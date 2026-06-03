@@ -1,0 +1,30 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check skeleton files
+        run: |
+          set -eu
+          test -f README.md
+          test -f AGENTS.md
+          test -f docs/README.md
+          test -f docs/dev/roadmap.md
+          test -f examples/README.md
+          test -f tests/README.md
+          test -f scripts/README.md
+          test -f .github/workflows/check.yml
+          grep -q "source extraction from ari-foundry/ari has not happened yet" README.md
+          grep -q "https://github.com/ari-foundry/ari" README.md
+          grep -q "https://ari-foundry.github.io" README.md
+          grep -q "long-term implementation direction" README.md
+          grep -q "Ari" README.md
