@@ -25,6 +25,8 @@ jobs:
           test -f .github/workflows/check.yml
           grep -q "source extraction from ari-foundry/ari has not happened yet" README.md
           grep -q "https://github.com/ari-foundry/ari" README.md
+          grep -q "https://github.com/ari-foundry/ari/releases" README.md
+          grep -q "https://github.com/ari-foundry/ari/tags" README.md
           grep -q "https://ari-foundry.github.io" README.md
           grep -q "long-term implementation direction" README.md
           grep -q "Ari" README.md

@@ -31,6 +31,15 @@ Do not modify `ari-foundry/ari-foundry.github.io` from this repository.
 
 Do not invent compatibility claims before releases exist.
 
+Before making compatibility or release claims, check Ari releases and tags as
+read-only references:
+
+- https://github.com/ari-foundry/ari/releases
+- https://github.com/ari-foundry/ari/tags
+
+Compatibility claims must not be invented. The `ari-lint` release/version
+policy is not established yet.
+
 Do not invent Ari syntax or APIs without checking `ari-foundry/ari`.
 
 Do not copy broad Ari language, compiler, standard library, LSP, editor, or
