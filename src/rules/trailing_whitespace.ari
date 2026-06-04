@@ -1,6 +1,7 @@
 // Planned trailing whitespace rule module. This file contains a minimal
-// internal single-line helper only. It does not read files, scan whole source
-// files, produce diagnostics, apply config overrides, or execute lint rules.
+// internal single-line helper and diagnostic mapping skeleton only. It does
+// not execute lint rules, does not read files, scan whole source files, print
+// diagnostics, serialize JSON, or apply config overrides.
 
 pub struct TrailingWhitespaceRuleModuleMetadata {
   code: String,
@@ -9,14 +10,22 @@ pub struct TrailingWhitespaceRuleModuleMetadata {
   layout_status: String,
 }
 
+struct TrailingWhitespaceDiagnosticMapping {
+  has_diagnostic: bool,
+  span: super::diagnostic::SourceSpan,
+  severity: super::severity::Severity,
+}
+
 // Metadata entry: lint/trailing-whitespace, short name trailing-whitespace,
 // default severity warning. Full rule behavior is future work.
 //
 // The helper below is intentionally limited to one already-split line. Rule
-// execution, whole-source scanning, file content inspection, diagnostic
+// execution, whole-source scanning, file content inspection, full diagnostic
 // production, config interaction, severity override application, CLI parsing,
 // diagnostics output, JSON serialization, and ari --check invocation are future
-// work.
+// work. Rule code lint/trailing-whitespace and message trailing whitespace are
+// confirmed by the reference implementation, but this skeleton does not
+// construct String fields or a full Diagnostic value yet.
 
 fn is_trailing_space_byte(value: u8) -> bool {
   return value == 32u8 || value == 9u8;
@@ -36,4 +45,36 @@ fn line_has_trailing_whitespace(line: Slice[u8]) -> bool {
     return false;
   }
   return is_trailing_space_byte(line.get(end - 1));
+}
+
+fn trailing_whitespace_start_column(line: Slice[u8], content_end: i64) -> i64 {
+  var index = content_end;
+  while index > 0 && is_trailing_space_byte(line.get(index - 1)) {
+    index = index - 1;
+  }
+  return index + 1;
+}
+
+fn trailing_whitespace_diagnostic_mapping(
+  file_path: String,
+  line_number: i64,
+  line: Slice[u8],
+) -> TrailingWhitespaceDiagnosticMapping {
+  let content_end = line_content_end(line);
+  let has_diagnostic = line_has_trailing_whitespace(line);
+  var column = content_end + 1;
+  if has_diagnostic {
+    column = trailing_whitespace_start_column(line, content_end);
+  }
+  return TrailingWhitespaceDiagnosticMapping {
+    has_diagnostic: has_diagnostic,
+    span: super::diagnostic::source_span_with_end(
+      file_path,
+      line_number,
+      column,
+      line_number,
+      content_end + 1,
+    ),
+    severity: super::severity::Warning,
+  };
 }

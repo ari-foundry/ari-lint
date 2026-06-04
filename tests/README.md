@@ -55,6 +55,11 @@ should cover no trailing whitespace, trailing spaces, trailing tabs,
 whitespace-only lines, final lines without trailing newlines, CRLF behavior,
 diagnostics, and parity behavior.
 
+No diagnostic mapping tests are added yet. Future tests should validate mapping
+from the trailing-whitespace helper result to the internal diagnostic model,
+including line and column behavior, end column behavior, message, severity,
+rule code, and parity behavior against current `tools/lint`.
+
 No CLI tests are added yet. Future CLI tests should validate positional source
 input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, invalid
 arguments, and parity behavior against current `tools/lint`.

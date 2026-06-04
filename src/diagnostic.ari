@@ -19,3 +19,19 @@ pub struct Diagnostic {
   rule_code: String,
   message: String,
 }
+
+pub fn source_span_with_end(
+  file_path: String,
+  line: i64,
+  column: i64,
+  end_line: i64,
+  end_column: i64,
+) -> SourceSpan {
+  return SourceSpan {
+    file_path: file_path,
+    line: line,
+    column: column,
+    end_line: Value(end_line),
+    end_column: Value(end_column),
+  };
+}

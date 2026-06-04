@@ -16,6 +16,14 @@ future Ari-language implementation.
   single-line helper in `src/rules/trailing_whitespace.ari`.
 - The helper only checks whether one already-split byte line ends with a space
   or tab.
+- Internal diagnostic mapping has started for one already-split line. The
+  mapping records whether the helper found trailing whitespace, the planned
+  diagnostic span, and default `warning` severity in an internal
+  diagnostic-like data value.
+- The mapping does not construct full string-bearing diagnostics yet. Rule code
+  `lint/trailing-whitespace` and message `trailing whitespace` are confirmed
+  from the current reference implementation, but final value construction for
+  those `String` fields remains needs follow-up.
 - Full rule execution is not complete.
 - File scanning, diagnostics, config integration, CLI integration, JSON output,
   and tests remain future work.
@@ -64,6 +72,12 @@ The future diagnostic should include:
 The current reference implementation reports the column as the first trailing
 space or tab and `endColumn` as one past the logical line end after CRLF
 normalization.
+
+The current Ari-language skeleton maps a single helper result to an internal
+span using the explicit file path and line number passed to the mapping
+function. Full diagnostics output is not implemented. JSON serialization is not
+implemented. CLI integration, file scanning, config integration, and parity
+tests remain future work.
 
 ## Planned Message
 
@@ -121,7 +135,7 @@ and test runner behavior are not added yet.
 
 - Do not implement full trailing-whitespace rule execution in this step.
 - Do not scan source text in this step.
-- Do not produce diagnostics in this step.
+- Do not produce CLI, human-readable, or JSON diagnostics in this step.
 - Do not add full CLI, parity, golden, or diagnostic tests in this step.
 - Do not add JSON serialization in this step.
 - Do not invoke `ari --check` in this step.

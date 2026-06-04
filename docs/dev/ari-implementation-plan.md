@@ -32,7 +32,9 @@ It does not move `tools/lint` or change build behavior.
 - The non-executing rule module layout has started with source-only child
   modules for the planned trailing whitespace and missing final newline rules.
   A minimal internal single-line helper has started for trailing whitespace,
-  but full rule behavior is not implemented yet.
+  and an internal diagnostic mapping skeleton has started. The mapping converts
+  a single-line helper result into diagnostic-model span/severity data, but
+  full rule behavior is not implemented yet.
 - The first rule design note,
   `docs/rules/trailing-whitespace.md`, records the planned
   `lint/trailing-whitespace` behavior. Implementation remains future work.
@@ -122,7 +124,9 @@ Current preparatory model skeleton files are source-only placeholders:
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
-  column, optional end position, severity, rule code, and message.
+  column, optional end position, severity, rule code, and message. It now also
+  has a small source-span constructor used by the trailing-whitespace mapping
+  skeleton; it does not format output or serialize JSON.
 - `src/output.ari` sketches diagnostic output metadata for human-readable and
   JSON output modes, diagnostic location, file path, line, column, endLine,
   endColumn, severity, rule code, and message. It does not format diagnostics,
@@ -174,15 +178,20 @@ Current non-executing rule module layout:
   metadata entries.
 - `src/rules/trailing_whitespace.ari` records layout metadata and a minimal
   internal single-line helper for the future `lint/trailing-whitespace`
-  implementation.
+  implementation. It also records a diagnostic mapping skeleton for one
+  already-split line, mapping helper output to internal span/severity data
+  without constructing full string-bearing diagnostics.
 - `src/rules/missing_final_newline.ari` records layout metadata for the future
   `lint/missing-final-newline` implementation.
 
-The trailing-whitespace helper is not a full rule implementation. It only
-checks one already-split borrowed byte line. These rule module files do not
+The trailing-whitespace helper and diagnostic mapping skeleton are not a full
+rule implementation. They only handle one already-split borrowed byte line and
+explicit caller-provided file/line data. These rule module files do not
 implement missing-final-newline behavior, rule execution, whole-source
-scanning, file reading, diagnostic production, config parsing, CLI parsing,
-diagnostics output, JSON serialization, compiler invocation, tests, or CI.
+scanning, file reading, full diagnostic production, config parsing, CLI
+parsing, diagnostics output, JSON serialization, compiler invocation, tests, or
+CI. Rule code and message value construction for full diagnostics remains needs
+follow-up.
 
 ### Phase 5: compiler boundary
 
