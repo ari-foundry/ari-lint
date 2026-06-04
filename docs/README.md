@@ -20,6 +20,13 @@ Future compatibility docs should reference real Ari releases and tags:
 Documentation migration is staged and tracked in
 [docs/migration.md](migration.md).
 
-This documentation is provisional until source extraction and docs migration are
-complete. Do not copy `docs/lint` content from `ari-foundry/ari` wholesale in
-this skeleton step, and do not include unverified Ari syntax examples.
+Ari-language implementation is planned but not started. The implementation plan
+is tracked in [docs/dev/ari-implementation-plan.md](dev/ari-implementation-plan.md).
+
+Compiler and standard library (stdlib) bugs should be filed in
+`ari-foundry/ari`, not `ari-lint`.
+
+This documentation is provisional until Ari-language implementation and docs
+migration are complete. Do not copy `docs/lint` content from `ari-foundry/ari`
+wholesale in this skeleton step, and do not include unverified Ari syntax
+examples.

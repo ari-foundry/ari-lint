@@ -1,0 +1,179 @@
+# Ari-language Implementation Plan
+
+## Purpose
+
+This document plans a future Ari-language implementation of `ari-lint`.
+
+This planning step does not add Ari source files, move source code, copy
+`tools/lint`, or change build behavior.
+
+## Current Status
+
+- `ari-lint` is currently in skeleton/planning state.
+- Source extraction has not happened.
+- The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
+  current bundled/reference implementation.
+- The future direction is Ari-language reimplementation in `ari-lint`.
+- Behavior parity with current `tools/lint` is the intended transition path.
+- The near-term dependency model remains invoking `ari --check`.
+
+## Reference Implementation
+
+`tools/lint` in `ari-foundry/ari` is the reference implementation during the
+transition.
+
+Use it to understand current CLI behavior, lint rules, diagnostics, config
+handling, and integration with `ari --check`.
+
+Do not copy `tools/lint` wholesale into `ari-lint`. Any behavior mismatch
+between the future Ari-language implementation and current `tools/lint` should
+be tracked explicitly.
+
+## Ari Language Source Of Truth
+
+Ari language syntax and idioms must be checked against `ari-foundry/ari` docs,
+examples, and tests.
+
+Do not invent Ari syntax. Do not add Ari examples unless they are verified
+against current Ari usage.
+
+If Ari language/toolchain limitations block implementation, file issues in
+`ari-foundry/ari`.
+
+Reference locations:
+
+- `ari-foundry/ari` `README.md`
+- `ari-foundry/ari` `docs/README.md`
+- `ari-foundry/ari` language docs, if present
+- `ari-foundry/ari` examples
+- `ari-foundry/ari` `tests/cases`
+
+## Implementation Phases
+
+### Phase 0: documentation and planning
+
+- repo skeleton
+- docs migration plan
+- Ari implementation plan
+- no source yet
+
+### Phase 1: Ari source skeleton
+
+- add minimal Ari project layout
+- no real lint rules yet
+- document build assumptions
+- keep checks lightweight
+
+### Phase 2: CLI shell
+
+- parse planned CLI options
+- accept source paths
+- accept `--ari` path if feasible
+- do not claim stable behavior until tested
+
+### Phase 3: diagnostics model
+
+- define internal diagnostic representation
+- map lint diagnostics to documented output expectations
+- keep JSON schema follow-up explicit
+
+### Phase 4: first rules
+
+- implement `lint/trailing-whitespace`
+- implement `lint/missing-final-newline`
+- compare behavior with reference implementation
+
+### Phase 5: compiler boundary
+
+- invoke `ari --check`
+- handle compiler failures
+- combine compiler-backed diagnostics with lint diagnostics
+- preserve behavior parity where possible
+
+### Phase 6: standalone tests and CI
+
+- add fixtures
+- add golden JSON diagnostics when schema is stable
+- run tests with explicit `--ari` compiler path
+
+## Parity Strategy
+
+Parity should be checked against the current bundled `tools/lint`
+implementation.
+
+Parity dimensions:
+
+- CLI options
+- rule names
+- severity names
+- config handling
+- diagnostic locations
+- JSON output shape
+- exit behavior
+- interaction with `ari --check`
+
+Unclear or unstable behavior should be marked as:
+
+needs follow-up
+
+## Issue Routing
+
+compiler bugs belong in ari-foundry/ari issues.
+
+standard library bugs belong in ari-foundry/ari issues.
+
+Ari language/toolchain limitations belong in `ari-foundry/ari` issues.
+
+`ari-lint` issues should focus on lint tooling, lint rules, config,
+diagnostics, docs, tests, and Ari-language implementation.
+
+If a bug crosses the boundary, file the root cause in `ari-foundry/ari` and
+link it from `ari-lint` if needed.
+
+## Release And Compatibility
+
+`ari-lint` has no stable release yet.
+
+Compatibility claims must not be invented.
+
+Future compatibility must reference real Ari releases and tags:
+
+- https://github.com/ari-foundry/ari/releases
+- https://github.com/ari-foundry/ari/tags
+
+Compatibility matrix updates should wait until `ari-lint` source and tests are
+usable.
+
+## Risks
+
+- Ari language/toolchain may not yet support everything needed for `ari-lint`.
+- Invoking `ari --check` from Ari code may require runtime/process support.
+- JSON diagnostic schema may still be unstable.
+- CLI parity may be hard to preserve exactly.
+- Tests may depend on a compatible Ari compiler binary.
+- Source layout may change after implementation starts.
+
+## Follow-up Checklist
+
+- [ ] Confirm current Ari language docs and examples
+- [ ] Define initial Ari source layout
+- [ ] Identify Ari runtime/process support needed for invoking `ari --check`
+- [ ] Define minimal CLI parser strategy
+- [ ] Define diagnostic data model
+- [ ] Define parity test fixtures against current `tools/lint`
+- [ ] Decide when to add first Ari source files
+- [ ] Track Ari compiler/toolchain blockers in `ari-foundry/ari` issues
+
+## Explicit Non-Goals
+
+- Do not move `tools/lint` in this step.
+- Do not copy `tools/lint` source in this step.
+- Do not add Ari source files in this step.
+- Do not add implementation code in this step.
+- Do not add tests in this step.
+- Do not add release workflows in this step.
+- Do not claim compatibility matrix support in this step.
+- Do not modify `ari-foundry/ari` in this step.
+- Do not modify `ari-foundry/ari-foundry.github.io` in this step.
+- Do not file compiler or standard library bugs in `ari-lint` as primary
+  issues.

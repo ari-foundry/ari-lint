@@ -20,6 +20,7 @@ jobs:
           test -f docs/README.md
           test -f docs/migration.md
           test -f docs/dev/roadmap.md
+          test -f docs/dev/ari-implementation-plan.md
           test -f examples/README.md
           test -f tests/README.md
           test -f scripts/README.md
@@ -32,4 +33,9 @@ jobs:
           grep -q "long-term implementation direction" README.md
           grep -q "Ari" README.md
           grep -q "docs/migration.md" docs/README.md
+          grep -q "docs/dev/ari-implementation-plan.md" docs/README.md
+          grep -q "docs/dev/ari-implementation-plan.md" docs/dev/roadmap.md
           grep -q "Do not invent compatibility claims" docs/migration.md
+          grep -q "Ari-language implementation" docs/dev/ari-implementation-plan.md
+          grep -q "compiler bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
+          grep -q "standard library bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
