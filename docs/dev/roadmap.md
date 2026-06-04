@@ -3,8 +3,8 @@
 Current status: skeleton initialized / Ari source skeleton started / internal
 model skeleton started / registry-severity-config skeleton started / first rule
 metadata entries added / CLI metadata skeleton started / diagnostic output
-metadata skeleton started / config override skeleton refined / no real lint
-implementation yet.
+metadata skeleton started / config override skeleton refined / rule module
+layout started / no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -57,6 +57,12 @@ and test work.
       invocation, tests, and CI remain future work. Standalone config
       precedence fixtures remain needs follow-up before claiming stable config
       behavior.
+- [x] Start non-executing rule module layout for planned
+      `lint/trailing-whitespace` and `lint/missing-final-newline` child modules
+      as layout/metadata-only Ari source placeholders; real trailing-whitespace
+      behavior, missing-final-newline behavior, rule execution, source scanning,
+      file content inspection, diagnostics, config interactions, CLI parsing,
+      compiler invocation, tests, and CI remain future work.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the future fixture and golden
       output strategy, but parity tests and CI parity jobs are not implemented.

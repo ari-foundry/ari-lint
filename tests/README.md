@@ -25,6 +25,10 @@ rule code, short name, default severity, and description for
 override behavior, diagnostics, and parity with current `tools/lint` after real
 implementation begins.
 
+No rule module tests are added yet. Future rule module tests should validate
+rule module metadata, rule behavior, diagnostics, config interactions, and
+parity behavior against current `tools/lint`.
+
 No CLI tests are added yet. Future CLI tests should validate positional source
 input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, invalid
 arguments, and parity behavior against current `tools/lint`.

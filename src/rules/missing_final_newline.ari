@@ -1,0 +1,18 @@
+// Planned missing final newline rule module layout only. This file does not
+// scan source text, inspect file contents, produce diagnostics, apply config
+// overrides, or execute lint rules.
+
+pub struct MissingFinalNewlineRuleModuleMetadata {
+  code: String,
+  short_name: String,
+  default_severity: String,
+  layout_status: String,
+}
+
+// Metadata entry: lint/missing-final-newline, short name missing-final-newline,
+// default severity warning. Real missing final newline behavior is future work.
+//
+// Rule execution, source scanning, file content inspection, diagnostic
+// production, config interaction, severity override application, CLI parsing,
+// diagnostics output, JSON serialization, and ari --check invocation are future
+// work.

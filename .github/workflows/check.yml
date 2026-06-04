@@ -33,6 +33,8 @@ jobs:
           test -f src/rule.ari
           test -f src/registry.ari
           test -f src/rules.ari
+          test -f src/rules/trailing_whitespace.ari
+          test -f src/rules/missing_final_newline.ari
           test -f src/config.ari
           test -f examples/README.md
           test -f tests/README.md
@@ -78,6 +80,10 @@ jobs:
           grep -q "Config parsing is not implemented yet" docs/dev/ari-implementation-plan.md
           grep -q "ari-lint.rules.*not parsed yet" docs/dev/ari-implementation-plan.md
           grep -q "No config override tests are added yet" tests/README.md
+          grep -q "non-executing rule module layout" docs/dev/ari-implementation-plan.md
+          grep -q "rule module layout" docs/dev/roadmap.md
+          grep -q "Real rule behavior is not implemented" docs/dev/ari-implementation-plan.md
+          grep -q "No rule module tests are added yet" tests/README.md
           grep -q "fn main() -> i64" src/main.ari
           grep -q "pub mod cli" src/model.ari
           grep -q "pub mod output" src/model.ari
@@ -118,6 +124,8 @@ jobs:
           grep -q "does not parse ari-lint.rules" src/config.ari
           grep -q "future work" src/config.ari
           grep -q "InitialRuleMetadata" src/rules.ari
+          grep -q "pub mod trailing_whitespace" src/rules.ari
+          grep -q "pub mod missing_final_newline" src/rules.ari
           grep -q "lint/trailing-whitespace" src/rules.ari
           grep -q "trailing-whitespace" src/rules.ari
           grep -q "lint/missing-final-newline" src/rules.ari
@@ -125,5 +133,13 @@ jobs:
           grep -q "default severity warning" src/rules.ari
           grep -q "future work" src/rules.ari
           grep -q "does not run rules" src/rules.ari
+          grep -q "TrailingWhitespaceRuleModuleMetadata" src/rules/trailing_whitespace.ari
+          grep -q "lint/trailing-whitespace" src/rules/trailing_whitespace.ari
+          grep -q "does not scan" src/rules/trailing_whitespace.ari
+          grep -q "future work" src/rules/trailing_whitespace.ari
+          grep -q "MissingFinalNewlineRuleModuleMetadata" src/rules/missing_final_newline.ari
+          grep -q "lint/missing-final-newline" src/rules/missing_final_newline.ari
+          grep -q "does not" src/rules/missing_final_newline.ari
+          grep -q "future work" src/rules/missing_final_newline.ari
           ! grep -q "trailing-whitespace" src/main.ari
           ! grep -q "missing-final-newline" src/main.ari
