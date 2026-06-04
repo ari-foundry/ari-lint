@@ -70,6 +70,11 @@ newline, an empty file, a single-line file without a final newline, a
 multi-line file without a final newline, CRLF final newline behavior, and lone
 carriage return behavior if relevant.
 
+No executable missing-final-newline helper tests are added yet. Future tests
+should cover file with final newline, file without final newline, empty file,
+single-line file without final newline, multi-line file without final newline,
+CRLF behavior, diagnostics, and parity behavior.
+
 No CLI tests are added yet. Future CLI tests should validate positional source
 input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, invalid
 arguments, and parity behavior against current `tools/lint`.
