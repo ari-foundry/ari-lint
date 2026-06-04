@@ -66,6 +66,11 @@ The current reference does not flag empty files and treats content ending in
 newline because the final byte is `'\n'`. A file ending with a lone carriage
 return is currently treated as missing the final newline.
 
+Standalone fixture confirmation for empty file behavior, CRLF behavior, lone
+carriage return behavior, exact line and column behavior, and end line/end
+column behavior remains needs follow-up until dedicated fixtures and tests
+exist.
+
 Exact standalone JSON output, human-readable output, fixture encoding, path
 normalization, and any golden-file schema details remain needs follow-up.
 
