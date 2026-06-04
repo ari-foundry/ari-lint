@@ -14,6 +14,9 @@ It does not move `tools/lint` or change build behavior.
 - The Ari source skeleton has started with source-only files under `src/`.
 - The rule registry, severity, and config model skeleton has started as
   preparatory source-only declarations.
+- First planned rule metadata entries have been added for
+  `lint/trailing-whitespace` and `lint/missing-final-newline` as metadata-only
+  placeholders. Real rule behavior remains future work.
 - Source directories should contain Ari source files only; source-layout
   documentation belongs in `docs/dev/` or other documentation directories.
 - The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
@@ -97,16 +100,23 @@ Current preparatory model skeleton files are source-only placeholders:
 - `src/registry.ari` sketches rule registry concepts for planned reference
   entries, including `lint/trailing-whitespace` and
   `lint/missing-final-newline` metadata placeholders.
+- `src/rules.ari` records the first planned rule metadata entries for
+  `lint/trailing-whitespace` and `lint/missing-final-newline`, including their
+  short names, default `warning` severity from the current Ari lint docs, and
+  brief descriptions, without implementing behavior.
 - `src/config.ari` sketches config concepts such as severity overrides,
   `ari-lint.rules` config source, and command-line override source.
 
 These files do not implement real lint rules, rule execution, CLI parsing,
-config parsing, diagnostics output, JSON serialization, file reads, or
-`ari --check` invocation. Severity parsing, CLI/config override behavior, rule
-registration behavior, and the JSON schema are not stable yet.
+source scanning, config parsing, diagnostics output, JSON serialization, file
+reads, or `ari --check` invocation. Descriptor value construction, severity
+parsing, CLI/config override behavior, rule registration behavior, and the JSON
+schema are not stable yet.
 
 ### Phase 4: first rules
 
+- turn metadata-only entries into executable rule registrations when Ari syntax
+  and toolchain support are ready
 - implement `lint/trailing-whitespace`
 - implement `lint/missing-final-newline`
 - compare behavior with reference implementation
@@ -182,6 +192,8 @@ usable.
 - Source layout may change after implementation starts.
 - Registry, severity, and config shapes may change when real rule execution and
   config parsing begin.
+- Metadata value construction may change once Ari constant or value syntax is
+  selected for the standalone implementation.
 - Source directories may accidentally collect README-style documentation unless
   docs stay under `docs/`.
 
@@ -194,6 +206,8 @@ usable.
 - [ ] Define diagnostic data model
 - [ ] Define registry, severity, and config model behavior after source
       skeletons compile in the real build
+- [ ] Define concrete metadata value construction after Ari syntax choices are
+      verified
 - [ ] Define parity test fixtures against current `tools/lint`
 - [ ] Decide when to add first Ari source files
 - [ ] Track Ari compiler/toolchain blockers in `ari-foundry/ari` issues
