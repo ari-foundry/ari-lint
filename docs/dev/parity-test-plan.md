@@ -57,6 +57,10 @@ Bugs in compiler behavior or standard library behavior should be filed in
 - rule-specific trailing-whitespace parity planning is documented in
   `docs/rules/trailing-whitespace-parity.md`
 - `lint/missing-final-newline`
+- planned `lint/missing-final-newline` behavior is documented in
+  `docs/rules/missing-final-newline.md`; future parity fixtures should compare
+  that design against the current reference behavior, but missing-final-newline
+  parity tests are not added yet
 - short rule names if supported
 - default severity behavior
 - disabled-rule behavior
@@ -111,6 +115,10 @@ Future fixture categories, without adding fixtures in this step:
   `docs/rules/trailing-whitespace-fixtures.md` and
   `docs/rules/trailing-whitespace-parity.md`
 - missing final newline
+- missing final newline future parity cases for files with final newlines,
+  files without final newlines, empty files, single-line files, multi-line
+  files, CRLF behavior, and lone carriage return behavior; see
+  `docs/rules/missing-final-newline.md`
 - compiler error
 - config file override
 - command-line rule override

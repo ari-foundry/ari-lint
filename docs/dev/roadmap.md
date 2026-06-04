@@ -8,7 +8,8 @@ layout started / trailing-whitespace design note added / minimal
 trailing-whitespace helper started / trailing-whitespace fixture and test plan
 added / initial trailing-whitespace fixtures and lightweight fixture check
 started / trailing-whitespace diagnostic mapping skeleton started /
-trailing-whitespace parity plan added / no real lint implementation yet.
+trailing-whitespace parity plan added / missing-final-newline design note added
+/ no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -99,6 +100,11 @@ and test work.
       behavior, but the parity runner, parity tests, golden output,
       `tools/lint` execution, full rule execution, and CI parity jobs remain
       future work.
+- [x] Add `docs/rules/missing-final-newline.md` as a design note for the
+      planned `lint/missing-final-newline` rule; real missing-final-newline
+      implementation, file reading, file content inspection, diagnostic
+      production, tests, fixtures, JSON serialization, CLI behavior, config
+      parsing, compiler invocation, and CI remain future work.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the future fixture and golden
       output strategy, but parity tests and CI parity jobs are not implemented.

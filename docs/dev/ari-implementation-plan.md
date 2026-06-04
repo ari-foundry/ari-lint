@@ -35,9 +35,11 @@ It does not move `tools/lint` or change build behavior.
   and an internal diagnostic mapping skeleton has started. The mapping converts
   a single-line helper result into diagnostic-model span/severity data, but
   full rule behavior is not implemented yet.
-- The first rule design note,
-  `docs/rules/trailing-whitespace.md`, records the planned
-  `lint/trailing-whitespace` behavior. Implementation remains future work.
+- Rule design notes have started:
+  `docs/rules/trailing-whitespace.md` records the planned
+  `lint/trailing-whitespace` behavior, and
+  `docs/rules/missing-final-newline.md` records the planned
+  `lint/missing-final-newline` behavior. Implementation remains future work.
 - Source directories should contain Ari source files only; source-layout
   documentation belongs in `docs/dev/` or other documentation directories.
 - The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
@@ -165,7 +167,8 @@ need follow-up before this repository claims standalone output compatibility.
 ### Phase 4: first rules
 
 - start non-executing rule module layout before implementing rule behavior
-- use `docs/rules/trailing-whitespace.md` as the first planned rule design note
+- use `docs/rules/trailing-whitespace.md` and
+  `docs/rules/missing-final-newline.md` as planned rule design notes
 - turn metadata-only entries into executable rule registrations when Ari syntax
   and toolchain support are ready
 - implement `lint/trailing-whitespace`
