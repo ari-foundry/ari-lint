@@ -6,8 +6,8 @@ Current checks only verify skeleton files and lightweight documentation/source
 guards.
 
 Future tests should cover CLI smoke tests, rule tests, configuration tests,
-diagnostic output, compiler-boundary behavior, and parity with current
-`tools/lint`.
+diagnostic output, JSON diagnostic tests, compiler-boundary behavior, and
+parity with current `tools/lint`.
 
 Tests should use an explicit `--ari` compiler path in CI unless the dependency
 model changes.
