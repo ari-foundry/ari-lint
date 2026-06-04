@@ -33,6 +33,9 @@ It does not move `tools/lint` or change build behavior.
   modules for the planned trailing whitespace and missing final newline rules.
   These files are layout/metadata-only. Real rule behavior is not implemented
   yet.
+- The first rule design note,
+  `docs/rules/trailing-whitespace.md`, records the planned
+  `lint/trailing-whitespace` behavior. Implementation remains future work.
 - Source directories should contain Ari source files only; source-layout
   documentation belongs in `docs/dev/` or other documentation directories.
 - The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
@@ -158,6 +161,7 @@ need follow-up before this repository claims standalone output compatibility.
 ### Phase 4: first rules
 
 - start non-executing rule module layout before implementing rule behavior
+- use `docs/rules/trailing-whitespace.md` as the first planned rule design note
 - turn metadata-only entries into executable rule registrations when Ari syntax
   and toolchain support are ready
 - implement `lint/trailing-whitespace`

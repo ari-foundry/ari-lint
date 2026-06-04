@@ -28,6 +28,10 @@ behavior is planned in
 [docs/dev/parity-test-plan.md](dev/parity-test-plan.md). Parity tests do not
 exist in this repository yet.
 
+Rule documentation is currently a set of design notes until Ari-language rule
+implementation exists. The first rule design note is
+[docs/rules/trailing-whitespace.md](rules/trailing-whitespace.md).
+
 Compiler and standard library (stdlib) bugs should be filed in
 `ari-foundry/ari`, not `ari-lint`.
 
