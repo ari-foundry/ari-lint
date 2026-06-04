@@ -1,0 +1,28 @@
+// Diagnostic data shapes only. This file does not format output or serialize JSON.
+
+pub enum DiagnosticSeverity {
+  Hint,
+  Note,
+  Warning,
+  Error,
+}
+
+pub enum OptionalPosition {
+  Missing,
+  Value(i64),
+}
+
+pub struct SourceSpan {
+  file_path: String,
+  line: i64,
+  column: i64,
+  end_line: OptionalPosition,
+  end_column: OptionalPosition,
+}
+
+pub struct Diagnostic {
+  span: SourceSpan,
+  severity: DiagnosticSeverity,
+  rule_code: String,
+  message: String,
+}

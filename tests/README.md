@@ -9,6 +9,11 @@ Future tests should cover CLI smoke tests, rule tests, configuration tests,
 diagnostic output, JSON diagnostic tests, compiler-boundary behavior, and
 parity with current `tools/lint`.
 
+No model tests are added yet. Future model tests should validate severity
+handling, rule metadata, diagnostic data, config override data, JSON output
+shape after the schema is defined, and parity behavior against current
+`tools/lint`.
+
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
 fixtures are not added yet.

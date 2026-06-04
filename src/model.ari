@@ -1,0 +1,4 @@
+// Internal model module surface only. This file groups future model data shapes.
+pub mod diagnostic;
+pub mod rule;
+pub mod config;
