@@ -1,8 +1,29 @@
-// Config data shapes only. This file does not parse ari-lint.rules or CLI input.
+// Config override metadata only. This file does not parse ari-lint.rules,
+// discover config files, inspect CLI input, or apply severity overrides.
 
 pub enum ConfigSource {
-  AriLintRulesFile,
-  CommandLine,
+  DefaultConfig,
+  AriLintRulesDiscovery,
+  ExplicitConfigFile,
+  CommandLineRuleOverride,
+}
+
+pub enum OverridePrecedenceStep {
+  Defaults,
+  ConfigFile,
+  CommandLineRule,
+}
+
+pub struct ConfigSourceMetadata {
+  source: ConfigSource,
+  name: String,
+  purpose: String,
+}
+
+pub struct ConfigFileMetadata {
+  default_file_name: String,
+  explicit_option: String,
+  discovery_status: String,
 }
 
 pub struct RuleSeverityOverride {
@@ -11,7 +32,30 @@ pub struct RuleSeverityOverride {
   source: ConfigSource,
 }
 
-pub struct ConfigSkeleton {
-  source: ConfigSource,
-  override_entry: RuleSeverityOverride,
+pub struct OverridePrecedenceMetadata {
+  first: OverridePrecedenceStep,
+  second: OverridePrecedenceStep,
+  third: OverridePrecedenceStep,
+  status: String,
 }
+
+pub struct ConfigSkeleton {
+  default_config: ConfigSourceMetadata,
+  config_file: ConfigFileMetadata,
+  rule_override: RuleSeverityOverride,
+  command_line_override: ConfigSourceMetadata,
+  override_precedence: OverridePrecedenceMetadata,
+}
+
+// Planned config concepts: default config, ari-lint.rules config source,
+// explicit --config file path, --rule command-line override, rule severity
+// override, and override precedence.
+//
+// Reference docs say --config disables ari-lint.rules discovery, and command
+// line --rule overrides are applied after config-file settings. This file
+// records that as metadata only.
+//
+// Config parsing, ari-lint.rules discovery or reading, --config behavior,
+// --rule behavior, severity override application, CLI parsing, diagnostics
+// output, JSON serialization, source scanning, and ari --check invocation are
+// future work.

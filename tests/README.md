@@ -34,6 +34,11 @@ validate human-readable output, JSON output shape, line/column fields,
 endLine/endColumn fields if supported, severity, rule code, message, path
 normalization, and parity behavior against current `tools/lint`.
 
+No config override tests are added yet. Future config override tests should
+validate `ari-lint.rules` discovery, `--config` behavior, `--rule` behavior,
+precedence, invalid config, diagnostics, and parity behavior against current
+`tools/lint`.
+
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
 fixtures are not added yet.

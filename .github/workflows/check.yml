@@ -22,6 +22,7 @@ jobs:
           test -f docs/dev/roadmap.md
           test -f docs/dev/ari-implementation-plan.md
           test -f docs/dev/parity-test-plan.md
+          test -z "$(find src -name README.md -print -quit)"
           test -z "$(find src -type f ! -name '*.ari' -print -quit)"
           test -f src/main.ari
           test -f src/model.ari
@@ -72,9 +73,15 @@ jobs:
           grep -q "Diagnostic output is not implemented yet" docs/dev/ari-implementation-plan.md
           grep -q "JSON serialization is not implemented yet" docs/dev/ari-implementation-plan.md
           grep -q "No diagnostic output tests are added yet" tests/README.md
+          grep -q "config override skeleton" docs/dev/ari-implementation-plan.md
+          grep -q "config override skeleton" docs/dev/roadmap.md
+          grep -q "Config parsing is not implemented yet" docs/dev/ari-implementation-plan.md
+          grep -q "ari-lint.rules.*not parsed yet" docs/dev/ari-implementation-plan.md
+          grep -q "No config override tests are added yet" tests/README.md
           grep -q "fn main() -> i64" src/main.ari
           grep -q "pub mod cli" src/model.ari
           grep -q "pub mod output" src/model.ari
+          grep -q "pub mod config" src/model.ari
           grep -q "CliSurfaceMetadata" src/cli.ari
           grep -q "positional source file input" src/cli.ari
           grep -q -- "--json" src/cli.ari
@@ -98,6 +105,18 @@ jobs:
           grep -q "message" src/output.ari
           grep -q "does not format" src/output.ari
           grep -q "JSON schema stability remain follow-up" src/output.ari
+          grep -q "ConfigSkeleton" src/config.ari
+          grep -q "ConfigSourceMetadata" src/config.ari
+          grep -q "OverridePrecedenceMetadata" src/config.ari
+          grep -q "DefaultConfig" src/config.ari
+          grep -q "AriLintRulesDiscovery" src/config.ari
+          grep -q "ExplicitConfigFile" src/config.ari
+          grep -q "CommandLineRuleOverride" src/config.ari
+          grep -q "ari-lint.rules" src/config.ari
+          grep -q -- "--config" src/config.ari
+          grep -q -- "--rule" src/config.ari
+          grep -q "does not parse ari-lint.rules" src/config.ari
+          grep -q "future work" src/config.ari
           grep -q "InitialRuleMetadata" src/rules.ari
           grep -q "lint/trailing-whitespace" src/rules.ari
           grep -q "trailing-whitespace" src/rules.ari

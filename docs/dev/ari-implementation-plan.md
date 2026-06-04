@@ -25,6 +25,10 @@ It does not move `tools/lint` or change build behavior.
   declarations for human and JSON output modes, diagnostic location fields, and
   planned diagnostic fields. Diagnostic output is not implemented yet.
   JSON serialization is not implemented yet.
+- The config override skeleton has been refined as metadata-only declarations
+  for default config, `ari-lint.rules`, `--config`, `--rule`, rule severity
+  overrides, and documented override precedence. Config parsing is not implemented yet.
+  `ari-lint.rules` is not parsed yet.
 - Source directories should contain Ari source files only; source-layout
   documentation belongs in `docs/dev/` or other documentation directories.
 - The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
@@ -94,6 +98,8 @@ Reference locations:
 - define internal diagnostic representation
 - define severity values, rule descriptors, registry entries, and config
   override data shapes
+- record config override metadata before implementing config parsing, config
+  discovery, or severity override application
 - record diagnostic output metadata before implementing formatting or JSON
   serialization
 - map lint diagnostics to documented output expectations
@@ -123,8 +129,13 @@ Current preparatory model skeleton files are source-only placeholders:
   `lint/trailing-whitespace` and `lint/missing-final-newline`, including their
   short names, default `warning` severity from the current Ari lint docs, and
   brief descriptions, without implementing behavior.
-- `src/config.ari` sketches config concepts such as severity overrides,
-  `ari-lint.rules` config source, and command-line override source.
+- `src/config.ari` sketches config override metadata such as default config,
+  `ari-lint.rules` config source, explicit `--config` file path, `--rule`
+  command-line override, rule severity override, and override precedence. It
+  records the documented reference order that config-file settings precede
+  command-line `--rule` overrides, and that explicit `--config` disables
+  discovery. It does not parse config files, read `ari-lint.rules`, inspect
+  CLI arguments, or apply overrides.
 
 These files do not implement real lint rules, rule execution, CLI parsing,
 process argument reading, argument validation, source scanning, config parsing,
@@ -132,6 +143,10 @@ diagnostics output, JSON serialization, file reads, or `ari --check`
 invocation. Descriptor value construction, severity parsing, CLI/config
 override behavior, rule registration behavior, and the JSON schema are not
 stable yet.
+
+Config precedence is recorded from the current Ari lint reference docs as
+metadata only. Standalone config discovery and config precedence fixtures remain
+needs follow-up before this repository claims stable config behavior.
 
 The exact JSON schema and human-readable diagnostic text remain unstable and
 need follow-up before this repository claims standalone output compatibility.
@@ -216,6 +231,8 @@ usable.
 - Source layout may change after implementation starts.
 - Registry, severity, and config shapes may change when real rule execution and
   config parsing begin.
+- Standalone config discovery and override precedence may need fixtures before
+  they become stable behavior.
 - Metadata value construction may change once Ari constant or value syntax is
   selected for the standalone implementation.
 - CLI metadata value construction may change once Ari constant or collection
@@ -239,6 +256,9 @@ usable.
 - [ ] Define stable JSON schema and human-readable diagnostic text policy
 - [ ] Define registry, severity, and config model behavior after source
       skeletons compile in the real build
+- [ ] Define concrete config override metadata value construction after Ari
+      syntax choices are verified
+- [ ] Add config precedence fixtures before claiming stable config behavior
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`
