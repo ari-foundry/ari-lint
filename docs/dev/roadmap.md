@@ -11,8 +11,9 @@ started / trailing-whitespace diagnostic mapping skeleton started /
 trailing-whitespace parity plan added / missing-final-newline design note added
 / minimal missing-final-newline helper started /
 missing-final-newline fixture and test plan added / initial
-missing-final-newline fixtures and lightweight fixture check started / no real
-lint implementation yet.
+missing-final-newline fixtures and lightweight fixture check started /
+missing-final-newline diagnostic mapping skeleton started / no real lint
+implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -124,6 +125,12 @@ and test work.
       presence/absence. Full rule execution, helper unit tests, source
       scanning, diagnostics, CLI tests, golden JSON, parity tests, compiler
       invocation, and a standalone test runner remain future work.
+- [x] Start missing-final-newline diagnostic mapping skeleton for explicit
+      caller-provided final position metadata, mapping helper output to internal
+      span/severity data. Full rule execution, full diagnostics,
+      message/rule-code String value construction, file reading, source scanning,
+      CLI output, JSON serialization, config integration, tests, parity checks,
+      compiler invocation, and CI remain future work.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the future fixture and golden
       output strategy, but parity tests and CI parity jobs are not implemented.

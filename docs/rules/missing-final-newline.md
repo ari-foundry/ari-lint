@@ -13,13 +13,17 @@ future Ari-language implementation.
 - The rule is planned for the Ari-language implementation.
 - The current reference behavior is the bundled `tools/lint` implementation in
   `ari-foundry/ari`.
-- This repository currently has metadata/module layout and a minimal internal
-  content helper in `src/rules/missing_final_newline.ari`.
+- This repository currently has metadata/module layout, a minimal internal
+  content helper, and an internal diagnostic mapping skeleton in
+  `src/rules/missing_final_newline.ari`.
 - The helper only checks already-provided bytes and returns whether non-empty
   content is missing a final newline byte.
+- The mapping skeleton converts the helper result plus caller-provided final
+  line/column metadata into internal span/severity data only.
 - Full rule execution is not complete.
-- File reading, diagnostics, config integration, CLI integration, JSON output,
-  and tests remain future work.
+- File reading, full diagnostic production, diagnostic output, config
+  integration, CLI integration, JSON serialization, and tests remain future
+  work.
 - Fixture and test planning is tracked in
   [docs/rules/missing-final-newline-fixtures.md](missing-final-newline-fixtures.md);
   initial final-newline and no-final-newline fixtures are started, while full
@@ -47,8 +51,14 @@ final newline by the reference implementation. Standalone fixture coverage for
 lone carriage return behavior remains needs follow-up.
 
 The current Ari-language helper is limited to an already-provided
-`Slice[u8]`. It does not read files, compute diagnostic positions, construct
-diagnostics, apply config, or participate in CLI behavior.
+`Slice[u8]`. It does not read files or participate in CLI behavior.
+
+The current Ari-language diagnostic mapping skeleton accepts the file path,
+final line, and final column from its caller. It maps the helper result to
+internal span/severity data, with the end column one column after the reported
+final column. It does not compute positions from file contents, construct
+rule-code/message `String` fields, format human diagnostics, serialize JSON, or
+apply config.
 
 ## Planned Diagnostic Location
 
@@ -66,8 +76,9 @@ The current reference implementation reports the diagnostic at the final
 position in the file, with `endLine` equal to the diagnostic line and
 `endColumn` one column after the reported column.
 
-Exact standalone JSON and human-readable output details remain needs
-follow-up until output schema and text stability are documented.
+Exact standalone JSON and human-readable output details remain needs follow-up
+until output schema and text stability are documented. Full diagnostics output is
+not implemented yet.
 
 ## Planned Message
 
@@ -119,8 +130,8 @@ Remaining future fixture ideas, without adding broad fixtures in this step:
 
 - Do not implement missing-final-newline in this step.
 - Do not read files in this step.
-- Do not inspect file contents in this step.
-- Do not produce diagnostics in this step.
+- Do not scan source files or compute positions from file contents in this step.
+- Do not produce full diagnostics or diagnostic output in this step.
 - Do not add full CLI, parity, golden, or diagnostic tests in this step.
 - Do not add JSON serialization in this step.
 - Do not invoke `ari --check` in this step.
