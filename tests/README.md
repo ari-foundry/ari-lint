@@ -14,6 +14,11 @@ handling, rule metadata, diagnostic data, config override data, JSON output
 shape after the schema is defined, and parity behavior against current
 `tools/lint`.
 
+No registry, severity, or config behavior tests are added yet. Future tests
+should validate severity values, rule registry metadata, config overrides,
+diagnostics, JSON output after the schema is defined, and parity behavior
+against current `tools/lint`.
+
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
 fixtures are not added yet.

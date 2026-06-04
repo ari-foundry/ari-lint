@@ -25,8 +25,10 @@ jobs:
           test -z "$(find src -type f ! -name '*.ari' -print -quit)"
           test -f src/main.ari
           test -f src/model.ari
+          test -f src/severity.ari
           test -f src/diagnostic.ari
           test -f src/rule.ari
+          test -f src/registry.ari
           test -f src/config.ari
           test -f examples/README.md
           test -f tests/README.md
@@ -53,6 +55,8 @@ jobs:
           grep -q "Do not add test fixtures in this step" docs/dev/parity-test-plan.md
           grep -q "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
           grep -q "These files do not implement real lint rules" docs/dev/ari-implementation-plan.md
+          grep -q "registry, severity, and config model skeleton" docs/dev/ari-implementation-plan.md
+          grep -q "registry, severity, and config skeleton" docs/dev/roadmap.md
           grep -q "fn main() -> i64" src/main.ari
           ! grep -q "trailing-whitespace" src/main.ari
           ! grep -q "missing-final-newline" src/main.ari

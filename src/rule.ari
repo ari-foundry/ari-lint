@@ -1,18 +1,15 @@
 // Rule metadata shapes only. This file does not execute lint rules.
 
-pub enum RuleSeverity {
-  Off,
-  Hint,
-  Note,
-  Warning,
-  Error,
-}
-
 pub struct RuleDescriptor {
   code: String,
   short_name: String,
-  default_severity: RuleSeverity,
+  default_severity: super::severity::Severity,
   description: String,
+}
+
+pub struct PlannedRuleCodes {
+  trailing_whitespace: String,
+  missing_final_newline: String,
 }
 
 // Future descriptors may cover lint/trailing-whitespace and

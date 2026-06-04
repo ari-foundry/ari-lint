@@ -1,0 +1,16 @@
+// Rule registry data shapes only. This file does not run rules or scan source.
+
+pub enum RegistryStatus {
+  Planned,
+  ReferenceOnly,
+}
+
+pub struct RegistryEntry {
+  descriptor: super::rule::RuleDescriptor,
+  status: RegistryStatus,
+}
+
+pub struct RuleRegistry {
+  trailing_whitespace: RegistryEntry,
+  missing_final_newline: RegistryEntry,
+}
