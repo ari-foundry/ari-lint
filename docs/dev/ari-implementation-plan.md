@@ -21,6 +21,10 @@ It does not move `tools/lint` or change build behavior.
   declarations for positional source input and the documented options `--json`,
   `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`. The real CLI parsing
   remains future work.
+- The diagnostic output metadata skeleton has started as metadata-only
+  declarations for human and JSON output modes, diagnostic location fields, and
+  planned diagnostic fields. Diagnostic output is not implemented yet.
+  JSON serialization is not implemented yet.
 - Source directories should contain Ari source files only; source-layout
   documentation belongs in `docs/dev/` or other documentation directories.
 - The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
@@ -90,6 +94,8 @@ Reference locations:
 - define internal diagnostic representation
 - define severity values, rule descriptors, registry entries, and config
   override data shapes
+- record diagnostic output metadata before implementing formatting or JSON
+  serialization
 - map lint diagnostics to documented output expectations
 - keep JSON schema follow-up explicit
 
@@ -104,6 +110,10 @@ Current preparatory model skeleton files are source-only placeholders:
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
   column, optional end position, severity, rule code, and message.
+- `src/output.ari` sketches diagnostic output metadata for human-readable and
+  JSON output modes, diagnostic location, file path, line, column, endLine,
+  endColumn, severity, rule code, and message. It does not format diagnostics,
+  build diagnostic strings, serialize JSON, or write stdout/stderr output.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description.
 - `src/registry.ari` sketches rule registry concepts for planned reference
@@ -122,6 +132,9 @@ diagnostics output, JSON serialization, file reads, or `ari --check`
 invocation. Descriptor value construction, severity parsing, CLI/config
 override behavior, rule registration behavior, and the JSON schema are not
 stable yet.
+
+The exact JSON schema and human-readable diagnostic text remain unstable and
+need follow-up before this repository claims standalone output compatibility.
 
 ### Phase 4: first rules
 
@@ -197,6 +210,7 @@ usable.
 - Ari language/toolchain may not yet support everything needed for `ari-lint`.
 - Invoking `ari --check` from Ari code may require runtime/process support.
 - JSON diagnostic schema may still be unstable.
+- Human-readable diagnostic text may still be unstable.
 - CLI parity may be hard to preserve exactly.
 - Tests may depend on a compatible Ari compiler binary.
 - Source layout may change after implementation starts.
@@ -206,6 +220,8 @@ usable.
   selected for the standalone implementation.
 - CLI metadata value construction may change once Ari constant or collection
   syntax is selected for the standalone implementation.
+- Diagnostic output metadata value construction may change once Ari constant or
+  collection syntax is selected for the standalone implementation.
 - Source directories may accidentally collect README-style documentation unless
   docs stay under `docs/`.
 
@@ -218,6 +234,9 @@ usable.
 - [ ] Define concrete CLI metadata value construction after Ari syntax choices
       are verified
 - [ ] Define diagnostic data model
+- [ ] Define concrete diagnostic output metadata value construction after Ari
+      syntax choices are verified
+- [ ] Define stable JSON schema and human-readable diagnostic text policy
 - [ ] Define registry, severity, and config model behavior after source
       skeletons compile in the real build
 - [ ] Define concrete metadata value construction after Ari syntax choices are

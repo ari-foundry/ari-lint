@@ -28,6 +28,7 @@ jobs:
           test -f src/cli.ari
           test -f src/severity.ari
           test -f src/diagnostic.ari
+          test -f src/output.ari
           test -f src/rule.ari
           test -f src/registry.ari
           test -f src/rules.ari
@@ -66,8 +67,14 @@ jobs:
           grep -q "CLI metadata skeleton" docs/dev/roadmap.md
           grep -q "real CLI parsing" docs/dev/ari-implementation-plan.md
           grep -q "No CLI tests are added yet" tests/README.md
+          grep -q "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
+          grep -q "diagnostic output metadata skeleton" docs/dev/roadmap.md
+          grep -q "Diagnostic output is not implemented yet" docs/dev/ari-implementation-plan.md
+          grep -q "JSON serialization is not implemented yet" docs/dev/ari-implementation-plan.md
+          grep -q "No diagnostic output tests are added yet" tests/README.md
           grep -q "fn main() -> i64" src/main.ari
           grep -q "pub mod cli" src/model.ari
+          grep -q "pub mod output" src/model.ari
           grep -q "CliSurfaceMetadata" src/cli.ari
           grep -q "positional source file input" src/cli.ari
           grep -q -- "--json" src/cli.ari
@@ -78,6 +85,19 @@ jobs:
           grep -q -- "--rule" src/cli.ari
           grep -q "does not parse arguments" src/cli.ari
           grep -q "future work" src/cli.ari
+          grep -q "DiagnosticOutputMetadata" src/output.ari
+          grep -q "Human" src/output.ari
+          grep -q "Json" src/output.ari
+          grep -q "file path" src/output.ari
+          grep -q "line" src/output.ari
+          grep -q "column" src/output.ari
+          grep -q "endLine" src/output.ari
+          grep -q "endColumn" src/output.ari
+          grep -q "severity" src/output.ari
+          grep -q "rule code" src/output.ari
+          grep -q "message" src/output.ari
+          grep -q "does not format" src/output.ari
+          grep -q "JSON schema stability remain follow-up" src/output.ari
           grep -q "InitialRuleMetadata" src/rules.ari
           grep -q "lint/trailing-whitespace" src/rules.ari
           grep -q "trailing-whitespace" src/rules.ari

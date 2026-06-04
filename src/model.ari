@@ -2,6 +2,7 @@
 pub mod cli;
 pub mod severity;
 pub mod diagnostic;
+pub mod output;
 pub mod rule;
 pub mod registry;
 pub mod config;
