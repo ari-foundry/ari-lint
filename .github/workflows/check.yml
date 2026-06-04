@@ -24,6 +24,7 @@ jobs:
           test -f docs/dev/parity-test-plan.md
           test -f docs/rules/trailing-whitespace.md
           test -f docs/rules/trailing-whitespace-fixtures.md
+          test -f docs/rules/trailing-whitespace-parity.md
           test -f tests/fixtures/trailing-whitespace/clean.ari
           test -f tests/fixtures/trailing-whitespace/trailing-spaces.ari
           test -z "$(find tests/fixtures/trailing-whitespace -type f ! -name clean.ari ! -name trailing-spaces.ari -print -quit)"
@@ -74,11 +75,20 @@ jobs:
           grep -q "docs/rules/trailing-whitespace-fixtures.md" docs/rules/trailing-whitespace.md
           grep -q "docs/rules/trailing-whitespace-fixtures.md" docs/dev/parity-test-plan.md
           grep -q "docs/rules/trailing-whitespace-fixtures.md" tests/README.md
+          grep -q "docs/rules/trailing-whitespace-parity.md" docs/rules/trailing-whitespace.md
+          grep -q "docs/rules/trailing-whitespace-parity.md" docs/rules/trailing-whitespace-fixtures.md
+          grep -q "docs/rules/trailing-whitespace-parity.md" docs/dev/parity-test-plan.md
+          grep -q "docs/rules/trailing-whitespace-parity.md" tests/README.md
+          grep -q "Do not add a parity runner in this step" docs/rules/trailing-whitespace-parity.md
+          grep -q "parity plan exists but runner is not implemented" docs/rules/trailing-whitespace.md
+          grep -q "Fixture comparison is planned but not automated yet" docs/rules/trailing-whitespace-fixtures.md
+          grep -q "No parity runner exists yet" tests/README.md
           grep -q "first minimal fixture coverage has started" docs/rules/trailing-whitespace-fixtures.md
           grep -q "initial clean and trailing-spaces fixtures are started" docs/rules/trailing-whitespace.md
           grep -q "trailing-whitespace design note" docs/dev/roadmap.md
           grep -q "trailing-whitespace fixture and test plan" docs/dev/roadmap.md
           grep -q "initial trailing-whitespace fixtures and lightweight fixture check" docs/dev/roadmap.md
+          grep -q "trailing-whitespace parity plan added" docs/dev/roadmap.md
           grep -q "Initial trailing-whitespace fixtures have started" tests/README.md
           grep -q "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
           grep -q "These files do not implement real lint rules" docs/dev/ari-implementation-plan.md
