@@ -61,6 +61,8 @@ Bugs in compiler behavior or standard library behavior should be filed in
   `docs/rules/missing-final-newline.md`; future parity fixtures should compare
   that design against the current reference behavior, but missing-final-newline
   parity tests are not added yet
+- rule-specific missing-final-newline parity planning is documented in
+  `docs/rules/missing-final-newline-parity.md`; no parity runner exists yet
 - short rule names if supported
 - default severity behavior
 - disabled-rule behavior
@@ -119,8 +121,9 @@ Future fixture categories, without adding fixtures in this step:
   files without final newlines, empty files, single-line files, multi-line
   files, CRLF behavior, and lone carriage return behavior; see
   `docs/rules/missing-final-newline.md` and
-  `docs/rules/missing-final-newline-fixtures.md`; missing-final-newline
-  fixtures and parity tests are not added yet
+  `docs/rules/missing-final-newline-fixtures.md` and
+  `docs/rules/missing-final-newline-parity.md`; missing-final-newline parity
+  runner and parity tests are not added yet
 - compiler error
 - config file override
 - command-line rule override

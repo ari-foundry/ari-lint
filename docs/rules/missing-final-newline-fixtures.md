@@ -21,6 +21,9 @@ remain future work.
   invoke `ari-lint`, compare diagnostics, or execute the helper directly.
 - No test runner is wired yet.
 - The current reference behavior remains `tools/lint` in `ari-foundry/ari`.
+- Rule-specific parity planning is documented in
+  [docs/rules/missing-final-newline-parity.md](missing-final-newline-parity.md).
+  Fixture comparison is planned but not automated yet.
 
 ## Started Fixture Coverage
 
@@ -106,6 +109,10 @@ normalization, and any golden-file schema details remain needs follow-up.
 ## Parity Strategy
 
 Future tests should compare the Ari implementation against current `tools/lint`.
+
+The detailed missing-final-newline parity plan is documented in
+[docs/rules/missing-final-newline-parity.md](missing-final-newline-parity.md).
+Fixture comparison is planned but not automated yet.
 
 Parity dimensions:
 

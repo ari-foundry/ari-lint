@@ -28,6 +28,9 @@ future Ari-language implementation.
   [docs/rules/missing-final-newline-fixtures.md](missing-final-newline-fixtures.md);
   initial final-newline and no-final-newline fixtures are started, while full
   fixture coverage and behavior tests remain future work.
+- Rule-specific parity planning is tracked in
+  [docs/rules/missing-final-newline-parity.md](missing-final-newline-parity.md);
+  the parity plan exists but runner is not implemented.
 
 ## Rule Identity
 
@@ -96,6 +99,10 @@ implemented.
 
 The future implementation should compare behavior against the current bundled
 `tools/lint` implementation.
+
+The detailed missing-final-newline parity plan is documented in
+[docs/rules/missing-final-newline-parity.md](missing-final-newline-parity.md).
+The parity plan exists but runner is not implemented.
 
 Parity dimensions:
 
