@@ -19,6 +19,9 @@ future Ari-language implementation.
 - Full rule execution is not complete.
 - File scanning, diagnostics, config integration, CLI integration, JSON output,
   and tests remain future work.
+- Fixture and test planning is tracked in
+  [docs/rules/trailing-whitespace-fixtures.md](trailing-whitespace-fixtures.md);
+  fixtures are not added yet.
 
 ## Rule Identity
 
@@ -100,6 +103,11 @@ Future fixture ideas, without adding fixtures in this step:
 - mixed spaces and tabs
 - final line without newline
 - CRLF or carriage return behavior
+
+The detailed future fixture and test plan is documented in
+[docs/rules/trailing-whitespace-fixtures.md](trailing-whitespace-fixtures.md).
+No trailing-whitespace fixtures, tests, golden files, or test runner behavior
+are added yet.
 
 ## Non-Goals
 
