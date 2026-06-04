@@ -1,6 +1,7 @@
 # ari-lint Roadmap
 
-Current status: skeleton initialized / Ari-language implementation planning.
+Current status: skeleton initialized / Ari source skeleton started / no real
+lint implementation yet.
 
 ## Split Roadmap
 
@@ -10,6 +11,9 @@ Current status: skeleton initialized / Ari-language implementation planning.
 - [ ] Plan Ari-language reimplementation with behavior parity against current
       `tools/lint`; `docs/dev/ari-implementation-plan.md` tracks the staged
       implementation plan.
+- [x] Start Ari source skeleton as the first step toward Ari-language
+      implementation; real rule implementation, CLI parsing, diagnostics,
+      compiler invocation, and tests remain future work.
 - [ ] Wire standalone build.
 - [ ] Wire standalone tests.
 - [ ] Define release and compatibility policy after inspecting Ari releases and

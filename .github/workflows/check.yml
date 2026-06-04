@@ -21,6 +21,8 @@ jobs:
           test -f docs/migration.md
           test -f docs/dev/roadmap.md
           test -f docs/dev/ari-implementation-plan.md
+          test -f src/README.md
+          test -f src/main.ari
           test -f examples/README.md
           test -f tests/README.md
           test -f scripts/README.md
@@ -39,3 +41,7 @@ jobs:
           grep -q "Ari-language implementation" docs/dev/ari-implementation-plan.md
           grep -q "compiler bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
           grep -q "standard library bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
+          grep -q "source here is currently a skeleton only" src/README.md
+          grep -q "fn main() -> i64" src/main.ari
+          ! grep -q "trailing-whitespace" src/main.ari
+          ! grep -q "missing-final-newline" src/main.ari
