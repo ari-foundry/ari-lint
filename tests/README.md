@@ -70,6 +70,10 @@ newline, an empty file, a single-line file without a final newline, a
 multi-line file without a final newline, CRLF final newline behavior, and lone
 carriage return behavior if relevant.
 
+The future missing-final-newline fixture and test plan is documented in
+[docs/rules/missing-final-newline-fixtures.md](../docs/rules/missing-final-newline-fixtures.md).
+No missing-final-newline fixtures are added yet.
+
 No executable missing-final-newline helper tests are added yet. Future tests
 should cover file with final newline, file without final newline, empty file,
 single-line file without final newline, multi-line file without final newline,

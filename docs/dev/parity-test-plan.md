@@ -118,7 +118,9 @@ Future fixture categories, without adding fixtures in this step:
 - missing final newline future parity cases for files with final newlines,
   files without final newlines, empty files, single-line files, multi-line
   files, CRLF behavior, and lone carriage return behavior; see
-  `docs/rules/missing-final-newline.md`
+  `docs/rules/missing-final-newline.md` and
+  `docs/rules/missing-final-newline-fixtures.md`; missing-final-newline
+  fixtures and parity tests are not added yet
 - compiler error
 - config file override
 - command-line rule override
