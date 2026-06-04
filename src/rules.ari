@@ -1,0 +1,27 @@
+// Initial planned rule metadata entries only. This file does not run rules or
+// scan source. Rule codes, short names, and default warning severities are
+// checked against the current Ari lint docs.
+
+pub struct RuleMetadataEntry {
+  code: String,
+  short_name: String,
+  default_severity: String,
+  description: String,
+}
+
+pub struct InitialRuleMetadata {
+  trailing_whitespace: RuleMetadataEntry,
+  missing_final_newline: RuleMetadataEntry,
+}
+
+// Metadata entry: lint/trailing-whitespace, short name trailing-whitespace,
+// default severity warning, description reports spaces or tabs at the end of a
+// source line.
+//
+// Metadata entry: lint/missing-final-newline, short name missing-final-newline,
+// default severity warning, description reports non-empty source files that do
+// not end with a newline.
+//
+// Concrete value construction, rule execution, source scanning, diagnostics,
+// config parsing, JSON output, CLI behavior, and ari --check invocation are
+// future work.

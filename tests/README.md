@@ -19,6 +19,12 @@ should validate severity values, rule registry metadata, config overrides,
 diagnostics, JSON output after the schema is defined, and parity behavior
 against current `tools/lint`.
 
+No rule metadata tests are added yet. Future metadata tests should validate the
+rule code, short name, default severity, and description for
+`lint/trailing-whitespace` and `lint/missing-final-newline`, then cover config
+override behavior, diagnostics, and parity with current `tools/lint` after real
+implementation begins.
+
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
 fixtures are not added yet.

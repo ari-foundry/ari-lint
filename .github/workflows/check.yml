@@ -29,6 +29,7 @@ jobs:
           test -f src/diagnostic.ari
           test -f src/rule.ari
           test -f src/registry.ari
+          test -f src/rules.ari
           test -f src/config.ari
           test -f examples/README.md
           test -f tests/README.md
@@ -57,6 +58,17 @@ jobs:
           grep -q "These files do not implement real lint rules" docs/dev/ari-implementation-plan.md
           grep -q "registry, severity, and config model skeleton" docs/dev/ari-implementation-plan.md
           grep -q "registry, severity, and config skeleton" docs/dev/roadmap.md
+          grep -q "first planned rule metadata entries" docs/dev/ari-implementation-plan.md
+          grep -q "first planned rule metadata entries" docs/dev/roadmap.md
+          grep -q "No rule metadata tests are added yet" tests/README.md
           grep -q "fn main() -> i64" src/main.ari
+          grep -q "InitialRuleMetadata" src/rules.ari
+          grep -q "lint/trailing-whitespace" src/rules.ari
+          grep -q "trailing-whitespace" src/rules.ari
+          grep -q "lint/missing-final-newline" src/rules.ari
+          grep -q "missing-final-newline" src/rules.ari
+          grep -q "default severity warning" src/rules.ari
+          grep -q "future work" src/rules.ari
+          grep -q "does not run rules" src/rules.ari
           ! grep -q "trailing-whitespace" src/main.ari
           ! grep -q "missing-final-newline" src/main.ari
