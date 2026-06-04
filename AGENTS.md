@@ -14,8 +14,11 @@ The current `tools/lint` implementation in `ari-foundry/ari` is a
 bundled/reference implementation for behavior parity. Do not copy it wholesale
 into this repository.
 
-Before writing Ari code or documenting Ari syntax, inspect `ari-foundry/ari`
-docs, examples, and tests for current language usage.
+Ari language syntax and idioms must be checked against `ari-foundry/ari` docs,
+examples, and tests.
+
+Do not invent Ari syntax. Do not add Ari examples unless they are verified
+against current Ari usage.
 
 Broad Ari language and compiler docs must not be copied here. Keep docs focused
 on lint CLI behavior, rules, diagnostics, configuration, tests, releases, and
@@ -51,17 +54,17 @@ package-manager docs into this repository.
 
 ## Issue Routing
 
-Compiler bugs go to `ari-foundry/ari`.
+compiler bugs belong in ari-foundry/ari issues.
 
-Standard library bugs go to `ari-foundry/ari`.
+standard library bugs belong in ari-foundry/ari issues.
 
-Ari language/toolchain limitations go to `ari-foundry/ari`.
+Ari language/toolchain limitations belong in ari-foundry/ari issues.
 
-`ari-lint` issues are for lint tooling, lint rules, diagnostics, config, docs,
+`ari-lint` issues are for lint tooling, lint rules, config, diagnostics, docs,
 tests, and Ari-language implementation.
 
-If a bug crosses the boundary, file the root cause in `ari-foundry/ari` and
-link it from `ari-lint` if needed.
+If a bug crosses the boundary, file the root cause in ari-foundry/ari and link
+it from `ari-lint` if needed.
 
 ## Workflow
 
