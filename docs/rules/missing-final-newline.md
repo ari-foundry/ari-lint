@@ -20,6 +20,9 @@ future Ari-language implementation.
 - Full rule execution is not complete.
 - File reading, diagnostics, config integration, CLI integration, JSON output,
   and tests remain future work.
+- Fixture and test planning is tracked in
+  [docs/rules/missing-final-newline-fixtures.md](missing-final-newline-fixtures.md);
+  fixtures are not added yet.
 
 ## Rule Identity
 
@@ -95,6 +98,10 @@ Parity dimensions:
 - exit behavior
 
 ## Fixture Ideas
+
+The detailed future fixture and test plan is documented in
+[docs/rules/missing-final-newline-fixtures.md](missing-final-newline-fixtures.md).
+The fixture plan exists but fixtures are not added yet.
 
 Future fixture ideas, without adding fixtures in this step:
 
