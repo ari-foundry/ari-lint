@@ -4,13 +4,16 @@
 
 This document plans a future Ari-language implementation of `ari-lint`.
 
-This planning step does not add Ari source files, move source code, copy
-`tools/lint`, or change build behavior.
+This document records the implementation direction and source-layout policy.
+It does not move `tools/lint` or change build behavior.
 
 ## Current Status
 
 - `ari-lint` is currently in skeleton/planning state.
 - Source extraction has not happened.
+- The Ari source skeleton has started with source-only files under `src/`.
+- Source directories should contain Ari source files only; source-layout
+  documentation belongs in `docs/dev/` or other documentation directories.
 - The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
   current bundled/reference implementation.
 - The future direction is Ari-language reimplementation in `ari-lint`.
@@ -61,7 +64,8 @@ Reference locations:
 
 - add minimal Ari project layout
 - no real lint rules yet
-- document build assumptions
+- document source layout and build assumptions in docs, not in source-directory
+  README files
 - keep checks lightweight
 
 ### Phase 2: CLI shell
@@ -76,6 +80,20 @@ Reference locations:
 - define internal diagnostic representation
 - map lint diagnostics to documented output expectations
 - keep JSON schema follow-up explicit
+
+Current preparatory model skeleton files are source-only placeholders:
+
+- `src/model.ari` groups future model modules.
+- `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
+  column, optional end position, severity, rule code, and message.
+- `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
+  default severity, and description.
+- `src/config.ari` sketches config concepts such as severity overrides,
+  `ari-lint.rules` config source, and command-line override source.
+
+These files do not implement real lint rules, rule execution, CLI parsing,
+config parsing, diagnostics output, JSON serialization, file reads, or
+`ari --check` invocation. The JSON schema is not stable yet.
 
 ### Phase 4: first rules
 
@@ -152,6 +170,8 @@ usable.
 - CLI parity may be hard to preserve exactly.
 - Tests may depend on a compatible Ari compiler binary.
 - Source layout may change after implementation starts.
+- Source directories may accidentally collect README-style documentation unless
+  docs stay under `docs/`.
 
 ## Follow-up Checklist
 
@@ -168,7 +188,6 @@ usable.
 
 - Do not move `tools/lint` in this step.
 - Do not copy `tools/lint` source in this step.
-- Do not add Ari source files in this step.
 - Do not add implementation code in this step.
 - Do not add tests in this step.
 - Do not add release workflows in this step.
