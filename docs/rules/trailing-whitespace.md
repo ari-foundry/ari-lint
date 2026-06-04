@@ -12,8 +12,13 @@ future Ari-language implementation.
 - The rule is planned for the Ari-language implementation.
 - The current reference behavior is the bundled `tools/lint` implementation in
   `ari-foundry/ari`.
-- This repository currently has metadata/module layout only.
-- Real source scanning and diagnostic production are future work.
+- This repository currently has metadata/module layout and a minimal internal
+  single-line helper in `src/rules/trailing_whitespace.ari`.
+- The helper only checks whether one already-split byte line ends with a space
+  or tab.
+- Full rule execution is not complete.
+- File scanning, diagnostics, config integration, CLI integration, JSON output,
+  and tests remain future work.
 
 ## Rule Identity
 
@@ -35,6 +40,10 @@ line before checking for trailing spaces or tabs, so CRLF line endings should
 not be flagged solely because of the carriage return. Future parity fixtures
 should confirm this behavior before the Ari-language implementation treats it as
 stable. Standalone CRLF fixture coverage remains needs follow-up.
+
+The current helper is limited to a single borrowed `Slice[u8]` line. It ignores
+a final carriage return before checking the last content byte, but it does not
+split source text into lines or compute a diagnostic span.
 
 ## Planned Diagnostic Location
 
@@ -94,7 +103,7 @@ Future fixture ideas, without adding fixtures in this step:
 
 ## Non-Goals
 
-- Do not implement trailing-whitespace in this step.
+- Do not implement full trailing-whitespace rule execution in this step.
 - Do not scan source text in this step.
 - Do not produce diagnostics in this step.
 - Do not add tests or fixtures in this step.

@@ -31,8 +31,8 @@ It does not move `tools/lint` or change build behavior.
   `ari-lint.rules` is not parsed yet.
 - The non-executing rule module layout has started with source-only child
   modules for the planned trailing whitespace and missing final newline rules.
-  These files are layout/metadata-only. Real rule behavior is not implemented
-  yet.
+  A minimal internal single-line helper has started for trailing whitespace,
+  but full rule behavior is not implemented yet.
 - The first rule design note,
   `docs/rules/trailing-whitespace.md`, records the planned
   `lint/trailing-whitespace` behavior. Implementation remains future work.
@@ -172,15 +172,17 @@ Current non-executing rule module layout:
 
 - `src/rules.ari` exposes planned child rule modules and keeps shared rule
   metadata entries.
-- `src/rules/trailing_whitespace.ari` records layout metadata for the future
-  `lint/trailing-whitespace` implementation.
+- `src/rules/trailing_whitespace.ari` records layout metadata and a minimal
+  internal single-line helper for the future `lint/trailing-whitespace`
+  implementation.
 - `src/rules/missing_final_newline.ari` records layout metadata for the future
   `lint/missing-final-newline` implementation.
 
-These rule module files do not implement trailing-whitespace behavior,
-missing-final-newline behavior, rule execution, source scanning, file content
-inspection, diagnostics, config parsing, CLI parsing, diagnostics output, JSON
-serialization, compiler invocation, tests, or CI.
+The trailing-whitespace helper is not a full rule implementation. It only
+checks one already-split borrowed byte line. These rule module files do not
+implement missing-final-newline behavior, rule execution, whole-source
+scanning, file reading, diagnostic production, config parsing, CLI parsing,
+diagnostics output, JSON serialization, compiler invocation, tests, or CI.
 
 ### Phase 5: compiler boundary
 
