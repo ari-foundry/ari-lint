@@ -34,7 +34,7 @@ The current reference implementation removes a final carriage return from each
 line before checking for trailing spaces or tabs, so CRLF line endings should
 not be flagged solely because of the carriage return. Future parity fixtures
 should confirm this behavior before the Ari-language implementation treats it as
-stable.
+stable. Standalone CRLF fixture coverage remains needs follow-up.
 
 ## Planned Diagnostic Location
 
@@ -76,7 +76,8 @@ Parity dimensions:
 - rule code
 - severity
 - human-readable output
-- JSON output shape, once schema is stable
+- JSON output shape, once schema is stable; exact JSON output details remain
+  needs follow-up
 - exit behavior
 
 ## Fixture Ideas
