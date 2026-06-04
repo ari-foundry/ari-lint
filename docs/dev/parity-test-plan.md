@@ -119,8 +119,9 @@ Future fixture categories, without adding fixtures in this step:
   files without final newlines, empty files, single-line files, multi-line
   files, CRLF behavior, and lone carriage return behavior; see
   `docs/rules/missing-final-newline.md` and
-  `docs/rules/missing-final-newline-fixtures.md`; missing-final-newline
-  fixtures and parity tests are not added yet
+  `docs/rules/missing-final-newline-fixtures.md`; initial final-newline and
+  no-final-newline fixtures exist, but missing-final-newline parity tests are
+  not added yet
 - compiler error
 - config file override
 - command-line rule override
@@ -198,7 +199,7 @@ from the other repo if needed.
 
 - Do not move `tools/lint` in this step.
 - Do not copy `tools/lint` source in this step.
-- Do not add test fixtures in this step.
+- Do not add broad test fixtures in this step.
 - Do not add golden files in this step.
 - Do not add Ari implementation code in this step.
 - Do not implement lint rules in this step.

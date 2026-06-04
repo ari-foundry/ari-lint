@@ -29,9 +29,14 @@ jobs:
           test -f docs/rules/missing-final-newline-fixtures.md
           test -f tests/fixtures/trailing-whitespace/clean.ari
           test -f tests/fixtures/trailing-whitespace/trailing-spaces.ari
+          test -f tests/fixtures/missing-final-newline/with-final-newline.ari
+          test -f tests/fixtures/missing-final-newline/missing-final-newline.ari
           test -z "$(find tests/fixtures/trailing-whitespace -type f ! -name clean.ari ! -name trailing-spaces.ari -print -quit)"
+          test -z "$(find tests/fixtures/missing-final-newline -type f ! -name with-final-newline.ari ! -name missing-final-newline.ari -print -quit)"
           ! grep -q '[[:blank:]]$' tests/fixtures/trailing-whitespace/clean.ari
           grep -q '[[:blank:]]$' tests/fixtures/trailing-whitespace/trailing-spaces.ari
+          tail -c 1 tests/fixtures/missing-final-newline/with-final-newline.ari | od -An -t x1 | grep -q '0a'
+          ! tail -c 1 tests/fixtures/missing-final-newline/missing-final-newline.ari | od -An -t x1 | grep -q '0a'
           test -z "$(find src -name README.md -print -quit)"
           test -z "$(find src -type f ! -name '*.ari' -print -quit)"
           test -f src/main.ari
@@ -70,7 +75,7 @@ jobs:
           grep -q "standard library bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
           grep -q "ari-lint Parity Test Plan" docs/dev/parity-test-plan.md
           grep -q "tools/lint" docs/dev/parity-test-plan.md
-          grep -q "Do not add test fixtures in this step" docs/dev/parity-test-plan.md
+          grep -q "Do not add broad test fixtures in this step" docs/dev/parity-test-plan.md
           grep -q "# lint/trailing-whitespace" docs/rules/trailing-whitespace.md
           grep -q "Do not implement full trailing-whitespace rule execution in this step" docs/rules/trailing-whitespace.md
           grep -q "# lint/missing-final-newline" docs/rules/missing-final-newline.md
@@ -85,7 +90,7 @@ jobs:
           grep -q "docs/rules/trailing-whitespace-fixtures.md" tests/README.md
           grep -q "docs/rules/missing-final-newline-fixtures.md" docs/rules/missing-final-newline.md
           grep -q "docs/rules/missing-final-newline-fixtures.md" tests/README.md
-          grep -q "Do not add fixtures in this step" docs/rules/missing-final-newline-fixtures.md
+          grep -q "Do not add broad fixture coverage in this step" docs/rules/missing-final-newline-fixtures.md
           grep -q "docs/rules/trailing-whitespace-parity.md" docs/rules/trailing-whitespace.md
           grep -q "docs/rules/trailing-whitespace-parity.md" docs/rules/trailing-whitespace-fixtures.md
           grep -q "docs/rules/trailing-whitespace-parity.md" docs/dev/parity-test-plan.md
@@ -103,8 +108,9 @@ jobs:
           grep -q "missing-final-newline design note added" docs/dev/roadmap.md
           grep -q "minimal missing-final-newline helper started" docs/dev/roadmap.md
           grep -q "missing-final-newline fixture and test plan added" docs/dev/roadmap.md
+          grep -q "missing-final-newline fixtures and lightweight fixture check started" docs/dev/roadmap.md
           grep -q "Initial trailing-whitespace fixtures have started" tests/README.md
-          grep -q "No missing-final-newline fixtures are added yet" tests/README.md
+          grep -q "Initial missing-final-newline fixtures have started" tests/README.md
           grep -q "No executable missing-final-newline helper tests are added yet" tests/README.md
           grep -q "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
           grep -q "These files do not implement real lint rules" docs/dev/ari-implementation-plan.md

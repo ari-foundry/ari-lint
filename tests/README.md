@@ -3,7 +3,8 @@
 Behavior tests will be added after actual implementation begins.
 
 Current checks verify skeleton files, lightweight documentation/source guards,
-and the first trailing-whitespace fixture shape.
+the first trailing-whitespace fixture shape, and the first
+missing-final-newline fixture shape.
 
 Future tests should cover CLI smoke tests, rule tests, configuration tests,
 diagnostic output, JSON diagnostic tests, compiler-boundary behavior, and
@@ -64,15 +65,29 @@ from the trailing-whitespace helper result to the internal diagnostic model,
 including line and column behavior, end column behavior, message, severity,
 rule code, and parity behavior against current `tools/lint`.
 
-No missing-final-newline fixtures are added yet. Future missing-final-newline
-fixtures should cover a file with a final newline, a file without a final
-newline, an empty file, a single-line file without a final newline, a
-multi-line file without a final newline, CRLF final newline behavior, and lone
-carriage return behavior if relevant.
+Initial missing-final-newline fixtures have started under
+`tests/fixtures/missing-final-newline/`:
+
+- `with-final-newline.ari` contains a small valid Ari snippet with a final
+  newline.
+- `missing-final-newline.ari` contains the same small Ari shape and
+  intentionally does not end with a final newline.
+
+The lightweight workflow check verifies fixture presence, verifies
+`with-final-newline.ari` ends with a newline, and verifies
+`missing-final-newline.ari` intentionally does not end with a newline. It does
+not compile fixtures, run the Ari compiler, invoke `ari-lint`, compare
+diagnostics, or execute the helper directly.
 
 The future missing-final-newline fixture and test plan is documented in
 [docs/rules/missing-final-newline-fixtures.md](../docs/rules/missing-final-newline-fixtures.md).
-No missing-final-newline fixtures are added yet.
+Full missing-final-newline behavior tests, golden files, and test runner
+behavior are not added yet.
+
+Future missing-final-newline fixtures should cover an empty file, a single-line
+file without a final newline, a multi-line file without a final newline, CRLF
+final newline behavior, diagnostics, and lone carriage return behavior if
+relevant.
 
 No executable missing-final-newline helper tests are added yet. Future tests
 should cover file with final newline, file without final newline, empty file,
@@ -110,6 +125,7 @@ model changes.
 Future Ari-language implementation tests must follow current `ari-foundry/ari`
 language usage.
 
-Only the initial clean and trailing-spaces fixture files are added so far; no
-broad fixture set, golden output, CLI test, parity runner, or compiler-backed
-test exists yet.
+Only the initial trailing-whitespace clean/trailing-spaces fixtures and
+missing-final-newline final-newline/no-final-newline fixtures are added so far;
+no broad fixture set, golden output, CLI test, parity runner, or
+compiler-backed test exists yet.

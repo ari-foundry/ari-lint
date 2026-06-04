@@ -22,7 +22,8 @@ future Ari-language implementation.
   and tests remain future work.
 - Fixture and test planning is tracked in
   [docs/rules/missing-final-newline-fixtures.md](missing-final-newline-fixtures.md);
-  fixtures are not added yet.
+  initial final-newline and no-final-newline fixtures are started, while full
+  fixture coverage and behavior tests remain future work.
 
 ## Rule Identity
 
@@ -101,9 +102,10 @@ Parity dimensions:
 
 The detailed future fixture and test plan is documented in
 [docs/rules/missing-final-newline-fixtures.md](missing-final-newline-fixtures.md).
-The fixture plan exists but fixtures are not added yet.
+The first minimal fixture coverage has started, but behavior tests are not
+added yet.
 
-Future fixture ideas, without adding fixtures in this step:
+Remaining future fixture ideas, without adding broad fixtures in this step:
 
 - file with final newline
 - file without final newline
@@ -119,7 +121,7 @@ Future fixture ideas, without adding fixtures in this step:
 - Do not read files in this step.
 - Do not inspect file contents in this step.
 - Do not produce diagnostics in this step.
-- Do not add tests or fixtures in this step.
+- Do not add full CLI, parity, golden, or diagnostic tests in this step.
 - Do not add JSON serialization in this step.
 - Do not invoke `ari --check` in this step.
 - Do not copy `tools/lint` source in this step.
