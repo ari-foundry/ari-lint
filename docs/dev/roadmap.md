@@ -1,7 +1,8 @@
 # ari-lint Roadmap
 
 Current status: skeleton initialized / Ari source skeleton started / internal
-model skeleton started / no real lint implementation yet.
+model skeleton started / registry-severity-config skeleton started / no real
+lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -23,6 +24,11 @@ and test work.
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain
       future work.
+- [x] Start registry, severity, and config skeleton as preparatory Ari source
+      work only; trailing-whitespace and missing-final-newline behavior,
+      registry execution, severity parsing, config parsing, CLI overrides,
+      diagnostics output, compiler invocation, tests, and CI remain future
+      work.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the future fixture and golden
       output strategy, but parity tests and CI parity jobs are not implemented.

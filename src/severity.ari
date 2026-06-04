@@ -1,0 +1,9 @@
+// Planned severity values only. This file does not parse text or apply overrides.
+
+pub enum Severity {
+  Off,
+  Hint,
+  Note,
+  Warning,
+  Error,
+}

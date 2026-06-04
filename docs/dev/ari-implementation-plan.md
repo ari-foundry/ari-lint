@@ -12,6 +12,8 @@ It does not move `tools/lint` or change build behavior.
 - `ari-lint` is currently in skeleton/planning state.
 - Source extraction has not happened.
 - The Ari source skeleton has started with source-only files under `src/`.
+- The rule registry, severity, and config model skeleton has started as
+  preparatory source-only declarations.
 - Source directories should contain Ari source files only; source-layout
   documentation belongs in `docs/dev/` or other documentation directories.
 - The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
@@ -75,25 +77,33 @@ Reference locations:
 - accept `--ari` path if feasible
 - do not claim stable behavior until tested
 
-### Phase 3: diagnostics model
+### Phase 3: internal lint model
 
 - define internal diagnostic representation
+- define severity values, rule descriptors, registry entries, and config
+  override data shapes
 - map lint diagnostics to documented output expectations
 - keep JSON schema follow-up explicit
 
 Current preparatory model skeleton files are source-only placeholders:
 
 - `src/model.ari` groups future model modules.
+- `src/severity.ari` sketches planned severity values: off, hint, note,
+  warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
   column, optional end position, severity, rule code, and message.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description.
+- `src/registry.ari` sketches rule registry concepts for planned reference
+  entries, including `lint/trailing-whitespace` and
+  `lint/missing-final-newline` metadata placeholders.
 - `src/config.ari` sketches config concepts such as severity overrides,
   `ari-lint.rules` config source, and command-line override source.
 
 These files do not implement real lint rules, rule execution, CLI parsing,
 config parsing, diagnostics output, JSON serialization, file reads, or
-`ari --check` invocation. The JSON schema is not stable yet.
+`ari --check` invocation. Severity parsing, CLI/config override behavior, rule
+registration behavior, and the JSON schema are not stable yet.
 
 ### Phase 4: first rules
 
@@ -170,6 +180,8 @@ usable.
 - CLI parity may be hard to preserve exactly.
 - Tests may depend on a compatible Ari compiler binary.
 - Source layout may change after implementation starts.
+- Registry, severity, and config shapes may change when real rule execution and
+  config parsing begin.
 - Source directories may accidentally collect README-style documentation unless
   docs stay under `docs/`.
 
@@ -180,6 +192,8 @@ usable.
 - [ ] Identify Ari runtime/process support needed for invoking `ari --check`
 - [ ] Define minimal CLI parser strategy
 - [ ] Define diagnostic data model
+- [ ] Define registry, severity, and config model behavior after source
+      skeletons compile in the real build
 - [ ] Define parity test fixtures against current `tools/lint`
 - [ ] Decide when to add first Ari source files
 - [ ] Track Ari compiler/toolchain blockers in `ari-foundry/ari` issues

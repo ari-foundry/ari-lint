@@ -1,12 +1,5 @@
 // Diagnostic data shapes only. This file does not format output or serialize JSON.
 
-pub enum DiagnosticSeverity {
-  Hint,
-  Note,
-  Warning,
-  Error,
-}
-
 pub enum OptionalPosition {
   Missing,
   Value(i64),
@@ -22,7 +15,7 @@ pub struct SourceSpan {
 
 pub struct Diagnostic {
   span: SourceSpan,
-  severity: DiagnosticSeverity,
+  severity: super::severity::Severity,
   rule_code: String,
   message: String,
 }
