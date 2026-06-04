@@ -29,6 +29,11 @@ No CLI tests are added yet. Future CLI tests should validate positional source
 input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, invalid
 arguments, and parity behavior against current `tools/lint`.
 
+No diagnostic output tests are added yet. Future diagnostic tests should
+validate human-readable output, JSON output shape, line/column fields,
+endLine/endColumn fields if supported, severity, rule code, message, path
+normalization, and parity behavior against current `tools/lint`.
+
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
 fixtures are not added yet.

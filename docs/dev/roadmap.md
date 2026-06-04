@@ -2,8 +2,8 @@
 
 Current status: skeleton initialized / Ari source skeleton started / internal
 model skeleton started / registry-severity-config skeleton started / first rule
-metadata entries added / CLI metadata skeleton started / no real lint
-implementation yet.
+metadata entries added / CLI metadata skeleton started / diagnostic output
+metadata skeleton started / no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -41,6 +41,13 @@ and test work.
       argument reading, argument validation, config parsing, diagnostics
       output, JSON serialization, compiler invocation, tests, and CI remain
       future work.
+- [x] Start diagnostic output metadata skeleton for human-readable output, JSON
+      output, diagnostic location, file path, line, column, endLine, endColumn,
+      severity, rule code, and message as metadata-only Ari source
+      placeholders; real diagnostic output, human-readable formatting, JSON
+      serialization, source scanning, CLI parsing, config parsing, compiler
+      invocation, tests, and CI remain future work, and the JSON schema remains
+      needs follow-up.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the future fixture and golden
       output strategy, but parity tests and CI parity jobs are not implemented.

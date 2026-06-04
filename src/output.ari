@@ -1,0 +1,46 @@
+// Planned diagnostic output metadata only. This file does not format
+// diagnostics, build diagnostic strings, serialize JSON, or write stdout/stderr.
+
+pub enum OutputModeName {
+  Human,
+  Json,
+}
+
+pub struct OutputModeMetadata {
+  name: OutputModeName,
+  purpose: String,
+  schema_status: String,
+}
+
+pub struct DiagnosticOutputFieldMetadata {
+  name: String,
+  purpose: String,
+  schema_status: String,
+}
+
+pub struct DiagnosticOutputMetadata {
+  human: OutputModeMetadata,
+  json: OutputModeMetadata,
+  diagnostic_location: DiagnosticOutputFieldMetadata,
+  file_path: DiagnosticOutputFieldMetadata,
+  line: DiagnosticOutputFieldMetadata,
+  column: DiagnosticOutputFieldMetadata,
+  end_line: DiagnosticOutputFieldMetadata,
+  end_column: DiagnosticOutputFieldMetadata,
+  severity: DiagnosticOutputFieldMetadata,
+  rule_code: DiagnosticOutputFieldMetadata,
+  message: DiagnosticOutputFieldMetadata,
+}
+
+// Output mode metadata: human output mode name human; JSON output mode name
+// json.
+//
+// Planned diagnostic location metadata covers file path, line, column, endLine,
+// and endColumn. Planned diagnostic fields also include severity, rule code, and
+// message.
+//
+// Human-readable text stability and JSON schema stability remain follow-up
+// items.
+// Formatting, diagnostic string construction, stdout/stderr output, JSON
+// serialization, source scanning, CLI parsing, config parsing, and ari --check
+// invocation are future work.
