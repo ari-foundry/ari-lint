@@ -7,7 +7,8 @@ metadata skeleton started / config override skeleton refined / rule module
 layout started / trailing-whitespace design note added / minimal
 trailing-whitespace helper started / trailing-whitespace fixture and test plan
 added / initial trailing-whitespace fixtures and lightweight fixture check
-started / no real lint implementation yet.
+started / trailing-whitespace diagnostic mapping skeleton started / no real
+lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -87,6 +88,12 @@ and test work.
       spaces. Full rule execution, helper unit tests, source scanning,
       diagnostics, CLI tests, golden JSON, parity tests, compiler invocation,
       and a standalone test runner remain future work.
+- [x] Start trailing-whitespace diagnostic mapping skeleton for one
+      already-split line, mapping helper output to internal span/severity data.
+      Full rule execution, full diagnostics, message/rule-code String value
+      construction, source scanning, CLI output, JSON serialization, config
+      integration, tests, parity checks, compiler invocation, and CI remain
+      future work.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the future fixture and golden
       output strategy, but parity tests and CI parity jobs are not implemented.

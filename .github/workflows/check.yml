@@ -162,6 +162,12 @@ jobs:
           grep -q "lint/trailing-whitespace" src/rules/trailing_whitespace.ari
           grep -q "line_has_trailing_whitespace" src/rules/trailing_whitespace.ari
           grep -q "is_trailing_space_byte" src/rules/trailing_whitespace.ari
+          grep -q "TrailingWhitespaceDiagnosticMapping" src/rules/trailing_whitespace.ari
+          grep -q "trailing_whitespace_diagnostic_mapping" src/rules/trailing_whitespace.ari
+          grep -q "source_span_with_end" src/diagnostic.ari
+          grep -q "diagnostic mapping skeleton" docs/dev/ari-implementation-plan.md
+          grep -q "diagnostic mapping skeleton" docs/dev/roadmap.md
+          grep -q "No diagnostic mapping tests are added yet" tests/README.md
           grep -q "does not read files" src/rules/trailing_whitespace.ari
           grep -q "whole source" src/rules/trailing_whitespace.ari
           grep -q "future work" src/rules/trailing_whitespace.ari
