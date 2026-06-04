@@ -39,3 +39,14 @@ Do not treat this skeleton as a stable release or a fully standalone tool. No
 install command, package registry entry, release artifact, or compatibility
 guarantee is available from this repository yet. Do not add unverified Ari code
 examples here.
+
+## Local Checks
+
+Run the lightweight repository-shape check with:
+
+```sh
+scripts/check.sh
+```
+
+This is not a full test suite yet. It checks skeleton files and fixture
+invariants only.

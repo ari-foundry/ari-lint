@@ -6,6 +6,16 @@ Current checks verify skeleton files, lightweight documentation/source guards,
 the first trailing-whitespace fixture shape, and the first
 missing-final-newline fixture shape.
 
+Run the lightweight check script from the repository root:
+
+```sh
+scripts/check.sh
+```
+
+The script checks repository shape and fixture invariants only. It does not run
+the Ari compiler, execute `tools/lint`, invoke `ari --check`, run a parity
+runner, run CLI tests, or compare golden tests.
+
 Future tests should cover CLI smoke tests, rule tests, configuration tests,
 diagnostic output, JSON diagnostic tests, compiler-boundary behavior, and
 parity with current `tools/lint`.
