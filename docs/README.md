@@ -20,8 +20,13 @@ Future compatibility docs should reference real Ari releases and tags:
 Documentation migration is staged and tracked in
 [docs/migration.md](migration.md).
 
-Ari-language implementation is planned but not started. The implementation plan
-is tracked in [docs/dev/ari-implementation-plan.md](dev/ari-implementation-plan.md).
+Ari-language implementation is in skeleton stage. The implementation plan is
+tracked in [docs/dev/ari-implementation-plan.md](dev/ari-implementation-plan.md).
+
+Future parity testing against the current bundled/reference `tools/lint`
+behavior is planned in
+[docs/dev/parity-test-plan.md](dev/parity-test-plan.md). Parity tests do not
+exist in this repository yet.
 
 Compiler and standard library (stdlib) bugs should be filed in
 `ari-foundry/ari`, not `ari-lint`.

@@ -21,6 +21,7 @@ jobs:
           test -f docs/migration.md
           test -f docs/dev/roadmap.md
           test -f docs/dev/ari-implementation-plan.md
+          test -f docs/dev/parity-test-plan.md
           test -f src/README.md
           test -f src/main.ari
           test -f examples/README.md
@@ -37,10 +38,15 @@ jobs:
           grep -q "docs/migration.md" docs/README.md
           grep -q "docs/dev/ari-implementation-plan.md" docs/README.md
           grep -q "docs/dev/ari-implementation-plan.md" docs/dev/roadmap.md
+          grep -q "docs/dev/parity-test-plan.md" docs/dev/roadmap.md
+          grep -q "docs/dev/parity-test-plan.md" tests/README.md
           grep -q "Do not invent compatibility claims" docs/migration.md
           grep -q "Ari-language implementation" docs/dev/ari-implementation-plan.md
           grep -q "compiler bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
           grep -q "standard library bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
+          grep -q "ari-lint Parity Test Plan" docs/dev/parity-test-plan.md
+          grep -q "tools/lint" docs/dev/parity-test-plan.md
+          grep -q "Do not add test fixtures in this step" docs/dev/parity-test-plan.md
           grep -q "source here is currently a skeleton only" src/README.md
           grep -q "fn main() -> i64" src/main.ari
           ! grep -q "trailing-whitespace" src/main.ari
