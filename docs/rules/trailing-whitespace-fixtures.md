@@ -104,6 +104,10 @@ Future trailing-whitespace tests should compare the Ari-language implementation
 with the current bundled/reference `tools/lint` implementation in
 `ari-foundry/ari`.
 
+The rule-specific parity plan is documented in
+[docs/rules/trailing-whitespace-parity.md](trailing-whitespace-parity.md).
+Fixture comparison is planned but not automated yet.
+
 Parity dimensions should include:
 
 - which lines are flagged

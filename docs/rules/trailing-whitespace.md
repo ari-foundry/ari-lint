@@ -96,6 +96,10 @@ implemented.
 The future implementation should compare behavior against the current bundled
 `tools/lint` implementation.
 
+The rule-specific parity plan is documented in
+[docs/rules/trailing-whitespace-parity.md](trailing-whitespace-parity.md).
+The parity plan exists but runner is not implemented.
+
 Parity dimensions:
 
 - which lines are flagged

@@ -50,6 +50,10 @@ The future trailing-whitespace fixture and test plan is documented in
 Full trailing-whitespace behavior tests, golden files, and test runner behavior
 are not added yet.
 
+The rule-specific trailing-whitespace parity plan is documented in
+[docs/rules/trailing-whitespace-parity.md](../docs/rules/trailing-whitespace-parity.md).
+No parity runner exists yet.
+
 No executable trailing-whitespace helper tests are added yet. Future tests
 should cover no trailing whitespace, trailing spaces, trailing tabs,
 whitespace-only lines, final lines without trailing newlines, CRLF behavior,
@@ -76,7 +80,7 @@ precedence, invalid config, diagnostics, and parity behavior against current
 
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
-fixtures are not added yet.
+fixtures and parity runners are not added yet.
 
 Future parity fixture categories include valid Ari source, trailing whitespace,
 missing final newline, compiler errors, config file overrides, command-line rule

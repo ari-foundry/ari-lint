@@ -52,8 +52,10 @@ Bugs in compiler behavior or standard library behavior should be filed in
   `docs/rules/trailing-whitespace.md`; future parity fixtures should compare
   that design against the current reference behavior
 - future trailing-whitespace fixture strategy is documented in
-  `docs/rules/trailing-whitespace-fixtures.md`; those fixtures and parity tests
-  are not added yet
+  `docs/rules/trailing-whitespace-fixtures.md`; initial clean/trailing-spaces
+  fixtures exist, but parity tests and a parity runner are not added yet
+- rule-specific trailing-whitespace parity planning is documented in
+  `docs/rules/trailing-whitespace-parity.md`
 - `lint/missing-final-newline`
 - short rule names if supported
 - default severity behavior
@@ -106,7 +108,8 @@ Future fixture categories, without adding fixtures in this step:
 - valid Ari source
 - trailing whitespace, including future parity cases for spaces, tabs,
   whitespace-only lines, final lines without newlines, and CRLF behavior; see
-  `docs/rules/trailing-whitespace-fixtures.md`
+  `docs/rules/trailing-whitespace-fixtures.md` and
+  `docs/rules/trailing-whitespace-parity.md`
 - missing final newline
 - compiler error
 - config file override
