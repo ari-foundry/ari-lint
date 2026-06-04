@@ -3,6 +3,11 @@
 Current status: skeleton initialized / Ari source skeleton started / internal
 model skeleton started / no real lint implementation yet.
 
+Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
+during this split. Compiler, standard library, and Ari toolchain bugs should be
+filed in `ari-foundry/ari`; `ari-lint` should track lint tooling, model, docs,
+and test work.
+
 ## Split Roadmap
 
 - [x] Initialize repo skeleton.
