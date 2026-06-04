@@ -3,7 +3,8 @@
 Current status: skeleton initialized / Ari source skeleton started / internal
 model skeleton started / registry-severity-config skeleton started / first rule
 metadata entries added / CLI metadata skeleton started / diagnostic output
-metadata skeleton started / no real lint implementation yet.
+metadata skeleton started / config override skeleton refined / no real lint
+implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -48,6 +49,14 @@ and test work.
       serialization, source scanning, CLI parsing, config parsing, compiler
       invocation, tests, and CI remain future work, and the JSON schema remains
       needs follow-up.
+- [x] Refine config override skeleton for default config, `ari-lint.rules`,
+      explicit `--config` file path, `--rule` command-line override, rule
+      severity override, and documented override precedence as metadata-only Ari
+      source placeholders; real config parsing, config discovery, config file
+      reading, override application, CLI parsing, diagnostics output, compiler
+      invocation, tests, and CI remain future work. Standalone config
+      precedence fixtures remain needs follow-up before claiming stable config
+      behavior.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the future fixture and golden
       output strategy, but parity tests and CI parity jobs are not implemented.
