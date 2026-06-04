@@ -1,0 +1,45 @@
+// Planned CLI surface metadata only. This file does not parse arguments,
+// inspect process arguments, validate inputs, read config files, serialize
+// JSON, produce diagnostics, or invoke ari --check.
+
+pub struct CliOptionMetadata {
+  name: String,
+  purpose: String,
+  takes_value: bool,
+  multiple: bool,
+}
+
+pub struct CliSurfaceMetadata {
+  positional_source_file_input: CliOptionMetadata,
+  json: CliOptionMetadata,
+  ari: CliOptionMetadata,
+  include_path: CliOptionMetadata,
+  list_rules: CliOptionMetadata,
+  config: CliOptionMetadata,
+  rule: CliOptionMetadata,
+}
+
+// Metadata entry: positional source file input; selects Ari source files to
+// lint; takes a value; may appear multiple times.
+//
+// Metadata entry: --json; requests machine-readable output; takes no value;
+// appears at most once.
+//
+// Metadata entry: --ari; selects the Ari compiler executable path; takes a
+// value; appears at most once.
+//
+// Metadata entry: -I; adds an Ari module include path; takes a value; may
+// appear multiple times.
+//
+// Metadata entry: --list-rules; requests planned rule listing; takes no value;
+// appears at most once.
+//
+// Metadata entry: --config; selects an ari-lint.rules config path; takes a
+// value; appears at most once.
+//
+// Metadata entry: --rule; records a planned rule severity override; takes a
+// value; may appear multiple times.
+//
+// CLI parsing, process argument reading, argument validation, config parsing,
+// diagnostics output, JSON serialization, and ari --check invocation are
+// future work.
