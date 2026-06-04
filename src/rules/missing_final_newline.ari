@@ -1,7 +1,9 @@
 // Planned missing final newline rule module. This file contains a minimal
-// internal content helper only. It does not read files, produce diagnostics,
-// apply config overrides, print output, serialize JSON, invoke ari --check, or
-// execute lint rules.
+// internal content helper and diagnostic mapping skeleton only.
+//
+// It does not read files, scan source files, produce full diagnostics, apply
+// config overrides, print output, serialize JSON, invoke ari --check, or execute
+// lint rules.
 
 pub struct MissingFinalNewlineRuleModuleMetadata {
   code: String,
@@ -10,13 +12,23 @@ pub struct MissingFinalNewlineRuleModuleMetadata {
   layout_status: String,
 }
 
+struct MissingFinalNewlineDiagnosticMapping {
+  has_diagnostic: bool,
+  span: super::diagnostic::SourceSpan,
+  severity: super::severity::Severity,
+}
+
 // Metadata entry: lint/missing-final-newline, short name missing-final-newline,
 // default severity warning. Real missing final newline behavior is future work.
 //
 // The helper below is intentionally limited to already-provided content bytes.
-// Rule execution, file reading, source scanning, diagnostic production, config
-// interaction, severity override application, CLI parsing, diagnostics output,
-// JSON serialization, and ari --check invocation are future work.
+// Rule execution, file reading, source scanning, full diagnostic production,
+// config interaction, severity override application, CLI parsing, diagnostics
+// output, JSON serialization, and ari --check invocation are future work. Rule
+// code lint/missing-final-newline and message missing final newline are confirmed
+// by the reference implementation, but this skeleton does not construct String
+// fields or a full Diagnostic value yet. The mapping uses explicit final
+// position metadata provided by its caller.
 
 fn content_is_missing_final_newline(content: Slice[u8]) -> bool {
   let length = content.len();
@@ -24,4 +36,24 @@ fn content_is_missing_final_newline(content: Slice[u8]) -> bool {
     return false;
   }
   return content.get(length - 1) != 10u8;
+}
+
+fn missing_final_newline_diagnostic_mapping(
+  file_path: String,
+  final_line: i64,
+  final_column: i64,
+  content: Slice[u8],
+) -> MissingFinalNewlineDiagnosticMapping {
+  let has_diagnostic = content_is_missing_final_newline(content);
+  return MissingFinalNewlineDiagnosticMapping {
+    has_diagnostic: has_diagnostic,
+    span: super::diagnostic::source_span_with_end(
+      file_path,
+      final_line,
+      final_column,
+      final_line,
+      final_column + 1,
+    ),
+    severity: super::severity::Warning,
+  };
 }

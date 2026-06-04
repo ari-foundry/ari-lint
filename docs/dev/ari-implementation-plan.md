@@ -33,9 +33,12 @@ It does not move `tools/lint` or change build behavior.
   modules for the planned trailing whitespace and missing final newline rules.
   A minimal internal single-line helper has started for trailing whitespace,
   a minimal internal content helper has started for missing final newline, and
-  an internal diagnostic mapping skeleton has started for trailing whitespace.
+  internal diagnostic mapping skeletons have started for trailing whitespace and
+  missing final newline.
   The trailing-whitespace mapping converts a single-line helper result into
-  diagnostic-model span/severity data, but full rule behavior is not
+  diagnostic-model span/severity data. The missing-final-newline mapping
+  converts a content-helper result plus explicit caller-provided final position
+  metadata into diagnostic-model span/severity data. Full rule behavior is not
   implemented yet.
 - Rule design notes have started:
   `docs/rules/trailing-whitespace.md` records the planned
@@ -129,8 +132,9 @@ Current preparatory model skeleton files are source-only placeholders:
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
   column, optional end position, severity, rule code, and message. It now also
-  has a small source-span constructor used by the trailing-whitespace mapping
-  skeleton; it does not format output or serialize JSON.
+  has a small source-span constructor used by the trailing-whitespace and
+  missing-final-newline mapping skeletons; it does not format output or
+  serialize JSON.
 - `src/output.ari` sketches diagnostic output metadata for human-readable and
   JSON output modes, diagnostic location, file path, line, column, endLine,
   endColumn, severity, rule code, and message. It does not format diagnostics,
@@ -189,10 +193,13 @@ Current non-executing rule module layout:
 - `src/rules/missing_final_newline.ari` records layout metadata and a minimal
   internal content helper for the future `lint/missing-final-newline`
   implementation. The helper only checks already-provided bytes for a missing
-  final newline.
+  final newline. It also records a diagnostic mapping skeleton that uses
+  explicit caller-provided final position metadata to map helper output to
+  internal span/severity data without constructing full string-bearing
+  diagnostics.
 
 The trailing-whitespace helper, missing-final-newline helper, and diagnostic
-mapping skeleton are not full rule implementations. They only handle
+mapping skeletons are not full rule implementations. They only handle
 already-provided bytes or explicit caller-provided file/line data. These rule
 module files do not implement rule execution, file reading, whole-source
 scanning, full diagnostic production, config parsing, CLI parsing, diagnostics

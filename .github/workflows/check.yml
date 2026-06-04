@@ -206,6 +206,12 @@ jobs:
           grep -q "MissingFinalNewlineRuleModuleMetadata" src/rules/missing_final_newline.ari
           grep -q "lint/missing-final-newline" src/rules/missing_final_newline.ari
           grep -q "content_is_missing_final_newline" src/rules/missing_final_newline.ari
+          grep -q "MissingFinalNewlineDiagnosticMapping" src/rules/missing_final_newline.ari
+          grep -q "missing_final_newline_diagnostic_mapping" src/rules/missing_final_newline.ari
+          grep -q "source_span_with_end" src/rules/missing_final_newline.ari
+          grep -q "explicit caller-provided final position" docs/dev/ari-implementation-plan.md
+          grep -q "missing-final-newline diagnostic mapping skeleton started" docs/dev/roadmap.md
+          grep -q "No missing-final-newline diagnostic mapping tests are added yet" tests/README.md
           grep -q "does not read files" src/rules/missing_final_newline.ari
           grep -q "does not" src/rules/missing_final_newline.ari
           grep -q "future work" src/rules/missing_final_newline.ari

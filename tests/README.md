@@ -94,6 +94,12 @@ should cover file with final newline, file without final newline, empty file,
 single-line file without final newline, multi-line file without final newline,
 CRLF behavior, diagnostics, and parity behavior.
 
+No missing-final-newline diagnostic mapping tests are added yet. Future tests
+should validate mapping from the missing-final-newline helper result to the
+internal diagnostic model, including caller-provided line and column behavior,
+end column behavior, message, severity, rule code, and parity behavior against
+current `tools/lint`.
+
 No CLI tests are added yet. Future CLI tests should validate positional source
 input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, invalid
 arguments, and parity behavior against current `tools/lint`.
