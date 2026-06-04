@@ -24,6 +24,10 @@ jobs:
           test -f docs/dev/parity-test-plan.md
           test -f src/README.md
           test -f src/main.ari
+          test -f src/model.ari
+          test -f src/diagnostic.ari
+          test -f src/rule.ari
+          test -f src/config.ari
           test -f examples/README.md
           test -f tests/README.md
           test -f scripts/README.md
@@ -48,6 +52,7 @@ jobs:
           grep -q "tools/lint" docs/dev/parity-test-plan.md
           grep -q "Do not add test fixtures in this step" docs/dev/parity-test-plan.md
           grep -q "source here is currently a skeleton only" src/README.md
+          grep -q "real lint rules are not implemented yet" src/README.md
           grep -q "fn main() -> i64" src/main.ari
           ! grep -q "trailing-whitespace" src/main.ari
           ! grep -q "missing-final-newline" src/main.ari

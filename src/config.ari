@@ -1,0 +1,20 @@
+// Config data shapes only. This file does not parse ari-lint.rules or CLI input.
+
+pub enum ConfigSeverity {
+  Off,
+  Hint,
+  Note,
+  Warning,
+  Error,
+}
+
+pub enum ConfigSource {
+  AriLintRulesFile,
+  CommandLine,
+}
+
+pub struct RuleSeverityOverride {
+  rule_code: String,
+  severity: ConfigSeverity,
+  source: ConfigSource,
+}

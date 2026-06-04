@@ -1,7 +1,7 @@
 # ari-lint Roadmap
 
-Current status: skeleton initialized / Ari source skeleton started / no real
-lint implementation yet.
+Current status: skeleton initialized / Ari source skeleton started / internal
+model skeleton started / no real lint implementation yet.
 
 ## Split Roadmap
 
@@ -14,6 +14,10 @@ lint implementation yet.
 - [x] Start Ari source skeleton as the first step toward Ari-language
       implementation; real rule implementation, CLI parsing, diagnostics,
       compiler invocation, and tests remain future work.
+- [x] Start internal data model skeleton as preparatory Ari source work only;
+      rule implementation, CLI parsing, diagnostics output, config parsing,
+      compiler invocation, implementation tests, and implementation CI remain
+      future work.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the future fixture and golden
       output strategy, but parity tests and CI parity jobs are not implemented.
