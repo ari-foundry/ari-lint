@@ -96,8 +96,10 @@ jobs:
           grep -q "initial trailing-whitespace fixtures and lightweight fixture check" docs/dev/roadmap.md
           grep -q "trailing-whitespace parity plan added" docs/dev/roadmap.md
           grep -q "missing-final-newline design note added" docs/dev/roadmap.md
+          grep -q "minimal missing-final-newline helper started" docs/dev/roadmap.md
           grep -q "Initial trailing-whitespace fixtures have started" tests/README.md
           grep -q "No missing-final-newline fixtures are added yet" tests/README.md
+          grep -q "No executable missing-final-newline helper tests are added yet" tests/README.md
           grep -q "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
           grep -q "These files do not implement real lint rules" docs/dev/ari-implementation-plan.md
           grep -q "registry, severity, and config model skeleton" docs/dev/ari-implementation-plan.md
@@ -191,6 +193,8 @@ jobs:
           grep -q "future work" src/rules/trailing_whitespace.ari
           grep -q "MissingFinalNewlineRuleModuleMetadata" src/rules/missing_final_newline.ari
           grep -q "lint/missing-final-newline" src/rules/missing_final_newline.ari
+          grep -q "content_is_missing_final_newline" src/rules/missing_final_newline.ari
+          grep -q "does not read files" src/rules/missing_final_newline.ari
           grep -q "does not" src/rules/missing_final_newline.ari
           grep -q "future work" src/rules/missing_final_newline.ari
           ! grep -q "trailing-whitespace" src/main.ari

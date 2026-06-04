@@ -13,8 +13,13 @@ future Ari-language implementation.
 - The rule is planned for the Ari-language implementation.
 - The current reference behavior is the bundled `tools/lint` implementation in
   `ari-foundry/ari`.
-- This repository currently has metadata/module layout only.
-- Real file inspection and diagnostic production are future work.
+- This repository currently has metadata/module layout and a minimal internal
+  content helper in `src/rules/missing_final_newline.ari`.
+- The helper only checks already-provided bytes and returns whether non-empty
+  content is missing a final newline byte.
+- Full rule execution is not complete.
+- File reading, diagnostics, config integration, CLI integration, JSON output,
+  and tests remain future work.
 
 ## Rule Identity
 
@@ -36,6 +41,10 @@ reference checks whether the final byte is `\n`.
 A file ending with a lone carriage return is currently treated as missing the
 final newline by the reference implementation. Standalone fixture coverage for
 lone carriage return behavior remains needs follow-up.
+
+The current Ari-language helper is limited to an already-provided
+`Slice[u8]`. It does not read files, compute diagnostic positions, construct
+diagnostics, apply config, or participate in CLI behavior.
 
 ## Planned Diagnostic Location
 

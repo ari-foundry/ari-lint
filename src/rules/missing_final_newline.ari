@@ -1,6 +1,7 @@
-// Planned missing final newline rule module layout only. This file does not
-// scan source text, inspect file contents, produce diagnostics, apply config
-// overrides, or execute lint rules.
+// Planned missing final newline rule module. This file contains a minimal
+// internal content helper only. It does not read files, produce diagnostics,
+// apply config overrides, print output, serialize JSON, invoke ari --check, or
+// execute lint rules.
 
 pub struct MissingFinalNewlineRuleModuleMetadata {
   code: String,
@@ -12,7 +13,15 @@ pub struct MissingFinalNewlineRuleModuleMetadata {
 // Metadata entry: lint/missing-final-newline, short name missing-final-newline,
 // default severity warning. Real missing final newline behavior is future work.
 //
-// Rule execution, source scanning, file content inspection, diagnostic
-// production, config interaction, severity override application, CLI parsing,
-// diagnostics output, JSON serialization, and ari --check invocation are future
-// work.
+// The helper below is intentionally limited to already-provided content bytes.
+// Rule execution, file reading, source scanning, diagnostic production, config
+// interaction, severity override application, CLI parsing, diagnostics output,
+// JSON serialization, and ari --check invocation are future work.
+
+fn content_is_missing_final_newline(content: Slice[u8]) -> bool {
+  let length = content.len();
+  if length == 0 {
+    return false;
+  }
+  return content.get(length - 1) != 10u8;
+}
