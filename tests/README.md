@@ -64,6 +64,12 @@ from the trailing-whitespace helper result to the internal diagnostic model,
 including line and column behavior, end column behavior, message, severity,
 rule code, and parity behavior against current `tools/lint`.
 
+No missing-final-newline fixtures are added yet. Future missing-final-newline
+fixtures should cover a file with a final newline, a file without a final
+newline, an empty file, a single-line file without a final newline, a
+multi-line file without a final newline, CRLF final newline behavior, and lone
+carriage return behavior if relevant.
+
 No CLI tests are added yet. Future CLI tests should validate positional source
 input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, invalid
 arguments, and parity behavior against current `tools/lint`.
