@@ -29,6 +29,11 @@ No rule module tests are added yet. Future rule module tests should validate
 rule module metadata, rule behavior, diagnostics, config interactions, and
 parity behavior against current `tools/lint`.
 
+No trailing-whitespace fixtures are added yet. Future fixtures should cover no
+trailing whitespace, trailing spaces, trailing tabs, whitespace-only lines,
+mixed spaces and tabs, final lines without trailing newlines, CRLF behavior,
+diagnostics, and parity with current `tools/lint`.
+
 No CLI tests are added yet. Future CLI tests should validate positional source
 input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, invalid
 arguments, and parity behavior against current `tools/lint`.
