@@ -138,6 +138,9 @@ runner exist.
 Lint behavior mismatch belongs in `ari-lint` if the Ari implementation
 disagrees with the reference implementation.
 
+`ari-lint` issues are for lint behavior, parity, docs, tests, config,
+diagnostics, rules, and Ari implementation.
+
 Compiler parser/sema/module bugs belong in `ari-foundry/ari`.
 
 Standard library bugs belong in `ari-foundry/ari`.
