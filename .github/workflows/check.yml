@@ -24,6 +24,11 @@ jobs:
           test -f docs/dev/parity-test-plan.md
           test -f docs/rules/trailing-whitespace.md
           test -f docs/rules/trailing-whitespace-fixtures.md
+          test -f tests/fixtures/trailing-whitespace/clean.ari
+          test -f tests/fixtures/trailing-whitespace/trailing-spaces.ari
+          test -z "$(find tests/fixtures/trailing-whitespace -type f ! -name clean.ari ! -name trailing-spaces.ari -print -quit)"
+          ! grep -q '[[:blank:]]$' tests/fixtures/trailing-whitespace/clean.ari
+          grep -q '[[:blank:]]$' tests/fixtures/trailing-whitespace/trailing-spaces.ari
           test -z "$(find src -name README.md -print -quit)"
           test -z "$(find src -type f ! -name '*.ari' -print -quit)"
           test -f src/main.ari
@@ -69,11 +74,12 @@ jobs:
           grep -q "docs/rules/trailing-whitespace-fixtures.md" docs/rules/trailing-whitespace.md
           grep -q "docs/rules/trailing-whitespace-fixtures.md" docs/dev/parity-test-plan.md
           grep -q "docs/rules/trailing-whitespace-fixtures.md" tests/README.md
-          grep -q "Do not add fixtures in this step" docs/rules/trailing-whitespace-fixtures.md
-          grep -q "fixtures are not added yet" docs/rules/trailing-whitespace.md
+          grep -q "first minimal fixture coverage has started" docs/rules/trailing-whitespace-fixtures.md
+          grep -q "initial clean and trailing-spaces fixtures are started" docs/rules/trailing-whitespace.md
           grep -q "trailing-whitespace design note" docs/dev/roadmap.md
           grep -q "trailing-whitespace fixture and test plan" docs/dev/roadmap.md
-          grep -q "No trailing-whitespace fixtures are added yet" tests/README.md
+          grep -q "initial trailing-whitespace fixtures and lightweight fixture check" docs/dev/roadmap.md
+          grep -q "Initial trailing-whitespace fixtures have started" tests/README.md
           grep -q "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
           grep -q "These files do not implement real lint rules" docs/dev/ari-implementation-plan.md
           grep -q "registry, severity, and config model skeleton" docs/dev/ari-implementation-plan.md
@@ -102,7 +108,7 @@ jobs:
           grep -q "minimal internal single-line helper" docs/dev/ari-implementation-plan.md
           grep -q "single-line helper" docs/rules/trailing-whitespace.md
           grep -q "trailing-whitespace helper started" docs/dev/roadmap.md
-          grep -q "No trailing-whitespace helper tests are added yet" tests/README.md
+          grep -q "No executable trailing-whitespace helper tests are added yet" tests/README.md
           grep -q "fn main() -> i64" src/main.ari
           grep -q "pub mod cli" src/model.ari
           grep -q "pub mod output" src/model.ari

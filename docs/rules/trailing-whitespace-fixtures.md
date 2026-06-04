@@ -5,8 +5,9 @@
 This document plans future fixtures and tests for
 `lint/trailing-whitespace`.
 
-This is a documentation-only planning step. It does not add fixtures, tests,
-golden files, test runner behavior, source implementation, or CI test jobs.
+The first minimal fixture coverage has started. Full CLI tests, parity tests,
+golden files, test runner behavior, source implementation, and CI test jobs
+remain future work.
 
 ## Current Status
 
@@ -14,18 +15,45 @@ golden files, test runner behavior, source implementation, or CI test jobs.
 - `ari-lint` has a minimal internal single-line helper for trailing whitespace.
 - Full rule execution is not complete.
 - Source-file scanning, diagnostic production, CLI behavior, config behavior,
-  JSON output, fixtures, tests, and golden files remain future work.
-- No real trailing-whitespace fixtures exist in this repository yet.
-- No test runner is wired for trailing-whitespace behavior yet.
-- Do not add fixtures in this step.
+  JSON output, broad fixtures, golden files, and parity tests remain future
+  work.
+- The first minimal fixture files now exist:
+  `tests/fixtures/trailing-whitespace/clean.ari` and
+  `tests/fixtures/trailing-whitespace/trailing-spaces.ari`.
+- The lightweight workflow check verifies fixture presence and whether the
+  clean fixture avoids trailing blanks while the trailing-spaces fixture keeps
+  an intentional trailing space.
+- No standalone test runner is wired for trailing-whitespace behavior yet.
+- Additional fixture cases remain future work.
+
+## Started Fixture Coverage
+
+Step 11.18.4 starts minimal fixture coverage with:
+
+- `tests/fixtures/trailing-whitespace/clean.ari`
+- `tests/fixtures/trailing-whitespace/trailing-spaces.ari`
+
+`clean.ari` uses a small valid Ari `fn main() -> i64` snippet with no trailing
+spaces.
+
+`trailing-spaces.ari` uses the same small Ari shape and intentionally keeps one
+trailing space on the first line.
+
+The current lightweight check does not compile the fixtures, run `ari-lint`,
+invoke `ari --check`, compare diagnostics, or execute the helper directly.
 
 ## Planned Fixture Layout
 
-Future fixture paths should use a dedicated trailing-whitespace area:
+Fixture paths use a dedicated trailing-whitespace area:
 
 ```text
 tests/fixtures/trailing-whitespace/clean.ari
 tests/fixtures/trailing-whitespace/trailing-spaces.ari
+```
+
+Remaining future fixture paths may include:
+
+```text
 tests/fixtures/trailing-whitespace/trailing-tabs.ari
 tests/fixtures/trailing-whitespace/whitespace-only-line.ari
 tests/fixtures/trailing-whitespace/mixed-spaces-tabs.ari
@@ -40,8 +68,8 @@ tested and the fixture encoding policy is clear.
 
 Future cases should cover:
 
-- clean source with no trailing whitespace
-- source lines ending in spaces
+- clean source with no trailing whitespace; started with `clean.ari`
+- source lines ending in spaces; started with `trailing-spaces.ari`
 - source lines ending in tabs
 - lines containing only whitespace before the newline
 - mixed spaces and tabs at the end of a line
@@ -115,8 +143,9 @@ and a standalone test runner exist.
 ## Non-Goals
 
 - Do not add source implementation in this step.
-- Do not add fixtures in this step.
-- Do not add tests in this step.
+- Do not add a broad fixture set in this step.
+- Do not add CLI tests in this step.
+- Do not add parity tests in this step.
 - Do not add golden files in this step.
 - Do not add test runner behavior in this step.
 - Do not copy or move `tools/lint` in this step.
