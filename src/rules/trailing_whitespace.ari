@@ -1,6 +1,6 @@
-// Planned trailing whitespace rule module layout only. This file does not scan
-// source text, inspect file contents, produce diagnostics, apply config
-// overrides, or execute lint rules.
+// Planned trailing whitespace rule module. This file contains a minimal
+// internal single-line helper only. It does not read files, scan whole source
+// files, produce diagnostics, apply config overrides, or execute lint rules.
 
 pub struct TrailingWhitespaceRuleModuleMetadata {
   code: String,
@@ -10,9 +10,30 @@ pub struct TrailingWhitespaceRuleModuleMetadata {
 }
 
 // Metadata entry: lint/trailing-whitespace, short name trailing-whitespace,
-// default severity warning. Real trailing whitespace behavior is future work.
+// default severity warning. Full rule behavior is future work.
 //
-// Rule execution, source scanning, file content inspection, diagnostic
+// The helper below is intentionally limited to one already-split line. Rule
+// execution, whole-source scanning, file content inspection, diagnostic
 // production, config interaction, severity override application, CLI parsing,
 // diagnostics output, JSON serialization, and ari --check invocation are future
 // work.
+
+fn is_trailing_space_byte(value: u8) -> bool {
+  return value == 32u8 || value == 9u8;
+}
+
+fn line_content_end(line: Slice[u8]) -> i64 {
+  let length = line.len();
+  if length > 0 && line.get(length - 1) == 13u8 {
+    return length - 1;
+  }
+  return length;
+}
+
+fn line_has_trailing_whitespace(line: Slice[u8]) -> bool {
+  let end = line_content_end(line);
+  if end == 0 {
+    return false;
+  }
+  return is_trailing_space_byte(line.get(end - 1));
+}

@@ -62,7 +62,7 @@ jobs:
           grep -q "tools/lint" docs/dev/parity-test-plan.md
           grep -q "Do not add test fixtures in this step" docs/dev/parity-test-plan.md
           grep -q "# lint/trailing-whitespace" docs/rules/trailing-whitespace.md
-          grep -q "Do not implement trailing-whitespace in this step" docs/rules/trailing-whitespace.md
+          grep -q "Do not implement full trailing-whitespace rule execution in this step" docs/rules/trailing-whitespace.md
           grep -q "docs/rules/trailing-whitespace.md" docs/dev/ari-implementation-plan.md
           grep -q "docs/rules/trailing-whitespace.md" docs/dev/parity-test-plan.md
           grep -q "trailing-whitespace design note" docs/dev/roadmap.md
@@ -90,8 +90,12 @@ jobs:
           grep -q "No config override tests are added yet" tests/README.md
           grep -q "non-executing rule module layout" docs/dev/ari-implementation-plan.md
           grep -q "rule module layout" docs/dev/roadmap.md
-          grep -q "Real rule behavior is not implemented" docs/dev/ari-implementation-plan.md
+          grep -q "full rule behavior is not implemented" docs/dev/ari-implementation-plan.md
           grep -q "No rule module tests are added yet" tests/README.md
+          grep -q "minimal internal single-line helper" docs/dev/ari-implementation-plan.md
+          grep -q "single-line helper" docs/rules/trailing-whitespace.md
+          grep -q "trailing-whitespace helper started" docs/dev/roadmap.md
+          grep -q "No trailing-whitespace helper tests are added yet" tests/README.md
           grep -q "fn main() -> i64" src/main.ari
           grep -q "pub mod cli" src/model.ari
           grep -q "pub mod output" src/model.ari
@@ -143,7 +147,10 @@ jobs:
           grep -q "does not run rules" src/rules.ari
           grep -q "TrailingWhitespaceRuleModuleMetadata" src/rules/trailing_whitespace.ari
           grep -q "lint/trailing-whitespace" src/rules/trailing_whitespace.ari
-          grep -q "does not scan" src/rules/trailing_whitespace.ari
+          grep -q "line_has_trailing_whitespace" src/rules/trailing_whitespace.ari
+          grep -q "is_trailing_space_byte" src/rules/trailing_whitespace.ari
+          grep -q "does not read files" src/rules/trailing_whitespace.ari
+          grep -q "whole source" src/rules/trailing_whitespace.ari
           grep -q "future work" src/rules/trailing_whitespace.ari
           grep -q "MissingFinalNewlineRuleModuleMetadata" src/rules/missing_final_newline.ari
           grep -q "lint/missing-final-newline" src/rules/missing_final_newline.ari
