@@ -17,6 +17,10 @@ It does not move `tools/lint` or change build behavior.
 - First planned rule metadata entries have been added for
   `lint/trailing-whitespace` and `lint/missing-final-newline` as metadata-only
   placeholders. Real rule behavior remains future work.
+- The CLI metadata skeleton for the planned surface has started as metadata-only
+  declarations for positional source input and the documented options `--json`,
+  `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`. The real CLI parsing
+  remains future work.
 - Source directories should contain Ari source files only; source-layout
   documentation belongs in `docs/dev/` or other documentation directories.
 - The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
@@ -75,6 +79,7 @@ Reference locations:
 
 ### Phase 2: CLI shell
 
+- record CLI surface metadata before implementing parsing
 - parse planned CLI options
 - accept source paths
 - accept `--ari` path if feasible
@@ -91,6 +96,10 @@ Reference locations:
 Current preparatory model skeleton files are source-only placeholders:
 
 - `src/model.ari` groups future model modules.
+- `src/cli.ari` sketches planned CLI option metadata for positional source file
+  input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`,
+  including each option's purpose, value requirement, and repeatability, without
+  parsing arguments.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
@@ -108,10 +117,11 @@ Current preparatory model skeleton files are source-only placeholders:
   `ari-lint.rules` config source, and command-line override source.
 
 These files do not implement real lint rules, rule execution, CLI parsing,
-source scanning, config parsing, diagnostics output, JSON serialization, file
-reads, or `ari --check` invocation. Descriptor value construction, severity
-parsing, CLI/config override behavior, rule registration behavior, and the JSON
-schema are not stable yet.
+process argument reading, argument validation, source scanning, config parsing,
+diagnostics output, JSON serialization, file reads, or `ari --check`
+invocation. Descriptor value construction, severity parsing, CLI/config
+override behavior, rule registration behavior, and the JSON schema are not
+stable yet.
 
 ### Phase 4: first rules
 
@@ -194,6 +204,8 @@ usable.
   config parsing begin.
 - Metadata value construction may change once Ari constant or value syntax is
   selected for the standalone implementation.
+- CLI metadata value construction may change once Ari constant or collection
+  syntax is selected for the standalone implementation.
 - Source directories may accidentally collect README-style documentation unless
   docs stay under `docs/`.
 
@@ -203,6 +215,8 @@ usable.
 - [ ] Define initial Ari source layout
 - [ ] Identify Ari runtime/process support needed for invoking `ari --check`
 - [ ] Define minimal CLI parser strategy
+- [ ] Define concrete CLI metadata value construction after Ari syntax choices
+      are verified
 - [ ] Define diagnostic data model
 - [ ] Define registry, severity, and config model behavior after source
       skeletons compile in the real build

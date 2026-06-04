@@ -2,7 +2,8 @@
 
 Current status: skeleton initialized / Ari source skeleton started / internal
 model skeleton started / registry-severity-config skeleton started / first rule
-metadata entries added / no real lint implementation yet.
+metadata entries added / CLI metadata skeleton started / no real lint
+implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -34,6 +35,12 @@ and test work.
       metadata-only Ari source placeholders; real rule behavior, source
       scanning, diagnostics output, config parsing, CLI behavior, compiler
       invocation, tests, and CI remain future work.
+- [x] Start CLI metadata skeleton for positional source input, `--json`,
+      `--ari`, `-I`, `--list-rules`, `--config`, and `--rule` as
+      metadata-only Ari source placeholders; real CLI parsing, process
+      argument reading, argument validation, config parsing, diagnostics
+      output, JSON serialization, compiler invocation, tests, and CI remain
+      future work.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the future fixture and golden
       output strategy, but parity tests and CI parity jobs are not implemented.

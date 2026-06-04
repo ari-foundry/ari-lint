@@ -25,6 +25,10 @@ rule code, short name, default severity, and description for
 override behavior, diagnostics, and parity with current `tools/lint` after real
 implementation begins.
 
+No CLI tests are added yet. Future CLI tests should validate positional source
+input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, invalid
+arguments, and parity behavior against current `tools/lint`.
+
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
 fixtures are not added yet.
