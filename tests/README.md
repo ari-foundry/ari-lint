@@ -9,6 +9,17 @@ Future tests should cover CLI smoke tests, rule tests, configuration tests,
 diagnostic output, JSON diagnostic tests, compiler-boundary behavior, and
 parity with current `tools/lint`.
 
+Parity testing is planned in
+[docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
+fixtures are not added yet.
+
+Future parity fixture categories include valid Ari source, trailing whitespace,
+missing final newline, compiler errors, config file overrides, command-line rule
+overrides, include paths, JSON diagnostics, and mixed compiler/lint diagnostics.
+
+Compiler and standard library bugs should be filed in `ari-foundry/ari`, not in
+`ari-lint` as primary issues.
+
 Tests should use an explicit `--ari` compiler path in CI unless the dependency
 model changes.
 

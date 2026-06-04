@@ -14,6 +14,9 @@ lint implementation yet.
 - [x] Start Ari source skeleton as the first step toward Ari-language
       implementation; real rule implementation, CLI parsing, diagnostics,
       compiler invocation, and tests remain future work.
+- [ ] Plan parity testing against current `tools/lint`;
+      `docs/dev/parity-test-plan.md` tracks the future fixture and golden
+      output strategy, but parity tests and CI parity jobs are not implemented.
 - [ ] Wire standalone build.
 - [ ] Wire standalone tests.
 - [ ] Define release and compatibility policy after inspecting Ari releases and
