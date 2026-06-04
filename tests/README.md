@@ -1,9 +1,9 @@
 # ari-lint Tests
 
-Tests will be added after actual implementation begins.
+Behavior tests will be added after actual implementation begins.
 
-Current checks only verify skeleton files and lightweight documentation/source
-guards.
+Current checks verify skeleton files, lightweight documentation/source guards,
+and the first trailing-whitespace fixture shape.
 
 Future tests should cover CLI smoke tests, rule tests, configuration tests,
 diagnostic output, JSON diagnostic tests, compiler-boundary behavior, and
@@ -29,20 +29,31 @@ No rule module tests are added yet. Future rule module tests should validate
 rule module metadata, rule behavior, diagnostics, config interactions, and
 parity behavior against current `tools/lint`.
 
-No trailing-whitespace fixtures are added yet. Future fixtures should cover no
-trailing whitespace, trailing spaces, trailing tabs, whitespace-only lines,
-mixed spaces and tabs, final lines without trailing newlines, CRLF behavior,
-diagnostics, and parity with current `tools/lint`.
+Initial trailing-whitespace fixtures have started under
+`tests/fixtures/trailing-whitespace/`:
+
+- `clean.ari` contains a small valid Ari snippet without trailing spaces.
+- `trailing-spaces.ari` contains the same small Ari shape with an intentional
+  trailing space on the first line.
+
+The lightweight workflow check verifies fixture presence, verifies `clean.ari`
+has no trailing blanks, and verifies `trailing-spaces.ari` keeps the
+intentional trailing space. It does not compile fixtures, run the Ari compiler,
+invoke `ari-lint`, compare diagnostics, or execute the helper directly.
+
+Future fixtures should cover trailing tabs, whitespace-only lines, mixed spaces
+and tabs, final lines without trailing newlines, CRLF behavior, diagnostics,
+and parity with current `tools/lint`.
 
 The future trailing-whitespace fixture and test plan is documented in
 [docs/rules/trailing-whitespace-fixtures.md](../docs/rules/trailing-whitespace-fixtures.md).
-No trailing-whitespace fixtures, tests, golden files, or test runner behavior
-are added yet.
+Full trailing-whitespace behavior tests, golden files, and test runner behavior
+are not added yet.
 
-No trailing-whitespace helper tests are added yet. Future tests should cover no
-trailing whitespace, trailing spaces, trailing tabs, whitespace-only lines,
-final lines without trailing newlines, CRLF behavior, diagnostics, and parity
-behavior.
+No executable trailing-whitespace helper tests are added yet. Future tests
+should cover no trailing whitespace, trailing spaces, trailing tabs,
+whitespace-only lines, final lines without trailing newlines, CRLF behavior,
+diagnostics, and parity behavior.
 
 No CLI tests are added yet. Future CLI tests should validate positional source
 input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, invalid
@@ -75,4 +86,6 @@ model changes.
 Future Ari-language implementation tests must follow current `ari-foundry/ari`
 language usage.
 
-No actual test fixtures are added in this skeleton step.
+Only the initial clean and trailing-spaces fixture files are added so far; no
+broad fixture set, golden output, CLI test, parity runner, or compiler-backed
+test exists yet.

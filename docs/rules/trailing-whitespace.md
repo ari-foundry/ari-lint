@@ -21,7 +21,8 @@ future Ari-language implementation.
   and tests remain future work.
 - Fixture and test planning is tracked in
   [docs/rules/trailing-whitespace-fixtures.md](trailing-whitespace-fixtures.md);
-  fixtures are not added yet.
+  initial clean and trailing-spaces fixtures are started, while full fixture
+  coverage and behavior tests remain future work.
 
 ## Rule Identity
 
@@ -92,12 +93,19 @@ Parity dimensions:
   needs follow-up
 - exit behavior
 
-## Fixture Ideas
+## Fixture Coverage
 
-Future fixture ideas, without adding fixtures in this step:
+Initial fixture coverage includes:
 
-- no trailing whitespace
-- trailing spaces
+- `tests/fixtures/trailing-whitespace/clean.ari`
+- `tests/fixtures/trailing-whitespace/trailing-spaces.ari`
+
+These fixtures are checked only for fixture shape. They are not compiled, run
+through `ari-lint`, compared against `tools/lint`, or connected to diagnostic
+goldens yet.
+
+Remaining future fixture ideas:
+
 - trailing tabs
 - whitespace-only line
 - mixed spaces and tabs
@@ -106,15 +114,15 @@ Future fixture ideas, without adding fixtures in this step:
 
 The detailed future fixture and test plan is documented in
 [docs/rules/trailing-whitespace-fixtures.md](trailing-whitespace-fixtures.md).
-No trailing-whitespace fixtures, tests, golden files, or test runner behavior
-are added yet.
+Full trailing-whitespace behavior tests, golden files, CLI tests, parity tests,
+and test runner behavior are not added yet.
 
 ## Non-Goals
 
 - Do not implement full trailing-whitespace rule execution in this step.
 - Do not scan source text in this step.
 - Do not produce diagnostics in this step.
-- Do not add tests or fixtures in this step.
+- Do not add full CLI, parity, golden, or diagnostic tests in this step.
 - Do not add JSON serialization in this step.
 - Do not invoke `ari --check` in this step.
 - Do not copy `tools/lint` source in this step.
