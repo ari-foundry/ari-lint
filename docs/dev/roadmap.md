@@ -5,7 +5,8 @@ Current status: skeleton initialized / source extraction pending.
 ## Split Roadmap
 
 - [x] Initialize repo skeleton.
-- [ ] Migrate `docs/lint` from `ari-foundry/ari`.
+- [ ] Migrate `docs/lint` from `ari-foundry/ari`; `docs/migration.md` tracks
+      the documentation migration plan.
 - [ ] Extract `tools/lint` source from `ari-foundry/ari`.
 - [ ] Wire standalone build.
 - [ ] Wire standalone tests.

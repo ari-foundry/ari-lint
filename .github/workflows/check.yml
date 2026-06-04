@@ -18,6 +18,7 @@ jobs:
           test -f README.md
           test -f AGENTS.md
           test -f docs/README.md
+          test -f docs/migration.md
           test -f docs/dev/roadmap.md
           test -f examples/README.md
           test -f tests/README.md
@@ -30,3 +31,5 @@ jobs:
           grep -q "https://ari-foundry.github.io" README.md
           grep -q "long-term implementation direction" README.md
           grep -q "Ari" README.md
+          grep -q "docs/migration.md" docs/README.md
+          grep -q "Do not invent compatibility claims" docs/migration.md
