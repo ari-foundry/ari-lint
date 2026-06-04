@@ -84,6 +84,10 @@ The future missing-final-newline fixture and test plan is documented in
 Full missing-final-newline behavior tests, golden files, and test runner
 behavior are not added yet.
 
+The rule-specific missing-final-newline parity plan is documented in
+[docs/rules/missing-final-newline-parity.md](../docs/rules/missing-final-newline-parity.md).
+No parity runner exists yet.
+
 Future missing-final-newline fixtures should cover an empty file, a single-line
 file without a final newline, a multi-line file without a final newline, CRLF
 final newline behavior, diagnostics, and lone carriage return behavior if
