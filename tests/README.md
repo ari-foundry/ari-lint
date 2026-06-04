@@ -34,6 +34,11 @@ trailing whitespace, trailing spaces, trailing tabs, whitespace-only lines,
 mixed spaces and tabs, final lines without trailing newlines, CRLF behavior,
 diagnostics, and parity with current `tools/lint`.
 
+The future trailing-whitespace fixture and test plan is documented in
+[docs/rules/trailing-whitespace-fixtures.md](../docs/rules/trailing-whitespace-fixtures.md).
+No trailing-whitespace fixtures, tests, golden files, or test runner behavior
+are added yet.
+
 No trailing-whitespace helper tests are added yet. Future tests should cover no
 trailing whitespace, trailing spaces, trailing tabs, whitespace-only lines,
 final lines without trailing newlines, CRLF behavior, diagnostics, and parity

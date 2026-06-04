@@ -23,6 +23,7 @@ jobs:
           test -f docs/dev/ari-implementation-plan.md
           test -f docs/dev/parity-test-plan.md
           test -f docs/rules/trailing-whitespace.md
+          test -f docs/rules/trailing-whitespace-fixtures.md
           test -z "$(find src -name README.md -print -quit)"
           test -z "$(find src -type f ! -name '*.ari' -print -quit)"
           test -f src/main.ari
@@ -65,7 +66,13 @@ jobs:
           grep -q "Do not implement full trailing-whitespace rule execution in this step" docs/rules/trailing-whitespace.md
           grep -q "docs/rules/trailing-whitespace.md" docs/dev/ari-implementation-plan.md
           grep -q "docs/rules/trailing-whitespace.md" docs/dev/parity-test-plan.md
+          grep -q "docs/rules/trailing-whitespace-fixtures.md" docs/rules/trailing-whitespace.md
+          grep -q "docs/rules/trailing-whitespace-fixtures.md" docs/dev/parity-test-plan.md
+          grep -q "docs/rules/trailing-whitespace-fixtures.md" tests/README.md
+          grep -q "Do not add fixtures in this step" docs/rules/trailing-whitespace-fixtures.md
+          grep -q "fixtures are not added yet" docs/rules/trailing-whitespace.md
           grep -q "trailing-whitespace design note" docs/dev/roadmap.md
+          grep -q "trailing-whitespace fixture and test plan" docs/dev/roadmap.md
           grep -q "No trailing-whitespace fixtures are added yet" tests/README.md
           grep -q "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
           grep -q "These files do not implement real lint rules" docs/dev/ari-implementation-plan.md
