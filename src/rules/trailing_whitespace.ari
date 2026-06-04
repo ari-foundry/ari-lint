@@ -1,0 +1,18 @@
+// Planned trailing whitespace rule module layout only. This file does not scan
+// source text, inspect file contents, produce diagnostics, apply config
+// overrides, or execute lint rules.
+
+pub struct TrailingWhitespaceRuleModuleMetadata {
+  code: String,
+  short_name: String,
+  default_severity: String,
+  layout_status: String,
+}
+
+// Metadata entry: lint/trailing-whitespace, short name trailing-whitespace,
+// default severity warning. Real trailing whitespace behavior is future work.
+//
+// Rule execution, source scanning, file content inspection, diagnostic
+// production, config interaction, severity override application, CLI parsing,
+// diagnostics output, JSON serialization, and ari --check invocation are future
+// work.

@@ -2,6 +2,9 @@
 // scan source. Rule codes, short names, and default warning severities are
 // checked against the current Ari lint docs.
 
+pub mod trailing_whitespace;
+pub mod missing_final_newline;
+
 pub struct RuleMetadataEntry {
   code: String,
   short_name: String,
@@ -25,3 +28,6 @@ pub struct InitialRuleMetadata {
 // Concrete value construction, rule execution, source scanning, diagnostics,
 // config parsing, JSON output, CLI behavior, and ari --check invocation are
 // future work.
+//
+// Child modules under src/rules/ are non-executing layout placeholders for the
+// future rule implementations.

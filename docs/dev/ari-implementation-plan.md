@@ -29,6 +29,10 @@ It does not move `tools/lint` or change build behavior.
   for default config, `ari-lint.rules`, `--config`, `--rule`, rule severity
   overrides, and documented override precedence. Config parsing is not implemented yet.
   `ari-lint.rules` is not parsed yet.
+- The non-executing rule module layout has started with source-only child
+  modules for the planned trailing whitespace and missing final newline rules.
+  These files are layout/metadata-only. Real rule behavior is not implemented
+  yet.
 - Source directories should contain Ari source files only; source-layout
   documentation belongs in `docs/dev/` or other documentation directories.
 - The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
@@ -153,11 +157,26 @@ need follow-up before this repository claims standalone output compatibility.
 
 ### Phase 4: first rules
 
+- start non-executing rule module layout before implementing rule behavior
 - turn metadata-only entries into executable rule registrations when Ari syntax
   and toolchain support are ready
 - implement `lint/trailing-whitespace`
 - implement `lint/missing-final-newline`
 - compare behavior with reference implementation
+
+Current non-executing rule module layout:
+
+- `src/rules.ari` exposes planned child rule modules and keeps shared rule
+  metadata entries.
+- `src/rules/trailing_whitespace.ari` records layout metadata for the future
+  `lint/trailing-whitespace` implementation.
+- `src/rules/missing_final_newline.ari` records layout metadata for the future
+  `lint/missing-final-newline` implementation.
+
+These rule module files do not implement trailing-whitespace behavior,
+missing-final-newline behavior, rule execution, source scanning, file content
+inspection, diagnostics, config parsing, CLI parsing, diagnostics output, JSON
+serialization, compiler invocation, tests, or CI.
 
 ### Phase 5: compiler boundary
 
@@ -231,6 +250,8 @@ usable.
 - Source layout may change after implementation starts.
 - Registry, severity, and config shapes may change when real rule execution and
   config parsing begin.
+- Rule module boundaries may change once real rule behavior and shared rule
+  execution APIs are designed.
 - Standalone config discovery and override precedence may need fixtures before
   they become stable behavior.
 - Metadata value construction may change once Ari constant or value syntax is
@@ -259,6 +280,8 @@ usable.
 - [ ] Define concrete config override metadata value construction after Ari
       syntax choices are verified
 - [ ] Add config precedence fixtures before claiming stable config behavior
+- [ ] Define executable rule module API after the non-executing layout is
+      validated
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`
