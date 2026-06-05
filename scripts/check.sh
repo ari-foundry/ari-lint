@@ -174,9 +174,13 @@ require_grep "first planned rule metadata entries" docs/dev/ari-implementation-p
 require_grep "first planned rule metadata entries" docs/dev/roadmap.md
 require_grep "No rule metadata tests are added yet" tests/README.md
 require_grep "CLI metadata skeleton" docs/dev/ari-implementation-plan.md
+require_grep "CLI argument result model" docs/dev/ari-implementation-plan.md
+require_grep "Actual process argument parsing remains future work" docs/dev/ari-implementation-plan.md
 require_grep "CLI metadata skeleton" docs/dev/roadmap.md
+require_grep "CLI argument model added" docs/dev/roadmap.md
 require_grep "real CLI parsing" docs/dev/ari-implementation-plan.md
 require_grep "No CLI tests are added yet" tests/README.md
+require_grep "No CLI model tests are added yet" tests/README.md
 require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
 require_grep "Diagnostic output is not implemented yet" docs/dev/ari-implementation-plan.md
@@ -200,13 +204,26 @@ require_grep "pub mod cli" src/model.ari
 require_grep "pub mod output" src/model.ari
 require_grep "pub mod config" src/model.ari
 require_grep "CliSurfaceMetadata" src/cli.ari
+require_grep "CliArgs" src/cli.ari
+require_grep "CliParseResult" src/cli.ari
+require_grep "CliRuleOverrideArg" src/cli.ari
+require_grep "CliArgumentProblem" src/cli.ari
 require_grep "positional source file input" src/cli.ari
+require_grep "source_files" src/cli.ari
 require_grep "--json" src/cli.ari
+require_grep "json_requested" src/cli.ari
 require_grep "--ari" src/cli.ari
+require_grep "ari_compiler_path" src/cli.ari
 require_grep "-I" src/cli.ari
+require_grep "include_paths" src/cli.ari
 require_grep "--list-rules" src/cli.ari
+require_grep "list_rules_requested" src/cli.ari
 require_grep "--config" src/cli.ari
+require_grep "config_path" src/cli.ari
 require_grep "--rule" src/cli.ari
+require_grep "rule_overrides" src/cli.ari
+require_grep "help_requested" src/cli.ari
+require_grep "problems" src/cli.ari
 require_grep "does not parse arguments" src/cli.ari
 require_grep "future work" src/cli.ari
 require_grep "DiagnosticOutputMetadata" src/output.ari

@@ -126,6 +126,10 @@ No CLI tests are added yet. Future CLI tests should validate positional source
 input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, invalid
 arguments, and parity behavior against current `tools/lint`.
 
+No CLI model tests are added yet. Future tests should cover parser output for
+positional files, `--json`, `--list-rules`, `--ari`, `-I`, `--config`,
+`--rule`, invalid args, and parity behavior.
+
 No diagnostic output tests are added yet. Future diagnostic tests should
 validate human-readable output, JSON output shape, line/column fields,
 endLine/endColumn fields if supported, severity, rule code, message, path
