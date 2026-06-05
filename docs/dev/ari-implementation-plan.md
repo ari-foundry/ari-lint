@@ -19,12 +19,13 @@ It does not move `tools/lint` or change build behavior.
   placeholders. Real rule behavior remains future work.
 - The CLI metadata skeleton for the planned surface has started as metadata-only
   declarations for positional source input and the documented options `--json`,
-  `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`. The real CLI parsing
-  remains future work.
-- The CLI argument result model is now present for future parser output,
-  including positional files, planned flags/options, optional compiler/config
-  paths, include paths, rule overrides, help requests, and parse problems.
-  Actual process argument parsing remains future work.
+  `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`.
+  Minimal token-list parsing has started for caller-provided tokens. OS argv
+  reading remains future work.
+- The CLI argument result model is now used by the minimal explicit-token
+  parser for positional files, planned flags/options, optional compiler/config
+  paths, include paths, raw rule overrides, help requests, and parse problems.
+  Actual OS process argument parsing remains future work.
 - The diagnostic output metadata skeleton has started as metadata-only
   declarations for human and JSON output modes, diagnostic location fields, and
   planned diagnostic fields. Diagnostic output is not implemented yet.
@@ -116,7 +117,7 @@ Reference locations:
 ### Phase 2: CLI shell
 
 - record CLI surface metadata before implementing parsing
-- parse planned CLI options
+- parse planned CLI options from explicit caller-provided token lists
 - accept source paths
 - accept `--ari` path if feasible
 - do not claim stable behavior until tested
@@ -138,11 +139,12 @@ Current preparatory model skeleton files are source-only placeholders:
 - `src/model.ari` groups future model modules.
 - `src/cli.ari` sketches planned CLI option metadata for positional source file
   input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`,
-  including each option's purpose, value requirement, and repeatability. It now
-  also defines a CLI argument result model for future parser output, including
-  positional files, requested output/list/help flags, optional compiler and
-  config paths, include paths, rule override entries, and parse problem data.
-  It does not parse arguments.
+  including each option's purpose, value requirement, and repeatability. It
+  also defines a CLI argument result model and a minimal explicit-token parser
+  for caller-provided token lists, including positional files, requested
+  output/list/help flags, optional compiler and config paths, include paths,
+  raw rule override entries, missing-value problems, and unknown-argument
+  problems. It does not read OS process argv.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
@@ -171,12 +173,13 @@ Current preparatory model skeleton files are source-only placeholders:
   discovery. It does not parse config files, read `ari-lint.rules`, inspect
   CLI arguments, or apply overrides.
 
-These files do not implement real lint rules, rule execution, CLI parsing,
-process argument reading, argument validation, source scanning, config parsing,
-diagnostics output, JSON serialization, file reads, or `ari --check`
-invocation. The CLI argument result model is data only; actual parser behavior,
-compiler invocation, config parsing, diagnostics output, and JSON serialization
-remain future work. Descriptor value construction, severity parsing, CLI/config
+These files do not implement real lint rules, rule execution, process argument
+reading, argument validation, source scanning, config parsing, diagnostics
+output, JSON serialization, file reads, or `ari --check` invocation. The CLI
+parser is limited to explicit caller-provided token lists and raw option
+values; OS argv integration, compiler invocation, config parsing, diagnostics
+output, JSON serialization, semantic `--rule` parsing, and parser tests remain
+future work. Descriptor value construction, severity parsing, CLI/config
 override behavior, rule registration behavior, and the JSON schema are not
 stable yet.
 

@@ -1,6 +1,6 @@
-// Planned CLI surface metadata and parser result data only. This file does not
-// parse arguments, read process arguments, validate inputs, read config files,
-// serialize JSON, produce diagnostics, or invoke ari --check.
+// Planned CLI surface metadata, parser result data, and explicit-token parsing
+// only. This file does not read process arguments, validate input paths, read
+// config files, serialize JSON, produce diagnostics, or invoke ari --check.
 
 pub struct CliOptionMetadata {
   name: String,
@@ -20,8 +20,8 @@ pub struct CliSurfaceMetadata {
 }
 
 pub struct CliRuleOverrideArg {
-  rule_name: String,
-  severity_name: String,
+  rule_name: Option[String],
+  severity_name: Option[String],
   raw_text: String,
 }
 
@@ -53,6 +53,114 @@ pub struct CliParseResult {
   problems: std::vec::Vec[CliArgumentProblem],
 }
 
+fn missing_value_problem(argument: String) -> CliArgumentProblem {
+  return CliArgumentProblem {
+    kind: MissingValue,
+    argument: argument,
+    detail: None<String>(),
+  };
+}
+
+fn unknown_argument_problem(argument: String) -> CliArgumentProblem {
+  return CliArgumentProblem {
+    kind: UnknownArgument,
+    argument: argument,
+    detail: None<String>(),
+  };
+}
+
+fn raw_rule_override(raw_text: String) -> CliRuleOverrideArg {
+  return CliRuleOverrideArg {
+    rule_name: None<String>(),
+    severity_name: None<String>(),
+    raw_text: raw_text,
+  };
+}
+
+pub fn parse_cli_tokens(
+  zone: ref mut Zone,
+  tokens: std::vec::Vec[String],
+) -> CliParseResult {
+  var source_files = std::vec::new<String>(zone, tokens.len());
+  var include_paths = std::vec::new<String>(zone, tokens.len());
+  var rule_overrides = std::vec::new<CliRuleOverrideArg>(zone, tokens.len());
+  var problems = std::vec::new<CliArgumentProblem>(zone, tokens.len());
+
+  var json_requested = false;
+  var list_rules_requested = false;
+  var help_requested = false;
+  var ari_compiler_path: Option[String] = None<String>();
+  var config_path: Option[String] = None<String>();
+
+  var index = 0;
+  while index < tokens.len() {
+    let token = tokens.get(index);
+
+    if token.equals("--json") {
+      json_requested = true;
+      index = index + 1;
+    } else if token.equals("--list-rules") {
+      list_rules_requested = true;
+      index = index + 1;
+    } else if token.equals("--help") || token.equals("-h") {
+      help_requested = true;
+      index = index + 1;
+    } else if token.equals("--ari") {
+      if index + 1 < tokens.len() {
+        ari_compiler_path = Some<String>(tokens.get(index + 1));
+        index = index + 2;
+      } else {
+        problems.push(missing_value_problem(token));
+        index = index + 1;
+      }
+    } else if token.equals("-I") {
+      if index + 1 < tokens.len() {
+        include_paths.push(tokens.get(index + 1));
+        index = index + 2;
+      } else {
+        problems.push(missing_value_problem(token));
+        index = index + 1;
+      }
+    } else if token.equals("--config") {
+      if index + 1 < tokens.len() {
+        config_path = Some<String>(tokens.get(index + 1));
+        index = index + 2;
+      } else {
+        problems.push(missing_value_problem(token));
+        index = index + 1;
+      }
+    } else if token.equals("--rule") {
+      if index + 1 < tokens.len() {
+        rule_overrides.push(raw_rule_override(tokens.get(index + 1)));
+        index = index + 2;
+      } else {
+        problems.push(missing_value_problem(token));
+        index = index + 1;
+      }
+    } else if token.starts_with("-") {
+      problems.push(unknown_argument_problem(token));
+      index = index + 1;
+    } else {
+      source_files.push(token);
+      index = index + 1;
+    }
+  }
+
+  return CliParseResult {
+    args: CliArgs {
+      source_files: source_files,
+      json_requested: json_requested,
+      list_rules_requested: list_rules_requested,
+      help_requested: help_requested,
+      ari_compiler_path: ari_compiler_path,
+      include_paths: include_paths,
+      config_path: config_path,
+      rule_overrides: rule_overrides,
+    },
+    problems: problems,
+  };
+}
+
 // Metadata entry: positional source file input; selects Ari source files to
 // lint; takes a value; may appear multiple times.
 //
@@ -74,18 +182,21 @@ pub struct CliParseResult {
 // Metadata entry: --rule; records a planned rule severity override; takes a
 // value; may appear multiple times.
 //
-// Parser result data model: CliArgs stores future parser output for positional
+// Parser result data model: CliArgs stores parser output for positional
 // source files, --json, --list-rules, --help/-h, --ari, -I, --config, and
 // --rule. Optional compiler/config paths use Option[String], repeated values
 // use std::vec::Vec, and rule override entries keep the original raw text plus
-// the planned split rule/severity names.
+// optional future split rule/severity names.
 //
-// Parser problem data model: CliArgumentProblem records future missing-value,
-// unknown-argument, and invalid-rule-override problems without defining final
-// validation behavior, diagnostic wording, or exit status.
+// Parser problem data model: CliArgumentProblem records missing-value and
+// unknown-argument problems from the explicit token list, and keeps the
+// invalid-rule-override shape reserved for later semantic parsing without
+// defining final validation behavior, diagnostic wording, or exit status.
 //
-// This file does not parse arguments.
+// parse_cli_tokens parses a caller-provided token list only. It does not read
+// OS process argv, inspect ARI_COMPILER, validate paths, parse ari-lint.rules,
+// semantically parse --rule values, print diagnostics, or invoke ari --check.
 //
-// CLI parsing, process argument reading, argument validation, config parsing,
-// diagnostics output, JSON serialization, and ari --check invocation are
-// future work.
+// Process argument reading, argument validation, config parsing, diagnostics
+// output, JSON serialization, compiler path validation, and ari --check
+// invocation are future work.

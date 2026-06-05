@@ -16,7 +16,7 @@ missing-final-newline diagnostic mapping skeleton started /
 missing-final-newline parity plan added / lightweight check runner skeleton
 added / compiler provisioning plan added / compiler invocation plan added /
 CLI argument model added / local build scaffold and gitignore hygiene added /
-no real lint implementation yet.
+minimal CLI token parser added / no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -50,15 +50,21 @@ and test work.
       invocation, tests, and CI remain future work.
 - [x] Start CLI metadata skeleton for positional source input, `--json`,
       `--ari`, `-I`, `--list-rules`, `--config`, and `--rule` as
-      metadata-only Ari source placeholders; real CLI parsing, process
-      argument reading, argument validation, config parsing, diagnostics
-      output, JSON serialization, compiler invocation, tests, and CI remain
-      future work.
+      metadata-only Ari source placeholders; OS process argument reading,
+      argument validation, config parsing, diagnostics output, JSON
+      serialization, compiler invocation, tests, and CI remain future work.
 - [x] Add CLI argument result model for future parser output, including
       positional files, `--json`, `--list-rules`, help requests, `--ari`, `-I`,
       `--config`, `--rule`, and parse problem data. Process argument parsing,
       CLI validation, config parsing, diagnostics output, JSON serialization,
       compiler invocation, tests, and CI remain future work.
+- [x] Add a minimal CLI token parser over explicit caller-provided token lists,
+      reusing the CLI argument result model for positional files, `--json`,
+      `--list-rules`, `--help`/`-h`, `--ari`, `-I`, `--config`, raw `--rule`
+      values, missing-value problems, and unknown-argument problems. OS process
+      argv reading, `ARI_COMPILER`, compiler path validation, config parsing,
+      semantic `--rule` parsing, compiler invocation, output behavior, tests,
+      and CI parser execution remain future work.
 - [x] Add local build scaffold and `.gitignore` hygiene for local/generated
       artifacts. `scripts/build.sh` requires an explicit Ari compiler path and
       builds `src/main.ari` to `build/ari-lint` for local use only; CI compiler

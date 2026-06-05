@@ -134,6 +134,13 @@ No CLI model tests are added yet. Future tests should cover parser output for
 positional files, `--json`, `--list-rules`, `--ari`, `-I`, `--config`,
 `--rule`, invalid args, and parity behavior.
 
+No executable CLI parser tests are added yet. Future parser tests should cover
+the minimal explicit token-list parser for positional files, `--json`,
+`--list-rules`, `--help`/`-h`, `--ari`, `-I`, `--config`, raw `--rule` values,
+missing option values, unknown options, repeated `-I` and `--rule`, multiple
+positional files, and future OS argv integration once process argument reading
+exists.
+
 No diagnostic output tests are added yet. Future diagnostic tests should
 validate human-readable output, JSON output shape, line/column fields,
 endLine/endColumn fields if supported, severity, rule code, message, path
