@@ -33,6 +33,11 @@ behavior is planned in
 [docs/dev/compiler-provisioning.md](dev/compiler-provisioning.md). Compiler
 provisioning is not implemented yet.
 
+Future Ari compiler invocation through `--ari PATH` or `ARI_COMPILER` is
+planned in
+[docs/dev/compiler-invocation.md](dev/compiler-invocation.md). Compiler
+invocation is not implemented yet.
+
 Rule documentation is currently a set of design notes until Ari-language rule
 implementation exists. Current rule design notes include
 [docs/rules/trailing-whitespace.md](rules/trailing-whitespace.md) and

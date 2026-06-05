@@ -39,6 +39,7 @@ require_file README.md
 require_file AGENTS.md
 require_file docs/README.md
 require_file docs/migration.md
+require_file docs/dev/compiler-invocation.md
 require_file docs/dev/compiler-provisioning.md
 require_file docs/dev/roadmap.md
 require_file docs/dev/ari-implementation-plan.md
@@ -100,6 +101,7 @@ require_grep "scripts/check.sh" README.md
 require_grep "not a full test suite yet" README.md
 require_grep "docs/migration.md" docs/README.md
 require_grep "docs/dev/ari-implementation-plan.md" docs/README.md
+require_grep "docs/dev/compiler-invocation.md" docs/README.md
 require_grep "docs/dev/compiler-provisioning.md" docs/README.md
 require_grep "docs/rules/trailing-whitespace.md" docs/README.md
 require_grep "docs/rules/missing-final-newline.md" docs/README.md
@@ -110,9 +112,11 @@ require_grep "Do not invent compatibility claims" docs/migration.md
 require_grep "Ari-language implementation" docs/dev/ari-implementation-plan.md
 require_grep "compiler bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
 require_grep "standard library bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
+require_grep "docs/dev/compiler-invocation.md" docs/dev/ari-implementation-plan.md
 require_grep "docs/dev/compiler-provisioning.md" docs/dev/ari-implementation-plan.md
 require_grep "ari-lint Parity Test Plan" docs/dev/parity-test-plan.md
 require_grep "tools/lint" docs/dev/parity-test-plan.md
+require_grep "docs/dev/compiler-invocation.md" docs/dev/parity-test-plan.md
 require_grep "docs/dev/compiler-provisioning.md" docs/dev/parity-test-plan.md
 require_grep "Do not add test fixtures in this step" docs/dev/parity-test-plan.md
 require_grep "# lint/trailing-whitespace" docs/rules/trailing-whitespace.md
@@ -155,9 +159,11 @@ require_grep "missing-final-newline fixture and test plan added" docs/dev/roadma
 require_grep "missing-final-newline fixtures and lightweight fixture check started" docs/dev/roadmap.md
 require_grep "missing-final-newline parity plan added" docs/dev/roadmap.md
 require_grep "lightweight check runner skeleton" docs/dev/roadmap.md
+require_grep "compiler invocation plan added" docs/dev/roadmap.md
 require_grep "compiler provisioning plan added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
+require_grep "docs/dev/compiler-invocation.md" tests/README.md
 require_grep "docs/dev/compiler-provisioning.md" tests/README.md
 require_grep "No executable missing-final-newline helper tests are added yet" tests/README.md
 require_grep "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md

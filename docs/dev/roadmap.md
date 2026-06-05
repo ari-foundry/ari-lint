@@ -14,7 +14,8 @@ missing-final-newline fixture and test plan added / initial
 missing-final-newline fixtures and lightweight fixture check started /
 missing-final-newline diagnostic mapping skeleton started /
 missing-final-newline parity plan added / lightweight check runner skeleton
-added / compiler provisioning plan added / no real lint implementation yet.
+added / compiler provisioning plan added / compiler invocation plan added /
+no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -147,6 +148,11 @@ and test work.
       boundary behavior; compiler execution, compiler-backed tests, CI compiler
       setup, compiler download/build automation, parity runner behavior, and a
       compatibility matrix remain future work.
+- [x] Add Ari compiler invocation plan in
+      `docs/dev/compiler-invocation.md` for future `--ari PATH` and
+      `ARI_COMPILER` selection behavior; `--ari` implementation,
+      `ARI_COMPILER` handling, compiler execution, compiler-backed tests,
+      parity runner behavior, and a compatibility matrix remain future work.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the future fixture and golden
       output strategy, but parity tests and CI parity jobs are not implemented.

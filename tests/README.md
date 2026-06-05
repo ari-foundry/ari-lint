@@ -20,6 +20,9 @@ Compiler-backed tests remain future work. Current checks do not run the
 compiler. Future compiler-backed tests should use explicit compiler
 provisioning as planned in
 [docs/dev/compiler-provisioning.md](../docs/dev/compiler-provisioning.md).
+Compiler invocation also remains future work; future compiler-backed tests
+should use explicit compiler invocation as planned in
+[docs/dev/compiler-invocation.md](../docs/dev/compiler-invocation.md).
 
 Future tests should cover CLI smoke tests, rule tests, configuration tests,
 diagnostic output, JSON diagnostic tests, compiler-boundary behavior, and
