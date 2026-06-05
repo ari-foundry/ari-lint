@@ -16,6 +16,11 @@ The script checks repository shape and fixture invariants only. It does not run
 the Ari compiler, execute `tools/lint`, invoke `ari --check`, run a parity
 runner, run CLI tests, or compare golden tests.
 
+Compiler-backed tests remain future work. Current checks do not run the
+compiler. Future compiler-backed tests should use explicit compiler
+provisioning as planned in
+[docs/dev/compiler-provisioning.md](../docs/dev/compiler-provisioning.md).
+
 Future tests should cover CLI smoke tests, rule tests, configuration tests,
 diagnostic output, JSON diagnostic tests, compiler-boundary behavior, and
 parity with current `tools/lint`.

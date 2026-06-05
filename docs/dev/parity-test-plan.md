@@ -18,6 +18,9 @@ behavior.
 - The future implementation direction is Ari-language reimplementation with
   behavior parity.
 - This plan does not move or copy `tools/lint`.
+- Future compiler provisioning for compiler-backed parity inputs is planned in
+  `docs/dev/compiler-provisioning.md`. Compiler-backed parity tests do not
+  exist yet.
 
 ## Reference Implementation
 
@@ -157,6 +160,10 @@ Future comparison flow:
 Exact command lines should be added only when the standalone build and test
 runner exist.
 
+Parity tests that use compiler-backed behavior must record the Ari compiler
+identity, such as version, release tag, or commit, according to
+`docs/dev/compiler-provisioning.md`.
+
 ## Issue Routing
 
 Lint behavior mismatch belongs in `ari-lint` if the Ari implementation
@@ -191,6 +198,8 @@ from the other repo if needed.
 - [ ] Define golden JSON format
 - [ ] Define path normalization policy
 - [ ] Define Ari compiler version pinning policy
+- [ ] Define compiler provisioning policy from
+      `docs/dev/compiler-provisioning.md`
 - [ ] Add first CLI smoke parity fixture
 - [ ] Add first rule parity fixture for trailing whitespace
 - [ ] Add first rule parity fixture for missing final newline
