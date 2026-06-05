@@ -21,6 +21,9 @@ behavior.
 - Future compiler provisioning for compiler-backed parity inputs is planned in
   `docs/dev/compiler-provisioning.md`. Compiler-backed parity tests do not
   exist yet.
+- Future compiler invocation selection is planned in
+  `docs/dev/compiler-invocation.md`. Compiler-backed parity tests that require
+  invocation do not exist yet.
 
 ## Reference Implementation
 
@@ -164,6 +167,10 @@ Parity tests that use compiler-backed behavior must record the Ari compiler
 identity, such as version, release tag, or commit, according to
 `docs/dev/compiler-provisioning.md`.
 
+Parity tests requiring compiler-backed behavior must use explicit compiler
+provisioning and invocation according to `docs/dev/compiler-provisioning.md`
+and `docs/dev/compiler-invocation.md`.
+
 ## Issue Routing
 
 Lint behavior mismatch belongs in `ari-lint` if the Ari implementation
@@ -200,6 +207,8 @@ from the other repo if needed.
 - [ ] Define Ari compiler version pinning policy
 - [ ] Define compiler provisioning policy from
       `docs/dev/compiler-provisioning.md`
+- [ ] Define compiler invocation policy from
+      `docs/dev/compiler-invocation.md`
 - [ ] Add first CLI smoke parity fixture
 - [ ] Add first rule parity fixture for trailing whitespace
 - [ ] Add first rule parity fixture for missing final newline

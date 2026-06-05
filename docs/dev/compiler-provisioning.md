@@ -48,6 +48,10 @@ before implementation.
 
 needs follow-up
 
+The future invocation contract for `--ari PATH`, `ARI_COMPILER`, precedence,
+and validation is planned in `docs/dev/compiler-invocation.md`. Invocation is
+planned but not implemented.
+
 ## CI Compiler Strategy
 
 Do not download or build the compiler in the current lightweight check.

@@ -54,6 +54,9 @@ It does not move `tools/lint` or change build behavior.
 - The near-term dependency model remains invoking `ari --check`.
 - Future Ari compiler provisioning for compiler-backed behavior is planned in
   `docs/dev/compiler-provisioning.md`. Compiler invocation remains future work.
+- Future Ari compiler invocation selection through `--ari PATH` or
+  `ARI_COMPILER` is planned in `docs/dev/compiler-invocation.md`. Compiler
+  invocation remains future work.
 
 ## Reference Implementation
 
@@ -217,6 +220,8 @@ full rule behavior is not implemented yet.
 - preserve behavior parity where possible
 - use the compiler provisioning plan in `docs/dev/compiler-provisioning.md`
   before adding compiler-backed tests or CI compiler setup
+- use the compiler invocation plan in `docs/dev/compiler-invocation.md` before
+  implementing `--ari`, `ARI_COMPILER`, or compiler execution
 
 ### Phase 6: standalone tests and CI
 
