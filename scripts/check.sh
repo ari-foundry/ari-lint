@@ -182,12 +182,14 @@ require_grep "first planned rule metadata entries" docs/dev/roadmap.md
 require_grep "No rule metadata tests are added yet" tests/README.md
 require_grep "CLI metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "CLI argument result model" docs/dev/ari-implementation-plan.md
-require_grep "Actual process argument parsing remains future work" docs/dev/ari-implementation-plan.md
+require_grep "Minimal token-list parsing has started" docs/dev/ari-implementation-plan.md
+require_grep "Actual OS process argument parsing and environment handling remain future" docs/dev/ari-implementation-plan.md
 require_grep "CLI metadata skeleton" docs/dev/roadmap.md
 require_grep "CLI argument model added" docs/dev/roadmap.md
-require_grep "real CLI parsing" docs/dev/ari-implementation-plan.md
+require_grep "minimal CLI token parser added" docs/dev/roadmap.md
 require_grep "No CLI tests are added yet" tests/README.md
 require_grep "No CLI model tests are added yet" tests/README.md
+require_grep "No executable CLI parser tests are added yet" tests/README.md
 require_grep "scripts/build.sh" tests/README.md
 require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
@@ -232,7 +234,12 @@ require_grep "--rule" src/cli.ari
 require_grep "rule_overrides" src/cli.ari
 require_grep "help_requested" src/cli.ari
 require_grep "problems" src/cli.ari
-require_grep "does not parse arguments" src/cli.ari
+require_grep "parse_cli_tokens" src/cli.ari
+require_grep "missing_value_problem" src/cli.ari
+require_grep "unknown_argument_problem" src/cli.ari
+require_grep "raw_rule_override" src/cli.ari
+require_grep "does not read process arguments" src/cli.ari
+require_grep "OS process argv" src/cli.ari
 require_grep "future work" src/cli.ari
 require_grep "DiagnosticOutputMetadata" src/output.ari
 require_grep "Human" src/output.ari
