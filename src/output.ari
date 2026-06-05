@@ -1,4 +1,4 @@
-// Planned diagnostic output metadata only. This file does not format
+// Planned diagnostic and list-rules output models only. This file does not format
 // diagnostics, build diagnostic strings, serialize JSON, or write stdout/stderr.
 
 pub enum OutputModeName {
@@ -32,6 +32,41 @@ pub struct DiagnosticOutputMetadata {
   message: DiagnosticOutputFieldMetadata,
 }
 
+pub struct ListRuleRow {
+  code: String,
+  short_name: String,
+  default_severity: String,
+  description: String,
+}
+
+pub struct ListRulesOutput {
+  rows: std::vec::Vec[ListRuleRow],
+}
+
+pub fn list_rule_row_from_metadata(
+  metadata: super::rules::RuleMetadataEntry,
+) -> ListRuleRow {
+  return ListRuleRow {
+    code: metadata.code,
+    short_name: metadata.short_name,
+    default_severity: metadata.default_severity,
+    description: metadata.description,
+  };
+}
+
+pub fn known_list_rules_output(zone: ref mut Zone) -> ListRulesOutput {
+  var rows = std::vec::new<ListRuleRow>(zone, 2);
+  rows.push(list_rule_row_from_metadata(
+    super::rules::trailing_whitespace_rule_metadata(zone),
+  ));
+  rows.push(list_rule_row_from_metadata(
+    super::rules::missing_final_newline_rule_metadata(zone),
+  ));
+  return ListRulesOutput {
+    rows: rows,
+  };
+}
+
 // Output mode metadata: human output mode name human; JSON output mode name
 // json.
 //
@@ -41,6 +76,12 @@ pub struct DiagnosticOutputMetadata {
 //
 // Human-readable text stability and JSON schema stability remain follow-up
 // items.
+//
+// ListRuleRow records the internal --list-rules row model for known rule
+// metadata: rule code, short name, default severity, and description.
+// known_list_rules_output returns rows in the current rule metadata order:
+// lint/trailing-whitespace, then lint/missing-final-newline.
+//
 // Formatting, diagnostic string construction, stdout/stderr output, JSON
-// serialization, source scanning, CLI parsing, config parsing, and ari --check
-// invocation are future work.
+// serialization, final human-readable list-rules table output, source scanning,
+// CLI main wiring, config parsing, and ari --check invocation are future work.

@@ -16,7 +16,8 @@ missing-final-newline diagnostic mapping skeleton started /
 missing-final-newline parity plan added / lightweight check runner skeleton
 added / compiler provisioning plan added / compiler invocation plan added /
 CLI argument model added / local build scaffold and gitignore hygiene added /
-minimal CLI token parser added / no real lint implementation yet.
+minimal CLI token parser added / internal list-rules output path added /
+no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -65,6 +66,13 @@ and test work.
       argv reading, `ARI_COMPILER`, compiler path validation, config parsing,
       semantic `--rule` parsing, compiler invocation, output behavior, tests,
       and CI parser execution remain future work.
+- [x] Add an internal list-rules output path that converts existing known rule
+      metadata into rows for `lint/trailing-whitespace` and
+      `lint/missing-final-newline`, including rule code, short name, default
+      severity, and description. User-facing `--list-rules` CLI completion,
+      CLI main integration, stdout/stderr formatting, JSON output, config
+      parsing, compiler invocation, tests, and parity behavior remain future
+      work.
 - [x] Add local build scaffold and `.gitignore` hygiene for local/generated
       artifacts. `scripts/build.sh` requires an explicit Ari compiler path and
       builds `src/main.ari` to `build/ari-lint` for local use only; CI compiler

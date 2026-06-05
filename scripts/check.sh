@@ -195,7 +195,10 @@ require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-p
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
 require_grep "Diagnostic output is not implemented yet" docs/dev/ari-implementation-plan.md
 require_grep "JSON serialization is not implemented yet" docs/dev/ari-implementation-plan.md
+require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
+require_grep "internal list-rules output path added" docs/dev/roadmap.md
 require_grep "No diagnostic output tests are added yet" tests/README.md
+require_grep "No executable list-rules tests are added yet" tests/README.md
 require_grep "config override skeleton" docs/dev/ari-implementation-plan.md
 require_grep "config override skeleton" docs/dev/roadmap.md
 require_grep "Config parsing is not implemented yet" docs/dev/ari-implementation-plan.md
@@ -213,6 +216,7 @@ require_grep "fn main() -> i64" src/main.ari
 require_grep "pub mod cli" src/model.ari
 require_grep "pub mod output" src/model.ari
 require_grep "pub mod config" src/model.ari
+require_grep "pub mod rules" src/model.ari
 require_grep "CliSurfaceMetadata" src/cli.ari
 require_grep "CliArgs" src/cli.ari
 require_grep "CliParseResult" src/cli.ari
@@ -254,6 +258,11 @@ require_grep "rule code" src/output.ari
 require_grep "message" src/output.ari
 require_grep "does not format" src/output.ari
 require_grep "JSON schema stability remain follow-up" src/output.ari
+require_grep "ListRuleRow" src/output.ari
+require_grep "ListRulesOutput" src/output.ari
+require_grep "list_rule_row_from_metadata" src/output.ari
+require_grep "known_list_rules_output" src/output.ari
+require_grep "final human-readable list-rules table output" src/output.ari
 require_grep "ConfigSkeleton" src/config.ari
 require_grep "ConfigSourceMetadata" src/config.ari
 require_grep "OverridePrecedenceMetadata" src/config.ari
@@ -274,6 +283,9 @@ require_grep "trailing-whitespace" src/rules.ari
 require_grep "lint/missing-final-newline" src/rules.ari
 require_grep "missing-final-newline" src/rules.ari
 require_grep "default severity warning" src/rules.ari
+require_grep "trailing_whitespace_rule_metadata" src/rules.ari
+require_grep "missing_final_newline_rule_metadata" src/rules.ari
+require_grep "initial_rule_metadata" src/rules.ari
 require_grep "future work" src/rules.ari
 require_grep "does not run rules" src/rules.ari
 require_grep "TrailingWhitespaceRuleModuleMetadata" src/rules/trailing_whitespace.ari

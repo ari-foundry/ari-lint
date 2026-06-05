@@ -31,6 +31,11 @@ It does not move `tools/lint` or change build behavior.
   declarations for human and JSON output modes, diagnostic location fields, and
   planned diagnostic fields. Diagnostic output is not implemented yet.
   JSON serialization is not implemented yet.
+- An internal list-rules output path now converts known rule metadata into
+  list-rules rows for `lint/trailing-whitespace` and
+  `lint/missing-final-newline`. User-facing stdout/stderr formatting, JSON
+  output, OS argv/main wiring, compiler invocation, config parsing, diagnostics
+  output, and parity tests remain future work.
 - The config override skeleton has been refined as metadata-only declarations
   for default config, `ari-lint.rules`, `--config`, `--rule`, rule severity
   overrides, and documented override precedence. Config parsing is not implemented yet.
@@ -155,8 +160,11 @@ Current preparatory model skeleton files are source-only placeholders:
   serialize JSON.
 - `src/output.ari` sketches diagnostic output metadata for human-readable and
   JSON output modes, diagnostic location, file path, line, column, endLine,
-  endColumn, severity, rule code, and message. It does not format diagnostics,
-  build diagnostic strings, serialize JSON, or write stdout/stderr output.
+  endColumn, severity, rule code, and message. It also defines an internal
+  list-rules output row model and a known-rule output builder from existing
+  rule metadata. It does not format diagnostics, build diagnostic strings,
+  serialize JSON, emit a final human-readable list-rules table, or write
+  stdout/stderr output.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description.
 - `src/registry.ari` sketches rule registry concepts for planned reference
@@ -165,7 +173,8 @@ Current preparatory model skeleton files are source-only placeholders:
 - `src/rules.ari` records the first planned rule metadata entries for
   `lint/trailing-whitespace` and `lint/missing-final-newline`, including their
   short names, default `warning` severity from the current Ari lint docs, and
-  brief descriptions, without implementing behavior.
+  brief descriptions. It now provides concrete metadata value constructors for
+  internal callers, without implementing rule behavior.
 - `src/config.ari` sketches config override metadata such as default config,
   `ari-lint.rules` config source, explicit `--config` file path, `--rule`
   command-line override, rule severity override, and override precedence. It
@@ -179,8 +188,8 @@ reading, argument validation, source scanning, config parsing, diagnostics
 output, JSON serialization, file reads, or `ari --check` invocation. The CLI
 parser is limited to explicit caller-provided token lists and raw option
 values; OS argv integration, compiler invocation, config parsing, diagnostics
-output, JSON serialization, environment handling, semantic `--rule` parsing,
-and parser tests remain future work. Descriptor value construction, severity
+output, stdout/stderr formatting, JSON serialization, environment handling,
+semantic `--rule` parsing, and parser tests remain future work. Severity
 parsing, CLI/config
 override behavior, rule registration behavior, and the JSON schema are not
 stable yet.
@@ -317,8 +326,9 @@ usable.
   selected for the standalone implementation.
 - CLI metadata value construction may change once Ari constant or collection
   syntax is selected for the standalone implementation.
-- Diagnostic output metadata value construction may change once Ari constant or
-  collection syntax is selected for the standalone implementation.
+- Diagnostic output and internal list-rules value construction may change once
+  broader Ari constant or collection syntax is selected for the standalone
+  implementation.
 - Source directories may accidentally collect README-style documentation unless
   docs stay under `docs/`.
 
@@ -351,7 +361,7 @@ usable.
 
 - Do not move `tools/lint` in this step.
 - Do not copy `tools/lint` source in this step.
-- Do not add implementation code in this step.
+- Do not add user-facing CLI/output integration in this step.
 - Do not add tests in this step.
 - Do not add release workflows in this step.
 - Do not claim compatibility matrix support in this step.
