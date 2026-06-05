@@ -28,6 +28,11 @@ behavior is planned in
 [docs/dev/parity-test-plan.md](dev/parity-test-plan.md). Parity tests do not
 exist in this repository yet.
 
+Future Ari compiler provisioning for compiler-backed tests and boundary
+behavior is planned in
+[docs/dev/compiler-provisioning.md](dev/compiler-provisioning.md). Compiler
+provisioning is not implemented yet.
+
 Rule documentation is currently a set of design notes until Ari-language rule
 implementation exists. Current rule design notes include
 [docs/rules/trailing-whitespace.md](rules/trailing-whitespace.md) and

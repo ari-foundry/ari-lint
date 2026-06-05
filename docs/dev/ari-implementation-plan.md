@@ -52,6 +52,8 @@ It does not move `tools/lint` or change build behavior.
 - The future direction is Ari-language reimplementation in `ari-lint`.
 - Behavior parity with current `tools/lint` is the intended transition path.
 - The near-term dependency model remains invoking `ari --check`.
+- Future Ari compiler provisioning for compiler-backed behavior is planned in
+  `docs/dev/compiler-provisioning.md`. Compiler invocation remains future work.
 
 ## Reference Implementation
 
@@ -213,6 +215,8 @@ full rule behavior is not implemented yet.
 - handle compiler failures
 - combine compiler-backed diagnostics with lint diagnostics
 - preserve behavior parity where possible
+- use the compiler provisioning plan in `docs/dev/compiler-provisioning.md`
+  before adding compiler-backed tests or CI compiler setup
 
 ### Phase 6: standalone tests and CI
 
