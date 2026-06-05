@@ -1,6 +1,7 @@
 # ari-lint Scripts
 
-This directory is a placeholder for future local validation, fixture
-generation, release checks, or CI helpers.
+This directory contains lightweight repository helper scripts.
 
-No executable scripts are added in this skeleton step.
+`check.sh` verifies repository shape and fixture invariants only. It does not
+run the Ari compiler, invoke `ari --check`, execute `tools/lint`, run parity
+checks, run CLI tests, or compare golden files.
