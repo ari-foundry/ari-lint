@@ -50,3 +50,18 @@ scripts/check.sh
 
 This is not a full test suite yet. It checks skeleton files and fixture
 invariants only.
+
+## Local Build Scaffold
+
+Build the current Ari-language entrypoint locally with an explicit Ari compiler path:
+
+```sh
+scripts/build.sh /path/to/ari
+```
+
+You may also set `ARI_COMPILER`; a positional compiler path takes precedence if
+both are provided. The build script writes `build/ari-lint`, does not download
+or build the Ari compiler, and does not run `tools/lint`.
+
+CI does not run compiler-backed builds or tests yet, and this repository is not
+a standalone release.

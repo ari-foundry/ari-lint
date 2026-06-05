@@ -16,6 +16,10 @@ The script checks repository shape and fixture invariants only. It does not run
 the Ari compiler, execute `tools/lint`, invoke `ari --check`, run a parity
 runner, run CLI tests, or compare golden tests.
 
+`scripts/build.sh` is separate from the lightweight checks. It is a
+compiler-dependent local build scaffold that requires an explicit Ari compiler
+path and is not run by default tests or CI.
+
 Compiler-backed tests remain future work. Current checks do not run the
 compiler. Future compiler-backed tests should use explicit compiler
 provisioning as planned in
