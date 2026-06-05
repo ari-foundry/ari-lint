@@ -17,6 +17,33 @@ pub struct InitialRuleMetadata {
   missing_final_newline: RuleMetadataEntry,
 }
 
+pub fn trailing_whitespace_rule_metadata(zone: ref mut Zone) -> RuleMetadataEntry {
+  return RuleMetadataEntry {
+    code: "lint/trailing-whitespace",
+    short_name: "trailing-whitespace",
+    default_severity: "warning",
+    description: "Reports spaces or tabs at the end of a source line.",
+  };
+}
+
+pub fn missing_final_newline_rule_metadata(zone: ref mut Zone) -> RuleMetadataEntry {
+  return RuleMetadataEntry {
+    code: "lint/missing-final-newline",
+    short_name: "missing-final-newline",
+    default_severity: "warning",
+    description: "Reports non-empty source files that do not end with a newline.",
+  };
+}
+
+pub fn initial_rule_metadata(zone: ref mut Zone) -> InitialRuleMetadata {
+  let trailing = trailing_whitespace_rule_metadata(zone);
+  let missing_final = missing_final_newline_rule_metadata(zone);
+  return InitialRuleMetadata {
+    trailing_whitespace: trailing,
+    missing_final_newline: missing_final,
+  };
+}
+
 // Metadata entry: lint/trailing-whitespace, short name trailing-whitespace,
 // default severity warning, description reports spaces or tabs at the end of a
 // source line.
@@ -25,9 +52,9 @@ pub struct InitialRuleMetadata {
 // default severity warning, description reports non-empty source files that do
 // not end with a newline.
 //
-// Concrete value construction, rule execution, source scanning, diagnostics,
-// config parsing, JSON output, CLI behavior, and ari --check invocation are
-// future work.
+// Concrete metadata value construction is present for internal callers. Rule
+// execution, source scanning, diagnostics, config parsing, JSON output, CLI
+// behavior, and ari --check invocation are future work.
 //
 // Child modules under src/rules/ are non-executing layout placeholders for the
 // future rule implementations.
