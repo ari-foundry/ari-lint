@@ -15,7 +15,7 @@ missing-final-newline fixtures and lightweight fixture check started /
 missing-final-newline diagnostic mapping skeleton started /
 missing-final-newline parity plan added / lightweight check runner skeleton
 added / compiler provisioning plan added / compiler invocation plan added /
-no real lint implementation yet.
+CLI argument model added / no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -53,6 +53,11 @@ and test work.
       argument reading, argument validation, config parsing, diagnostics
       output, JSON serialization, compiler invocation, tests, and CI remain
       future work.
+- [x] Add CLI argument result model for future parser output, including
+      positional files, `--json`, `--list-rules`, help requests, `--ari`, `-I`,
+      `--config`, `--rule`, and parse problem data. Process argument parsing,
+      CLI validation, config parsing, diagnostics output, JSON serialization,
+      compiler invocation, tests, and CI remain future work.
 - [x] Start diagnostic output metadata skeleton for human-readable output, JSON
       output, diagnostic location, file path, line, column, endLine, endColumn,
       severity, rule code, and message as metadata-only Ari source

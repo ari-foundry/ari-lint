@@ -21,6 +21,10 @@ It does not move `tools/lint` or change build behavior.
   declarations for positional source input and the documented options `--json`,
   `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`. The real CLI parsing
   remains future work.
+- The CLI argument result model is now present for future parser output,
+  including positional files, planned flags/options, optional compiler/config
+  paths, include paths, rule overrides, help requests, and parse problems.
+  Actual process argument parsing remains future work.
 - The diagnostic output metadata skeleton has started as metadata-only
   declarations for human and JSON output modes, diagnostic location fields, and
   planned diagnostic fields. Diagnostic output is not implemented yet.
@@ -131,8 +135,11 @@ Current preparatory model skeleton files are source-only placeholders:
 - `src/model.ari` groups future model modules.
 - `src/cli.ari` sketches planned CLI option metadata for positional source file
   input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`,
-  including each option's purpose, value requirement, and repeatability, without
-  parsing arguments.
+  including each option's purpose, value requirement, and repeatability. It now
+  also defines a CLI argument result model for future parser output, including
+  positional files, requested output/list/help flags, optional compiler and
+  config paths, include paths, rule override entries, and parse problem data.
+  It does not parse arguments.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
@@ -164,7 +171,9 @@ Current preparatory model skeleton files are source-only placeholders:
 These files do not implement real lint rules, rule execution, CLI parsing,
 process argument reading, argument validation, source scanning, config parsing,
 diagnostics output, JSON serialization, file reads, or `ari --check`
-invocation. Descriptor value construction, severity parsing, CLI/config
+invocation. The CLI argument result model is data only; actual parser behavior,
+compiler invocation, config parsing, diagnostics output, and JSON serialization
+remain future work. Descriptor value construction, severity parsing, CLI/config
 override behavior, rule registration behavior, and the JSON schema are not
 stable yet.
 

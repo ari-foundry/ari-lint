@@ -1,6 +1,6 @@
-// Planned CLI surface metadata only. This file does not parse arguments,
-// inspect process arguments, validate inputs, read config files, serialize
-// JSON, produce diagnostics, or invoke ari --check.
+// Planned CLI surface metadata and parser result data only. This file does not
+// parse arguments, read process arguments, validate inputs, read config files,
+// serialize JSON, produce diagnostics, or invoke ari --check.
 
 pub struct CliOptionMetadata {
   name: String,
@@ -17,6 +17,40 @@ pub struct CliSurfaceMetadata {
   list_rules: CliOptionMetadata,
   config: CliOptionMetadata,
   rule: CliOptionMetadata,
+}
+
+pub struct CliRuleOverrideArg {
+  rule_name: String,
+  severity_name: String,
+  raw_text: String,
+}
+
+pub enum CliArgumentProblemKind {
+  MissingValue,
+  UnknownArgument,
+  InvalidRuleOverride,
+}
+
+pub struct CliArgumentProblem {
+  kind: CliArgumentProblemKind,
+  argument: String,
+  detail: Option[String],
+}
+
+pub struct CliArgs {
+  source_files: std::vec::Vec[String],
+  json_requested: bool,
+  list_rules_requested: bool,
+  help_requested: bool,
+  ari_compiler_path: Option[String],
+  include_paths: std::vec::Vec[String],
+  config_path: Option[String],
+  rule_overrides: std::vec::Vec[CliRuleOverrideArg],
+}
+
+pub struct CliParseResult {
+  args: CliArgs,
+  problems: std::vec::Vec[CliArgumentProblem],
 }
 
 // Metadata entry: positional source file input; selects Ari source files to
@@ -39,6 +73,18 @@ pub struct CliSurfaceMetadata {
 //
 // Metadata entry: --rule; records a planned rule severity override; takes a
 // value; may appear multiple times.
+//
+// Parser result data model: CliArgs stores future parser output for positional
+// source files, --json, --list-rules, --help/-h, --ari, -I, --config, and
+// --rule. Optional compiler/config paths use Option[String], repeated values
+// use std::vec::Vec, and rule override entries keep the original raw text plus
+// the planned split rule/severity names.
+//
+// Parser problem data model: CliArgumentProblem records future missing-value,
+// unknown-argument, and invalid-rule-override problems without defining final
+// validation behavior, diagnostic wording, or exit status.
+//
+// This file does not parse arguments.
 //
 // CLI parsing, process argument reading, argument validation, config parsing,
 // diagnostics output, JSON serialization, and ari --check invocation are
