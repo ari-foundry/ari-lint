@@ -25,7 +25,8 @@ It does not move `tools/lint` or change build behavior.
 - The CLI argument result model is now used by the minimal explicit-token
   parser for positional files, planned flags/options, optional compiler/config
   paths, include paths, raw rule overrides, help requests, and parse problems.
-  Actual OS process argument parsing remains future work.
+  Actual OS process argument parsing and environment handling remain future
+  work.
 - The diagnostic output metadata skeleton has started as metadata-only
   declarations for human and JSON output modes, diagnostic location fields, and
   planned diagnostic fields. Diagnostic output is not implemented yet.
@@ -178,8 +179,9 @@ reading, argument validation, source scanning, config parsing, diagnostics
 output, JSON serialization, file reads, or `ari --check` invocation. The CLI
 parser is limited to explicit caller-provided token lists and raw option
 values; OS argv integration, compiler invocation, config parsing, diagnostics
-output, JSON serialization, semantic `--rule` parsing, and parser tests remain
-future work. Descriptor value construction, severity parsing, CLI/config
+output, JSON serialization, environment handling, semantic `--rule` parsing,
+and parser tests remain future work. Descriptor value construction, severity
+parsing, CLI/config
 override behavior, rule registration behavior, and the JSON schema are not
 stable yet.
 

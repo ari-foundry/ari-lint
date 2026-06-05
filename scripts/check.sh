@@ -183,7 +183,7 @@ require_grep "No rule metadata tests are added yet" tests/README.md
 require_grep "CLI metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "CLI argument result model" docs/dev/ari-implementation-plan.md
 require_grep "Minimal token-list parsing has started" docs/dev/ari-implementation-plan.md
-require_grep "Actual OS process argument parsing remains future work" docs/dev/ari-implementation-plan.md
+require_grep "Actual OS process argument parsing and environment handling remain future" docs/dev/ari-implementation-plan.md
 require_grep "CLI metadata skeleton" docs/dev/roadmap.md
 require_grep "CLI argument model added" docs/dev/roadmap.md
 require_grep "minimal CLI token parser added" docs/dev/roadmap.md

@@ -139,6 +139,7 @@ the minimal explicit token-list parser for positional files, `--json`,
 `--list-rules`, `--help`/`-h`, `--ari`, `-I`, `--config`, raw `--rule` values,
 missing option values, unknown options, repeated `-I` and `--rule`, multiple
 positional files, and future OS argv integration once process argument reading
+exists, plus parity behavior against current `tools/lint` once a parity runner
 exists.
 
 No diagnostic output tests are added yet. Future diagnostic tests should
