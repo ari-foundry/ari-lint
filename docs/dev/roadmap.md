@@ -15,7 +15,8 @@ missing-final-newline fixtures and lightweight fixture check started /
 missing-final-newline diagnostic mapping skeleton started /
 missing-final-newline parity plan added / lightweight check runner skeleton
 added / compiler provisioning plan added / compiler invocation plan added /
-CLI argument model added / no real lint implementation yet.
+CLI argument model added / local build scaffold and gitignore hygiene added /
+no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -58,6 +59,12 @@ and test work.
       `--config`, `--rule`, and parse problem data. Process argument parsing,
       CLI validation, config parsing, diagnostics output, JSON serialization,
       compiler invocation, tests, and CI remain future work.
+- [x] Add local build scaffold and `.gitignore` hygiene for local/generated
+      artifacts. `scripts/build.sh` requires an explicit Ari compiler path and
+      builds `src/main.ari` to `build/ari-lint` for local use only; CI compiler
+      execution, release builds, compiler-backed tests, package manager
+      integration, parity runner behavior, and compatibility claims remain
+      future work.
 - [x] Start diagnostic output metadata skeleton for human-readable output, JSON
       output, diagnostic location, file path, line, column, endLine, endColumn,
       severity, rule code, and message as metadata-only Ari source

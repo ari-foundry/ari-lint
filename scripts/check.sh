@@ -37,6 +37,7 @@ require_no_final_newline() {
 
 require_file README.md
 require_file AGENTS.md
+require_file .gitignore
 require_file docs/README.md
 require_file docs/migration.md
 require_file docs/dev/compiler-invocation.md
@@ -57,7 +58,10 @@ require_file tests/fixtures/missing-final-newline/missing-final-newline.ari
 require_file examples/README.md
 require_file tests/README.md
 require_file scripts/README.md
+require_file scripts/build.sh
 require_file .github/workflows/check.yml
+
+[ -x scripts/build.sh ] || fail "scripts/build.sh is not executable"
 
 require_dir src
 src_readme=$(find src -name README.md -print -quit)
@@ -98,7 +102,9 @@ require_grep "https://ari-foundry.github.io" README.md
 require_grep "long-term implementation direction" README.md
 require_grep "Ari" README.md
 require_grep "scripts/check.sh" README.md
+require_grep "scripts/build.sh" README.md
 require_grep "not a full test suite yet" README.md
+require_grep "explicit Ari compiler path" README.md
 require_grep "docs/migration.md" docs/README.md
 require_grep "docs/dev/ari-implementation-plan.md" docs/README.md
 require_grep "docs/dev/compiler-invocation.md" docs/README.md
@@ -161,6 +167,7 @@ require_grep "missing-final-newline parity plan added" docs/dev/roadmap.md
 require_grep "lightweight check runner skeleton" docs/dev/roadmap.md
 require_grep "compiler invocation plan added" docs/dev/roadmap.md
 require_grep "compiler provisioning plan added" docs/dev/roadmap.md
+require_grep "local build scaffold and gitignore hygiene added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
@@ -181,6 +188,7 @@ require_grep "CLI argument model added" docs/dev/roadmap.md
 require_grep "real CLI parsing" docs/dev/ari-implementation-plan.md
 require_grep "No CLI tests are added yet" tests/README.md
 require_grep "No CLI model tests are added yet" tests/README.md
+require_grep "scripts/build.sh" tests/README.md
 require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
 require_grep "Diagnostic output is not implemented yet" docs/dev/ari-implementation-plan.md
@@ -287,6 +295,14 @@ require_grep "does not read files" src/rules/missing_final_newline.ari
 require_grep "does not" src/rules/missing_final_newline.ari
 require_grep "future work" src/rules/missing_final_newline.ari
 require_grep "provision the Ari compiler" scripts/README.md
+require_grep "build.sh" scripts/README.md
+require_grep "explicit Ari compiler path" scripts/README.md
+require_grep "does not download or build the Ari compiler" scripts/README.md
+require_grep "tools/lint" scripts/README.md
+require_grep "ARI_COMPILER" scripts/build.sh
+require_grep "src/main.ari" scripts/build.sh
+require_grep "build/ari-lint" scripts/build.sh
+require_grep "does not run" tests/README.md
 require_no_grep "trailing-whitespace" src/main.ari
 require_no_grep "missing-final-newline" src/main.ari
 

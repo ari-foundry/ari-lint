@@ -51,6 +51,9 @@ It does not move `tools/lint` or change build behavior.
   `lint/missing-final-newline` behavior. Implementation remains future work.
 - Source directories should contain Ari source files only; source-layout
   documentation belongs in `docs/dev/` or other documentation directories.
+- A local build scaffold now exists at `scripts/build.sh`. It requires an
+  explicit Ari compiler path, compiles `src/main.ari` to `build/ari-lint` using
+  the verified `ari input.ari -o output` invocation form, and is not run by CI.
 - The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
   current bundled/reference implementation.
 - The future direction is Ari-language reimplementation in `ari-lint`.
@@ -176,6 +179,10 @@ compiler invocation, config parsing, diagnostics output, and JSON serialization
 remain future work. Descriptor value construction, severity parsing, CLI/config
 override behavior, rule registration behavior, and the JSON schema are not
 stable yet.
+
+The local build scaffold is not compiler-backed CI or full build validation.
+Compiler-backed CI, standalone test execution, compiler provisioning in CI,
+and compatibility validation remain future work.
 
 Config precedence is recorded from the current Ari lint reference docs as
 metadata only. Standalone config discovery and config precedence fixtures remain
