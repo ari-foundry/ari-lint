@@ -19,6 +19,7 @@ CLI argument model added / local build scaffold and gitignore hygiene added /
 minimal CLI token parser added / internal list-rules output path added /
 human-readable list-rules formatter added /
 stdout-free command dispatcher added /
+internal explicit-token entry path added /
 no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -88,6 +89,12 @@ and test work.
       User-facing CLI completion, OS argv/main wiring, stdout/stderr output,
       JSON output, source scanning, lint execution, config parsing, compiler
       invocation, dispatcher tests, and parity behavior remain future work.
+- [x] Add an internal explicit-token entry path that accepts a caller-provided
+      token list, composes the existing explicit-token parser with the
+      stdout-free command dispatcher, and returns a `CliCommandResult`.
+      OS argv reading, environment handling, stdout/stderr output, JSON output,
+      source scanning, lint execution, config parsing, compiler invocation,
+      entry-path tests, and parity behavior remain future work.
 - [x] Add local build scaffold and `.gitignore` hygiene for local/generated
       artifacts. `scripts/build.sh` requires an explicit Ari compiler path and
       builds `src/main.ari` to `build/ari-lint` for local use only; CI compiler

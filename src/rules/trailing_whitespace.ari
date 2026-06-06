@@ -1,7 +1,7 @@
-// Planned trailing whitespace rule module. This file contains a minimal
-// internal single-line helper and diagnostic mapping skeleton only. It does
-// not execute lint rules, does not read files, scan whole source files, print
-// diagnostics, serialize JSON, or apply config overrides.
+// Trailing whitespace rule helpers. This file contains a minimal internal
+// single-line helper and diagnostic mapping helper only. It does not execute
+// lint rules, does not read files, scan whole source files, print diagnostics,
+// serialize JSON, or apply config overrides.
 
 pub struct TrailingWhitespaceRuleModuleMetadata {
   code: String,
@@ -16,16 +16,14 @@ struct TrailingWhitespaceDiagnosticMapping {
   severity: super::severity::Severity,
 }
 
-// Metadata entry: lint/trailing-whitespace, short name trailing-whitespace,
-// default severity warning. Full rule behavior is future work.
-//
 // The helper below is intentionally limited to one already-split line. Rule
 // execution, whole-source scanning, file content inspection, full diagnostic
 // production, config interaction, severity override application, CLI parsing,
-// diagnostics output, JSON serialization, and ari --check invocation are future
-// work. Rule code lint/trailing-whitespace and message trailing whitespace are
-// confirmed by the reference implementation, but this skeleton does not
-// construct String fields or a full Diagnostic value yet.
+// diagnostics output, JSON serialization, and ari --check invocation are future work.
+// Rule code lint/trailing-whitespace, short name trailing-whitespace, default
+// severity warning, and message trailing whitespace are confirmed by the
+// reference implementation, but this helper does not construct String fields or
+// a full Diagnostic value yet.
 
 fn is_trailing_space_byte(value: u8) -> bool {
   return value == 32u8 || value == 9u8;

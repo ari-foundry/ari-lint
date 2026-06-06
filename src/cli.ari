@@ -1,7 +1,9 @@
-// Planned CLI surface metadata, parser result data, explicit-token parsing, and
-// stdout-free command dispatch only. This file does not read process arguments,
-// validate input paths, read config files, serialize JSON, produce diagnostics,
-// write stdout/stderr, or invoke ari --check.
+// CLI model, explicit-token parsing, stdout-free dispatch, and the internal
+// explicit-token entry point. The positional source file input and documented
+// options are represented here. This file does not read process arguments,
+// inspect OS process argv or environment state, validate input paths, read
+// config files, serialize JSON, produce diagnostics, write stdout/stderr, scan
+// source files, execute lint rules, call tools/lint, or invoke ari --check.
 
 pub struct CliOptionMetadata {
   name: String,
@@ -233,52 +235,22 @@ pub fn dispatch_cli_command(
   );
 }
 
-// Metadata entry: positional source file input; selects Ari source files to
-// lint; takes a value; may appear multiple times.
+pub fn run_explicit_cli_tokens(
+  zone: ref mut Zone,
+  tokens: std::vec::Vec[String],
+) -> CliCommandResult {
+  let parse_result = parse_cli_tokens(zone, tokens);
+  return dispatch_cli_command(zone, parse_result);
+}
+
+// parse_cli_tokens consumes a caller-provided token list and records source
+// files, flags/options, raw rule overrides, and parse problems in CliParseResult.
+// It intentionally leaves process argv/env, path validation, config parsing,
+// semantic --rule parsing, diagnostic printing, and ari --check invocation as
+// future work.
 //
-// Metadata entry: --json; requests machine-readable output; takes no value;
-// appears at most once.
-//
-// Metadata entry: --ari; selects the Ari compiler executable path; takes a
-// value; appears at most once.
-//
-// Metadata entry: -I; adds an Ari module include path; takes a value; may
-// appear multiple times.
-//
-// Metadata entry: --list-rules; requests planned rule listing; takes no value;
-// appears at most once.
-//
-// Metadata entry: --config; selects an ari-lint.rules config path; takes a
-// value; appears at most once.
-//
-// Metadata entry: --rule; records a planned rule severity override; takes a
-// value; may appear multiple times.
-//
-// Parser result data model: CliArgs stores parser output for positional
-// source files, --json, --list-rules, --help/-h, --ari, -I, --config, and
-// --rule. Optional compiler/config paths use Option[String], repeated values
-// use std::vec::Vec, and rule override entries keep the original raw text plus
-// optional future split rule/severity names.
-//
-// Parser problem data model: CliArgumentProblem records missing-value and
-// unknown-argument problems from the explicit token list, and keeps the
-// invalid-rule-override shape reserved for later semantic parsing without
-// defining final validation behavior, diagnostic wording, or exit status.
-//
-// Command result data model: CliCommandResult records stdout-free command
-// dispatch outcomes. List-rules dispatch carries internal text from the
-// list-rules formatter; parse-problem, help, source-lint, and unsupported
-// command paths carry explicit future-work placeholders.
-//
-// parse_cli_tokens parses a caller-provided token list only. It does not read
-// OS process argv, inspect ARI_COMPILER, validate paths, parse ari-lint.rules,
-// semantically parse --rule values, print diagnostics, or invoke ari --check.
-//
-// dispatch_cli_command maps an already parsed CliParseResult to an internal
-// command result only. It does not read OS process argv, write stdout/stderr,
-// serialize JSON, parse config files, apply config overrides, read source files,
-// scan source text, execute lint rules, call tools/lint, or invoke ari --check.
-//
-// Process argument reading, argument validation, config parsing, diagnostics
-// output, JSON serialization, compiler path validation, and ari --check
-// invocation are future work.
+// dispatch_cli_command maps a CliParseResult to a stdout-free internal command
+// result. run_explicit_cli_tokens composes parsing and dispatch for callers that
+// already have tokens. These entry paths do not write stdout/stderr, serialize
+// JSON, read source or config files, scan source text, execute lint rules, call
+// tools/lint, or invoke ari --check.

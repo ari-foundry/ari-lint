@@ -189,10 +189,12 @@ require_grep "CLI metadata skeleton" docs/dev/roadmap.md
 require_grep "CLI argument model added" docs/dev/roadmap.md
 require_grep "minimal CLI token parser added" docs/dev/roadmap.md
 require_grep "stdout-free command dispatcher added" docs/dev/roadmap.md
+require_grep "internal explicit-token entry path added" docs/dev/roadmap.md
 require_grep "No CLI tests are added yet" tests/README.md
 require_grep "No CLI model tests are added yet" tests/README.md
 require_grep "No executable CLI parser tests are added yet" tests/README.md
 require_grep "No executable dispatcher tests are added yet" tests/README.md
+require_grep "No executable explicit-token entry tests are added yet" tests/README.md
 require_grep "scripts/build.sh" tests/README.md
 require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
@@ -247,6 +249,7 @@ require_grep "help_requested" src/cli.ari
 require_grep "problems" src/cli.ari
 require_grep "parse_cli_tokens" src/cli.ari
 require_grep "dispatch_cli_command" src/cli.ari
+require_grep "run_explicit_cli_tokens" src/cli.ari
 require_grep "CliListRulesText" src/cli.ari
 require_grep "CliSourceLintFuture" src/cli.ari
 require_grep "missing_value_problem" src/cli.ari
@@ -337,5 +340,8 @@ require_grep "build/ari-lint" scripts/build.sh
 require_grep "does not run" tests/README.md
 require_no_grep "trailing-whitespace" src/main.ari
 require_no_grep "missing-final-newline" src/main.ari
+
+stale_source_metadata=$(grep -R "Metadata entry:" src || true)
+[ -z "$stale_source_metadata" ] || fail "stale source metadata comment found"
 
 printf '%s\n' "lightweight checks passed"

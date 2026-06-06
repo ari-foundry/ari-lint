@@ -1,4 +1,4 @@
-// Rule metadata shapes only. This file does not execute lint rules.
+// Rule descriptor shapes. This file does not execute lint rules.
 
 pub struct RuleDescriptor {
   code: String,
@@ -12,5 +12,5 @@ pub struct PlannedRuleCodes {
   missing_final_newline: String,
 }
 
-// Future descriptors may cover lint/trailing-whitespace and
-// lint/missing-final-newline, but this file does not implement either rule.
+// Rule execution, source scanning, config interaction, diagnostics output, JSON
+// output, and compiler invocation remain outside this layer.

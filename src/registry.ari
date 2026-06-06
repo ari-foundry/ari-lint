@@ -1,4 +1,4 @@
-// Rule registry data shapes only. This file does not run rules or scan source.
+// Rule registry shapes. This file does not run rules or scan source.
 
 pub enum RegistryStatus {
   Planned,
