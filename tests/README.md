@@ -152,6 +152,11 @@ should cover list-rules token input, parse problems, unsupported commands,
 source-file lint requests, stdout-free behavior, and parity behavior against
 current `tools/lint` once a parity runner exists.
 
+No executable main-entry tests are added yet. Future tests should cover main
+entry behavior, delegation from the main shell to explicit-token handling,
+stdout-free behavior, future OS argv integration, and parity behavior against
+current `tools/lint` once a parity runner exists.
+
 No diagnostic output tests are added yet. Future diagnostic tests should
 validate human-readable output, JSON output shape, line/column fields,
 endLine/endColumn fields if supported, severity, rule code, message, path

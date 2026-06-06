@@ -12,6 +12,12 @@ It does not move `tools/lint` or change build behavior.
 - `ari-lint` is currently in skeleton/planning state.
 - Source extraction has not happened.
 - The Ari source skeleton has started with source-only files under `src/`.
+- A minimal Ari main entry shell is now present. It provides a source-level
+  connection point for future OS argv handling to reach the internal
+  explicit-token entry path, but it currently returns success without reading OS
+  argv, reading environment variables, writing stdout/stderr, serializing JSON,
+  scanning sources, parsing config, invoking the compiler, invoking
+  `ari --check`, or calling `tools/lint`.
 - The rule registry, severity, and config model skeleton has started as
   preparatory source-only declarations.
 - First planned rule metadata entries have been added for
@@ -155,6 +161,11 @@ Reference locations:
 
 Current preparatory model skeleton files are source-only placeholders:
 
+- `src/main.ari` defines a minimal main entry shell and delegates `main` through
+  a local `run_main_entry_shell` function. The shell is the future connection
+  point to the explicit-token entry path after OS argv and output wiring are
+  designed. It currently returns success without reading process state or
+  producing output.
 - `src/model.ari` groups future model modules.
 - `src/cli.ari` sketches planned CLI option metadata for positional source file
   input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`,
@@ -202,13 +213,14 @@ Current preparatory model skeleton files are source-only placeholders:
 
 These files do not implement real lint rules, rule execution, process argument
 reading, argument validation, source scanning, config parsing, diagnostics
-output, JSON serialization, file reads, or `ari --check` invocation. The CLI
-parser is limited to explicit caller-provided token lists and raw option
-values, the list-rules formatter is limited to internal text construction, and
-the command dispatcher is limited to stdout-free internal command results. OS
-argv integration, compiler invocation, config parsing, diagnostics output,
-stdout/stderr formatting, JSON serialization, environment handling, semantic
-`--rule` parsing, source scanning, lint execution, parser tests, dispatcher
+output, JSON serialization, file reads, or `ari --check` invocation. The main
+entry shell is limited to returning success, the CLI parser is limited to
+explicit caller-provided token lists and raw option values, the list-rules
+formatter is limited to internal text construction, and the command dispatcher
+is limited to stdout-free internal command results. OS argv integration,
+compiler invocation, config parsing, diagnostics output, stdout/stderr
+formatting, JSON serialization, environment handling, semantic `--rule` parsing,
+source scanning, lint execution, main-entry tests, parser tests, dispatcher
 tests, and explicit-token entry tests remain future work. Severity parsing,
 CLI/config override behavior, rule registration behavior, and the JSON schema
 are not stable yet.

@@ -20,6 +20,7 @@ minimal CLI token parser added / internal list-rules output path added /
 human-readable list-rules formatter added /
 stdout-free command dispatcher added /
 internal explicit-token entry path added /
+minimal main entry shell added /
 no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -38,6 +39,10 @@ and test work.
 - [x] Start Ari source skeleton as the first step toward Ari-language
       implementation; real rule implementation, CLI parsing, diagnostics,
       compiler invocation, and tests remain future work.
+- [x] Add a minimal main entry shell that delegates through a local internal
+      shell function and returns success. OS argv integration, stdout/stderr
+      output, JSON output, config parsing, compiler invocation, source scanning,
+      lint execution, main-entry tests, and parity behavior remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain
