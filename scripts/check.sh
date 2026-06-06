@@ -184,12 +184,15 @@ require_grep "CLI metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "CLI argument result model" docs/dev/ari-implementation-plan.md
 require_grep "Minimal token-list parsing has started" docs/dev/ari-implementation-plan.md
 require_grep "Actual OS process argument parsing and environment handling remain future" docs/dev/ari-implementation-plan.md
+require_grep "internal stdout-free command dispatcher" docs/dev/ari-implementation-plan.md
 require_grep "CLI metadata skeleton" docs/dev/roadmap.md
 require_grep "CLI argument model added" docs/dev/roadmap.md
 require_grep "minimal CLI token parser added" docs/dev/roadmap.md
+require_grep "stdout-free command dispatcher added" docs/dev/roadmap.md
 require_grep "No CLI tests are added yet" tests/README.md
 require_grep "No CLI model tests are added yet" tests/README.md
 require_grep "No executable CLI parser tests are added yet" tests/README.md
+require_grep "No executable dispatcher tests are added yet" tests/README.md
 require_grep "scripts/build.sh" tests/README.md
 require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
@@ -224,6 +227,8 @@ require_grep "CliArgs" src/cli.ari
 require_grep "CliParseResult" src/cli.ari
 require_grep "CliRuleOverrideArg" src/cli.ari
 require_grep "CliArgumentProblem" src/cli.ari
+require_grep "CliCommandResultKind" src/cli.ari
+require_grep "CliCommandResult" src/cli.ari
 require_grep "positional source file input" src/cli.ari
 require_grep "source_files" src/cli.ari
 require_grep "--json" src/cli.ari
@@ -241,11 +246,15 @@ require_grep "rule_overrides" src/cli.ari
 require_grep "help_requested" src/cli.ari
 require_grep "problems" src/cli.ari
 require_grep "parse_cli_tokens" src/cli.ari
+require_grep "dispatch_cli_command" src/cli.ari
+require_grep "CliListRulesText" src/cli.ari
+require_grep "CliSourceLintFuture" src/cli.ari
 require_grep "missing_value_problem" src/cli.ari
 require_grep "unknown_argument_problem" src/cli.ari
 require_grep "raw_rule_override" src/cli.ari
 require_grep "does not read process arguments" src/cli.ari
 require_grep "OS process argv" src/cli.ari
+require_grep "write stdout/stderr" src/cli.ari
 require_grep "future work" src/cli.ari
 require_grep "DiagnosticOutputMetadata" src/output.ari
 require_grep "Human" src/output.ari

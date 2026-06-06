@@ -1,6 +1,7 @@
-// Planned CLI surface metadata, parser result data, and explicit-token parsing
-// only. This file does not read process arguments, validate input paths, read
-// config files, serialize JSON, produce diagnostics, or invoke ari --check.
+// Planned CLI surface metadata, parser result data, explicit-token parsing, and
+// stdout-free command dispatch only. This file does not read process arguments,
+// validate input paths, read config files, serialize JSON, produce diagnostics,
+// write stdout/stderr, or invoke ari --check.
 
 pub struct CliOptionMetadata {
   name: String,
@@ -53,6 +54,20 @@ pub struct CliParseResult {
   problems: std::vec::Vec[CliArgumentProblem],
 }
 
+pub enum CliCommandResultKind {
+  CliListRulesText,
+  CliParseProblems,
+  CliHelpFuture,
+  CliSourceLintFuture,
+  CliUnsupportedFuture,
+}
+
+pub struct CliCommandResult {
+  kind: CliCommandResultKind,
+  text: Option[String],
+  detail: String,
+}
+
 fn missing_value_problem(argument: String) -> CliArgumentProblem {
   return CliArgumentProblem {
     kind: MissingValue,
@@ -74,6 +89,18 @@ fn raw_rule_override(raw_text: String) -> CliRuleOverrideArg {
     rule_name: None<String>(),
     severity_name: None<String>(),
     raw_text: raw_text,
+  };
+}
+
+fn cli_command_result(
+  kind: CliCommandResultKind,
+  text: Option[String],
+  detail: String,
+) -> CliCommandResult {
+  return CliCommandResult {
+    kind: kind,
+    text: text,
+    detail: detail,
   };
 }
 
@@ -161,6 +188,51 @@ pub fn parse_cli_tokens(
   };
 }
 
+pub fn dispatch_cli_command(
+  zone: ref mut Zone,
+  parse_result: CliParseResult,
+) -> CliCommandResult {
+  if parse_result.problems.len() > 0 {
+    return cli_command_result(
+      CliParseProblems,
+      None<String>(),
+      "CLI parse problems are recorded internally; diagnostic output remains future work.",
+    );
+  }
+
+  if parse_result.args.list_rules_requested {
+    let list_rules = super::output::known_list_rules_output(zone);
+    let text = super::output::format_list_rules_human(zone, list_rules);
+    return cli_command_result(
+      CliListRulesText,
+      Some<String>(text),
+      "List-rules text is available internally; stdout/stderr output remains future work.",
+    );
+  }
+
+  if parse_result.args.help_requested {
+    return cli_command_result(
+      CliHelpFuture,
+      None<String>(),
+      "Help command dispatch is recognized internally; user-facing output remains future work.",
+    );
+  }
+
+  if parse_result.args.source_files.len() > 0 {
+    return cli_command_result(
+      CliSourceLintFuture,
+      None<String>(),
+      "Source-file lint dispatch is recognized internally; source scanning and compiler invocation remain future work.",
+    );
+  }
+
+  return cli_command_result(
+    CliUnsupportedFuture,
+    None<String>(),
+    "No executable command is available internally yet; CLI validation remains future work.",
+  );
+}
+
 // Metadata entry: positional source file input; selects Ari source files to
 // lint; takes a value; may appear multiple times.
 //
@@ -193,9 +265,19 @@ pub fn parse_cli_tokens(
 // invalid-rule-override shape reserved for later semantic parsing without
 // defining final validation behavior, diagnostic wording, or exit status.
 //
+// Command result data model: CliCommandResult records stdout-free command
+// dispatch outcomes. List-rules dispatch carries internal text from the
+// list-rules formatter; parse-problem, help, source-lint, and unsupported
+// command paths carry explicit future-work placeholders.
+//
 // parse_cli_tokens parses a caller-provided token list only. It does not read
 // OS process argv, inspect ARI_COMPILER, validate paths, parse ari-lint.rules,
 // semantically parse --rule values, print diagnostics, or invoke ari --check.
+//
+// dispatch_cli_command maps an already parsed CliParseResult to an internal
+// command result only. It does not read OS process argv, write stdout/stderr,
+// serialize JSON, parse config files, apply config overrides, read source files,
+// scan source text, execute lint rules, call tools/lint, or invoke ari --check.
 //
 // Process argument reading, argument validation, config parsing, diagnostics
 // output, JSON serialization, compiler path validation, and ari --check

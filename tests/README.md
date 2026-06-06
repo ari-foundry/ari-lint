@@ -142,6 +142,11 @@ positional files, and future OS argv integration once process argument reading
 exists, plus parity behavior against current `tools/lint` once a parity runner
 exists.
 
+No executable dispatcher tests are added yet. Future dispatcher tests should
+cover list-rules dispatch, unsupported commands, source-file lint requests,
+parse-problem/error results, stdout-free behavior, and parity behavior against
+current `tools/lint` once a parity runner exists.
+
 No diagnostic output tests are added yet. Future diagnostic tests should
 validate human-readable output, JSON output shape, line/column fields,
 endLine/endColumn fields if supported, severity, rule code, message, path
