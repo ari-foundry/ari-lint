@@ -17,6 +17,7 @@ missing-final-newline parity plan added / lightweight check runner skeleton
 added / compiler provisioning plan added / compiler invocation plan added /
 CLI argument model added / local build scaffold and gitignore hygiene added /
 minimal CLI token parser added / internal list-rules output path added /
+human-readable list-rules formatter added /
 no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -73,6 +74,12 @@ and test work.
       CLI main integration, stdout/stderr formatting, JSON output, config
       parsing, compiler invocation, tests, and parity behavior remain future
       work.
+- [x] Add an internal human-readable list-rules formatter that converts the
+      existing list-rules rows into newline-terminated text containing rule code,
+      short name, default severity, and description. User-facing
+      `--list-rules` CLI completion, CLI main integration, stdout/stderr output,
+      JSON output, config parsing, compiler invocation, formatter tests, and
+      parity behavior remain future work.
 - [x] Add local build scaffold and `.gitignore` hygiene for local/generated
       artifacts. `scripts/build.sh` requires an explicit Ari compiler path and
       builds `src/main.ari` to `build/ari-lint` for local use only; CI compiler

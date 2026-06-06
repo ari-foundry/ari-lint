@@ -1,5 +1,6 @@
-// Planned diagnostic and list-rules output models only. This file does not format
-// diagnostics, build diagnostic strings, serialize JSON, or write stdout/stderr.
+// Planned diagnostic output models and internal list-rules formatting only. This
+// file does not format diagnostics, build diagnostic strings, serialize JSON, or
+// write stdout/stderr.
 
 pub enum OutputModeName {
   Human,
@@ -67,6 +68,34 @@ pub fn known_list_rules_output(zone: ref mut Zone) -> ListRulesOutput {
   };
 }
 
+pub fn format_list_rule_row_human(
+  zone: ref mut Zone,
+  row: ListRuleRow,
+) -> String {
+  var text = std::string::new(zone, 128);
+  text.append_string_in(zone, row.code);
+  text.append_string_in(zone, "\tname=");
+  text.append_string_in(zone, row.short_name);
+  text.append_string_in(zone, "\tdefault=");
+  text.append_string_in(zone, row.default_severity);
+  text.append_string_in(zone, "\t");
+  text.append_string_in(zone, row.description);
+  text.append_string_in(zone, "\n");
+  return text;
+}
+
+pub fn format_list_rules_human(
+  zone: ref mut Zone,
+  output: ListRulesOutput,
+) -> String {
+  var text = std::string::new(zone, 256);
+  for row in output.rows {
+    let row_text = format_list_rule_row_human(zone, row);
+    text.append_string_in(zone, row_text);
+  }
+  return text;
+}
+
 // Output mode metadata: human output mode name human; JSON output mode name
 // json.
 //
@@ -81,7 +110,9 @@ pub fn known_list_rules_output(zone: ref mut Zone) -> ListRulesOutput {
 // metadata: rule code, short name, default severity, and description.
 // known_list_rules_output returns rows in the current rule metadata order:
 // lint/trailing-whitespace, then lint/missing-final-newline.
+// format_list_rules_human converts those rows into internal human-readable text
+// with one newline-terminated row per rule. It does not write stdout/stderr.
 //
-// Formatting, diagnostic string construction, stdout/stderr output, JSON
-// serialization, final human-readable list-rules table output, source scanning,
-// CLI main wiring, config parsing, and ari --check invocation are future work.
+// Diagnostic string construction, stdout/stderr output, JSON serialization,
+// final user-facing list-rules CLI output, source scanning, CLI main wiring,
+// config parsing, and ari --check invocation are future work.
