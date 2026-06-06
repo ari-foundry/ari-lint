@@ -33,9 +33,10 @@ It does not move `tools/lint` or change build behavior.
   JSON serialization is not implemented yet.
 - An internal list-rules output path now converts known rule metadata into
   list-rules rows for `lint/trailing-whitespace` and
-  `lint/missing-final-newline`. User-facing stdout/stderr formatting, JSON
-  output, OS argv/main wiring, compiler invocation, config parsing, diagnostics
-  output, and parity tests remain future work.
+  `lint/missing-final-newline`, and an internal human-readable list-rules
+  formatter now converts those rows to text. User-facing stdout/stderr output,
+  JSON output, OS argv/main wiring, compiler invocation, config parsing,
+  diagnostics output, and parity tests remain future work.
 - The config override skeleton has been refined as metadata-only declarations
   for default config, `ari-lint.rules`, `--config`, `--rule`, rule severity
   overrides, and documented override precedence. Config parsing is not implemented yet.
@@ -161,10 +162,10 @@ Current preparatory model skeleton files are source-only placeholders:
 - `src/output.ari` sketches diagnostic output metadata for human-readable and
   JSON output modes, diagnostic location, file path, line, column, endLine,
   endColumn, severity, rule code, and message. It also defines an internal
-  list-rules output row model and a known-rule output builder from existing
-  rule metadata. It does not format diagnostics, build diagnostic strings,
-  serialize JSON, emit a final human-readable list-rules table, or write
-  stdout/stderr output.
+  list-rules output row model, a known-rule output builder from existing rule
+  metadata, and an internal human-readable list-rules formatter. It does not
+  format diagnostics, build diagnostic strings, serialize JSON, emit
+  user-facing `--list-rules` CLI output, or write stdout/stderr output.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description.
 - `src/registry.ari` sketches rule registry concepts for planned reference
@@ -187,12 +188,12 @@ These files do not implement real lint rules, rule execution, process argument
 reading, argument validation, source scanning, config parsing, diagnostics
 output, JSON serialization, file reads, or `ari --check` invocation. The CLI
 parser is limited to explicit caller-provided token lists and raw option
-values; OS argv integration, compiler invocation, config parsing, diagnostics
-output, stdout/stderr formatting, JSON serialization, environment handling,
-semantic `--rule` parsing, and parser tests remain future work. Severity
-parsing, CLI/config
-override behavior, rule registration behavior, and the JSON schema are not
-stable yet.
+values, and the list-rules formatter is limited to internal text construction;
+OS argv integration, compiler invocation, config parsing, diagnostics output,
+stdout/stderr formatting, JSON serialization, environment handling, semantic
+`--rule` parsing, and parser tests remain future work. Severity parsing,
+CLI/config override behavior, rule registration behavior, and the JSON schema
+are not stable yet.
 
 The local build scaffold is not compiler-backed CI or full build validation.
 Compiler-backed CI, standalone test execution, compiler provisioning in CI,

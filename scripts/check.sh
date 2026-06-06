@@ -196,9 +196,11 @@ require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
 require_grep "Diagnostic output is not implemented yet" docs/dev/ari-implementation-plan.md
 require_grep "JSON serialization is not implemented yet" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
+require_grep "internal human-readable list-rules formatter" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path added" docs/dev/roadmap.md
+require_grep "human-readable list-rules formatter added" docs/dev/roadmap.md
 require_grep "No diagnostic output tests are added yet" tests/README.md
-require_grep "No executable list-rules tests are added yet" tests/README.md
+require_grep "No executable list-rules formatter tests are added yet" tests/README.md
 require_grep "config override skeleton" docs/dev/ari-implementation-plan.md
 require_grep "config override skeleton" docs/dev/roadmap.md
 require_grep "Config parsing is not implemented yet" docs/dev/ari-implementation-plan.md
@@ -262,7 +264,9 @@ require_grep "ListRuleRow" src/output.ari
 require_grep "ListRulesOutput" src/output.ari
 require_grep "list_rule_row_from_metadata" src/output.ari
 require_grep "known_list_rules_output" src/output.ari
-require_grep "final human-readable list-rules table output" src/output.ari
+require_grep "format_list_rule_row_human" src/output.ari
+require_grep "format_list_rules_human" src/output.ari
+require_grep "final user-facing list-rules CLI output" src/output.ari
 require_grep "ConfigSkeleton" src/config.ari
 require_grep "ConfigSourceMetadata" src/config.ari
 require_grep "OverridePrecedenceMetadata" src/config.ari
