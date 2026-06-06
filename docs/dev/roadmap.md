@@ -18,6 +18,7 @@ added / compiler provisioning plan added / compiler invocation plan added /
 CLI argument model added / local build scaffold and gitignore hygiene added /
 minimal CLI token parser added / internal list-rules output path added /
 human-readable list-rules formatter added /
+stdout-free command dispatcher added /
 no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -80,6 +81,13 @@ and test work.
       `--list-rules` CLI completion, CLI main integration, stdout/stderr output,
       JSON output, config parsing, compiler invocation, formatter tests, and
       parity behavior remain future work.
+- [x] Add an internal stdout-free command dispatcher that maps parsed CLI args
+      to internal command results, routes list-rules requests to the existing
+      human-readable formatter, and returns explicit future-work placeholders for
+      parse-problem, help, source-file linting, and unsupported command paths.
+      User-facing CLI completion, OS argv/main wiring, stdout/stderr output,
+      JSON output, source scanning, lint execution, config parsing, compiler
+      invocation, dispatcher tests, and parity behavior remain future work.
 - [x] Add local build scaffold and `.gitignore` hygiene for local/generated
       artifacts. `scripts/build.sh` requires an explicit Ari compiler path and
       builds `src/main.ari` to `build/ari-lint` for local use only; CI compiler

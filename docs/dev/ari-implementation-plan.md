@@ -37,6 +37,13 @@ It does not move `tools/lint` or change build behavior.
   formatter now converts those rows to text. User-facing stdout/stderr output,
   JSON output, OS argv/main wiring, compiler invocation, config parsing,
   diagnostics output, and parity tests remain future work.
+- An internal stdout-free command dispatcher now maps parsed CLI arguments to
+  internal command results. It routes list-rules requests to the internal
+  human-readable list-rules formatter and returns explicit future-work
+  placeholders for parse-problem, help, source-file linting, and unsupported
+  command paths. User-facing stdout/stderr output, OS argv/main wiring, JSON
+  output, source scanning, compiler invocation, config parsing, diagnostics
+  output, and parity tests remain future work.
 - The config override skeleton has been refined as metadata-only declarations
   for default config, `ari-lint.rules`, `--config`, `--rule`, rule severity
   overrides, and documented override precedence. Config parsing is not implemented yet.
@@ -151,7 +158,10 @@ Current preparatory model skeleton files are source-only placeholders:
   for caller-provided token lists, including positional files, requested
   output/list/help flags, optional compiler and config paths, include paths,
   raw rule override entries, missing-value problems, and unknown-argument
-  problems. It does not read OS process argv.
+  problems. It also defines an internal stdout-free command result model and a
+  dispatcher that routes list-rules requests to internal formatted text while
+  keeping other command paths as explicit future-work placeholders. It does not
+  read OS process argv or write stdout/stderr output.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
@@ -188,12 +198,13 @@ These files do not implement real lint rules, rule execution, process argument
 reading, argument validation, source scanning, config parsing, diagnostics
 output, JSON serialization, file reads, or `ari --check` invocation. The CLI
 parser is limited to explicit caller-provided token lists and raw option
-values, and the list-rules formatter is limited to internal text construction;
-OS argv integration, compiler invocation, config parsing, diagnostics output,
+values, the list-rules formatter is limited to internal text construction, and
+the command dispatcher is limited to stdout-free internal command results. OS
+argv integration, compiler invocation, config parsing, diagnostics output,
 stdout/stderr formatting, JSON serialization, environment handling, semantic
-`--rule` parsing, and parser tests remain future work. Severity parsing,
-CLI/config override behavior, rule registration behavior, and the JSON schema
-are not stable yet.
+`--rule` parsing, source scanning, lint execution, parser tests, and dispatcher
+tests remain future work. Severity parsing, CLI/config override behavior, rule
+registration behavior, and the JSON schema are not stable yet.
 
 The local build scaffold is not compiler-backed CI or full build validation.
 Compiler-backed CI, standalone test execution, compiler provisioning in CI,
