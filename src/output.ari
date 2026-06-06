@@ -1,6 +1,6 @@
-// Planned diagnostic output models and internal list-rules formatting only. This
-// file does not format diagnostics, build diagnostic strings, serialize JSON, or
-// write stdout/stderr.
+// Diagnostic output models and internal list-rules formatting. This file does
+// not emit diagnostics. It does not format diagnostics, build diagnostic
+// strings, serialize JSON, or write stdout/stderr.
 
 pub enum OutputModeName {
   Human,
@@ -99,9 +99,8 @@ pub fn format_list_rules_human(
 // Output mode metadata: human output mode name human; JSON output mode name
 // json.
 //
-// Planned diagnostic location metadata covers file path, line, column, endLine,
-// and endColumn. Planned diagnostic fields also include severity, rule code, and
-// message.
+// Diagnostic location metadata covers file path, line, column, endLine, and
+// endColumn. Diagnostic fields also include severity, rule code, and message.
 //
 // Human-readable text stability and JSON schema stability remain follow-up
 // items.

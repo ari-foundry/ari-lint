@@ -44,6 +44,11 @@ It does not move `tools/lint` or change build behavior.
   command paths. User-facing stdout/stderr output, OS argv/main wiring, JSON
   output, source scanning, compiler invocation, config parsing, diagnostics
   output, and parity tests remain future work.
+- An internal explicit-token entry path now composes the existing
+  caller-provided token-list parser with the stdout-free command dispatcher and
+  returns a `CliCommandResult`. It does not read OS argv, environment variables,
+  stdout/stderr, JSON, config files, source files, compiler output, or
+  `tools/lint`.
 - The config override skeleton has been refined as metadata-only declarations
   for default config, `ari-lint.rules`, `--config`, `--rule`, rule severity
   overrides, and documented override precedence. Config parsing is not implemented yet.
@@ -160,8 +165,9 @@ Current preparatory model skeleton files are source-only placeholders:
   raw rule override entries, missing-value problems, and unknown-argument
   problems. It also defines an internal stdout-free command result model and a
   dispatcher that routes list-rules requests to internal formatted text while
-  keeping other command paths as explicit future-work placeholders. It does not
-  read OS process argv or write stdout/stderr output.
+  keeping other command paths as explicit future-work placeholders, plus an
+  internal explicit-token entry function that composes parsing and dispatch. It
+  does not read OS process argv or write stdout/stderr output.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
@@ -202,9 +208,10 @@ values, the list-rules formatter is limited to internal text construction, and
 the command dispatcher is limited to stdout-free internal command results. OS
 argv integration, compiler invocation, config parsing, diagnostics output,
 stdout/stderr formatting, JSON serialization, environment handling, semantic
-`--rule` parsing, source scanning, lint execution, parser tests, and dispatcher
-tests remain future work. Severity parsing, CLI/config override behavior, rule
-registration behavior, and the JSON schema are not stable yet.
+`--rule` parsing, source scanning, lint execution, parser tests, dispatcher
+tests, and explicit-token entry tests remain future work. Severity parsing,
+CLI/config override behavior, rule registration behavior, and the JSON schema
+are not stable yet.
 
 The local build scaffold is not compiler-backed CI or full build validation.
 Compiler-backed CI, standalone test execution, compiler provisioning in CI,

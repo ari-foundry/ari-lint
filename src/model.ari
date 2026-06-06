@@ -1,4 +1,5 @@
-// Internal model module surface only. This file groups future model data shapes.
+// Internal model module surface. This file groups source modules without wiring
+// process entry behavior.
 pub mod cli;
 pub mod severity;
 pub mod diagnostic;

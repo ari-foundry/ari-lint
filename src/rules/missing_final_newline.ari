@@ -1,5 +1,5 @@
-// Planned missing final newline rule module. This file contains a minimal
-// internal content helper and diagnostic mapping skeleton only.
+// Missing final newline rule helpers. This file contains a minimal internal
+// content helper and diagnostic mapping helper only.
 //
 // It does not read files, scan source files, produce full diagnostics, apply
 // config overrides, print output, serialize JSON, invoke ari --check, or execute
@@ -18,17 +18,15 @@ struct MissingFinalNewlineDiagnosticMapping {
   severity: super::severity::Severity,
 }
 
-// Metadata entry: lint/missing-final-newline, short name missing-final-newline,
-// default severity warning. Real missing final newline behavior is future work.
-//
 // The helper below is intentionally limited to already-provided content bytes.
 // Rule execution, file reading, source scanning, full diagnostic production,
 // config interaction, severity override application, CLI parsing, diagnostics
 // output, JSON serialization, and ari --check invocation are future work. Rule
-// code lint/missing-final-newline and message missing final newline are confirmed
-// by the reference implementation, but this skeleton does not construct String
-// fields or a full Diagnostic value yet. The mapping uses explicit final
-// position metadata provided by its caller.
+// code lint/missing-final-newline, short name missing-final-newline, default
+// severity warning, and message missing final newline are confirmed by the
+// reference implementation, but this helper does not construct String fields or
+// a full Diagnostic value yet. The mapping uses explicit final position
+// metadata provided by its caller.
 
 fn content_is_missing_final_newline(content: Slice[u8]) -> bool {
   let length = content.len();

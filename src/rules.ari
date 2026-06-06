@@ -1,6 +1,6 @@
-// Initial planned rule metadata entries only. This file does not run rules or
-// scan source. Rule codes, short names, and default warning severities are
-// checked against the current Ari lint docs.
+// Known rule metadata entries. This file does not run rules or scan source.
+// Rule codes, short names, and default severity warning values are checked
+// against the current Ari lint docs.
 
 pub mod trailing_whitespace;
 pub mod missing_final_newline;
@@ -44,17 +44,6 @@ pub fn initial_rule_metadata(zone: ref mut Zone) -> InitialRuleMetadata {
   };
 }
 
-// Metadata entry: lint/trailing-whitespace, short name trailing-whitespace,
-// default severity warning, description reports spaces or tabs at the end of a
-// source line.
-//
-// Metadata entry: lint/missing-final-newline, short name missing-final-newline,
-// default severity warning, description reports non-empty source files that do
-// not end with a newline.
-//
 // Concrete metadata value construction is present for internal callers. Rule
 // execution, source scanning, diagnostics, config parsing, JSON output, CLI
 // behavior, and ari --check invocation are future work.
-//
-// Child modules under src/rules/ are non-executing layout placeholders for the
-// future rule implementations.
