@@ -162,6 +162,12 @@ the inactive boundary marker, later process argument collection, environment
 isolation, delegation into explicit-token parsing, stdout-free behavior, and
 parity behavior against current `tools/lint` once a parity runner exists.
 
+No executable stdout/stderr output boundary tests are added yet. Future tests
+should cover the internal sink/result model, stdout versus stderr stream
+selection, no-write behavior before output adapters exist, later output adapter
+wiring, diagnostic stream behavior, and parity behavior against current
+`tools/lint` once a parity runner exists.
+
 No diagnostic output tests are added yet. Future diagnostic tests should
 validate human-readable output, JSON output shape, line/column fields,
 endLine/endColumn fields if supported, severity, rule code, message, path

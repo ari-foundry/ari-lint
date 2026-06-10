@@ -170,6 +170,7 @@ require_grep "compiler provisioning plan added" docs/dev/roadmap.md
 require_grep "local build scaffold and gitignore hygiene added" docs/dev/roadmap.md
 require_grep "minimal main entry shell added" docs/dev/roadmap.md
 require_grep "OS argv boundary placeholder added" docs/dev/roadmap.md
+require_grep "stdout/stderr output boundary model added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
@@ -199,6 +200,7 @@ require_grep "No executable dispatcher tests are added yet" tests/README.md
 require_grep "No executable explicit-token entry tests are added yet" tests/README.md
 require_grep "No executable main-entry tests are added yet" tests/README.md
 require_grep "No executable OS argv boundary tests are added yet" tests/README.md
+require_grep "No executable stdout/stderr output boundary tests are added yet" tests/README.md
 require_grep "scripts/build.sh" tests/README.md
 require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
@@ -206,6 +208,7 @@ require_grep "Diagnostic output is not implemented yet" docs/dev/ari-implementat
 require_grep "JSON serialization is not implemented yet" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
 require_grep "internal human-readable list-rules formatter" docs/dev/ari-implementation-plan.md
+require_grep "stdout/stderr output boundary model" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path added" docs/dev/roadmap.md
 require_grep "human-readable list-rules formatter added" docs/dev/roadmap.md
 require_grep "No diagnostic output tests are added yet" tests/README.md
@@ -287,6 +290,12 @@ require_grep "known_list_rules_output" src/output.ari
 require_grep "format_list_rule_row_human" src/output.ari
 require_grep "format_list_rules_human" src/output.ari
 require_grep "final user-facing list-rules CLI output" src/output.ari
+require_grep "OutputSinkName" src/output.ari
+require_grep "OutputSinkBoundary" src/output.ari
+require_grep "OutputBoundaryResult" src/output.ari
+require_grep "stdout_stderr_output_boundary" src/output.ari
+require_grep "writes_real_streams" src/output.ari
+require_grep "does not call real output APIs" src/output.ari
 require_grep "ConfigSkeleton" src/config.ari
 require_grep "ConfigSourceMetadata" src/config.ari
 require_grep "OverridePrecedenceMetadata" src/config.ari
