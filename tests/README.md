@@ -138,9 +138,8 @@ No executable CLI parser tests are added yet. Future parser tests should cover
 the minimal explicit token-list parser for positional files, `--json`,
 `--list-rules`, `--help`/`-h`, `--ari`, `-I`, `--config`, raw `--rule` values,
 missing option values, unknown options, repeated `-I` and `--rule`, multiple
-positional files, and future OS argv integration once process argument reading
-exists, plus parity behavior against current `tools/lint` once a parity runner
-exists.
+positional files, the internal OS argv integration entry path, plus parity
+behavior against current `tools/lint` once a parity runner exists.
 
 No executable dispatcher tests are added yet. Future dispatcher tests should
 cover list-rules dispatch, unsupported commands, source-file lint requests,
@@ -168,10 +167,11 @@ entry behavior, delegation from the main shell to explicit-token handling,
 stdout-free behavior, future OS argv integration, and parity behavior against
 current `tools/lint` once a parity runner exists.
 
-No executable OS argv boundary tests are added yet. Future tests should cover
-the inactive boundary marker, later process argument collection, environment
-isolation, delegation into explicit-token parsing, stdout-free behavior, and
-parity behavior against current `tools/lint` once a parity runner exists.
+No executable OS argv integration tests are added yet. Future tests should
+cover `std::env::args` collection, argv[0] dropping, delegation into
+explicit-token parsing, environment isolation, stdout-free behavior, no process
+exit calls, and parity behavior against current `tools/lint` once a parity
+runner exists.
 
 No executable stdout/stderr output boundary tests are added yet. Future tests
 should cover the internal sink/result model, stdout versus stderr stream

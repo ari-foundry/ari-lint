@@ -174,6 +174,7 @@ require_grep "stdout/stderr output boundary model added" docs/dev/roadmap.md
 require_grep "internal exit-code model added" docs/dev/roadmap.md
 require_grep "explicit-token list-rules command wiring added" docs/dev/roadmap.md
 require_grep "minimal stdout adapter added" docs/dev/roadmap.md
+require_grep "OS argv integration added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
@@ -189,7 +190,8 @@ require_grep "No rule metadata tests are added yet" tests/README.md
 require_grep "CLI metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "CLI argument result model" docs/dev/ari-implementation-plan.md
 require_grep "Minimal token-list parsing has started" docs/dev/ari-implementation-plan.md
-require_grep "Actual OS process argument parsing and environment handling remain future" docs/dev/ari-implementation-plan.md
+require_grep "Actual OS process argument collection now has a minimal internal entry path" docs/dev/ari-implementation-plan.md
+require_grep "std::env::args" docs/dev/ari-implementation-plan.md
 require_grep "internal stdout-free command dispatcher" docs/dev/ari-implementation-plan.md
 require_grep "Internal command results now carry data-only exit-code mappings" docs/dev/ari-implementation-plan.md
 require_grep "named explicit-token .--list-rules. command entry" docs/dev/ari-implementation-plan.md
@@ -208,7 +210,7 @@ require_grep "No executable exit-code tests are added yet" tests/README.md
 require_grep "No executable explicit-token entry tests are added yet" tests/README.md
 require_grep "No executable explicit-token list-rules command tests are added yet" tests/README.md
 require_grep "No executable main-entry tests are added yet" tests/README.md
-require_grep "No executable OS argv boundary tests are added yet" tests/README.md
+require_grep "No executable OS argv integration tests are added yet" tests/README.md
 require_grep "No executable stdout/stderr output boundary tests are added yet" tests/README.md
 require_grep "No executable stdout adapter tests are added yet" tests/README.md
 require_grep "scripts/build.sh" tests/README.md
@@ -278,16 +280,19 @@ require_grep "parse_cli_tokens" src/cli.ari
 require_grep "dispatch_cli_command" src/cli.ari
 require_grep "run_explicit_cli_tokens" src/cli.ari
 require_grep "run_explicit_list_rules_command" src/cli.ari
+require_grep "read_os_argv_tokens" src/cli.ari
+require_grep "run_os_argv_cli" src/cli.ari
 require_grep "OsArgvBoundary" src/cli.ari
 require_grep "os_argv_boundary" src/cli.ari
+require_grep "std::env::args" src/cli.ari
+require_grep "reads_process_argv: true" src/cli.ari
 require_grep "CliListRulesText" src/cli.ari
 require_grep "CliSourceLintFuture" src/cli.ari
 require_grep "missing_value_problem" src/cli.ari
 require_grep "unknown_argument_problem" src/cli.ari
 require_grep "raw_rule_override" src/cli.ari
-require_grep "does not read process arguments" src/cli.ari
-require_grep "OS process argv" src/cli.ari
-require_grep "does not inspect argv" src/cli.ari
+require_grep "does not read environment" src/cli.ari
+require_grep "main wiring remains future work" src/cli.ari
 require_grep "write stdout/stderr" src/cli.ari
 require_grep "call process exit" src/cli.ari
 require_grep "future work" src/cli.ari

@@ -26,6 +26,7 @@ stdout/stderr output boundary model added /
 internal exit-code model added /
 explicit-token list-rules command wiring added /
 minimal stdout adapter added /
+OS argv integration added /
 no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -45,9 +46,10 @@ and test work.
       implementation; real rule implementation, CLI parsing, diagnostics,
       compiler invocation, and tests remain future work.
 - [x] Add a minimal main entry shell that delegates through a local internal
-      shell function and returns success. OS argv integration, stdout/stderr
-      output, JSON output, config parsing, compiler invocation, source scanning,
-      lint execution, main-entry tests, and parity behavior remain future work.
+      shell function and returns success. Main wiring to the OS argv integration
+      entry path, stdout/stderr output, JSON output, config parsing, compiler
+      invocation, source scanning, lint execution, main-entry tests, and parity
+      behavior remain future work.
 - [x] Add an explicit OS argv boundary placeholder that records the future
       process-argument integration boundary without reading OS argv, reading
       environment variables, dispatching tokens, writing stdout/stderr output,
@@ -75,6 +77,13 @@ and test work.
       serializing JSON, invoking the compiler, scanning sources, executing lint
       rules, or calling process exit. Stdout-adapter tests and user-facing CLI
       output wiring remain future work.
+- [x] Add internal OS argv integration using the verified Ari `std::env::args`
+      API, dropping argv[0] and reusing the existing explicit-token parser and
+      stdout-free dispatcher without reading environment variables, writing
+      stdout/stderr, wiring `main`, serializing JSON, invoking the compiler,
+      scanning sources, executing lint rules, or calling process exit.
+      OS-argv integration tests and user-facing CLI process behavior remain
+      future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain
@@ -91,19 +100,19 @@ and test work.
       invocation, tests, and CI remain future work.
 - [x] Start CLI metadata skeleton for positional source input, `--json`,
       `--ari`, `-I`, `--list-rules`, `--config`, and `--rule` as
-      metadata-only Ari source placeholders; OS process argument reading,
-      argument validation, config parsing, diagnostics output, JSON
-      serialization, compiler invocation, tests, and CI remain future work.
+      metadata-only Ari source placeholders; full user-facing argument
+      validation, config parsing, diagnostics output, JSON serialization,
+      compiler invocation, tests, and CI remain future work.
 - [x] Add CLI argument result model for future parser output, including
       positional files, `--json`, `--list-rules`, help requests, `--ari`, `-I`,
-      `--config`, `--rule`, and parse problem data. Process argument parsing,
-      CLI validation, config parsing, diagnostics output, JSON serialization,
-      compiler invocation, tests, and CI remain future work.
+      `--config`, `--rule`, and parse problem data. CLI validation, config
+      parsing, diagnostics output, JSON serialization, compiler invocation,
+      tests, and CI remain future work.
 - [x] Add a minimal CLI token parser over explicit caller-provided token lists,
       reusing the CLI argument result model for positional files, `--json`,
       `--list-rules`, `--help`/`-h`, `--ari`, `-I`, `--config`, raw `--rule`
-      values, missing-value problems, and unknown-argument problems. OS process
-      argv reading, `ARI_COMPILER`, compiler path validation, config parsing,
+      values, missing-value problems, and unknown-argument problems. Main
+      wiring, `ARI_COMPILER`, compiler path validation, config parsing,
       semantic `--rule` parsing, compiler invocation, output behavior, tests,
       and CI parser execution remain future work.
 - [x] Add an internal list-rules output path that converts existing known rule
@@ -123,13 +132,13 @@ and test work.
       to internal command results, routes list-rules requests to the existing
       human-readable formatter, and returns explicit future-work placeholders for
       parse-problem, help, source-file linting, and unsupported command paths.
-      User-facing CLI completion, OS argv/main wiring, stdout/stderr output,
+      User-facing CLI completion, `main` wiring, stdout/stderr output,
       JSON output, source scanning, lint execution, config parsing, compiler
       invocation, dispatcher tests, and parity behavior remain future work.
 - [x] Add an internal explicit-token entry path that accepts a caller-provided
       token list, composes the existing explicit-token parser with the
       stdout-free command dispatcher, and returns a `CliCommandResult`.
-      OS argv reading, environment handling, stdout/stderr output, JSON output,
+      Environment handling, stdout/stderr output, JSON output,
       source scanning, lint execution, config parsing, compiler invocation,
       entry-path tests, and parity behavior remain future work.
 - [x] Add local build scaffold and `.gitignore` hygiene for local/generated
