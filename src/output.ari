@@ -1,7 +1,7 @@
-// Diagnostic output models, internal list-rules formatting, output boundary
-// data, and the minimal stdout adapter. This file does not emit diagnostics. It
-// does not format diagnostics, build diagnostic strings, serialize JSON, write
-// stderr, read OS argv, or run the CLI.
+// Diagnostic output models, internal diagnostic JSON serialization,
+// internal list-rules formatting, output boundary data, and the minimal stdout
+// adapter. This file does not emit diagnostics, write stdout/stderr, read OS
+// argv, or run the CLI.
 
 pub enum OutputModeName {
   Human,
@@ -67,6 +67,93 @@ pub struct StdoutAdapterResult {
   attempted_stdout_write: bool,
   wrote_stdout: bool,
   detail: String,
+}
+
+fn diagnostic_severity_name(severity: super::severity::Severity) -> Slice[u8] {
+  match severity {
+    super::severity::Off => {
+      return "off";
+    }
+    super::severity::Hint => {
+      return "hint";
+    }
+    super::severity::Note => {
+      return "note";
+    }
+    super::severity::Warning => {
+      return "warning";
+    }
+    super::severity::Error => {
+      return "error";
+    }
+  }
+}
+
+fn append_json_string(
+  zone: ref mut Zone,
+  text: ref mut String,
+  value: Slice[u8],
+) -> void {
+  text.append_string_in(zone, "\"");
+  var index = 0;
+  while index < value.len() {
+    let byte = value.get(index);
+    if byte == 34u8 {
+      text.append_string_in(zone, "\\\"");
+    } else if byte == 92u8 {
+      text.append_string_in(zone, "\\\\");
+    } else if byte == 10u8 {
+      text.append_string_in(zone, "\\n");
+    } else if byte == 13u8 {
+      text.append_string_in(zone, "\\r");
+    } else if byte == 9u8 {
+      text.append_string_in(zone, "\\t");
+    } else {
+      text.append_string_in(zone, std::string::substring(value, index, index + 1));
+    }
+    index = index + 1;
+  }
+  text.append_string_in(zone, "\"");
+}
+
+fn append_json_optional_position(
+  zone: ref mut Zone,
+  text: ref mut String,
+  position: super::diagnostic::OptionalPosition,
+) -> void {
+  match position {
+    super::diagnostic::Missing => {
+      text.append_string_in(zone, "null");
+    }
+    super::diagnostic::Value(value) => {
+      text.append_i64_in(zone, value);
+    }
+  }
+}
+
+pub fn serialize_diagnostic_json(
+  zone: ref mut Zone,
+  diagnostic: super::diagnostic::Diagnostic,
+) -> String {
+  var text = std::string::new(zone, 256);
+  text.append_string_in(zone, "{\"filePath\":");
+  append_json_string(zone, ref mut text, diagnostic.span.file_path.as_slice());
+  text.append_string_in(zone, ",\"line\":");
+  text.append_i64_in(zone, diagnostic.span.line);
+  text.append_string_in(zone, ",\"column\":");
+  text.append_i64_in(zone, diagnostic.span.column);
+  text.append_string_in(zone, ",\"endLine\":");
+  append_json_optional_position(zone, ref mut text, diagnostic.span.end_line);
+  text.append_string_in(zone, ",\"endColumn\":");
+  append_json_optional_position(zone, ref mut text, diagnostic.span.end_column);
+  text.append_string_in(zone, ",\"severity\":");
+  append_json_string(zone, ref mut text, diagnostic_severity_name(diagnostic.severity));
+  text.append_string_in(zone, ",\"code\":");
+  append_json_string(zone, ref mut text, diagnostic.rule_code.as_slice());
+  text.append_string_in(zone, ",\"message\":");
+  append_json_string(zone, ref mut text, diagnostic.message.as_slice());
+  text.append_string_in(zone, "}");
+  return text;
 }
 
 fn output_sink_boundary(
@@ -175,6 +262,12 @@ pub fn format_list_rules_human(
 // Human-readable text stability and JSON schema stability remain follow-up
 // items.
 //
+// serialize_diagnostic_json builds a single in-memory JSON object from one
+// internal Diagnostic. It escapes common JSON string bytes and serializes
+// missing optional end positions as null. It does not write stdout/stderr,
+// choose output mode, serialize diagnostic arrays, or claim the final JSON
+// schema is stable.
+//
 // ListRuleRow records the internal --list-rules row model for known rule
 // metadata: rule code, short name, default severity, and description.
 // known_list_rules_output returns rows in the current rule metadata order:
@@ -190,7 +283,8 @@ pub fn format_list_rules_human(
 // It does not read OS argv, inspect command results, write stderr, serialize
 // JSON, call process exit, or run the CLI.
 //
-// Diagnostic string construction, stderr output, JSON serialization, and
-// final user-facing list-rules CLI output are future work. Source scanning, CLI
-// main wiring, config parsing, and ari --check invocation are also future work.
-// The stdout adapter is internal and must be called explicitly by future wiring.
+// Human-readable diagnostic string construction, diagnostic arrays, stderr
+// output, final user-facing JSON output, and final user-facing list-rules CLI
+// output are future work. Source scanning, CLI main wiring, config parsing, and
+// ari --check invocation are also future work. The stdout adapter is internal
+// and must be called explicitly by future wiring.
