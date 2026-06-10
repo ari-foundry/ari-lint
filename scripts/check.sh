@@ -176,6 +176,7 @@ require_grep "explicit-token list-rules command wiring added" docs/dev/roadmap.m
 require_grep "minimal stdout adapter added" docs/dev/roadmap.md
 require_grep "OS argv integration added" docs/dev/roadmap.md
 require_grep "minimal config text parser added" docs/dev/roadmap.md
+require_grep "rule override semantic parser added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
@@ -191,7 +192,8 @@ require_grep "No rule metadata tests are added yet" tests/README.md
 require_grep "CLI metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "CLI argument result model" docs/dev/ari-implementation-plan.md
 require_grep "Minimal token-list parsing has started" docs/dev/ari-implementation-plan.md
-require_grep "Actual OS process argument collection now has a minimal internal entry path" docs/dev/ari-implementation-plan.md
+require_grep "Actual OS process argument collection now has a" docs/dev/ari-implementation-plan.md
+require_grep "minimal internal entry path" docs/dev/ari-implementation-plan.md
 require_grep "std::env::args" docs/dev/ari-implementation-plan.md
 require_grep "internal stdout-free command dispatcher" docs/dev/ari-implementation-plan.md
 require_grep "Internal command results now carry data-only exit-code mappings" docs/dev/ari-implementation-plan.md
@@ -232,6 +234,8 @@ require_grep "config text parser now handles" docs/dev/ari-implementation-plan.m
 require_grep "RULE = SEVERITY" docs/dev/ari-implementation-plan.md
 require_grep "config discovery, config file reading, override" docs/dev/ari-implementation-plan.md
 require_grep "No executable config parser tests are added yet" tests/README.md
+require_grep "semantic parser for caller-provided .--rule. values" docs/dev/roadmap.md
+require_grep "No executable rule override parser tests are added yet" tests/README.md
 require_grep "No config override tests are added yet" tests/README.md
 require_grep "non-executing rule module layout" docs/dev/ari-implementation-plan.md
 require_grep "rule module layout" docs/dev/roadmap.md
@@ -285,6 +289,7 @@ require_grep "run_explicit_cli_tokens" src/cli.ari
 require_grep "run_explicit_list_rules_command" src/cli.ari
 require_grep "read_os_argv_tokens" src/cli.ari
 require_grep "run_os_argv_cli" src/cli.ari
+require_grep "parse_cli_rule_overrides" src/cli.ari
 require_grep "OsArgvBoundary" src/cli.ari
 require_grep "os_argv_boundary" src/cli.ari
 require_grep "std::env::args" src/cli.ari
@@ -294,6 +299,9 @@ require_grep "CliSourceLintFuture" src/cli.ari
 require_grep "missing_value_problem" src/cli.ari
 require_grep "unknown_argument_problem" src/cli.ari
 require_grep "raw_rule_override" src/cli.ari
+require_grep "optional_rule_override_part" src/cli.ari
+require_grep "semantic rule override parsing bridge" src/cli.ari
+require_grep "does not apply overrides" src/cli.ari
 require_grep "does not read environment" src/cli.ari
 require_grep "main wiring remains future work" src/cli.ari
 require_grep "write stdout/stderr" src/cli.ari
@@ -332,11 +340,15 @@ require_grep "ConfigSkeleton" src/config.ari
 require_grep "ConfigSourceMetadata" src/config.ari
 require_grep "OverridePrecedenceMetadata" src/config.ari
 require_grep "ConfigParseResult" src/config.ari
+require_grep "RuleOverrideParseResult" src/config.ari
 require_grep "ConfigParseProblemKind" src/config.ari
 require_grep "ConfigMissingEquals" src/config.ari
 require_grep "ConfigInvalidSeverity" src/config.ari
 require_grep "parse_config_text" src/config.ari
 require_grep "parse_config_severity" src/config.ari
+require_grep "parse_rule_override_texts" src/config.ari
+require_grep "parse_rule_override_value" src/config.ari
+require_grep "normalized_rule_override_code" src/config.ari
 require_grep "DefaultConfig" src/config.ari
 require_grep "AriLintRulesDiscovery" src/config.ari
 require_grep "ExplicitConfigFile" src/config.ari
@@ -346,6 +358,8 @@ require_grep "--config" src/config.ari
 require_grep "--rule" src/config.ari
 require_grep "not discover or read ari-lint.rules" src/config.ari
 require_grep "RULE = SEVERITY" src/config.ari
+require_grep "RULE=SEVERITY" src/config.ari
+require_grep "CommandLineRuleOverride" src/config.ari
 require_grep "future work" src/config.ari
 require_grep "InitialRuleMetadata" src/rules.ari
 require_grep "pub mod trailing_whitespace" src/rules.ari
