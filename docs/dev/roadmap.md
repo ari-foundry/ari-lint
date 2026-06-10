@@ -24,6 +24,7 @@ minimal main entry shell added /
 OS argv boundary placeholder added /
 stdout/stderr output boundary model added /
 internal exit-code model added /
+explicit-token list-rules command wiring added /
 no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -61,6 +62,12 @@ and test work.
       a user-facing CLI, reading OS argv, writing stdout/stderr output,
       invoking the compiler, scanning sources, or executing lint rules.
       Exit-code tests and process-exit behavior remain future work.
+- [x] Wire a named explicit-token `--list-rules` command path to the existing
+      parser, dispatcher, human-readable formatter, and exit-code model without
+      reading OS argv, writing stdout/stderr output, running a user-facing CLI,
+      serializing JSON, invoking the compiler, scanning sources, or executing
+      lint rules. List-rules command tests and real output behavior remain
+      future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain

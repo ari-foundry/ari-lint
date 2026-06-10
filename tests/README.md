@@ -158,6 +158,11 @@ should cover list-rules token input, parse problems, unsupported commands,
 source-file lint requests, stdout-free behavior, and parity behavior against
 current `tools/lint` once a parity runner exists.
 
+No executable explicit-token list-rules command tests are added yet. Future
+tests should cover the named `--list-rules` command path, formatted text
+presence, success exit-code mapping, stdout-free behavior, no OS argv reads, and
+parity behavior against current `tools/lint` once a parity runner exists.
+
 No executable main-entry tests are added yet. Future tests should cover main
 entry behavior, delegation from the main shell to explicit-token handling,
 stdout-free behavior, future OS argv integration, and parity behavior against
