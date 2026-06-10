@@ -83,6 +83,7 @@ require_file src/rules/trailing_whitespace.ari
 require_file src/rules/missing_final_newline.ari
 require_file src/config.ari
 require_file src/source.ari
+require_file src/lint.ari
 
 unexpected_trailing_fixture=$(find tests/fixtures/trailing-whitespace -type f ! -name clean.ari ! -name trailing-spaces.ari -print -quit)
 [ -z "$unexpected_trailing_fixture" ] || fail "unexpected trailing-whitespace fixture: $unexpected_trailing_fixture"
@@ -184,13 +185,18 @@ require_grep "minimal diagnostic JSON serializer added" docs/dev/roadmap.md
 require_grep "source input boundary model added" docs/dev/roadmap.md
 require_grep "in-memory trailing-whitespace execution added" docs/dev/roadmap.md
 require_grep "in-memory missing-final-newline execution added" docs/dev/roadmap.md
+require_grep "in-memory lint run aggregation added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
+require_grep "lint run aggregation has also started" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
 require_grep "docs/dev/compiler-provisioning.md" tests/README.md
 require_grep "No executable missing-final-newline rule execution tests are added yet" tests/README.md
+require_grep "No executable in-memory lint run aggregation tests are added yet" tests/README.md
 require_grep "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
 require_grep "These files do not implement file-backed linting" docs/dev/ari-implementation-plan.md
+require_grep "in-memory lint run aggregation path" docs/dev/ari-implementation-plan.md
+require_grep "File-backed aggregation" docs/dev/ari-implementation-plan.md
 require_grep "registry, severity, and config model skeleton" docs/dev/ari-implementation-plan.md
 require_grep "registry, severity, and config skeleton" docs/dev/roadmap.md
 require_grep "first planned rule metadata entries" docs/dev/ari-implementation-plan.md
@@ -263,6 +269,7 @@ require_grep "pub mod output" src/model.ari
 require_grep "pub mod config" src/model.ari
 require_grep "pub mod rules" src/model.ari
 require_grep "pub mod source" src/model.ari
+require_grep "pub mod lint" src/model.ari
 require_grep "CliSurfaceMetadata" src/cli.ari
 require_grep "CliArgs" src/cli.ari
 require_grep "CliParseResult" src/cli.ari
@@ -393,6 +400,24 @@ require_grep "reads_file: false" src/source.ari
 require_grep "recursively_scans_filesystem: false" src/source.ari
 require_grep "does not read files" src/source.ari
 require_grep "recursively scan directories" src/source.ari
+require_grep "InMemoryLintRunResult" src/lint.ari
+require_grep "lint_in_memory_source" src/lint.ari
+require_grep "append_diagnostics" src/lint.ari
+require_grep "lint_trailing_whitespace_in_memory" src/lint.ari
+require_grep "lint_missing_final_newline_in_memory" src/lint.ari
+require_grep "source_count: 1" src/lint.ari
+require_grep "reads_files: false" src/lint.ari
+require_grep "scans_filesystem: false" src/lint.ari
+require_grep "applies_config: false" src/lint.ari
+require_grep "writes_output: false" src/lint.ari
+require_grep "serializes_json: false" src/lint.ari
+require_grep "invokes_compiler: false" src/lint.ari
+require_grep "does not read files" src/lint.ari
+require_grep "scan the filesystem" src/lint.ari
+require_grep "apply config" src/lint.ari
+require_grep "serialize JSON" src/lint.ari
+require_grep "invoke ari --check" src/lint.ari
+require_grep "tools/lint" src/lint.ari
 require_grep "InitialRuleMetadata" src/rules.ari
 require_grep "pub mod trailing_whitespace" src/rules.ari
 require_grep "pub mod missing_final_newline" src/rules.ari
@@ -462,5 +487,11 @@ require_no_grep "missing-final-newline" src/main.ari
 
 stale_source_metadata=$(grep -R "Metadata entry:" src || true)
 [ -z "$stale_source_metadata" ] || fail "stale source metadata comment found"
+
+stale_source_metadata_only=$(grep -R "metadata-only" src || true)
+[ -z "$stale_source_metadata_only" ] || fail "stale source metadata-only comment found"
+
+stale_source_not_added=$(grep -R "not added yet" src || true)
+[ -z "$stale_source_not_added" ] || fail "stale source not-added-yet comment found"
 
 printf '%s\n' "lightweight checks passed"

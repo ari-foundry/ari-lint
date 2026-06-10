@@ -61,6 +61,11 @@ It does not move `tools/lint` or change build behavior.
   internal `Diagnostic` when non-empty content does not end with a newline,
   without reading files, scanning the filesystem, applying config, writing
   output, serializing JSON, invoking the compiler, or calling `tools/lint`.
+- An in-memory lint run aggregation path now combines diagnostics from the
+  trailing-whitespace and missing-final-newline in-memory rules for one
+  caller-provided source text. It does not read files, scan the filesystem,
+  apply config, write output, serialize JSON, invoke the compiler, or call
+  `tools/lint`.
 - An internal list-rules output path now converts known rule metadata into
   list-rules rows for `lint/trailing-whitespace` and
   `lint/missing-final-newline`, and an internal human-readable list-rules
@@ -223,6 +228,11 @@ Current preparatory model skeleton files are source-only placeholders:
   caller-provided source text, path-only source entries, and path-list inputs
   from already-parsed CLI paths. It does not read files, walk directories,
   inspect source text, invoke the compiler, or execute lint rules.
+- `src/lint.ari` defines in-memory lint run aggregation over one
+  caller-provided source text. It combines diagnostics from the in-memory
+  trailing-whitespace and missing-final-newline rule execution paths without
+  reading files, scanning the filesystem, applying config, writing output,
+  serializing JSON, invoking the compiler, or calling `tools/lint`.
 - `src/cli.ari` sketches planned CLI option metadata for positional source file
   input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`,
   including each option's purpose, value requirement, and repeatability. It
@@ -297,6 +307,8 @@ pairs, blank lines, and comments, the rule override parser is limited to
 caller-provided `--rule` text and internal override construction, the diagnostic
 JSON serializer is limited to one already-built internal Diagnostic, the source
 input boundary is limited to caller-provided source text and path-only entries,
+the lint run aggregation path is limited to combining diagnostics for one
+caller-provided in-memory source text,
 the list-rules formatter is limited to internal text construction, the command
 dispatcher is limited to stdout-free internal command results, the exit-code
 model is limited to internal data carried by those results, the explicit-token
@@ -357,11 +369,18 @@ Current rule module state:
   line/column metadata from caller-provided bytes, returns internal
   `Diagnostic` values, and records that it does not read files or scan the
   filesystem.
+- `src/lint.ari` combines diagnostics from the in-memory
+  trailing-whitespace and missing-final-newline rule execution paths for one
+  caller-provided source text, recording that it does not read files, scan the
+  filesystem, apply config, write output, serialize JSON, invoke the compiler,
+  or call `tools/lint`.
 
 The rule implementations only handle caller-provided bytes in memory. These
 rule module files do not implement file reading, filesystem scanning, config
 parsing, CLI parsing, diagnostics output, JSON serialization, compiler
-invocation, tests, or CI. Rule aggregation remains future work.
+invocation, tests, or CI. File-backed aggregation, multi-source aggregation,
+config/severity override application, CLI wiring, user-facing output, JSON
+diagnostic arrays, tests, and parity checks remain future work.
 
 ### Phase 5: compiler boundary
 
@@ -478,6 +497,7 @@ usable.
       filesystem scanning
 - [x] Add in-memory missing-final-newline rule execution without file IO or
       filesystem scanning
+- [x] Add in-memory lint run aggregation without file IO or filesystem scanning
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`

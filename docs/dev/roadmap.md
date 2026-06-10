@@ -33,6 +33,7 @@ minimal diagnostic JSON serializer added /
 source input boundary model added /
 in-memory trailing-whitespace execution added /
 in-memory missing-final-newline execution added /
+in-memory lint run aggregation added /
 no file-backed or user-facing lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -133,6 +134,13 @@ and test work.
       scanning the filesystem, applying config, producing user-facing output,
       serializing JSON, invoking the compiler, or calling `tools/lint`. Rule
       execution tests, file-backed linting, config integration, CLI wiring,
+      output behavior, and parity checks remain future work.
+- [x] Add in-memory lint run aggregation over caller-provided source text,
+      combining diagnostics from the in-memory `lint/trailing-whitespace` and
+      `lint/missing-final-newline` rules without reading files, scanning the
+      filesystem, applying config, producing user-facing output, serializing
+      JSON, invoking the compiler, or calling `tools/lint`. Aggregation tests,
+      config/severity override application, CLI wiring, file-backed linting,
       output behavior, and parity checks remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
