@@ -187,17 +187,20 @@ require_grep "in-memory trailing-whitespace execution added" docs/dev/roadmap.md
 require_grep "in-memory missing-final-newline execution added" docs/dev/roadmap.md
 require_grep "in-memory lint run aggregation added" docs/dev/roadmap.md
 require_grep "file read boundary added" docs/dev/roadmap.md
+require_grep "internal CLI file lint path added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "lint run aggregation has also started" tests/README.md
 require_grep "file-read boundary for one" tests/README.md
+require_grep "internal CLI file lint path" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
 require_grep "docs/dev/compiler-provisioning.md" tests/README.md
 require_grep "No executable missing-final-newline rule execution tests are added yet" tests/README.md
 require_grep "No executable in-memory lint run aggregation tests are added yet" tests/README.md
 require_grep "No executable file IO boundary tests are added yet" tests/README.md
+require_grep "No executable CLI file lint path tests are added yet" tests/README.md
 require_grep "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
-require_grep "These files do not implement file-backed linting" docs/dev/ari-implementation-plan.md
+require_grep "CLI file lint path is limited" docs/dev/ari-implementation-plan.md
 require_grep "in-memory lint run aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "File-backed aggregation" docs/dev/ari-implementation-plan.md
 require_grep "file-read boundary" docs/dev/ari-implementation-plan.md
@@ -282,6 +285,7 @@ require_grep "CliRuleOverrideArg" src/cli.ari
 require_grep "CliArgumentProblem" src/cli.ari
 require_grep "CliCommandResultKind" src/cli.ari
 require_grep "CliCommandResult" src/cli.ari
+require_grep "file_lint_result" src/cli.ari
 require_grep "CliExitCodeKind" src/cli.ari
 require_grep "CliExitCodeMapping" src/cli.ari
 require_grep "CliExitSuccess" src/cli.ari
@@ -314,12 +318,14 @@ require_grep "run_explicit_list_rules_command" src/cli.ari
 require_grep "read_os_argv_tokens" src/cli.ari
 require_grep "run_os_argv_cli" src/cli.ari
 require_grep "parse_cli_rule_overrides" src/cli.ari
+require_grep "cli_file_lint_exit_code" src/cli.ari
 require_grep "OsArgvBoundary" src/cli.ari
 require_grep "os_argv_boundary" src/cli.ari
 require_grep "std::env::args" src/cli.ari
 require_grep "reads_process_argv: true" src/cli.ari
 require_grep "CliListRulesText" src/cli.ari
-require_grep "CliSourceLintFuture" src/cli.ari
+require_grep "CliSourceLintResult" src/cli.ari
+require_grep "lint_file_sources" src/cli.ari
 require_grep "missing_value_problem" src/cli.ari
 require_grep "unknown_argument_problem" src/cli.ari
 require_grep "raw_rule_override" src/cli.ari
@@ -330,6 +336,8 @@ require_grep "does not read environment" src/cli.ari
 require_grep "main wiring remains future work" src/cli.ari
 require_grep "write stdout/stderr" src/cli.ari
 require_grep "call process exit" src/cli.ari
+require_grep "recursively scan source trees" src/cli.ari
+require_grep "Source-file lint diagnostics are available internally" src/cli.ari
 require_grep "future work" src/cli.ari
 require_grep "DiagnosticOutputMetadata" src/output.ari
 require_grep "Human" src/output.ari
@@ -415,18 +423,26 @@ require_grep "recursively scan directories" src/source.ari
 require_grep "discover ari-lint.rules" src/source.ari
 require_grep "execute lint rules" src/source.ari
 require_grep "InMemoryLintRunResult" src/lint.ari
+require_grep "FileLintRunResult" src/lint.ari
 require_grep "lint_in_memory_source" src/lint.ari
+require_grep "lint_file_source" src/lint.ari
+require_grep "lint_file_sources" src/lint.ari
 require_grep "append_diagnostics" src/lint.ari
+require_grep "append_file_lint_result" src/lint.ari
 require_grep "lint_trailing_whitespace_in_memory" src/lint.ari
 require_grep "lint_missing_final_newline_in_memory" src/lint.ari
+require_grep "source_input_from_file" src/lint.ari
+require_grep "read_errors" src/lint.ari
+require_grep "read_error_count" src/lint.ari
 require_grep "source_count: 1" src/lint.ari
 require_grep "reads_files: false" src/lint.ari
+require_grep "reads_files: true" src/lint.ari
 require_grep "scans_filesystem: false" src/lint.ari
 require_grep "applies_config: false" src/lint.ari
 require_grep "writes_output: false" src/lint.ari
 require_grep "serializes_json: false" src/lint.ari
 require_grep "invokes_compiler: false" src/lint.ari
-require_grep "does not read files" src/lint.ari
+require_grep "reads only explicit paths" src/lint.ari
 require_grep "scan the filesystem" src/lint.ari
 require_grep "apply config" src/lint.ari
 require_grep "serialize JSON" src/lint.ari

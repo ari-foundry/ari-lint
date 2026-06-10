@@ -48,10 +48,10 @@ It does not move `tools/lint` or change build behavior.
   serializer now builds JSON text from an already-built internal `Diagnostic`.
   User-facing diagnostic output, diagnostic arrays, human-readable formatting,
   and final JSON schema stability remain future work.
-- The source input boundary model has started for caller-provided source text
-  and path-only source entries. It records internal source inputs without
-  reading files, recursively scanning the filesystem, inspecting source text, or
-  running lint rules.
+- The source input boundary model has started for caller-provided source text,
+  path-only source entries, and explicit single-file reads. It records internal
+  source inputs without recursively scanning the filesystem, discovering config
+  files, or running lint rules on its own.
 - A file-read boundary now uses the verified Ari
   `std::fs::read_detailed(ref mut zone, path)` API to read one explicitly
   provided path into a source input while preserving `PathError` details. It
@@ -72,6 +72,12 @@ It does not move `tools/lint` or change build behavior.
   caller-provided source text. It does not read files, scan the filesystem,
   apply config, write output, serialize JSON, invoke the compiler, or call
   `tools/lint`.
+- The CLI source-file dispatch path now reads explicitly provided file paths
+  through the file-read boundary and returns internal lint diagnostics plus
+  file read errors in the command result. It does not write stdout/stderr,
+  serialize JSON, discover config files, apply config, traverse directories,
+  invoke the compiler, call `ari --check`, call `tools/lint`, or wire `main`
+  to user-facing process behavior.
 - An internal list-rules output path now converts known rule metadata into
   list-rules rows for `lint/trailing-whitespace` and
   `lint/missing-final-newline`, and an internal human-readable list-rules
@@ -238,10 +244,11 @@ Current preparatory model skeleton files are source-only placeholders:
   discover config files, invoke the compiler, produce diagnostics, or execute
   lint rules.
 - `src/lint.ari` defines in-memory lint run aggregation over one
-  caller-provided source text. It combines diagnostics from the in-memory
+  caller-provided source text and file-backed aggregation for explicitly
+  provided file paths. It combines diagnostics from the in-memory
   trailing-whitespace and missing-final-newline rule execution paths without
-  reading files, scanning the filesystem, applying config, writing output,
-  serializing JSON, invoking the compiler, or calling `tools/lint`.
+  scanning the filesystem, applying config, writing output, serializing JSON,
+  invoking the compiler, or calling `tools/lint`.
 - `src/cli.ari` sketches planned CLI option metadata for positional source file
   input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`,
   including each option's purpose, value requirement, and repeatability. It
@@ -253,13 +260,14 @@ Current preparatory model skeleton files are source-only placeholders:
   `--rule` parser bridge that converts raw rule override values into the
   internal config override model and parse problems without applying them. It
   also defines an internal stdout-free command result model and a dispatcher
-  that routes list-rules requests to internal formatted text while keeping
-  other command paths as explicit future-work placeholders, plus an internal
-  exit-code mapping carried by command results, plus an internal explicit-token
-  entry function that composes parsing and dispatch. It also has a named
-  explicit-token `--list-rules` command path that reaches formatted text and
-  exit-code data through that existing pipeline. It also defines an OS argv
-  integration path that reads process arguments through verified
+  that routes list-rules requests to internal formatted text and routes
+  source-file requests through file reading plus in-memory lint aggregation
+  while keeping other command paths as explicit future-work placeholders, plus
+  an internal exit-code mapping carried by command results, plus an internal
+  explicit-token entry function that composes parsing and dispatch. It also has
+  a named explicit-token `--list-rules` command path that reaches formatted
+  text and exit-code data through that existing pipeline. It also defines an OS
+  argv integration path that reads process arguments through verified
   `std::env::args`, drops argv[0], and dispatches through the existing
   explicit-token path. It does not read environment variables, apply rule
   overrides, write stdout/stderr output, wire `main`, or call process exit.
@@ -304,9 +312,9 @@ Current preparatory model skeleton files are source-only placeholders:
   rule codes. It does not discover config files, read `ari-lint.rules`, inspect
   CLI arguments, apply overrides, or validate unknown rule names.
 
-These files do not implement file-backed linting, user-facing rule execution,
-argument validation, diagnostics output, JSON serialization, file reads, or
-`ari --check` invocation. The trailing-whitespace and missing-final-newline rule
+These files do not implement user-facing rule execution,
+argument validation, diagnostics output, JSON serialization, or `ari --check`
+invocation. The trailing-whitespace and missing-final-newline rule
 execution paths are limited to caller-provided in-memory source text, the main
 entry shell is limited to returning success, the OS argv entry path is limited
 to reading `std::env::args`, dropping argv[0], and dispatching internal tokens,
@@ -320,6 +328,9 @@ the lint run aggregation path is limited to combining diagnostics for one
 caller-provided in-memory source text,
 the file-read boundary is limited to reading one explicitly provided path with
 the verified Ari `std::fs::read_detailed` API and preserving file read errors,
+the CLI file lint path is limited to explicit source-file arguments, the
+file-read boundary, in-memory lint aggregation, internal diagnostics, and
+internal read-error data,
 the list-rules formatter is limited to internal text construction, the command
 dispatcher is limited to stdout-free internal command results, the exit-code
 model is limited to internal data carried by those results, the explicit-token
@@ -330,7 +341,7 @@ Compiler invocation, config discovery, config file reading, override
 application, diagnostics output, stderr writing, stdout adapter wiring to
 commands or `main`, process exit, diagnostic array serialization, user-facing
 JSON output, environment handling, unknown-rule validation for `--rule`, source
-filesystem scanning, main-entry tests, argv-boundary tests,
+filesystem scanning, directory traversal, main-entry tests, argv-boundary tests,
 OS-argv integration tests, config parser tests, rule
 override parser tests, diagnostic JSON serializer tests, source input tests,
 trailing-whitespace execution tests, missing-final-newline execution tests,
@@ -364,6 +375,8 @@ need follow-up before this repository claims standalone output compatibility.
 - implement `lint/missing-final-newline` over caller-provided in-memory source
 - add a file-read boundary for one caller-provided path after verifying the
   Ari `std::fs` API
+- route explicit source-file CLI input through file reading and in-memory lint
+  aggregation as internal command data
 - compare behavior with reference implementation
 
 Current rule module state:
@@ -384,9 +397,9 @@ Current rule module state:
   filesystem.
 - `src/lint.ari` combines diagnostics from the in-memory
   trailing-whitespace and missing-final-newline rule execution paths for one
-  caller-provided source text, recording that it does not read files, scan the
-  filesystem, apply config, write output, serialize JSON, invoke the compiler,
-  or call `tools/lint`.
+  caller-provided source text or explicitly provided file paths, recording that
+  it does not scan the filesystem, apply config, write output, serialize JSON,
+  invoke the compiler, or call `tools/lint`.
 
 The rule implementations only handle caller-provided bytes in memory. These
 rule module files do not implement file reading, filesystem scanning, config
@@ -399,6 +412,13 @@ The source input file-read boundary reads one explicitly provided path into a
 source input using `std::fs::read_detailed`. It does not scan directories,
 discover config, apply config, run lint rules over file sets, produce output,
 serialize JSON, invoke the compiler, call `ari --check`, or call `tools/lint`.
+
+The CLI file lint path is internal command dispatch only. It reads explicit
+source-file arguments, runs the in-memory lint aggregation for successfully
+read files, preserves read errors, and carries the result in `CliCommandResult`.
+It does not write stdout/stderr, serialize JSON, discover config files, apply
+config, traverse directories, invoke the compiler, call `ari --check`, call
+`tools/lint`, or connect `main` to user-facing process behavior.
 
 ### Phase 5: compiler boundary
 
@@ -518,6 +538,7 @@ usable.
 - [x] Add in-memory lint run aggregation without file IO or filesystem scanning
 - [x] Add file read boundary for one caller-provided path using verified
       `std::fs::read_detailed`
+- [x] Add internal CLI file lint path over explicit source-file arguments
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`
