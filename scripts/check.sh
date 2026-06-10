@@ -130,7 +130,8 @@ require_grep "# lint/trailing-whitespace" docs/rules/trailing-whitespace.md
 require_grep "Do not read files in this step" docs/rules/trailing-whitespace.md
 require_grep "in-memory behavior" docs/rules/trailing-whitespace.md
 require_grep "# lint/missing-final-newline" docs/rules/missing-final-newline.md
-require_grep "Do not implement missing-final-newline in this step" docs/rules/missing-final-newline.md
+require_grep "Do not read files in this step" docs/rules/missing-final-newline.md
+require_grep "in-memory behavior" docs/rules/missing-final-newline.md
 require_grep "docs/rules/trailing-whitespace.md" docs/dev/ari-implementation-plan.md
 require_grep "docs/rules/missing-final-newline.md" docs/dev/ari-implementation-plan.md
 require_grep "docs/rules/trailing-whitespace.md" docs/dev/parity-test-plan.md
@@ -182,11 +183,12 @@ require_grep "rule override semantic parser added" docs/dev/roadmap.md
 require_grep "minimal diagnostic JSON serializer added" docs/dev/roadmap.md
 require_grep "source input boundary model added" docs/dev/roadmap.md
 require_grep "in-memory trailing-whitespace execution added" docs/dev/roadmap.md
+require_grep "in-memory missing-final-newline execution added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
 require_grep "docs/dev/compiler-provisioning.md" tests/README.md
-require_grep "No executable missing-final-newline helper tests are added yet" tests/README.md
+require_grep "No executable missing-final-newline rule execution tests are added yet" tests/README.md
 require_grep "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
 require_grep "These files do not implement file-backed linting" docs/dev/ari-implementation-plan.md
 require_grep "registry, severity, and config model skeleton" docs/dev/ari-implementation-plan.md
@@ -248,7 +250,7 @@ require_grep "No config override tests are added yet" tests/README.md
 require_grep "Current rule module state" docs/dev/ari-implementation-plan.md
 require_grep "rule module layout" docs/dev/roadmap.md
 require_grep "in-memory rule execution" docs/dev/ari-implementation-plan.md
-require_grep "Missing-final-newline full rule behavior is not" docs/dev/ari-implementation-plan.md
+require_grep "Both rules now" docs/dev/ari-implementation-plan.md
 require_grep "No rule module tests are added yet" tests/README.md
 require_grep "minimal internal single-line helper" docs/dev/ari-implementation-plan.md
 require_grep "single-line helper" docs/rules/trailing-whitespace.md
@@ -431,8 +433,16 @@ require_grep "lint/missing-final-newline" src/rules/missing_final_newline.ari
 require_grep "content_is_missing_final_newline" src/rules/missing_final_newline.ari
 require_grep "MissingFinalNewlineDiagnosticMapping" src/rules/missing_final_newline.ari
 require_grep "missing_final_newline_diagnostic_mapping" src/rules/missing_final_newline.ari
+require_grep "MissingFinalNewlineFinalPosition" src/rules/missing_final_newline.ari
+require_grep "MissingFinalNewlineRuleResult" src/rules/missing_final_newline.ari
+require_grep "final_position_for_source" src/rules/missing_final_newline.ari
+require_grep "lint_missing_final_newline_in_memory" src/rules/missing_final_newline.ari
+require_grep "diagnostic_from_span" src/rules/missing_final_newline.ari
+require_grep "diagnostics.push" src/rules/missing_final_newline.ari
+require_grep "reads_files: false" src/rules/missing_final_newline.ari
+require_grep "scans_filesystem: false" src/rules/missing_final_newline.ari
 require_grep "source_span_with_end" src/rules/missing_final_newline.ari
-require_grep "explicit caller-provided final position" docs/dev/ari-implementation-plan.md
+require_grep "computes final position metadata" docs/dev/ari-implementation-plan.md
 require_grep "missing-final-newline diagnostic mapping skeleton started" docs/dev/roadmap.md
 require_grep "No missing-final-newline diagnostic mapping tests are added yet" tests/README.md
 require_grep "does not read files" src/rules/missing_final_newline.ari
