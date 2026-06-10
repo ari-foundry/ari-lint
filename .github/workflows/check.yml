@@ -12,5 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Keep this workflow compiler-free until explicit Ari compiler
+      # provisioning and standalone tests are ready.
       - name: Run lightweight checks
         run: scripts/check.sh

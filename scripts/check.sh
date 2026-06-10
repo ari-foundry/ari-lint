@@ -61,6 +61,16 @@ require_file scripts/README.md
 require_file scripts/build.sh
 require_file .github/workflows/check.yml
 
+require_grep "compiler-free" .github/workflows/check.yml
+require_grep "scripts/check.sh" .github/workflows/check.yml
+require_no_grep "scripts/build.sh" .github/workflows/check.yml
+require_no_grep "ari --check" .github/workflows/check.yml
+require_no_grep "ARI_COMPILER" .github/workflows/check.yml
+require_no_grep "tools/lint" .github/workflows/check.yml
+require_no_grep "npm " .github/workflows/check.yml
+require_no_grep "cargo " .github/workflows/check.yml
+require_no_grep "arix" .github/workflows/check.yml
+
 [ -x scripts/build.sh ] || fail "scripts/build.sh is not executable"
 
 require_dir src
@@ -190,12 +200,14 @@ require_grep "in-memory lint run aggregation added" docs/dev/roadmap.md
 require_grep "file read boundary added" docs/dev/roadmap.md
 require_grep "internal CLI file lint path added" docs/dev/roadmap.md
 require_grep "source-only parity runner skeleton added" docs/dev/roadmap.md
+require_grep "compiler-backed CI gate documented" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "lint run aggregation has also started" tests/README.md
 require_grep "file-read boundary for one" tests/README.md
 require_grep "internal CLI file lint path" tests/README.md
 require_grep "source-only parity runner skeleton" tests/README.md
+require_grep "GitHub Actions workflow is intentionally compiler-free" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
 require_grep "docs/dev/compiler-provisioning.md" tests/README.md
 require_grep "No executable missing-final-newline rule execution tests are added yet" tests/README.md
@@ -206,6 +218,8 @@ require_grep "No executable parity runner tests are added yet" tests/README.md
 require_grep "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
 require_grep "CLI file lint path is limited" docs/dev/ari-implementation-plan.md
 require_grep "source-only parity runner skeleton" docs/dev/ari-implementation-plan.md
+require_grep "compiler-backed CI gate" docs/dev/ari-implementation-plan.md
+require_grep "The current GitHub Actions workflow must not run" docs/dev/compiler-provisioning.md
 require_grep "in-memory lint run aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "File-backed aggregation" docs/dev/ari-implementation-plan.md
 require_grep "file-read boundary" docs/dev/ari-implementation-plan.md
