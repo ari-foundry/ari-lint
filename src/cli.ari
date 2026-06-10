@@ -1,11 +1,12 @@
 // CLI model, explicit-token parsing, stdout-free dispatch, internal exit-code
 // data, explicit-token list-rules command wiring, explicit-token entry point,
-// and OS argv boundary marker. The positional source file input and documented
-// options are represented here. This file does not read process arguments or
-// inspect OS process argv. It also does not read environment state, validate
-// input paths, read config files, serialize JSON, produce diagnostics, write
-// stdout/stderr, scan source files, execute lint rules, call tools/lint, call
-// process exit, or invoke ari --check.
+// and OS argv integration. The positional source file input and documented
+// options are represented here. This file reads process arguments only through
+// the verified std::env::args boundary and keeps main wiring future work. It
+// does not read environment state, validate input paths, read config files,
+// serialize JSON, produce diagnostics, write stdout/stderr, scan source files,
+// execute lint rules, call tools/lint, call process exit, or invoke ari
+// --check.
 
 pub struct CliOptionMetadata {
   name: String,
@@ -96,11 +97,11 @@ pub struct OsArgvBoundary {
 
 pub fn os_argv_boundary() -> OsArgvBoundary {
   return OsArgvBoundary {
-    status: "OS argv integration boundary is present but inactive.",
-    reads_process_argv: false,
+    status: "OS argv integration boundary reads process arguments through std::env::args.",
+    reads_process_argv: true,
     reads_environment: false,
     writes_output: false,
-    dispatches_tokens: false,
+    dispatches_tokens: true,
   };
 }
 
@@ -327,11 +328,34 @@ pub fn run_explicit_list_rules_command(zone: ref mut Zone) -> CliCommandResult {
   return run_explicit_cli_tokens(zone, tokens);
 }
 
+fn cli_tokens_from_os_argv(
+  zone: ref mut Zone,
+  argv: std::vec::Vec[String],
+) -> std::vec::Vec[String] {
+  var tokens = std::vec::new<String>(zone, argv.len());
+  var index = 1;
+  while index < argv.len() {
+    tokens.push(argv.get(index));
+    index = index + 1;
+  }
+  return tokens;
+}
+
+pub fn read_os_argv_tokens(zone: ref mut Zone) -> std::vec::Vec[String] {
+  let argv = std::env::args(zone);
+  return cli_tokens_from_os_argv(zone, argv);
+}
+
+pub fn run_os_argv_cli(zone: ref mut Zone) -> CliCommandResult {
+  let tokens = read_os_argv_tokens(zone);
+  return run_explicit_cli_tokens(zone, tokens);
+}
+
 // parse_cli_tokens consumes a caller-provided token list and records source
 // files, flags/options, raw rule overrides, and parse problems in CliParseResult.
-// It intentionally leaves process argv/env, path validation, config parsing,
-// semantic --rule parsing, diagnostic printing, and ari --check invocation as
-// future work.
+// It intentionally leaves environment handling, path validation, config
+// parsing, semantic --rule parsing, diagnostic printing, and ari --check
+// invocation as future work.
 //
 // dispatch_cli_command maps a CliParseResult to a stdout-free internal command
 // result with internal exit-code data. run_explicit_cli_tokens composes parsing
@@ -349,6 +373,8 @@ pub fn run_explicit_list_rules_command(zone: ref mut Zone) -> CliCommandResult {
 // existing parser and dispatcher, but does not read OS argv, write stdout/stderr,
 // or run a user-facing CLI process.
 //
-// os_argv_boundary names the future OS argv integration point. It records that
-// the boundary exists and is inactive. It does not inspect argv, read
-// environment variables, dispatch tokens, or write output.
+// read_os_argv_tokens is the verified OS argv boundary. It reads arguments
+// through std::env::args, drops argv[0], and reuses the explicit-token parser
+// and dispatcher through run_os_argv_cli. It does not read environment
+// variables, write output, call process exit, or run a user-facing CLI process.
+// main wiring remains future work.

@@ -26,17 +26,19 @@ It does not move `tools/lint` or change build behavior.
 - The CLI metadata skeleton for the planned surface has started as metadata-only
   declarations for positional source input and the documented options `--json`,
   `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`.
-  Minimal token-list parsing has started for caller-provided tokens. OS argv
-  reading remains future work.
+  Minimal token-list parsing has started for caller-provided tokens. Internal
+  OS argv reading has started through a verified stdlib boundary.
 - The CLI argument result model is now used by the minimal explicit-token
   parser for positional files, planned flags/options, optional compiler/config
   paths, include paths, raw rule overrides, help requests, and parse problems.
-  Actual OS process argument parsing and environment handling remain future
-  work.
-- An explicit OS argv boundary marker now exists in `src/cli.ari`. It records
-  that OS argv integration has a named internal boundary, but the boundary is
-  inactive and does not read process arguments, read environment variables,
-  dispatch tokens, or write output.
+  Actual OS process argument collection now has a minimal internal entry path;
+  environment handling remains future work.
+- An explicit OS argv boundary now exists in `src/cli.ari`. It reads process
+  arguments through the verified Ari `std::env::args` API, drops argv[0], and
+  reuses the existing explicit-token parser and stdout-free dispatcher. It does
+  not read environment variables, write stdout/stderr, wire `main`, call
+  process exit, serialize JSON, invoke the compiler, scan sources, or execute
+  lint rules.
 - The diagnostic output metadata skeleton has started as metadata-only
   declarations for human and JSON output modes, diagnostic location fields, and
   planned diagnostic fields. Diagnostic output is not implemented yet.
@@ -45,13 +47,13 @@ It does not move `tools/lint` or change build behavior.
   list-rules rows for `lint/trailing-whitespace` and
   `lint/missing-final-newline`, and an internal human-readable list-rules
   formatter now converts those rows to text. User-facing stdout/stderr output,
-  JSON output, OS argv/main wiring, compiler invocation, config parsing,
+  JSON output, `main` wiring, compiler invocation, config parsing,
   diagnostics output, and parity tests remain future work.
 - An internal stdout-free command dispatcher now maps parsed CLI arguments to
   internal command results. It routes list-rules requests to the internal
   human-readable list-rules formatter and returns explicit future-work
   placeholders for parse-problem, help, source-file linting, and unsupported
-  command paths. User-facing stdout/stderr output, OS argv/main wiring, JSON
+  command paths. User-facing stdout/stderr output, `main` wiring, JSON
   output, source scanning, compiler invocation, config parsing, diagnostics
   output, and parity tests remain future work.
 - Internal command results now carry data-only exit-code mappings for success,
@@ -66,6 +68,11 @@ It does not move `tools/lint` or change build behavior.
   verified Ari `std::io::print_string` API and returns local status data. It is
   not wired to OS argv, `main`, command dispatch, stderr, JSON output, process
   exit, compiler invocation, source scanning, or lint execution.
+- An internal OS argv entry path now reads arguments through the verified Ari
+  `std::env::args` API, drops the program-name argument, and dispatches the
+  remaining user tokens through the existing explicit-token parser and
+  stdout-free command dispatcher. User-facing `main` wiring and output behavior
+  remain future work.
 - An internal explicit-token entry path now composes the existing
   caller-provided token-list parser with the stdout-free command dispatcher and
   returns a `CliCommandResult`. It does not read OS argv, environment variables,
@@ -203,9 +210,10 @@ Current preparatory model skeleton files are source-only placeholders:
   explicit-token entry function that composes parsing and dispatch. It also has
   a named explicit-token `--list-rules` command path that reaches formatted
   text and exit-code data through that existing pipeline. It also defines an
-  inactive OS argv boundary marker for future process-argument integration. It
-  does not read OS process argv, write stdout/stderr output, or call process
-  exit.
+  OS argv integration path that reads process arguments through verified
+  `std::env::args`, drops argv[0], and dispatches through the existing
+  explicit-token path. It does not read environment variables, write
+  stdout/stderr output, wire `main`, or call process exit.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
@@ -242,23 +250,24 @@ Current preparatory model skeleton files are source-only placeholders:
   discovery. It does not parse config files, read `ari-lint.rules`, inspect
   CLI arguments, or apply overrides.
 
-These files do not implement real lint rules, rule execution, process argument
-reading, argument validation, source scanning, config parsing, diagnostics
-output, JSON serialization, file reads, or `ari --check` invocation. The main
-entry shell is limited to returning success, the OS argv boundary marker is
-limited to inactive status data, the CLI parser is limited to explicit
-caller-provided token lists and raw option values, the list-rules formatter is
-limited to internal text construction, the command dispatcher is limited to
-stdout-free internal command results, the exit-code model is limited to internal
-data carried by those results, the explicit-token `--list-rules` command path is
-limited to caller-provided token construction, the stdout adapter is limited to
-caller-provided `String` text, and the stdout/stderr output boundary is limited
-to status data for named future sinks. OS argv reading, compiler invocation,
-config parsing, diagnostics output, stderr writing, stdout adapter wiring to
-commands or `main`, process exit, JSON serialization, environment handling,
-semantic `--rule` parsing, source scanning, lint execution, main-entry tests,
-argv-boundary tests, output-boundary tests, stdout-adapter tests, exit-code
-tests, list-rules command tests, parser tests, dispatcher tests, and
+These files do not implement real lint rules, rule execution, argument
+validation, source scanning, config parsing, diagnostics output, JSON
+serialization, file reads, or `ari --check` invocation. The main entry shell is
+limited to returning success, the OS argv entry path is limited to reading
+`std::env::args`, dropping argv[0], and dispatching internal tokens, the CLI
+parser is limited to explicit caller-provided token lists and raw option values,
+the list-rules formatter is limited to internal text construction, the command
+dispatcher is limited to stdout-free internal command results, the exit-code
+model is limited to internal data carried by those results, the explicit-token
+`--list-rules` command path is limited to caller-provided token construction,
+the stdout adapter is limited to caller-provided `String` text, and the
+stdout/stderr output boundary is limited to status data for named future sinks.
+Compiler invocation, config parsing, diagnostics output, stderr writing, stdout
+adapter wiring to commands or `main`, process exit, JSON serialization,
+environment handling, semantic `--rule` parsing, source scanning, lint
+execution, main-entry tests, argv-boundary tests, OS-argv integration tests,
+output-boundary tests, stdout-adapter tests, exit-code tests, list-rules command
+tests, parser tests, dispatcher tests, and
 explicit-token entry tests remain future work. Severity parsing, CLI/config
 override behavior, rule registration behavior, and the JSON schema are not
 stable yet.
