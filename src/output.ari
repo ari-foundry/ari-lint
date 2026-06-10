@@ -1,6 +1,7 @@
-// Diagnostic output models, internal list-rules formatting, and output boundary
-// data. This file does not emit diagnostics. It does not format diagnostics,
-// build diagnostic strings, serialize JSON, or write stdout/stderr.
+// Diagnostic output models, internal list-rules formatting, output boundary
+// data, and the minimal stdout adapter. This file does not emit diagnostics. It
+// does not format diagnostics, build diagnostic strings, serialize JSON, write
+// stderr, read OS argv, or run the CLI.
 
 pub enum OutputModeName {
   Human,
@@ -62,6 +63,12 @@ pub struct OutputBoundaryResult {
   detail: String,
 }
 
+pub struct StdoutAdapterResult {
+  attempted_stdout_write: bool,
+  wrote_stdout: bool,
+  detail: String,
+}
+
 fn output_sink_boundary(
   sink: OutputSinkName,
   status: String,
@@ -85,6 +92,25 @@ pub fn stdout_stderr_output_boundary() -> OutputBoundaryResult {
     ),
     writes_real_streams: false,
     detail: "Output boundary model is internal only; user-facing output remains future work.",
+  };
+}
+
+pub fn write_stdout_text(text: ref String) -> StdoutAdapterResult {
+  match std::io::print_string(text) {
+    std::Err(_) => {
+      return StdoutAdapterResult {
+        attempted_stdout_write: true,
+        wrote_stdout: false,
+        detail: "stdout write was attempted through std::io::print_string and failed.",
+      };
+    }
+    std::Ok(_) => {}
+  }
+
+  return StdoutAdapterResult {
+    attempted_stdout_write: true,
+    wrote_stdout: true,
+    detail: "stdout write completed through std::io::print_string.",
   };
 }
 
@@ -159,6 +185,12 @@ pub fn format_list_rules_human(
 // stdout_stderr_output_boundary records stdout and stderr as named future output
 // sinks. It returns status data only and does not call real output APIs.
 //
-// Diagnostic string construction, stdout/stderr output, JSON serialization,
-// final user-facing list-rules CLI output, source scanning, CLI main wiring,
-// config parsing, and ari --check invocation are future work.
+// write_stdout_text is the minimal verified stdout adapter. It writes a caller-
+// provided String through std::io::print_string and returns local status data.
+// It does not read OS argv, inspect command results, write stderr, serialize
+// JSON, call process exit, or run the CLI.
+//
+// Diagnostic string construction, stderr output, JSON serialization, and
+// final user-facing list-rules CLI output are future work. Source scanning, CLI
+// main wiring, config parsing, and ari --check invocation are also future work.
+// The stdout adapter is internal and must be called explicitly by future wiring.

@@ -62,6 +62,10 @@ It does not move `tools/lint` or change build behavior.
   stderr sinks plus result status for future output handling. It is data-only:
   it does not call real output APIs, write stdout/stderr, connect to OS argv or
   `main`, serialize JSON, or emit user-facing CLI output.
+- A minimal stdout adapter now writes caller-provided `String` text through the
+  verified Ari `std::io::print_string` API and returns local status data. It is
+  not wired to OS argv, `main`, command dispatch, stderr, JSON output, process
+  exit, compiler invocation, source scanning, or lint execution.
 - An internal explicit-token entry path now composes the existing
   caller-provided token-list parser with the stdout-free command dispatcher and
   returns a `CliCommandResult`. It does not read OS argv, environment variables,
@@ -214,10 +218,12 @@ Current preparatory model skeleton files are source-only placeholders:
   endColumn, severity, rule code, and message. It also defines an internal
   list-rules output row model, a known-rule output builder from existing rule
   metadata, an internal human-readable list-rules formatter, and a data-only
-  stdout/stderr output boundary model for named future output sinks. It does
-  not format diagnostics, build diagnostic strings, serialize JSON, emit
-  user-facing `--list-rules` CLI output, call output APIs, or write
-  stdout/stderr output.
+  stdout/stderr output boundary model for named future output sinks. It now
+  includes a minimal stdout adapter that uses the verified Ari
+  `std::io::print_string` API for caller-provided `String` text and returns
+  local status data. It does not format diagnostics, build diagnostic strings,
+  serialize JSON, emit user-facing `--list-rules` CLI output, write stderr,
+  read OS argv, or run the CLI.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description.
 - `src/registry.ari` sketches rule registry concepts for planned reference
@@ -245,13 +251,14 @@ caller-provided token lists and raw option values, the list-rules formatter is
 limited to internal text construction, the command dispatcher is limited to
 stdout-free internal command results, the exit-code model is limited to internal
 data carried by those results, the explicit-token `--list-rules` command path is
-limited to caller-provided token construction, and the stdout/stderr output
-boundary is limited to status data for named future sinks. OS argv reading,
-compiler invocation, config parsing, diagnostics output, real stdout/stderr
-writing, stdout/stderr adapter wiring, process exit, JSON serialization,
-environment handling, semantic `--rule` parsing, source scanning, lint
-execution, main-entry tests, argv-boundary tests, output-boundary tests,
-exit-code tests, list-rules command tests, parser tests, dispatcher tests, and
+limited to caller-provided token construction, the stdout adapter is limited to
+caller-provided `String` text, and the stdout/stderr output boundary is limited
+to status data for named future sinks. OS argv reading, compiler invocation,
+config parsing, diagnostics output, stderr writing, stdout adapter wiring to
+commands or `main`, process exit, JSON serialization, environment handling,
+semantic `--rule` parsing, source scanning, lint execution, main-entry tests,
+argv-boundary tests, output-boundary tests, stdout-adapter tests, exit-code
+tests, list-rules command tests, parser tests, dispatcher tests, and
 explicit-token entry tests remain future work. Severity parsing, CLI/config
 override behavior, rule registration behavior, and the JSON schema are not
 stable yet.

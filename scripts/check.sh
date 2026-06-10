@@ -173,6 +173,7 @@ require_grep "OS argv boundary placeholder added" docs/dev/roadmap.md
 require_grep "stdout/stderr output boundary model added" docs/dev/roadmap.md
 require_grep "internal exit-code model added" docs/dev/roadmap.md
 require_grep "explicit-token list-rules command wiring added" docs/dev/roadmap.md
+require_grep "minimal stdout adapter added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
@@ -192,6 +193,8 @@ require_grep "Actual OS process argument parsing and environment handling remain
 require_grep "internal stdout-free command dispatcher" docs/dev/ari-implementation-plan.md
 require_grep "Internal command results now carry data-only exit-code mappings" docs/dev/ari-implementation-plan.md
 require_grep "named explicit-token .--list-rules. command entry" docs/dev/ari-implementation-plan.md
+require_grep "minimal stdout adapter" docs/dev/ari-implementation-plan.md
+require_grep "std::io::print_string" docs/dev/ari-implementation-plan.md
 require_grep "CLI metadata skeleton" docs/dev/roadmap.md
 require_grep "CLI argument model added" docs/dev/roadmap.md
 require_grep "minimal CLI token parser added" docs/dev/roadmap.md
@@ -207,6 +210,7 @@ require_grep "No executable explicit-token list-rules command tests are added ye
 require_grep "No executable main-entry tests are added yet" tests/README.md
 require_grep "No executable OS argv boundary tests are added yet" tests/README.md
 require_grep "No executable stdout/stderr output boundary tests are added yet" tests/README.md
+require_grep "No executable stdout adapter tests are added yet" tests/README.md
 require_grep "scripts/build.sh" tests/README.md
 require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
@@ -313,6 +317,9 @@ require_grep "OutputBoundaryResult" src/output.ari
 require_grep "stdout_stderr_output_boundary" src/output.ari
 require_grep "writes_real_streams" src/output.ari
 require_grep "does not call real output APIs" src/output.ari
+require_grep "StdoutAdapterResult" src/output.ari
+require_grep "write_stdout_text" src/output.ari
+require_grep "std::io::print_string" src/output.ari
 require_grep "ConfigSkeleton" src/config.ari
 require_grep "ConfigSourceMetadata" src/config.ari
 require_grep "OverridePrecedenceMetadata" src/config.ari
