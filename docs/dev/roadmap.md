@@ -39,6 +39,7 @@ internal CLI file lint path added /
 source-only parity runner skeleton added /
 compiler-backed CI gate documented /
 standalone build root wiring added /
+standalone test entrypoint added /
 no user-facing lint output yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -365,7 +366,8 @@ and test work.
       compiler provisioning exist.
 - [x] Wire local standalone build script root handling; build execution remains
       explicit/local and is not part of CI.
-- [ ] Wire standalone tests.
+- [x] Wire local standalone test entrypoint; executable compiler-backed, rule,
+      CLI, parity, and golden-output tests remain future work.
 - [ ] Define release and compatibility policy after inspecting Ari releases and
       Ari tags; define `ari-lint` compatibility only after Ari-language source
       and standalone tests exist.

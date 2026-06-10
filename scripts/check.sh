@@ -59,6 +59,7 @@ require_file examples/README.md
 require_file tests/README.md
 require_file scripts/README.md
 require_file scripts/build.sh
+require_file scripts/test.sh
 require_file .github/workflows/check.yml
 
 require_grep "compiler-free" .github/workflows/check.yml
@@ -72,6 +73,17 @@ require_no_grep "cargo " .github/workflows/check.yml
 require_no_grep "arix" .github/workflows/check.yml
 
 [ -x scripts/build.sh ] || fail "scripts/build.sh is not executable"
+[ -x scripts/test.sh ] || fail "scripts/test.sh is not executable"
+
+require_grep "repo_root" scripts/test.sh
+require_grep "scripts/check.sh" scripts/test.sh
+require_no_grep "ari --check" scripts/test.sh
+require_no_grep "ARI_COMPILER" scripts/test.sh
+require_no_grep "tools/lint" scripts/test.sh
+require_no_grep "scripts/build.sh" scripts/test.sh
+require_no_grep "npm " scripts/test.sh
+require_no_grep "cargo " scripts/test.sh
+require_no_grep "arix" scripts/test.sh
 
 require_dir src
 src_readme=$(find src -name README.md -print -quit)
@@ -115,10 +127,12 @@ require_grep "https://ari-foundry.github.io" README.md
 require_grep "long-term implementation direction" README.md
 require_grep "Ari" README.md
 require_grep "scripts/check.sh" README.md
+require_grep "scripts/test.sh" README.md
 require_grep "scripts/build.sh" README.md
 require_grep "not a full test suite yet" README.md
 require_grep "explicit Ari compiler path" README.md
 require_grep "local standalone build wiring has started" README.md
+require_grep "local standalone test entrypoint" README.md
 require_grep "relative compiler paths" README.md
 require_grep "docs/migration.md" docs/README.md
 require_grep "docs/dev/ari-implementation-plan.md" docs/README.md
@@ -204,6 +218,8 @@ require_grep "internal CLI file lint path added" docs/dev/roadmap.md
 require_grep "source-only parity runner skeleton added" docs/dev/roadmap.md
 require_grep "compiler-backed CI gate documented" docs/dev/roadmap.md
 require_grep "standalone build root wiring added" docs/dev/roadmap.md
+require_grep "standalone test entrypoint added" docs/dev/roadmap.md
+require_grep "Wire local standalone test entrypoint" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "lint run aggregation has also started" tests/README.md
@@ -211,6 +227,7 @@ require_grep "file-read boundary for one" tests/README.md
 require_grep "internal CLI file lint path" tests/README.md
 require_grep "source-only parity runner skeleton" tests/README.md
 require_grep "GitHub Actions workflow is intentionally compiler-free" tests/README.md
+require_grep "local standalone test entrypoint" tests/README.md
 require_grep "No executable standalone build tests are added yet" tests/README.md
 require_grep "relative compiler path preservation" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
@@ -224,6 +241,7 @@ require_grep "Source directories should contain Ari source files only" docs/dev/
 require_grep "CLI file lint path is limited" docs/dev/ari-implementation-plan.md
 require_grep "source-only parity runner skeleton" docs/dev/ari-implementation-plan.md
 require_grep "compiler-backed CI gate" docs/dev/ari-implementation-plan.md
+require_grep "local standalone test entrypoint" docs/dev/ari-implementation-plan.md
 require_grep "Standalone build wiring is local-only" docs/dev/ari-implementation-plan.md
 require_grep "relative compiler paths" docs/dev/ari-implementation-plan.md
 require_grep "The current GitHub Actions workflow must not run" docs/dev/compiler-provisioning.md
@@ -264,6 +282,7 @@ require_grep "No executable OS argv integration tests are added yet" tests/READM
 require_grep "No executable stdout/stderr output boundary tests are added yet" tests/README.md
 require_grep "No executable stdout adapter tests are added yet" tests/README.md
 require_grep "scripts/build.sh" tests/README.md
+require_grep "scripts/test.sh" tests/README.md
 require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
 require_grep "minimal internal single-diagnostic JSON" docs/dev/ari-implementation-plan.md

@@ -155,6 +155,12 @@ It does not move `tools/lint` or change build behavior.
   explicit Ari compiler path, compiles `src/main.ari` to `build/ari-lint` using
   the verified `ari input.ari -o output` invocation form, resolves the
   repository root before compiling, and is not run by CI.
+- A local standalone test entrypoint now exists at `scripts/test.sh`. It
+  resolves the repository root and delegates to `scripts/check.sh`, so it
+  currently runs only compiler-free repository-shape and fixture-invariant
+  checks. It does not run the Ari compiler, invoke `ari --check`, execute
+  `tools/lint`, run CLI tests, run parity checks, install dependencies, or use
+  package manager commands.
 - The CI compiler-backed check gate is documented. The GitHub Actions workflow
   remains compiler-free and runs only `scripts/check.sh` until explicit Ari
   compiler provisioning, standalone tests, and compiler identity recording are
@@ -366,6 +372,12 @@ The local build scaffold is not compiler-backed CI or full build validation.
 Compiler-backed CI, standalone test execution, compiler provisioning in CI,
 and compatibility validation remain future work.
 
+The local standalone test entrypoint is not a full executable test suite.
+`scripts/test.sh` resolves the repository root and delegates to
+`scripts/check.sh` only. Compiler-backed tests, CLI tests, rule execution
+tests, parity checks, golden output comparison, package manager commands, and
+CI compiler execution remain future work.
+
 Standalone build wiring is local-only. `scripts/build.sh` resolves the
 repository root, requires an explicit compiler path or `ARI_COMPILER`, writes
 `build/ari-lint`, preserves relative compiler paths from the caller's
@@ -454,6 +466,7 @@ config, traverse directories, invoke the compiler, call `ari --check`, call
 
 ### Phase 6: standalone tests and CI
 
+- add a local standalone test entrypoint for lightweight checks
 - add fixtures
 - add golden JSON diagnostics when schema is stable
 - run tests with explicit `--ari` compiler path
@@ -582,6 +595,9 @@ usable.
       `ari --check`, `tools/lint`, package managers, or release automation
 - [x] Wire local standalone build script root handling without running the Ari
       compiler in CI or adding package manager files
+- [x] Add a local standalone test entrypoint that resolves the repository root
+      and delegates to `scripts/check.sh` only; executable rule, CLI,
+      compiler-backed, parity, and golden-output tests remain future work
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`
