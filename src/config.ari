@@ -1,5 +1,6 @@
-// Config override metadata only. This file does not parse ari-lint.rules,
-// discover config files, inspect CLI input, or apply severity overrides.
+// Config override model and caller-provided config text parsing. This file does
+// not discover or read ari-lint.rules files, inspect CLI input, or apply
+// severity overrides.
 
 pub enum ConfigSource {
   DefaultConfig,
@@ -32,6 +33,24 @@ pub struct RuleSeverityOverride {
   source: ConfigSource,
 }
 
+pub enum ConfigParseProblemKind {
+  ConfigMissingEquals,
+  ConfigEmptyRule,
+  ConfigInvalidSeverity,
+}
+
+pub struct ConfigParseProblem {
+  kind: ConfigParseProblemKind,
+  line: i64,
+  text: String,
+  detail: String,
+}
+
+pub struct ConfigParseResult {
+  overrides: std::vec::Vec[RuleSeverityOverride],
+  problems: std::vec::Vec[ConfigParseProblem],
+}
+
 pub struct OverridePrecedenceMetadata {
   first: OverridePrecedenceStep,
   second: OverridePrecedenceStep,
@@ -47,15 +66,171 @@ pub struct ConfigSkeleton {
   override_precedence: OverridePrecedenceMetadata,
 }
 
-// Planned config concepts: default config, ari-lint.rules config source,
+fn parse_config_severity(
+  value: Slice[u8],
+) -> Option[super::severity::Severity] {
+  if value.equals("off") {
+    return Some<super::severity::Severity>(super::severity::Off);
+  }
+  if value.equals("hint") {
+    return Some<super::severity::Severity>(super::severity::Hint);
+  }
+  if value.equals("note") {
+    return Some<super::severity::Severity>(super::severity::Note);
+  }
+  if value.equals("warning") {
+    return Some<super::severity::Severity>(super::severity::Warning);
+  }
+  if value.equals("error") {
+    return Some<super::severity::Severity>(super::severity::Error);
+  }
+  return None<super::severity::Severity>();
+}
+
+fn config_text_without_comment(line: Slice[u8]) -> Slice[u8] {
+  match std::string::split_once(line, "#") {
+    Some(pair) => {
+      return std::string::trim(pair.left());
+    }
+    None => {}
+  }
+  return std::string::trim(line);
+}
+
+fn config_parse_problem(
+  zone: ref mut Zone,
+  line_number: i64,
+  line: Slice[u8],
+  kind: ConfigParseProblemKind,
+  detail: String,
+) -> ConfigParseProblem {
+  return ConfigParseProblem {
+    kind: kind,
+    line: line_number,
+    text: std::string::from(zone, line),
+    detail: detail,
+  };
+}
+
+fn config_override_from_parts(
+  zone: ref mut Zone,
+  rule_code: Slice[u8],
+  severity: super::severity::Severity,
+  source: ConfigSource,
+) -> RuleSeverityOverride {
+  return RuleSeverityOverride {
+    rule_code: std::string::from(zone, rule_code),
+    severity: severity,
+    source: source,
+  };
+}
+
+fn parse_config_line(
+  zone: ref mut Zone,
+  line_number: i64,
+  raw_line: Slice[u8],
+  overrides: ref mut std::vec::Vec[RuleSeverityOverride],
+  problems: ref mut std::vec::Vec[ConfigParseProblem],
+) -> void {
+  let line = config_text_without_comment(raw_line);
+  if line.len() == 0 {
+    return;
+  }
+
+  match std::string::split_once(line, "=") {
+    None => {
+      problems.push(config_parse_problem(
+        zone,
+        line_number,
+        line,
+        ConfigMissingEquals,
+        "Config line must use RULE = SEVERITY.",
+      ));
+      return;
+    }
+    Some(pair) => {
+      let rule_code = std::string::trim(pair.left());
+      let severity_text = std::string::trim(pair.right());
+      if rule_code.len() == 0 {
+        problems.push(config_parse_problem(
+          zone,
+          line_number,
+          line,
+          ConfigEmptyRule,
+          "Config line is missing a rule name.",
+        ));
+        return;
+      }
+
+      match parse_config_severity(severity_text) {
+        None => {
+          problems.push(config_parse_problem(
+            zone,
+            line_number,
+            line,
+            ConfigInvalidSeverity,
+            "Severity must be off, hint, note, warning, or error.",
+          ));
+        }
+        Some(severity) => {
+          overrides.push(config_override_from_parts(
+            zone,
+            rule_code,
+            severity,
+            AriLintRulesDiscovery,
+          ));
+        }
+      }
+    }
+  }
+}
+
+pub fn parse_config_text(
+  zone: ref mut Zone,
+  text: Slice[u8],
+) -> ConfigParseResult {
+  var overrides = std::vec::new<RuleSeverityOverride>(zone, 4);
+  var problems = std::vec::new<ConfigParseProblem>(zone, 4);
+  var lines = std::string::lines(text);
+  var line_number = 1;
+
+  while true {
+    match lines.next() {
+      None => {
+        break;
+      }
+      Some(line) => {
+        parse_config_line(
+          zone,
+          line_number,
+          line,
+          ref mut overrides,
+          ref mut problems,
+        );
+        line_number = line_number + 1;
+      }
+    }
+  }
+
+  return ConfigParseResult {
+    overrides: overrides,
+    problems: problems,
+  };
+}
+
+// Planned config concepts include default config, ari-lint.rules config source,
 // explicit --config file path, --rule command-line override, rule severity
 // override, and override precedence.
 //
 // Reference docs say --config disables ari-lint.rules discovery, and command
 // line --rule overrides are applied after config-file settings. This file
-// records that as metadata only.
+// records that precedence and parses caller-provided config text only.
 //
-// Config parsing, ari-lint.rules discovery or reading, --config behavior,
-// --rule behavior, severity override application, CLI parsing, diagnostics
-// output, JSON serialization, source scanning, and ari --check invocation are
-// future work.
+// parse_config_text accepts text already supplied by the caller. It supports
+// blank lines, # comments, and RULE = SEVERITY entries for off, hint, note,
+// warning, and error. It returns internal overrides and parse problems without
+// applying them.
+//
+// ari-lint.rules discovery or reading, --config behavior, --rule behavior,
+// severity override application, CLI integration, diagnostics output, JSON
+// serialization, source scanning, and ari --check invocation are future work.

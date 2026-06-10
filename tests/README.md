@@ -195,10 +195,14 @@ severity, description, ordering, newline behavior, human-readable text
 stability, future JSON formatting, and parity behavior against current
 `tools/lint`.
 
+No executable config parser tests are added yet. Future config parser tests
+should validate caller-provided `RULE = SEVERITY` text, blank lines, comments,
+invalid lines, invalid severity names, and parse problem reporting.
+
 No config override tests are added yet. Future config override tests should
 validate `ari-lint.rules` discovery, `--config` behavior, `--rule` behavior,
-precedence, invalid config, diagnostics, and parity behavior against current
-`tools/lint`.
+precedence, override application, diagnostics, and parity behavior against
+current `tools/lint`.
 
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity

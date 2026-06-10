@@ -27,6 +27,7 @@ internal exit-code model added /
 explicit-token list-rules command wiring added /
 minimal stdout adapter added /
 OS argv integration added /
+minimal config text parser added /
 no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -83,6 +84,14 @@ and test work.
       stdout/stderr, wiring `main`, serializing JSON, invoking the compiler,
       scanning sources, executing lint rules, or calling process exit.
       OS-argv integration tests and user-facing CLI process behavior remain
+      future work.
+- [x] Add a minimal config text parser for caller-provided text using the
+      documented `RULE = SEVERITY` shape, blank lines, and `#` comments,
+      returning internal overrides and parse problems without reading
+      `ari-lint.rules`, discovering config files, applying overrides, inspecting
+      CLI input, emitting diagnostics, serializing JSON, scanning sources,
+      invoking the compiler, or executing lint rules. Config parser tests,
+      config discovery, `--config` behavior, and override application remain
       future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
@@ -157,11 +166,11 @@ and test work.
 - [x] Refine config override skeleton for default config, `ari-lint.rules`,
       explicit `--config` file path, `--rule` command-line override, rule
       severity override, and documented override precedence as metadata-only Ari
-      source placeholders; real config parsing, config discovery, config file
-      reading, override application, CLI parsing, diagnostics output, compiler
-      invocation, tests, and CI remain future work. Standalone config
-      precedence fixtures remain needs follow-up before claiming stable config
-      behavior.
+      source placeholders; caller-provided config text parsing has started, but
+      config discovery, config file reading, override application, CLI parsing,
+      diagnostics output, compiler invocation, tests, and CI remain future work.
+      Standalone config precedence fixtures remain needs follow-up before
+      claiming stable config behavior.
 - [x] Start non-executing rule module layout for planned
       `lint/trailing-whitespace` and `lint/missing-final-newline` child modules
       as layout/metadata-only Ari source placeholders; real trailing-whitespace
