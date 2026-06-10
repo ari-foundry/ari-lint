@@ -172,6 +172,7 @@ require_grep "minimal main entry shell added" docs/dev/roadmap.md
 require_grep "OS argv boundary placeholder added" docs/dev/roadmap.md
 require_grep "stdout/stderr output boundary model added" docs/dev/roadmap.md
 require_grep "internal exit-code model added" docs/dev/roadmap.md
+require_grep "explicit-token list-rules command wiring added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
@@ -190,6 +191,7 @@ require_grep "Minimal token-list parsing has started" docs/dev/ari-implementatio
 require_grep "Actual OS process argument parsing and environment handling remain future" docs/dev/ari-implementation-plan.md
 require_grep "internal stdout-free command dispatcher" docs/dev/ari-implementation-plan.md
 require_grep "Internal command results now carry data-only exit-code mappings" docs/dev/ari-implementation-plan.md
+require_grep "named explicit-token .--list-rules. command entry" docs/dev/ari-implementation-plan.md
 require_grep "CLI metadata skeleton" docs/dev/roadmap.md
 require_grep "CLI argument model added" docs/dev/roadmap.md
 require_grep "minimal CLI token parser added" docs/dev/roadmap.md
@@ -201,6 +203,7 @@ require_grep "No executable CLI parser tests are added yet" tests/README.md
 require_grep "No executable dispatcher tests are added yet" tests/README.md
 require_grep "No executable exit-code tests are added yet" tests/README.md
 require_grep "No executable explicit-token entry tests are added yet" tests/README.md
+require_grep "No executable explicit-token list-rules command tests are added yet" tests/README.md
 require_grep "No executable main-entry tests are added yet" tests/README.md
 require_grep "No executable OS argv boundary tests are added yet" tests/README.md
 require_grep "No executable stdout/stderr output boundary tests are added yet" tests/README.md
@@ -270,6 +273,7 @@ require_grep "problems" src/cli.ari
 require_grep "parse_cli_tokens" src/cli.ari
 require_grep "dispatch_cli_command" src/cli.ari
 require_grep "run_explicit_cli_tokens" src/cli.ari
+require_grep "run_explicit_list_rules_command" src/cli.ari
 require_grep "OsArgvBoundary" src/cli.ari
 require_grep "os_argv_boundary" src/cli.ari
 require_grep "CliListRulesText" src/cli.ari

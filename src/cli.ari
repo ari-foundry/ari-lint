@@ -1,10 +1,11 @@
 // CLI model, explicit-token parsing, stdout-free dispatch, internal exit-code
-// data, explicit-token entry point, and OS argv boundary marker. The
-// positional source file input and documented options are represented here.
-// This file does not read process arguments or inspect OS process argv. It also
-// does not read environment state, validate input paths, read config files,
-// serialize JSON, produce diagnostics, write stdout/stderr, scan source files,
-// execute lint rules, call tools/lint, call process exit, or invoke ari --check.
+// data, explicit-token list-rules command wiring, explicit-token entry point,
+// and OS argv boundary marker. The positional source file input and documented
+// options are represented here. This file does not read process arguments or
+// inspect OS process argv. It also does not read environment state, validate
+// input paths, read config files, serialize JSON, produce diagnostics, write
+// stdout/stderr, scan source files, execute lint rules, call tools/lint, call
+// process exit, or invoke ari --check.
 
 pub struct CliOptionMetadata {
   name: String,
@@ -320,6 +321,12 @@ pub fn run_explicit_cli_tokens(
   return dispatch_cli_command(zone, parse_result);
 }
 
+pub fn run_explicit_list_rules_command(zone: ref mut Zone) -> CliCommandResult {
+  var tokens = std::vec::new<String>(zone, 1);
+  tokens.push("--list-rules");
+  return run_explicit_cli_tokens(zone, tokens);
+}
+
 // parse_cli_tokens consumes a caller-provided token list and records source
 // files, flags/options, raw rule overrides, and parse problems in CliParseResult.
 // It intentionally leaves process argv/env, path validation, config parsing,
@@ -336,6 +343,11 @@ pub fn run_explicit_cli_tokens(
 // CliExitCodeMapping records internal command-result-to-code decisions. It does
 // not exit the process; main still returns its fixed shell status until real CLI
 // wiring is explicitly scoped.
+//
+// run_explicit_list_rules_command is the explicit-token command path for
+// --list-rules. It reaches formatted text and exit-code data through the
+// existing parser and dispatcher, but does not read OS argv, write stdout/stderr,
+// or run a user-facing CLI process.
 //
 // os_argv_boundary names the future OS argv integration point. It records that
 // the boundary exists and is inactive. It does not inspect argv, read
