@@ -47,6 +47,10 @@ It does not move `tools/lint` or change build behavior.
   serializer now builds JSON text from an already-built internal `Diagnostic`.
   User-facing diagnostic output, diagnostic arrays, human-readable formatting,
   and final JSON schema stability remain future work.
+- The source input boundary model has started for caller-provided source text
+  and path-only source entries. It records internal source inputs without
+  reading files, recursively scanning the filesystem, inspecting source text, or
+  running lint rules.
 - An internal list-rules output path now converts known rule metadata into
   list-rules rows for `lint/trailing-whitespace` and
   `lint/missing-final-newline`, and an internal human-readable list-rules
@@ -204,6 +208,10 @@ Current preparatory model skeleton files are source-only placeholders:
   designed. It currently returns success without reading process state or
   producing output.
 - `src/model.ari` groups future model modules.
+- `src/source.ari` defines the internal source input boundary model for
+  caller-provided source text, path-only source entries, and path-list inputs
+  from already-parsed CLI paths. It does not read files, walk directories,
+  inspect source text, invoke the compiler, or execute lint rules.
 - `src/cli.ari` sketches planned CLI option metadata for positional source file
   input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`,
   including each option's purpose, value requirement, and repeatability. It
@@ -275,21 +283,23 @@ caller-provided token lists and raw option values, the config parser is limited
 to caller-provided text, rule/severity pairs, blank lines, and comments, the
 rule override parser is limited to caller-provided `--rule` text and internal
 override construction, the diagnostic JSON serializer is limited to one
-already-built internal Diagnostic, the list-rules formatter is limited to
-internal text construction, the command dispatcher is limited to stdout-free
-internal command results, the exit-code model is limited to internal data
-carried by those results, the explicit-token `--list-rules` command path is
-limited to caller-provided token construction, the stdout adapter is limited to
-caller-provided `String` text, and the stdout/stderr output boundary is limited
-to status data for named future sinks.
+already-built internal Diagnostic, the source input boundary is limited to
+caller-provided source text and path-only entries, the list-rules formatter is
+limited to internal text construction, the command dispatcher is limited to
+stdout-free internal command results, the exit-code model is limited to
+internal data carried by those results, the explicit-token `--list-rules`
+command path is limited to caller-provided token construction, the stdout
+adapter is limited to caller-provided `String` text, and the stdout/stderr
+output boundary is limited to status data for named future sinks.
 Compiler invocation, config discovery, config file reading, override
 application, diagnostics output, stderr writing, stdout adapter wiring to
 commands or `main`, process exit, diagnostic array serialization, user-facing
 JSON output, environment handling, unknown-rule validation for `--rule`, source
-scanning, lint execution, main-entry tests, argv-boundary tests, OS-argv
-integration tests, config parser tests, rule override parser tests, diagnostic
-JSON serializer tests, output-boundary tests, stdout-adapter tests, exit-code
-tests, list-rules command tests, parser tests, dispatcher tests, and
+text inspection, filesystem scanning, lint execution, main-entry tests,
+argv-boundary tests, OS-argv integration tests, config parser tests, rule
+override parser tests, diagnostic JSON serializer tests, source input tests,
+output-boundary tests, stdout-adapter tests, exit-code tests, list-rules command
+tests, parser tests, dispatcher tests, and
 explicit-token entry tests remain future work. Severity parsing, CLI/config
 override behavior, rule registration behavior, and the JSON schema are not
 stable yet.
@@ -446,6 +456,7 @@ usable.
       syntax choices are verified
 - [ ] Define stable JSON schema and human-readable diagnostic text policy
 - [x] Add minimal internal diagnostic JSON serialization for one diagnostic
+- [x] Add source input boundary model without file IO or filesystem scanning
 - [ ] Define registry, severity, and config model behavior after source
       skeletons compile in the real build
 - [x] Add minimal caller-provided config text parsing

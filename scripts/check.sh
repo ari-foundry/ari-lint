@@ -82,6 +82,7 @@ require_file src/rules.ari
 require_file src/rules/trailing_whitespace.ari
 require_file src/rules/missing_final_newline.ari
 require_file src/config.ari
+require_file src/source.ari
 
 unexpected_trailing_fixture=$(find tests/fixtures/trailing-whitespace -type f ! -name clean.ari ! -name trailing-spaces.ari -print -quit)
 [ -z "$unexpected_trailing_fixture" ] || fail "unexpected trailing-whitespace fixture: $unexpected_trailing_fixture"
@@ -178,6 +179,7 @@ require_grep "OS argv integration added" docs/dev/roadmap.md
 require_grep "minimal config text parser added" docs/dev/roadmap.md
 require_grep "rule override semantic parser added" docs/dev/roadmap.md
 require_grep "minimal diagnostic JSON serializer added" docs/dev/roadmap.md
+require_grep "source input boundary model added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
@@ -230,6 +232,7 @@ require_grep "internal list-rules output path added" docs/dev/roadmap.md
 require_grep "human-readable list-rules formatter added" docs/dev/roadmap.md
 require_grep "No diagnostic output tests are added yet" tests/README.md
 require_grep "No executable diagnostic JSON serializer tests are added yet" tests/README.md
+require_grep "No executable source input boundary tests are added yet" tests/README.md
 require_grep "No executable list-rules formatter tests are added yet" tests/README.md
 require_grep "config override skeleton" docs/dev/ari-implementation-plan.md
 require_grep "config override skeleton" docs/dev/roadmap.md
@@ -254,6 +257,7 @@ require_grep "pub mod cli" src/model.ari
 require_grep "pub mod output" src/model.ari
 require_grep "pub mod config" src/model.ari
 require_grep "pub mod rules" src/model.ari
+require_grep "pub mod source" src/model.ari
 require_grep "CliSurfaceMetadata" src/cli.ari
 require_grep "CliArgs" src/cli.ari
 require_grep "CliParseResult" src/cli.ari
@@ -372,6 +376,18 @@ require_grep "RULE = SEVERITY" src/config.ari
 require_grep "RULE=SEVERITY" src/config.ari
 require_grep "CommandLineRuleOverride" src/config.ari
 require_grep "future work" src/config.ari
+require_grep "SourceInput" src/source.ari
+require_grep "SourceInputSet" src/source.ari
+require_grep "SourceInputOrigin" src/source.ari
+require_grep "ProvidedText" src/source.ari
+require_grep "PathOnly" src/source.ari
+require_grep "source_input_from_text" src/source.ari
+require_grep "source_input_from_path" src/source.ari
+require_grep "source_input_set_from_paths" src/source.ari
+require_grep "reads_file: false" src/source.ari
+require_grep "recursively_scans_filesystem: false" src/source.ari
+require_grep "does not read files" src/source.ari
+require_grep "recursively scan directories" src/source.ari
 require_grep "InitialRuleMetadata" src/rules.ari
 require_grep "pub mod trailing_whitespace" src/rules.ari
 require_grep "pub mod missing_final_newline" src/rules.ari
