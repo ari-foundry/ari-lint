@@ -189,6 +189,11 @@ validate human-readable output, JSON output shape, line/column fields,
 endLine/endColumn fields if supported, severity, rule code, message, path
 normalization, and parity behavior against current `tools/lint`.
 
+No executable diagnostic JSON serializer tests are added yet. Future serializer
+tests should validate single-diagnostic JSON construction, string escaping,
+optional end positions, severity names, rule codes, messages, and final schema
+stability once the schema is set.
+
 No executable list-rules formatter tests are added yet. Future tests should
 cover list-rules rows and formatting for rule code, short name, default
 severity, description, ordering, newline behavior, human-readable text

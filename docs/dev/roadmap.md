@@ -29,6 +29,7 @@ minimal stdout adapter added /
 OS argv integration added /
 minimal config text parser added /
 rule override semantic parser added /
+minimal diagnostic JSON serializer added /
 no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -102,6 +103,13 @@ and test work.
       serializing JSON, scanning sources, invoking the compiler, or executing
       lint rules. Rule override parser tests, unknown-rule validation, and
       override application remain future work.
+- [x] Add a minimal internal diagnostic JSON serializer for one already-built
+      internal `Diagnostic`, including file path, line, column, optional
+      endLine/endColumn, severity, rule code, message, basic string escaping,
+      and null optional positions without writing stdout/stderr, wiring CLI
+      output, serializing diagnostic arrays, scanning sources, invoking the
+      compiler, executing lint rules, or adding golden tests. JSON serializer
+      tests and final schema stability remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain
@@ -169,8 +177,9 @@ and test work.
 - [x] Start diagnostic output metadata skeleton for human-readable output, JSON
       output, diagnostic location, file path, line, column, endLine, endColumn,
       severity, rule code, and message as metadata-only Ari source
-      placeholders; real diagnostic output, human-readable formatting, JSON
-      serialization, source scanning, CLI parsing, config parsing, compiler
+      placeholders; minimal internal single-diagnostic JSON serialization has
+      started, but real diagnostic output, human-readable formatting,
+      diagnostic arrays, source scanning, CLI parsing, config parsing, compiler
       invocation, tests, and CI remain future work, and the JSON schema remains
       needs follow-up.
 - [x] Refine config override skeleton for default config, `ari-lint.rules`,

@@ -43,8 +43,10 @@ It does not move `tools/lint` or change build behavior.
   lint rules.
 - The diagnostic output metadata skeleton has started as metadata-only
   declarations for human and JSON output modes, diagnostic location fields, and
-  planned diagnostic fields. Diagnostic output is not implemented yet.
-  JSON serialization is not implemented yet.
+  planned diagnostic fields. A minimal internal single-diagnostic JSON
+  serializer now builds JSON text from an already-built internal `Diagnostic`.
+  User-facing diagnostic output, diagnostic arrays, human-readable formatting,
+  and final JSON schema stability remain future work.
 - An internal list-rules output path now converts known rule metadata into
   list-rules rows for `lint/trailing-whitespace` and
   `lint/missing-final-newline`, and an internal human-readable list-rules
@@ -233,14 +235,15 @@ Current preparatory model skeleton files are source-only placeholders:
 - `src/output.ari` sketches diagnostic output metadata for human-readable and
   JSON output modes, diagnostic location, file path, line, column, endLine,
   endColumn, severity, rule code, and message. It also defines an internal
+  single-diagnostic JSON serializer for already-built internal diagnostics,
   list-rules output row model, a known-rule output builder from existing rule
   metadata, an internal human-readable list-rules formatter, and a data-only
   stdout/stderr output boundary model for named future output sinks. It now
   includes a minimal stdout adapter that uses the verified Ari
   `std::io::print_string` API for caller-provided `String` text and returns
-  local status data. It does not format diagnostics, build diagnostic strings,
-  serialize JSON, emit user-facing `--list-rules` CLI output, write stderr,
-  read OS argv, or run the CLI.
+  local status data. It does not format human-readable diagnostics, serialize
+  diagnostic arrays, emit user-facing JSON output, emit user-facing
+  `--list-rules` CLI output, write stderr, read OS argv, or run the CLI.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description.
 - `src/registry.ari` sketches rule registry concepts for planned reference
@@ -271,20 +274,22 @@ argv[0], and dispatching internal tokens, the CLI parser is limited to explicit
 caller-provided token lists and raw option values, the config parser is limited
 to caller-provided text, rule/severity pairs, blank lines, and comments, the
 rule override parser is limited to caller-provided `--rule` text and internal
-override construction, the list-rules formatter is limited to internal text
-construction, the command dispatcher is limited to stdout-free internal command
-results, the exit-code model is limited to internal data carried by those
-results, the explicit-token `--list-rules` command path is limited to
-caller-provided token construction, the stdout adapter is limited to
+override construction, the diagnostic JSON serializer is limited to one
+already-built internal Diagnostic, the list-rules formatter is limited to
+internal text construction, the command dispatcher is limited to stdout-free
+internal command results, the exit-code model is limited to internal data
+carried by those results, the explicit-token `--list-rules` command path is
+limited to caller-provided token construction, the stdout adapter is limited to
 caller-provided `String` text, and the stdout/stderr output boundary is limited
 to status data for named future sinks.
 Compiler invocation, config discovery, config file reading, override
 application, diagnostics output, stderr writing, stdout adapter wiring to
-commands or `main`, process exit, JSON serialization, environment handling,
-unknown-rule validation for `--rule`, source scanning, lint execution,
-main-entry tests, argv-boundary tests, OS-argv integration tests, config parser
-tests, rule override parser tests, output-boundary tests, stdout-adapter tests,
-exit-code tests, list-rules command tests, parser tests, dispatcher tests, and
+commands or `main`, process exit, diagnostic array serialization, user-facing
+JSON output, environment handling, unknown-rule validation for `--rule`, source
+scanning, lint execution, main-entry tests, argv-boundary tests, OS-argv
+integration tests, config parser tests, rule override parser tests, diagnostic
+JSON serializer tests, output-boundary tests, stdout-adapter tests, exit-code
+tests, list-rules command tests, parser tests, dispatcher tests, and
 explicit-token entry tests remain future work. Severity parsing, CLI/config
 override behavior, rule registration behavior, and the JSON schema are not
 stable yet.
@@ -440,6 +445,7 @@ usable.
 - [ ] Define concrete diagnostic output metadata value construction after Ari
       syntax choices are verified
 - [ ] Define stable JSON schema and human-readable diagnostic text policy
+- [x] Add minimal internal diagnostic JSON serialization for one diagnostic
 - [ ] Define registry, severity, and config model behavior after source
       skeletons compile in the real build
 - [x] Add minimal caller-provided config text parsing
