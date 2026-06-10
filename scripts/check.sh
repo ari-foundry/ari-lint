@@ -168,6 +168,7 @@ require_grep "lightweight check runner skeleton" docs/dev/roadmap.md
 require_grep "compiler invocation plan added" docs/dev/roadmap.md
 require_grep "compiler provisioning plan added" docs/dev/roadmap.md
 require_grep "local build scaffold and gitignore hygiene added" docs/dev/roadmap.md
+require_grep "minimal main entry shell added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
@@ -195,6 +196,7 @@ require_grep "No CLI model tests are added yet" tests/README.md
 require_grep "No executable CLI parser tests are added yet" tests/README.md
 require_grep "No executable dispatcher tests are added yet" tests/README.md
 require_grep "No executable explicit-token entry tests are added yet" tests/README.md
+require_grep "No executable main-entry tests are added yet" tests/README.md
 require_grep "scripts/build.sh" tests/README.md
 require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
@@ -220,6 +222,7 @@ require_grep "single-line helper" docs/rules/trailing-whitespace.md
 require_grep "trailing-whitespace helper started" docs/dev/roadmap.md
 require_grep "No executable trailing-whitespace helper tests are added yet" tests/README.md
 require_grep "fn main() -> i64" src/main.ari
+require_grep "run_main_entry_shell" src/main.ari
 require_grep "pub mod cli" src/model.ari
 require_grep "pub mod output" src/model.ari
 require_grep "pub mod config" src/model.ari
