@@ -5,8 +5,9 @@ Behavior tests will be added after executable test wiring begins.
 Current checks verify skeleton files, lightweight documentation/source guards,
 the first trailing-whitespace fixture shape, and the first
 missing-final-newline fixture shape. In-memory trailing-whitespace execution
-and in-memory missing-final-newline execution have started in source, but they
-are not executed by these checks yet.
+and in-memory missing-final-newline execution have started in source. In-memory
+lint run aggregation has also started for caller-provided source text, but
+these paths are not executed by these checks yet.
 
 Run the lightweight check script from the repository root:
 
@@ -129,6 +130,12 @@ No missing-final-newline diagnostic mapping tests are added yet. Future tests
 should validate mapping from the missing-final-newline helper result to the
 internal diagnostic model, including caller-provided line and column behavior,
 end column behavior, message, severity, rule code, and parity behavior against
+current `tools/lint`.
+
+No executable in-memory lint run aggregation tests are added yet. Future tests
+should cover combining rule diagnostics, diagnostic ordering, empty diagnostic
+sets, no file reads, no filesystem scanning, no config application, no output
+or JSON serialization, no compiler invocation, and parity behavior against
 current `tools/lint`.
 
 No CLI tests are added yet. Future CLI tests should validate positional source

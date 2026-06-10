@@ -1,0 +1,58 @@
+// In-memory lint run aggregation over caller-provided source text only.
+//
+// This module combines diagnostics from already-scoped in-memory rules. It
+// does not read files, scan the filesystem, apply config overrides, write
+// output, serialize JSON, invoke ari --check, or call tools/lint.
+
+pub struct InMemoryLintRunResult {
+  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
+  source_count: i64,
+  reads_files: bool,
+  scans_filesystem: bool,
+  applies_config: bool,
+  writes_output: bool,
+  serializes_json: bool,
+  invokes_compiler: bool,
+}
+
+fn append_diagnostics(
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic],
+  rule_diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
+) -> void {
+  for diagnostic in rule_diagnostics {
+    diagnostics.push(diagnostic);
+  }
+}
+
+pub fn lint_in_memory_source(
+  zone: ref mut Zone,
+  file_path: Slice[u8],
+  source_text: Slice[u8],
+) -> InMemoryLintRunResult {
+  var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 8);
+
+  let trailing = super::rules::trailing_whitespace::lint_trailing_whitespace_in_memory(
+    zone,
+    file_path,
+    source_text,
+  );
+  append_diagnostics(ref mut diagnostics, trailing.diagnostics);
+
+  let missing_final = super::rules::missing_final_newline::lint_missing_final_newline_in_memory(
+    zone,
+    file_path,
+    source_text,
+  );
+  append_diagnostics(ref mut diagnostics, missing_final.diagnostics);
+
+  return InMemoryLintRunResult {
+    diagnostics: diagnostics,
+    source_count: 1,
+    reads_files: false,
+    scans_filesystem: false,
+    applies_config: false,
+    writes_output: false,
+    serializes_json: false,
+    invokes_compiler: false,
+  };
+}
