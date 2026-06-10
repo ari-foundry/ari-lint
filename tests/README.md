@@ -7,7 +7,9 @@ the first trailing-whitespace fixture shape, and the first
 missing-final-newline fixture shape. In-memory trailing-whitespace execution
 and in-memory missing-final-newline execution have started in source. In-memory
 lint run aggregation has also started for caller-provided source text, but
-these paths are not executed by these checks yet.
+these paths are not executed by these checks yet. A file-read boundary for one
+caller-provided path has started in source, but the lightweight checks do not
+execute file IO.
 
 Run the lightweight check script from the repository root:
 
@@ -208,8 +210,15 @@ stability once the schema is set.
 
 No executable source input boundary tests are added yet. Future source input
 tests should validate caller-provided source text, path-only source entries,
-path-list inputs from already-parsed CLI paths, no file reads, no recursive
-filesystem scanning, and later file input behavior once file IO is scoped.
+path-list inputs from already-parsed CLI paths, the single-path file-read
+boundary, file read error preservation, no recursive filesystem scanning, no
+config discovery, and later file input behavior once CLI wiring is scoped.
+
+No executable file IO boundary tests are added yet. Future tests should cover
+successful single-file reads, missing-file `PathError` preservation,
+permission errors if practical, no directory traversal, no config-file
+discovery, no rule execution, no output, no JSON serialization, no compiler
+invocation, and parity behavior against current `tools/lint`.
 
 No executable list-rules formatter tests are added yet. Future tests should
 cover list-rules rows and formatting for rule code, short name, default

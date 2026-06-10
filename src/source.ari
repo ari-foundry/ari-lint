@@ -1,10 +1,12 @@
-// Source input boundary model. This file records caller-provided source text
-// and path-only source entries without reading files, walking directories,
-// scanning source contents, invoking the compiler, or executing lint rules.
+// Source input boundary model. This file records caller-provided source text,
+// path-only source entries, and the explicit single-file read boundary without
+// walking directories, recursively scanning source trees, invoking the
+// compiler, or executing lint rules.
 
 pub enum SourceInputOrigin {
   ProvidedText,
   PathOnly,
+  FileRead,
 }
 
 pub struct SourceInput {
@@ -19,6 +21,15 @@ pub struct SourceInputSet {
   inputs: std::vec::Vec[SourceInput],
   reads_files: bool,
   recursively_scans_filesystem: bool,
+}
+
+pub struct SourceFileReadBoundary {
+  api: String,
+  reads_file: bool,
+  recursively_scans_filesystem: bool,
+  discovers_config: bool,
+  executes_rules: bool,
+  invokes_compiler: bool,
 }
 
 pub fn source_input_from_text(
@@ -73,11 +84,45 @@ pub fn source_input_set_from_paths(
   };
 }
 
+pub fn source_file_read_boundary() -> SourceFileReadBoundary {
+  return SourceFileReadBoundary {
+    api: "std::fs::read_detailed(ref mut zone, path)",
+    reads_file: true,
+    recursively_scans_filesystem: false,
+    discovers_config: false,
+    executes_rules: false,
+    invokes_compiler: false,
+  };
+}
+
+pub fn source_input_from_file(
+  zone: ref mut Zone,
+  path: Slice[u8],
+) -> std::Result[SourceInput, std::fs::PathError] {
+  match std::fs::read_detailed(zone, path) {
+    std::Ok(text) => {
+      return std::Ok<SourceInput, std::fs::PathError>(SourceInput {
+        path: std::string::from(zone, path),
+        text: Some<String>(text),
+        origin: FileRead,
+        reads_file: true,
+        recursively_scans_filesystem: false,
+      });
+    }
+    std::Err(problem) => {
+      return std::Err<SourceInput, std::fs::PathError>(problem);
+    }
+  }
+}
+
 // source_input_from_text is for already-provided in-memory source. It copies the
 // caller-provided path label and source text into the active zone.
 //
 // source_input_from_path and source_input_set_from_paths record path-only
-// entries for future file input wiring. This boundary does not read files, open
-// directories, discover ari-lint.rules, recursively scan directories, inspect
-// source text, produce diagnostics, serialize JSON, invoke ari --check, call
-// tools/lint, or execute lint rules.
+// entries for future file input wiring.
+//
+// source_input_from_file is the file-read boundary. It uses the verified
+// std::fs::read_detailed API to read one explicitly provided path and preserve
+// PathError details. It does not open directories, discover ari-lint.rules,
+// recursively scan directories, produce diagnostics, serialize JSON, invoke ari
+// --check, call tools/lint, or execute lint rules.
