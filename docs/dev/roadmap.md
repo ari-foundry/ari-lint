@@ -32,6 +32,7 @@ rule override semantic parser added /
 minimal diagnostic JSON serializer added /
 source input boundary model added /
 in-memory trailing-whitespace execution added /
+in-memory missing-final-newline execution added /
 no file-backed or user-facing lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -126,21 +127,28 @@ and test work.
       calling `tools/lint`. Rule execution tests, file-backed linting, config
       integration, CLI wiring, output behavior, and parity checks remain future
       work.
+- [x] Add in-memory `lint/missing-final-newline` execution over
+      caller-provided source text, returning an internal diagnostic for
+      non-empty content that does not end with a newline without reading files,
+      scanning the filesystem, applying config, producing user-facing output,
+      serializing JSON, invoking the compiler, or calling `tools/lint`. Rule
+      execution tests, file-backed linting, config integration, CLI wiring,
+      output behavior, and parity checks remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain
       future work.
 - [x] Start registry, severity, and config skeleton as preparatory Ari source
       work only; in-memory trailing-whitespace behavior has since started,
-      while missing-final-newline behavior, registry execution, severity
-      parsing, config parsing, CLI overrides, diagnostics output, compiler
-      invocation, tests, and CI remain future work.
+      in-memory missing-final-newline behavior has since started, while
+      registry execution, severity parsing, config parsing, CLI overrides,
+      diagnostics output, compiler invocation, tests, and CI remain future work.
 - [x] Add first planned rule metadata entries for
       `lint/trailing-whitespace` and `lint/missing-final-newline` as
       metadata-only Ari source placeholders; in-memory trailing-whitespace
-      behavior has since started, while missing-final-newline behavior,
-      file-backed source scanning, diagnostics output, config parsing, CLI
-      behavior, compiler invocation, tests, and CI remain future work.
+      behavior and in-memory missing-final-newline behavior have since started,
+      while file-backed source scanning, diagnostics output, config parsing,
+      CLI behavior, compiler invocation, tests, and CI remain future work.
 - [x] Start CLI metadata skeleton for positional source input, `--json`,
       `--ari`, `-I`, `--list-rules`, `--config`, and `--rule` as
       metadata-only Ari source placeholders; full user-facing argument
@@ -211,8 +219,9 @@ and test work.
       `lint/trailing-whitespace` and `lint/missing-final-newline` child modules
       as layout/metadata-only Ari source placeholders; in-memory
       trailing-whitespace execution has since started, while
-      missing-final-newline behavior, file-backed linting, config interactions,
-      CLI parsing, compiler invocation, tests, and CI remain future work.
+      in-memory missing-final-newline execution has since started. File-backed
+      linting, config interactions, CLI parsing, compiler invocation, tests, and
+      CI remain future work.
 - [x] Add `docs/rules/trailing-whitespace.md` as a design note for the planned
       `lint/trailing-whitespace` rule; in-memory implementation has since
       started, while file reading, filesystem scanning, tests, fixtures, JSON
@@ -249,37 +258,40 @@ and test work.
       `tools/lint` execution, file-backed rule execution, and CI parity jobs
       remain future work.
 - [x] Add `docs/rules/missing-final-newline.md` as a design note for the
-      planned `lint/missing-final-newline` rule; real missing-final-newline
-      implementation, file reading, file content inspection, diagnostic
-      production, tests, fixtures, JSON serialization, CLI behavior, config
-      parsing, compiler invocation, and CI remain future work.
-- [x] Start a minimal internal missing-final-newline content helper; full rule
-      execution, file reading, source scanning, diagnostic production, CLI
-      behavior, config parsing, JSON serialization, compiler invocation, tests,
-      fixtures, and CI remain future work.
+      planned `lint/missing-final-newline` rule; in-memory implementation has
+      since started, while file reading, filesystem scanning, tests, fixtures,
+      JSON serialization, CLI behavior, config parsing, compiler invocation,
+      and CI remain future work.
+- [x] Start a minimal internal missing-final-newline content helper; the helper
+      now feeds in-memory rule execution, while file reading, user-facing
+      diagnostic output, CLI behavior, config parsing, JSON serialization,
+      compiler invocation, tests, fixtures, and CI remain future work.
 - [x] Add a fixture and test plan for `lint/missing-final-newline`;
       `docs/rules/missing-final-newline-fixtures.md` tracks planned fixture
       layout, expected cases, expected result strategy, parity strategy, and
       golden output policy, but fixtures, tests, golden files, test runner
-      behavior, full rule execution, diagnostics, and CI remain future work.
+      behavior, file-backed rule execution, user-facing diagnostics, and CI
+      remain future work.
 - [x] Start first minimal missing-final-newline fixture coverage with
       `tests/fixtures/missing-final-newline/with-final-newline.ari` and
       `tests/fixtures/missing-final-newline/missing-final-newline.ari`, plus a
       lightweight workflow check for fixture presence and final newline
-      presence/absence. Full rule execution, helper unit tests, source
-      scanning, diagnostics, CLI tests, golden JSON, parity tests, compiler
-      invocation, and a standalone test runner remain future work.
+      presence/absence. In-memory execution has since started, while helper
+      unit tests, file-backed source scanning, diagnostics output, CLI tests,
+      golden JSON, parity tests, compiler invocation, and a standalone test
+      runner remain future work.
 - [x] Start missing-final-newline diagnostic mapping skeleton for explicit
       caller-provided final position metadata, mapping helper output to internal
-      span/severity data. Full rule execution, full diagnostics,
-      message/rule-code String value construction, file reading, source scanning,
-      CLI output, JSON serialization, config integration, tests, parity checks,
-      compiler invocation, and CI remain future work.
+      span/severity data. In-memory rule execution now computes final position
+      metadata and constructs internal diagnostics with message/rule-code
+      values, while file-backed source scanning, CLI output, JSON serialization,
+      config integration, tests, parity checks, compiler invocation, and CI
+      remain future work.
 - [x] Add missing-final-newline parity plan;
       `docs/rules/missing-final-newline-parity.md` tracks future comparison
       against current bundled/reference `tools/lint` behavior, but the parity
-      runner, parity tests, golden output, `tools/lint` execution, full rule
-      execution, and CI parity jobs remain future work.
+      runner, parity tests, golden output, `tools/lint` execution, file-backed
+      rule execution, and CI parity jobs remain future work.
 - [x] Add lightweight check runner skeleton with `scripts/check.sh` for
       repository shape and fixture invariants only; Ari compiler execution,
       `ari --check`, `tools/lint` execution, parity runner behavior, CLI tests,

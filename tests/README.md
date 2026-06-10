@@ -5,7 +5,8 @@ Behavior tests will be added after executable test wiring begins.
 Current checks verify skeleton files, lightweight documentation/source guards,
 the first trailing-whitespace fixture shape, and the first
 missing-final-newline fixture shape. In-memory trailing-whitespace execution
-has started in source, but it is not executed by these checks yet.
+and in-memory missing-final-newline execution have started in source, but they
+are not executed by these checks yet.
 
 Run the lightweight check script from the repository root:
 
@@ -105,8 +106,9 @@ diagnostics, or execute the helper directly.
 
 The future missing-final-newline fixture and test plan is documented in
 [docs/rules/missing-final-newline-fixtures.md](../docs/rules/missing-final-newline-fixtures.md).
-Full missing-final-newline behavior tests, golden files, and test runner
-behavior are not added yet.
+In-memory missing-final-newline execution has started, but full
+missing-final-newline behavior tests, golden files, and test runner behavior
+are not added yet.
 
 The rule-specific missing-final-newline parity plan is documented in
 [docs/rules/missing-final-newline-parity.md](../docs/rules/missing-final-newline-parity.md).
@@ -117,10 +119,11 @@ file without a final newline, a multi-line file without a final newline, CRLF
 final newline behavior, diagnostics, and lone carriage return behavior if
 relevant.
 
-No executable missing-final-newline helper tests are added yet. Future tests
-should cover file with final newline, file without final newline, empty file,
-single-line file without final newline, multi-line file without final newline,
-CRLF behavior, diagnostics, and parity behavior.
+No executable missing-final-newline rule execution tests are added yet. Future
+tests should cover file with final newline, file without final newline, empty
+file, single-line file without final newline, multi-line file without final
+newline, CRLF behavior, diagnostics, no file reads, no filesystem scanning, and
+parity behavior.
 
 No missing-final-newline diagnostic mapping tests are added yet. Future tests
 should validate mapping from the missing-final-newline helper result to the

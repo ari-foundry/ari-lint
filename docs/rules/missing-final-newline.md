@@ -2,28 +2,23 @@
 
 ## Purpose
 
-This document defines the planned behavior for
-`lint/missing-final-newline`.
-
-This step does not implement the rule. It records the design target for a
-future Ari-language implementation.
+This document defines the current in-memory behavior and remaining planned
+behavior for `lint/missing-final-newline`.
 
 ## Current Status
 
-- The rule is planned for the Ari-language implementation.
 - The current reference behavior is the bundled `tools/lint` implementation in
   `ari-foundry/ari`.
 - This repository currently has metadata/module layout, a minimal internal
-  content helper, and an internal diagnostic mapping skeleton in
+  content helper, and internal diagnostic mapping in
   `src/rules/missing_final_newline.ari`.
 - The helper only checks already-provided bytes and returns whether non-empty
   content is missing a final newline byte.
-- The mapping skeleton converts the helper result plus caller-provided final
-  line/column metadata into internal span/severity data only.
-- Full rule execution is not complete.
-- File reading, full diagnostic production, diagnostic output, config
-  integration, CLI integration, JSON serialization, and tests remain future
-  work.
+- In-memory rule execution now scans caller-provided source text, computes final
+  line/column metadata from those bytes, and returns an internal `Diagnostic`
+  when non-empty content does not end with a newline byte.
+- File reading, filesystem scanning, diagnostic output, config integration, CLI
+  integration, JSON serialization, and tests remain future work.
 - Fixture and test planning is tracked in
   [docs/rules/missing-final-newline-fixtures.md](missing-final-newline-fixtures.md);
   initial final-newline and no-final-newline fixtures are started, while full
@@ -41,8 +36,8 @@ future Ari-language implementation.
 
 ## Planned Detection
 
-The future rule should detect a non-empty source file that does not end with a
-newline.
+The rule detects non-empty caller-provided source text that does not end with a
+newline byte.
 
 The current reference implementation does not flag empty files.
 
@@ -53,15 +48,14 @@ A file ending with a lone carriage return is currently treated as missing the
 final newline by the reference implementation. Standalone fixture coverage for
 lone carriage return behavior remains needs follow-up.
 
-The current Ari-language helper is limited to an already-provided
+The current Ari-language implementation is limited to an already-provided
 `Slice[u8]`. It does not read files or participate in CLI behavior.
 
-The current Ari-language diagnostic mapping skeleton accepts the file path,
-final line, and final column from its caller. It maps the helper result to
-internal span/severity data, with the end column one column after the reported
-final column. It does not compute positions from file contents, construct
-rule-code/message `String` fields, format human diagnostics, serialize JSON, or
-apply config.
+The current Ari-language implementation computes the final line and final
+column from caller-provided bytes, maps the helper result to internal
+span/severity data, and constructs internal diagnostics with rule code
+`lint/missing-final-newline` and message `missing final newline`. It does not
+format human diagnostics, serialize JSON, or apply config.
 
 ## Planned Diagnostic Location
 
@@ -91,9 +85,8 @@ The current reference implementation reports:
 missing final newline
 ```
 
-The future Ari-language implementation should use this message for behavior
-parity unless the reference implementation changes before the rule is
-implemented.
+The in-memory Ari-language implementation uses this message for internal
+diagnostics.
 
 ## Parity Expectations
 
@@ -135,10 +128,9 @@ Remaining future fixture ideas, without adding broad fixtures in this step:
 
 ## Non-Goals
 
-- Do not implement missing-final-newline in this step.
 - Do not read files in this step.
-- Do not scan source files or compute positions from file contents in this step.
-- Do not produce full diagnostics or diagnostic output in this step.
+- Do not scan the filesystem in this step.
+- Do not produce CLI, human-readable, or JSON diagnostic output in this step.
 - Do not add full CLI, parity, golden, or diagnostic tests in this step.
 - Do not add JSON serialization in this step.
 - Do not invoke `ari --check` in this step.
