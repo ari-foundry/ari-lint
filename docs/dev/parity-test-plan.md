@@ -6,8 +6,9 @@ This document defines how the future Ari-language implementation of `ari-lint`
 should be compared against the current bundled/reference `tools/lint`
 implementation in `ari-foundry/ari`.
 
-This step does not add tests, fixtures, golden files, source code, or build
-behavior.
+The original parity planning step did not add tests, fixtures, golden files,
+source code, or build behavior. The current source-only parity runner skeleton
+records boundaries only and still does not execute a parity flow.
 
 ## Current Status
 
@@ -24,6 +25,10 @@ behavior.
 - Future compiler invocation selection is planned in
   `docs/dev/compiler-invocation.md`. Compiler-backed parity tests that require
   invocation do not exist yet.
+- A source-only parity runner skeleton exists in `src/parity.ari`. It records
+  the intended comparison boundary but does not run `tools/lint`, invoke an
+  `ari-lint` binary, read fixtures, compare output, invoke the compiler, or run
+  in CI.
 
 ## Reference Implementation
 
@@ -59,7 +64,8 @@ Bugs in compiler behavior or standard library behavior should be filed in
   that design against the current reference behavior
 - future trailing-whitespace fixture strategy is documented in
   `docs/rules/trailing-whitespace-fixtures.md`; initial clean/trailing-spaces
-  fixtures exist, but parity tests and a parity runner are not added yet
+  fixtures exist, but parity tests and an executable parity runner are not
+  added yet
 - rule-specific trailing-whitespace parity planning is documented in
   `docs/rules/trailing-whitespace-parity.md`
 - `lint/missing-final-newline`
@@ -68,7 +74,8 @@ Bugs in compiler behavior or standard library behavior should be filed in
   that design against the current reference behavior, but missing-final-newline
   parity tests are not added yet
 - rule-specific missing-final-newline parity planning is documented in
-  `docs/rules/missing-final-newline-parity.md`; no parity runner exists yet
+  `docs/rules/missing-final-newline-parity.md`; no executable parity runner
+  exists yet
 - short rule names if supported
 - default severity behavior
 - disabled-rule behavior
@@ -129,7 +136,7 @@ Future fixture categories, without adding fixtures in this step:
   `docs/rules/missing-final-newline.md` and
   `docs/rules/missing-final-newline-fixtures.md` and
   `docs/rules/missing-final-newline-parity.md`; missing-final-newline parity
-  runner and parity tests are not added yet
+  runner execution and parity tests are not added yet
 - compiler error
 - config file override
 - command-line rule override
@@ -162,6 +169,8 @@ Future comparison flow:
 
 Exact command lines should be added only when the standalone build and test
 runner exist.
+
+The current source-only parity runner skeleton does not perform this flow.
 
 Parity tests that use compiler-backed behavior must record the Ari compiler
 identity, such as version, release tag, or commit, according to
@@ -209,6 +218,8 @@ from the other repo if needed.
       `docs/dev/compiler-provisioning.md`
 - [ ] Define compiler invocation policy from
       `docs/dev/compiler-invocation.md`
+- [x] Add source-only parity runner skeleton without executing either
+      implementation
 - [ ] Add first CLI smoke parity fixture
 - [ ] Add first rule parity fixture for trailing whitespace
 - [ ] Add first rule parity fixture for missing final newline

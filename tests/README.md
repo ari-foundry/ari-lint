@@ -12,6 +12,8 @@ caller-provided path has started in source, but the lightweight checks do not
 execute file IO. An internal CLI file lint path now routes explicit source-file
 arguments through the file-read boundary and in-memory lint aggregation, but
 the lightweight checks do not run CLI tests.
+A source-only parity runner skeleton records future comparison boundaries, but
+the lightweight checks do not execute a parity runner.
 
 Run the lightweight check script from the repository root:
 
@@ -83,7 +85,8 @@ not added yet.
 
 The rule-specific trailing-whitespace parity plan is documented in
 [docs/rules/trailing-whitespace-parity.md](../docs/rules/trailing-whitespace-parity.md).
-No parity runner exists yet.
+No executable parity runner exists yet; the source-only skeleton records future
+runner boundaries only.
 
 No executable trailing-whitespace rule execution tests are added yet. Future
 tests should cover no trailing whitespace, trailing spaces, trailing tabs,
@@ -117,7 +120,8 @@ are not added yet.
 
 The rule-specific missing-final-newline parity plan is documented in
 [docs/rules/missing-final-newline-parity.md](../docs/rules/missing-final-newline-parity.md).
-No parity runner exists yet.
+No executable parity runner exists yet; the source-only skeleton records future
+runner boundaries only.
 
 Future missing-final-newline fixtures should cover an empty file, a single-line
 file without a final newline, a multi-line file without a final newline, CRLF
@@ -253,7 +257,14 @@ current `tools/lint`.
 
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
-fixtures and parity runners are not added yet.
+fixtures and executable parity runners are not added yet. A source-only parity
+runner skeleton records intended boundaries only.
+
+No executable parity runner tests are added yet. Future parity runner tests
+should cover reference command selection, standalone `ari-lint` command
+selection, fixture inputs, path normalization, output comparison, exit-code
+comparison, and strict avoidance of accidental compiler or network execution in
+lightweight checks.
 
 Future parity fixture categories include valid Ari source, trailing whitespace,
 missing final newline, compiler errors, config file overrides, command-line rule
@@ -270,5 +281,5 @@ language usage.
 
 Only the initial trailing-whitespace clean/trailing-spaces fixtures and
 missing-final-newline final-newline/no-final-newline fixtures are added so far;
-no broad fixture set, golden output, CLI test, parity runner, or
+no broad fixture set, golden output, CLI test, executable parity runner, or
 compiler-backed test exists yet.

@@ -78,6 +78,11 @@ It does not move `tools/lint` or change build behavior.
   serialize JSON, discover config files, apply config, traverse directories,
   invoke the compiler, call `ari --check`, call `tools/lint`, or wire `main`
   to user-facing process behavior.
+- A source-only parity runner skeleton now records intended comparison
+  boundaries against current `tools/lint`, with all execution, file IO, and
+  output-comparison flags false. It does not run `tools/lint`, invoke an
+  `ari-lint` binary, read fixtures, write files, compare output, invoke the
+  compiler, call `ari --check`, or add CI parity behavior.
 - An internal list-rules output path now converts known rule metadata into
   list-rules rows for `lint/trailing-whitespace` and
   `lint/missing-final-newline`, and an internal human-readable list-rules
@@ -437,10 +442,19 @@ config, traverse directories, invoke the compiler, call `ari --check`, call
 - add golden JSON diagnostics when schema is stable
 - run tests with explicit `--ari` compiler path
 
+The source-only parity runner skeleton in `src/parity.ari` records the future
+comparison boundary. It does not execute `tools/lint`, execute `ari-lint`, read
+fixtures, compare outputs, invoke the compiler, or run in CI.
+
 ## Parity Strategy
 
 Parity should be checked against the current bundled `tools/lint`
 implementation.
+
+A source-only parity runner skeleton names current `tools/lint` as the
+reference implementation and the Ari-language `ari-lint` implementation as the
+future implementation under test. It is not an executable parity runner and
+does not compare output.
 
 Parity dimensions:
 
@@ -509,6 +523,9 @@ usable.
   implementation.
 - Source directories may accidentally collect README-style documentation unless
   docs stay under `docs/`.
+- The source-only parity runner skeleton may be mistaken for an executable
+  runner unless docs and checks continue to state that execution remains future
+  work.
 
 ## Follow-up Checklist
 
@@ -539,6 +556,8 @@ usable.
 - [x] Add file read boundary for one caller-provided path using verified
       `std::fs::read_detailed`
 - [x] Add internal CLI file lint path over explicit source-file arguments
+- [x] Add source-only parity runner skeleton without executing `tools/lint`,
+      `ari-lint`, the Ari compiler, shell commands, file IO, or comparisons
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`
