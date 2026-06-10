@@ -1,0 +1,83 @@
+// Source input boundary model. This file records caller-provided source text
+// and path-only source entries without reading files, walking directories,
+// scanning source contents, invoking the compiler, or executing lint rules.
+
+pub enum SourceInputOrigin {
+  ProvidedText,
+  PathOnly,
+}
+
+pub struct SourceInput {
+  path: String,
+  text: Option[String],
+  origin: SourceInputOrigin,
+  reads_file: bool,
+  recursively_scans_filesystem: bool,
+}
+
+pub struct SourceInputSet {
+  inputs: std::vec::Vec[SourceInput],
+  reads_files: bool,
+  recursively_scans_filesystem: bool,
+}
+
+pub fn source_input_from_text(
+  zone: ref mut Zone,
+  path: Slice[u8],
+  text: Slice[u8],
+) -> SourceInput {
+  return SourceInput {
+    path: std::string::from(zone, path),
+    text: Some<String>(std::string::from(zone, text)),
+    origin: ProvidedText,
+    reads_file: false,
+    recursively_scans_filesystem: false,
+  };
+}
+
+pub fn source_input_from_path(
+  zone: ref mut Zone,
+  path: Slice[u8],
+) -> SourceInput {
+  return SourceInput {
+    path: std::string::from(zone, path),
+    text: None<String>(),
+    origin: PathOnly,
+    reads_file: false,
+    recursively_scans_filesystem: false,
+  };
+}
+
+fn source_input_from_owned_path(path: String) -> SourceInput {
+  return SourceInput {
+    path: path,
+    text: None<String>(),
+    origin: PathOnly,
+    reads_file: false,
+    recursively_scans_filesystem: false,
+  };
+}
+
+pub fn source_input_set_from_paths(
+  zone: ref mut Zone,
+  paths: std::vec::Vec[String],
+) -> SourceInputSet {
+  var inputs = std::vec::new<SourceInput>(zone, paths.len());
+  for path in paths {
+    inputs.push(source_input_from_owned_path(path));
+  }
+  return SourceInputSet {
+    inputs: inputs,
+    reads_files: false,
+    recursively_scans_filesystem: false,
+  };
+}
+
+// source_input_from_text is for already-provided in-memory source. It copies the
+// caller-provided path label and source text into the active zone.
+//
+// source_input_from_path and source_input_set_from_paths record path-only
+// entries for future file input wiring. This boundary does not read files, open
+// directories, discover ari-lint.rules, recursively scan directories, inspect
+// source text, produce diagnostics, serialize JSON, invoke ari --check, call
+// tools/lint, or execute lint rules.

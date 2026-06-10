@@ -30,6 +30,7 @@ OS argv integration added /
 minimal config text parser added /
 rule override semantic parser added /
 minimal diagnostic JSON serializer added /
+source input boundary model added /
 no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -110,6 +111,13 @@ and test work.
       output, serializing diagnostic arrays, scanning sources, invoking the
       compiler, executing lint rules, or adding golden tests. JSON serializer
       tests and final schema stability remain future work.
+- [x] Add an internal source input boundary model for caller-provided source
+      text and path-only source entries, including a path-list boundary for
+      already-parsed CLI paths without reading files, recursively scanning the
+      filesystem, inspecting source text, producing diagnostics, invoking the
+      compiler, or executing lint rules. Source input tests, file reading,
+      directory traversal policy, CLI path execution, and rule execution remain
+      future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain

@@ -194,6 +194,11 @@ tests should validate single-diagnostic JSON construction, string escaping,
 optional end positions, severity names, rule codes, messages, and final schema
 stability once the schema is set.
 
+No executable source input boundary tests are added yet. Future source input
+tests should validate caller-provided source text, path-only source entries,
+path-list inputs from already-parsed CLI paths, no file reads, no recursive
+filesystem scanning, and later file input behavior once file IO is scoped.
+
 No executable list-rules formatter tests are added yet. Future tests should
 cover list-rules rows and formatting for rule code, short name, default
 severity, description, ordering, newline behavior, human-readable text

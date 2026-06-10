@@ -8,3 +8,4 @@ pub mod rule;
 pub mod registry;
 pub mod rules;
 pub mod config;
+pub mod source;
