@@ -86,8 +86,10 @@ It does not move `tools/lint` or change build behavior.
   rules.
 - The config override skeleton has been refined as metadata-only declarations
   for default config, `ari-lint.rules`, `--config`, `--rule`, rule severity
-  overrides, and documented override precedence. Config parsing is not implemented yet.
-  `ari-lint.rules` is not parsed yet.
+  overrides, and documented override precedence. A minimal caller-provided
+  config text parser now handles `RULE = SEVERITY` lines, blank lines, and `#`
+  comments, returning internal overrides and parse problems. `ari-lint.rules`
+  discovery and file reading are not implemented yet.
 - The non-executing rule module layout has started with source-only child
   modules for the planned trailing whitespace and missing final newline rules.
   A minimal internal single-line helper has started for trailing whitespace,
@@ -247,25 +249,29 @@ Current preparatory model skeleton files are source-only placeholders:
   command-line override, rule severity override, and override precedence. It
   records the documented reference order that config-file settings precede
   command-line `--rule` overrides, and that explicit `--config` disables
-  discovery. It does not parse config files, read `ari-lint.rules`, inspect
+  discovery. It now parses caller-provided config text with blank lines,
+  comments, and `RULE = SEVERITY` entries into internal overrides and parse
+  problems. It does not discover config files, read `ari-lint.rules`, inspect
   CLI arguments, or apply overrides.
 
 These files do not implement real lint rules, rule execution, argument
-validation, source scanning, config parsing, diagnostics output, JSON
-serialization, file reads, or `ari --check` invocation. The main entry shell is
-limited to returning success, the OS argv entry path is limited to reading
-`std::env::args`, dropping argv[0], and dispatching internal tokens, the CLI
-parser is limited to explicit caller-provided token lists and raw option values,
-the list-rules formatter is limited to internal text construction, the command
+validation, source scanning, diagnostics output, JSON serialization, file reads,
+or `ari --check` invocation. The main entry shell is limited to returning
+success, the OS argv entry path is limited to reading `std::env::args`, dropping
+argv[0], and dispatching internal tokens, the CLI parser is limited to explicit
+caller-provided token lists and raw option values, the config parser is limited
+to caller-provided text, rule/severity pairs, blank lines, and comments, the
+list-rules formatter is limited to internal text construction, the command
 dispatcher is limited to stdout-free internal command results, the exit-code
 model is limited to internal data carried by those results, the explicit-token
 `--list-rules` command path is limited to caller-provided token construction,
 the stdout adapter is limited to caller-provided `String` text, and the
 stdout/stderr output boundary is limited to status data for named future sinks.
-Compiler invocation, config parsing, diagnostics output, stderr writing, stdout
-adapter wiring to commands or `main`, process exit, JSON serialization,
-environment handling, semantic `--rule` parsing, source scanning, lint
-execution, main-entry tests, argv-boundary tests, OS-argv integration tests,
+Compiler invocation, config discovery, config file reading, override
+application, diagnostics output, stderr writing, stdout adapter wiring to
+commands or `main`, process exit, JSON serialization, environment handling,
+semantic `--rule` parsing, source scanning, lint execution, main-entry tests,
+argv-boundary tests, OS-argv integration tests, config parser tests,
 output-boundary tests, stdout-adapter tests, exit-code tests, list-rules command
 tests, parser tests, dispatcher tests, and
 explicit-token entry tests remain future work. Severity parsing, CLI/config
@@ -276,9 +282,10 @@ The local build scaffold is not compiler-backed CI or full build validation.
 Compiler-backed CI, standalone test execution, compiler provisioning in CI,
 and compatibility validation remain future work.
 
-Config precedence is recorded from the current Ari lint reference docs as
-metadata only. Standalone config discovery and config precedence fixtures remain
-needs follow-up before this repository claims stable config behavior.
+Config precedence is recorded from the current Ari lint reference docs. The
+minimal parser only handles caller-provided text; standalone config discovery
+and config precedence fixtures remain needs follow-up before this repository
+claims stable config behavior.
 
 The exact JSON schema and human-readable diagnostic text remain unstable and
 need follow-up before this repository claims standalone output compatibility.
@@ -394,8 +401,8 @@ usable.
 - CLI parity may be hard to preserve exactly.
 - Tests may depend on a compatible Ari compiler binary.
 - Source layout may change after implementation starts.
-- Registry, severity, and config shapes may change when real rule execution and
-  config parsing begin.
+- Registry, severity, and config shapes may change when real rule execution,
+  config discovery, and override application begin.
 - Rule module boundaries may change once real rule behavior and shared rule
   execution APIs are designed.
 - Standalone config discovery and override precedence may need fixtures before
@@ -424,8 +431,7 @@ usable.
 - [ ] Define stable JSON schema and human-readable diagnostic text policy
 - [ ] Define registry, severity, and config model behavior after source
       skeletons compile in the real build
-- [ ] Define concrete config override metadata value construction after Ari
-      syntax choices are verified
+- [x] Add minimal caller-provided config text parsing
 - [ ] Add config precedence fixtures before claiming stable config behavior
 - [ ] Define executable rule module API after the non-executing layout is
       validated
