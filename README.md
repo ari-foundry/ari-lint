@@ -8,7 +8,7 @@ This repository is being initialized as part of the `ari-lint` split from
 - source extraction from ari-foundry/ari has not happened yet
 - docs migration from ari-foundry/ari has not happened yet
 - local standalone build wiring has started with an explicit compiler path
-- standalone test wiring has not happened yet
+- local standalone test entrypoint wiring has started with compiler-free checks
 
 The near-term dependency model is invoking `ari --check` for compiler-backed
 checking. Compiler behavior remains owned by the Ari compiler project.
@@ -49,7 +49,14 @@ Run the lightweight repository-shape check with:
 scripts/check.sh
 ```
 
-This is not a full test suite yet. It checks skeleton files and fixture
+Run the local standalone test entrypoint with:
+
+```sh
+scripts/test.sh
+```
+
+This is not a full test suite yet. The standalone test entrypoint delegates to
+the lightweight check script, which checks skeleton files and fixture
 invariants only.
 
 ## Local Build Scaffold

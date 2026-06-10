@@ -21,9 +21,17 @@ Run the lightweight check script from the repository root:
 scripts/check.sh
 ```
 
-The script checks repository shape and fixture invariants only. It does not run
-the Ari compiler, execute `tools/lint`, invoke `ari --check`, run a parity
-runner, run CLI tests, or compare golden tests.
+Run the local standalone test entrypoint with:
+
+```sh
+scripts/test.sh
+```
+
+The standalone test entrypoint resolves the repository root and delegates to
+`scripts/check.sh`. These scripts check repository shape and fixture invariants
+only. They do not run the Ari compiler, execute `tools/lint`, invoke
+`ari --check`, run a parity runner, run CLI tests, or compare golden tests.
+The standalone test entrypoint does not run compiler-backed tests yet.
 
 The GitHub Actions workflow is intentionally compiler-free. It runs only
 `scripts/check.sh` and must not run `scripts/build.sh`, invoke the Ari
@@ -31,10 +39,11 @@ compiler, invoke `ari --check`, execute `tools/lint`, install package manager
 dependencies, or run parity checks until standalone tests and explicit compiler
 provisioning are ready.
 
-`scripts/build.sh` is separate from the lightweight checks. It is a
-compiler-dependent local build scaffold that requires an explicit Ari compiler
-path, resolves the repository root before compiling, and is not run by default
-tests or CI. Relative compiler paths are preserved from the caller's directory.
+`scripts/build.sh` is separate from `scripts/test.sh` and the lightweight
+checks. It is a compiler-dependent local build scaffold that requires an
+explicit Ari compiler path, resolves the repository root before compiling, and
+is not run by default tests or CI. Relative compiler paths are preserved from
+the caller's directory.
 
 Compiler-backed tests remain future work. Current checks do not run the
 compiler. Future compiler-backed tests should use explicit compiler
@@ -276,6 +285,8 @@ lightweight checks.
 No compiler-backed CI tests are added yet. Future compiler-backed CI should
 record the Ari compiler release tag or commit, use explicit compiler
 provisioning, and run only after standalone tests exist.
+
+The local standalone test entrypoint exists.
 
 No executable standalone build tests are added yet. Future build tests should
 cover repository-root resolution, explicit compiler path validation,
