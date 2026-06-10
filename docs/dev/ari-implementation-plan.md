@@ -33,6 +33,10 @@ It does not move `tools/lint` or change build behavior.
   paths, include paths, raw rule overrides, help requests, and parse problems.
   Actual OS process argument parsing and environment handling remain future
   work.
+- An explicit OS argv boundary marker now exists in `src/cli.ari`. It records
+  that OS argv integration has a named internal boundary, but the boundary is
+  inactive and does not read process arguments, read environment variables,
+  dispatch tokens, or write output.
 - The diagnostic output metadata skeleton has started as metadata-only
   declarations for human and JSON output modes, diagnostic location fields, and
   planned diagnostic fields. Diagnostic output is not implemented yet.
@@ -178,7 +182,8 @@ Current preparatory model skeleton files are source-only placeholders:
   dispatcher that routes list-rules requests to internal formatted text while
   keeping other command paths as explicit future-work placeholders, plus an
   internal explicit-token entry function that composes parsing and dispatch. It
-  does not read OS process argv or write stdout/stderr output.
+  also defines an inactive OS argv boundary marker for future process-argument
+  integration. It does not read OS process argv or write stdout/stderr output.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
@@ -214,13 +219,14 @@ Current preparatory model skeleton files are source-only placeholders:
 These files do not implement real lint rules, rule execution, process argument
 reading, argument validation, source scanning, config parsing, diagnostics
 output, JSON serialization, file reads, or `ari --check` invocation. The main
-entry shell is limited to returning success, the CLI parser is limited to
-explicit caller-provided token lists and raw option values, the list-rules
-formatter is limited to internal text construction, and the command dispatcher
-is limited to stdout-free internal command results. OS argv integration,
-compiler invocation, config parsing, diagnostics output, stdout/stderr
-formatting, JSON serialization, environment handling, semantic `--rule` parsing,
-source scanning, lint execution, main-entry tests, parser tests, dispatcher
+entry shell is limited to returning success, the OS argv boundary marker is
+limited to inactive status data, the CLI parser is limited to explicit
+caller-provided token lists and raw option values, the list-rules formatter is
+limited to internal text construction, and the command dispatcher is limited to
+stdout-free internal command results. OS argv reading, compiler invocation,
+config parsing, diagnostics output, stdout/stderr formatting, JSON
+serialization, environment handling, semantic `--rule` parsing, source scanning,
+lint execution, main-entry tests, argv-boundary tests, parser tests, dispatcher
 tests, and explicit-token entry tests remain future work. Severity parsing,
 CLI/config override behavior, rule registration behavior, and the JSON schema
 are not stable yet.
