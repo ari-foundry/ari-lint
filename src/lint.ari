@@ -1,12 +1,27 @@
-// In-memory lint run aggregation over caller-provided source text only.
+// Lint run aggregation over caller-provided source text and explicit file
+// paths.
 //
-// This module combines diagnostics from already-scoped in-memory rules. It
-// does not read files, scan the filesystem, apply config overrides, write
-// output, serialize JSON, invoke ari --check, or call tools/lint.
+// This module combines diagnostics from already-scoped in-memory rules. The
+// file-backed path reads only explicit paths through the source boundary. It
+// does not scan the filesystem, apply config overrides, write output,
+// serialize JSON, invoke ari --check, or call tools/lint.
 
 pub struct InMemoryLintRunResult {
   diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
   source_count: i64,
+  reads_files: bool,
+  scans_filesystem: bool,
+  applies_config: bool,
+  writes_output: bool,
+  serializes_json: bool,
+  invokes_compiler: bool,
+}
+
+pub struct FileLintRunResult {
+  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
+  read_errors: std::vec::Vec[std::fs::PathError],
+  source_count: i64,
+  read_error_count: i64,
   reads_files: bool,
   scans_filesystem: bool,
   applies_config: bool,
@@ -22,6 +37,33 @@ fn append_diagnostics(
   for diagnostic in rule_diagnostics {
     diagnostics.push(diagnostic);
   }
+}
+
+fn empty_file_lint_result(zone: ref mut Zone) -> FileLintRunResult {
+  return FileLintRunResult {
+    diagnostics: std::vec::new<super::diagnostic::Diagnostic>(zone, 8),
+    read_errors: std::vec::new<std::fs::PathError>(zone, 2),
+    source_count: 0,
+    read_error_count: 0,
+    reads_files: true,
+    scans_filesystem: false,
+    applies_config: false,
+    writes_output: false,
+    serializes_json: false,
+    invokes_compiler: false,
+  };
+}
+
+fn append_file_lint_result(
+  target: ref mut FileLintRunResult,
+  result: FileLintRunResult,
+) -> void {
+  append_diagnostics(ref mut target.diagnostics, result.diagnostics);
+  for problem in result.read_errors {
+    target.read_errors.push(problem);
+  }
+  target.source_count = target.source_count + result.source_count;
+  target.read_error_count = target.read_error_count + result.read_error_count;
 }
 
 pub fn lint_in_memory_source(
@@ -55,4 +97,48 @@ pub fn lint_in_memory_source(
     serializes_json: false,
     invokes_compiler: false,
   };
+}
+
+pub fn lint_file_source(
+  zone: ref mut Zone,
+  path: String,
+) -> FileLintRunResult {
+  var result = empty_file_lint_result(zone);
+
+  match super::source::source_input_from_file(zone, path.as_slice()) {
+    std::Ok(source) => {
+      match source.text {
+        Some(text) => {
+          let in_memory = lint_in_memory_source(
+            zone,
+            source.path.as_slice(),
+            text.as_slice(),
+          );
+          append_diagnostics(ref mut result.diagnostics, in_memory.diagnostics);
+          result.source_count = result.source_count + 1;
+        }
+        None => {}
+      }
+    }
+    std::Err(problem) => {
+      result.read_errors.push(problem);
+      result.read_error_count = result.read_error_count + 1;
+    }
+  }
+
+  return result;
+}
+
+pub fn lint_file_sources(
+  zone: ref mut Zone,
+  paths: std::vec::Vec[String],
+) -> FileLintRunResult {
+  var result = empty_file_lint_result(zone);
+  for path in paths {
+    append_file_lint_result(
+      ref mut result,
+      lint_file_source(zone, path),
+    );
+  }
+  return result;
 }

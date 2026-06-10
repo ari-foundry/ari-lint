@@ -35,7 +35,8 @@ in-memory trailing-whitespace execution added /
 in-memory missing-final-newline execution added /
 in-memory lint run aggregation added /
 file read boundary added /
-no file-backed or user-facing lint implementation yet.
+internal CLI file lint path added /
+no user-facing lint output yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -151,6 +152,14 @@ and test work.
       or calling `tools/lint`. File-backed lint command wiring, directory
       traversal policy, config-file discovery, output behavior, tests, and
       parity checks remain future work.
+- [x] Wire parsed source-file CLI input to the file-read boundary and
+      in-memory lint aggregation as an internal command result, preserving
+      diagnostics and file read errors without writing stdout/stderr,
+      serializing JSON, discovering config files, applying config, traversing
+      directories, invoking the compiler, calling `ari --check`, calling
+      `tools/lint`, or wiring `main` to user-facing process behavior. Output
+      formatting, JSON arrays, config integration, compiler diagnostics, tests,
+      and parity checks remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain

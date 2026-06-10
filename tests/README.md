@@ -9,7 +9,9 @@ and in-memory missing-final-newline execution have started in source. In-memory
 lint run aggregation has also started for caller-provided source text, but
 these paths are not executed by these checks yet. A file-read boundary for one
 caller-provided path has started in source, but the lightweight checks do not
-execute file IO.
+execute file IO. An internal CLI file lint path now routes explicit source-file
+arguments through the file-read boundary and in-memory lint aggregation, but
+the lightweight checks do not run CLI tests.
 
 Run the lightweight check script from the repository root:
 
@@ -157,8 +159,9 @@ behavior against current `tools/lint` once a parity runner exists.
 
 No executable dispatcher tests are added yet. Future dispatcher tests should
 cover list-rules dispatch, unsupported commands, source-file lint requests,
-parse-problem/error results, internal exit-code mapping, stdout-free behavior,
-and parity behavior against current `tools/lint` once a parity runner exists.
+file read errors, lint diagnostics, parse-problem/error results, internal
+exit-code mapping, stdout-free behavior, and parity behavior against current
+`tools/lint` once a parity runner exists.
 
 No executable exit-code tests are added yet. Future tests should cover the
 internal command-result mappings for success, usage-error, and unavailable
@@ -219,6 +222,13 @@ successful single-file reads, missing-file `PathError` preservation,
 permission errors if practical, no directory traversal, no config-file
 discovery, no rule execution, no output, no JSON serialization, no compiler
 invocation, and parity behavior against current `tools/lint`.
+
+No executable CLI file lint path tests are added yet. Future tests should cover
+explicit source-file arguments, successful file reads feeding in-memory lint
+aggregation, file read error preservation, diagnostic counts, exit-code
+mapping, no directory traversal, no config discovery, no stdout/stderr output,
+no JSON serialization, no compiler invocation, no `ari --check`, and parity
+behavior against current `tools/lint`.
 
 No executable list-rules formatter tests are added yet. Future tests should
 cover list-rules rows and formatting for rule code, short name, default

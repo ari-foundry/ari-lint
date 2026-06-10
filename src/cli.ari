@@ -1,13 +1,14 @@
 // CLI model, explicit-token parsing, semantic rule override parsing bridge,
 // stdout-free dispatch, internal exit-code data, explicit-token list-rules
-// command wiring, explicit-token entry point, and OS argv integration. The
-// positional source file input and documented options are represented here.
-// This file reads process arguments only through the verified std::env::args
-// boundary and keeps main wiring future work. It does not read environment
-// state, validate input paths, read config files, apply rule overrides,
-// serialize JSON, produce diagnostics, write stdout/stderr, scan source files,
-// execute lint rules, call tools/lint, call process exit, or invoke ari
-// --check.
+// command wiring, explicit-token entry point, OS argv integration, and an
+// internal source-file lint path. The positional source file input and
+// documented options are represented here. This file reads process arguments
+// only through the verified std::env::args boundary and keeps main wiring
+// future work. Source-file dispatch reads explicitly provided file paths through
+// the source boundary and runs in-memory lint aggregation, but it does not read
+// environment state, discover config files, apply rule overrides, serialize
+// JSON, write stdout/stderr, recursively scan source trees, call tools/lint,
+// call process exit, or invoke ari --check.
 
 pub struct CliOptionMetadata {
   name: String,
@@ -64,7 +65,7 @@ pub enum CliCommandResultKind {
   CliListRulesText,
   CliParseProblems,
   CliHelpFuture,
-  CliSourceLintFuture,
+  CliSourceLintResult,
   CliUnsupportedFuture,
 }
 
@@ -84,6 +85,7 @@ pub struct CliExitCodeMapping {
 pub struct CliCommandResult {
   kind: CliCommandResultKind,
   text: Option[String],
+  file_lint_result: Option[super::lint::FileLintRunResult],
   exit_code: CliExitCodeMapping,
   detail: String,
 }
@@ -196,15 +198,30 @@ fn cli_unavailable_exit_code() -> CliExitCodeMapping {
 fn cli_command_result(
   kind: CliCommandResultKind,
   text: Option[String],
+  file_lint_result: Option[super::lint::FileLintRunResult],
   exit_code: CliExitCodeMapping,
   detail: String,
 ) -> CliCommandResult {
   return CliCommandResult {
     kind: kind,
     text: text,
+    file_lint_result: file_lint_result,
     exit_code: exit_code,
     detail: detail,
   };
+}
+
+fn cli_file_lint_exit_code(
+  diagnostic_count: i64,
+  read_error_count: i64,
+) -> CliExitCodeMapping {
+  if read_error_count > 0 {
+    return cli_unavailable_exit_code();
+  }
+  if diagnostic_count > 0 {
+    return cli_usage_error_exit_code();
+  }
+  return cli_success_exit_code();
 }
 
 pub fn parse_cli_tokens(
@@ -310,6 +327,7 @@ pub fn dispatch_cli_command(
     return cli_command_result(
       CliParseProblems,
       None<String>(),
+      None<super::lint::FileLintRunResult>(),
       cli_usage_error_exit_code(),
       "CLI parse problems are recorded internally; diagnostic output remains future work.",
     );
@@ -321,6 +339,7 @@ pub fn dispatch_cli_command(
     return cli_command_result(
       CliListRulesText,
       Some<String>(text),
+      None<super::lint::FileLintRunResult>(),
       cli_success_exit_code(),
       "List-rules text is available internally; stdout/stderr output remains future work.",
     );
@@ -330,23 +349,31 @@ pub fn dispatch_cli_command(
     return cli_command_result(
       CliHelpFuture,
       None<String>(),
+      None<super::lint::FileLintRunResult>(),
       cli_success_exit_code(),
       "Help command dispatch is recognized internally; user-facing output remains future work.",
     );
   }
 
   if parse_result.args.source_files.len() > 0 {
+    let lint_result = super::lint::lint_file_sources(zone, parse_result.args.source_files);
+    let exit_code = cli_file_lint_exit_code(
+      lint_result.diagnostics.len(),
+      lint_result.read_error_count,
+    );
     return cli_command_result(
-      CliSourceLintFuture,
+      CliSourceLintResult,
       None<String>(),
-      cli_unavailable_exit_code(),
-      "Source-file lint dispatch is recognized internally; source scanning and compiler invocation remain future work.",
+      Some<super::lint::FileLintRunResult>(lint_result),
+      exit_code,
+      "Source-file lint diagnostics are available internally; user-facing output remains future work.",
     );
   }
 
   return cli_command_result(
     CliUnsupportedFuture,
     None<String>(),
+    None<super::lint::FileLintRunResult>(),
     cli_unavailable_exit_code(),
     "No executable command is available internally yet; CLI validation remains future work.",
   );
@@ -401,11 +428,12 @@ pub fn run_os_argv_cli(zone: ref mut Zone) -> CliCommandResult {
 // execution or command dispatch.
 //
 // dispatch_cli_command maps a CliParseResult to a stdout-free internal command
-// result with internal exit-code data. run_explicit_cli_tokens composes parsing
-// and dispatch for callers that already have tokens. These entry paths do not
-// write stdout/stderr, serialize JSON, read source or config files, scan source
-// text, execute lint rules, call tools/lint, call process exit, or invoke
-// ari --check.
+// result with internal exit-code data. For source-file arguments it reads only
+// the explicitly provided file paths and runs in-memory lint aggregation.
+// run_explicit_cli_tokens composes parsing and dispatch for callers that
+// already have tokens. These entry paths do not write stdout/stderr, serialize
+// JSON, read config files, recursively scan source trees, call tools/lint, call
+// process exit, or invoke ari --check.
 //
 // CliExitCodeMapping records internal command-result-to-code decisions. It does
 // not exit the process; main still returns its fixed shell status until real CLI
