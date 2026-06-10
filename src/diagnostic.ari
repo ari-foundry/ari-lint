@@ -35,3 +35,17 @@ pub fn source_span_with_end(
     end_column: Value(end_column),
   };
 }
+
+pub fn diagnostic_from_span(
+  span: SourceSpan,
+  severity: super::severity::Severity,
+  rule_code: String,
+  message: String,
+) -> Diagnostic {
+  return Diagnostic {
+    span: span,
+    severity: severity,
+    rule_code: rule_code,
+    message: message,
+  };
+}

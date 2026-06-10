@@ -1,7 +1,6 @@
-// Trailing whitespace rule helpers. This file contains a minimal internal
-// single-line helper and diagnostic mapping helper only. It does not execute
-// lint rules, does not read files, scan whole source files, print diagnostics,
-// serialize JSON, or apply config overrides.
+// Trailing whitespace rule helpers and in-memory execution. This file scans
+// only caller-provided source text. It does not read files, scan the
+// filesystem, print diagnostics, serialize JSON, or apply config overrides.
 
 pub struct TrailingWhitespaceRuleModuleMetadata {
   code: String,
@@ -16,14 +15,20 @@ struct TrailingWhitespaceDiagnosticMapping {
   severity: super::severity::Severity,
 }
 
-// The helper below is intentionally limited to one already-split line. Rule
-// execution, whole-source scanning, file content inspection, full diagnostic
-// production, config interaction, severity override application, CLI parsing,
-// diagnostics output, JSON serialization, and ari --check invocation are future work.
-// Rule code lint/trailing-whitespace, short name trailing-whitespace, default
-// severity warning, and message trailing whitespace are confirmed by the
-// reference implementation, but this helper does not construct String fields or
-// a full Diagnostic value yet.
+pub struct TrailingWhitespaceRuleResult {
+  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
+  reads_files: bool,
+  scans_filesystem: bool,
+}
+
+// The line helper is intentionally limited to one already-split line. The
+// public in-memory rule function below performs whole caller-provided source
+// text scanning by splitting on newline bytes and reusing this helper. File
+// reading, filesystem traversal, config interaction, severity override
+// application, CLI parsing, diagnostics output, JSON serialization, and ari
+// --check invocation remain future work. Rule code lint/trailing-whitespace,
+// short name trailing-whitespace, default severity warning, and message
+// trailing whitespace are confirmed by the reference implementation.
 
 fn is_trailing_space_byte(value: u8) -> bool {
   return value == 32u8 || value == 9u8;
@@ -74,5 +79,68 @@ fn trailing_whitespace_diagnostic_mapping(
       content_end + 1,
     ),
     severity: super::severity::Warning,
+  };
+}
+
+fn push_trailing_whitespace_diagnostic(
+  zone: ref mut Zone,
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic],
+  file_path: Slice[u8],
+  line_number: i64,
+  line: Slice[u8],
+) -> void {
+  let mapping = trailing_whitespace_diagnostic_mapping(
+    std::string::from(zone, file_path),
+    line_number,
+    line,
+  );
+  if mapping.has_diagnostic {
+    diagnostics.push(super::diagnostic::diagnostic_from_span(
+      mapping.span,
+      mapping.severity,
+      "lint/trailing-whitespace",
+      "trailing whitespace",
+    ));
+  }
+}
+
+pub fn lint_trailing_whitespace_in_memory(
+  zone: ref mut Zone,
+  file_path: Slice[u8],
+  source_text: Slice[u8],
+) -> TrailingWhitespaceRuleResult {
+  var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 4);
+  var line_start = 0;
+  var line_number = 1;
+  var index = 0;
+  while index < source_text.len() {
+    if source_text.get(index) == 10u8 {
+      push_trailing_whitespace_diagnostic(
+        zone,
+        ref mut diagnostics,
+        file_path,
+        line_number,
+        std::string::substring(source_text, line_start, index),
+      );
+      line_start = index + 1;
+      line_number = line_number + 1;
+    }
+    index = index + 1;
+  }
+
+  if line_start < source_text.len() {
+    push_trailing_whitespace_diagnostic(
+      zone,
+      ref mut diagnostics,
+      file_path,
+      line_number,
+      std::string::substring(source_text, line_start, source_text.len()),
+    );
+  }
+
+  return TrailingWhitespaceRuleResult {
+    diagnostics: diagnostics,
+    reads_files: false,
+    scans_filesystem: false,
   };
 }
