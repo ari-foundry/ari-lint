@@ -34,6 +34,7 @@ source input boundary model added /
 in-memory trailing-whitespace execution added /
 in-memory missing-final-newline execution added /
 in-memory lint run aggregation added /
+file read boundary added /
 no file-backed or user-facing lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -142,6 +143,14 @@ and test work.
       JSON, invoking the compiler, or calling `tools/lint`. Aggregation tests,
       config/severity override application, CLI wiring, file-backed linting,
       output behavior, and parity checks remain future work.
+- [x] Add an explicit file read boundary using the verified Ari
+      `std::fs::read_detailed(ref mut zone, path)` API for one caller-provided
+      path, preserving file read errors without scanning directories,
+      discovering config files, applying config, producing user-facing output,
+      serializing JSON, invoking the compiler, executing rules over file sets,
+      or calling `tools/lint`. File-backed lint command wiring, directory
+      traversal policy, config-file discovery, output behavior, tests, and
+      parity checks remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain

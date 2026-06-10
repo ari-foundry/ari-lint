@@ -52,6 +52,12 @@ It does not move `tools/lint` or change build behavior.
   and path-only source entries. It records internal source inputs without
   reading files, recursively scanning the filesystem, inspecting source text, or
   running lint rules.
+- A file-read boundary now uses the verified Ari
+  `std::fs::read_detailed(ref mut zone, path)` API to read one explicitly
+  provided path into a source input while preserving `PathError` details. It
+  does not scan directories, discover config files, apply config, write output,
+  serialize JSON, invoke the compiler, execute lint rules over file sets, or
+  call `tools/lint`.
 - The trailing-whitespace rule now scans caller-provided in-memory source text
   and returns internal `Diagnostic` values for lines ending in spaces or tabs,
   without reading files, scanning the filesystem, applying config, writing
@@ -226,8 +232,11 @@ Current preparatory model skeleton files are source-only placeholders:
 - `src/model.ari` groups future model modules.
 - `src/source.ari` defines the internal source input boundary model for
   caller-provided source text, path-only source entries, and path-list inputs
-  from already-parsed CLI paths. It does not read files, walk directories,
-  inspect source text, invoke the compiler, or execute lint rules.
+  from already-parsed CLI paths. It now also defines the explicit file-read
+  boundary for one caller-provided path using
+  `std::fs::read_detailed(ref mut zone, path)`. It does not walk directories,
+  discover config files, invoke the compiler, produce diagnostics, or execute
+  lint rules.
 - `src/lint.ari` defines in-memory lint run aggregation over one
   caller-provided source text. It combines diagnostics from the in-memory
   trailing-whitespace and missing-final-newline rule execution paths without
@@ -309,6 +318,8 @@ JSON serializer is limited to one already-built internal Diagnostic, the source
 input boundary is limited to caller-provided source text and path-only entries,
 the lint run aggregation path is limited to combining diagnostics for one
 caller-provided in-memory source text,
+the file-read boundary is limited to reading one explicitly provided path with
+the verified Ari `std::fs::read_detailed` API and preserving file read errors,
 the list-rules formatter is limited to internal text construction, the command
 dispatcher is limited to stdout-free internal command results, the exit-code
 model is limited to internal data carried by those results, the explicit-token
@@ -327,8 +338,8 @@ output-boundary tests,
 stdout-adapter tests, exit-code tests, list-rules command tests, parser tests,
 dispatcher tests, and
 explicit-token entry tests remain future work. Severity parsing, CLI/config
-override behavior, rule registration behavior, and the JSON schema are not
-stable yet.
+override behavior, rule registration behavior, directory traversal policy,
+file-backed lint command behavior, and the JSON schema are not stable yet.
 
 The local build scaffold is not compiler-backed CI or full build validation.
 Compiler-backed CI, standalone test execution, compiler provisioning in CI,
@@ -351,6 +362,8 @@ need follow-up before this repository claims standalone output compatibility.
   toolchain support are ready
 - implement `lint/trailing-whitespace` over caller-provided in-memory source
 - implement `lint/missing-final-newline` over caller-provided in-memory source
+- add a file-read boundary for one caller-provided path after verifying the
+  Ari `std::fs` API
 - compare behavior with reference implementation
 
 Current rule module state:
@@ -381,6 +394,11 @@ parsing, CLI parsing, diagnostics output, JSON serialization, compiler
 invocation, tests, or CI. File-backed aggregation, multi-source aggregation,
 config/severity override application, CLI wiring, user-facing output, JSON
 diagnostic arrays, tests, and parity checks remain future work.
+
+The source input file-read boundary reads one explicitly provided path into a
+source input using `std::fs::read_detailed`. It does not scan directories,
+discover config, apply config, run lint rules over file sets, produce output,
+serialize JSON, invoke the compiler, call `ari --check`, or call `tools/lint`.
 
 ### Phase 5: compiler boundary
 
@@ -498,6 +516,8 @@ usable.
 - [x] Add in-memory missing-final-newline rule execution without file IO or
       filesystem scanning
 - [x] Add in-memory lint run aggregation without file IO or filesystem scanning
+- [x] Add file read boundary for one caller-provided path using verified
+      `std::fs::read_detailed`
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`

@@ -186,17 +186,22 @@ require_grep "source input boundary model added" docs/dev/roadmap.md
 require_grep "in-memory trailing-whitespace execution added" docs/dev/roadmap.md
 require_grep "in-memory missing-final-newline execution added" docs/dev/roadmap.md
 require_grep "in-memory lint run aggregation added" docs/dev/roadmap.md
+require_grep "file read boundary added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "lint run aggregation has also started" tests/README.md
+require_grep "file-read boundary for one" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
 require_grep "docs/dev/compiler-provisioning.md" tests/README.md
 require_grep "No executable missing-final-newline rule execution tests are added yet" tests/README.md
 require_grep "No executable in-memory lint run aggregation tests are added yet" tests/README.md
+require_grep "No executable file IO boundary tests are added yet" tests/README.md
 require_grep "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
 require_grep "These files do not implement file-backed linting" docs/dev/ari-implementation-plan.md
 require_grep "in-memory lint run aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "File-backed aggregation" docs/dev/ari-implementation-plan.md
+require_grep "file-read boundary" docs/dev/ari-implementation-plan.md
+require_grep "std::fs::read_detailed" docs/dev/ari-implementation-plan.md
 require_grep "registry, severity, and config model skeleton" docs/dev/ari-implementation-plan.md
 require_grep "registry, severity, and config skeleton" docs/dev/roadmap.md
 require_grep "first planned rule metadata entries" docs/dev/ari-implementation-plan.md
@@ -393,13 +398,22 @@ require_grep "SourceInputSet" src/source.ari
 require_grep "SourceInputOrigin" src/source.ari
 require_grep "ProvidedText" src/source.ari
 require_grep "PathOnly" src/source.ari
+require_grep "FileRead" src/source.ari
+require_grep "SourceFileReadBoundary" src/source.ari
 require_grep "source_input_from_text" src/source.ari
 require_grep "source_input_from_path" src/source.ari
 require_grep "source_input_set_from_paths" src/source.ari
+require_grep "source_file_read_boundary" src/source.ari
+require_grep "source_input_from_file" src/source.ari
+require_grep "std::fs::read_detailed" src/source.ari
+require_grep "std::fs::PathError" src/source.ari
 require_grep "reads_file: false" src/source.ari
+require_grep "reads_file: true" src/source.ari
 require_grep "recursively_scans_filesystem: false" src/source.ari
-require_grep "does not read files" src/source.ari
+require_grep "read one explicitly provided path" src/source.ari
 require_grep "recursively scan directories" src/source.ari
+require_grep "discover ari-lint.rules" src/source.ari
+require_grep "execute lint rules" src/source.ari
 require_grep "InMemoryLintRunResult" src/lint.ari
 require_grep "lint_in_memory_source" src/lint.ari
 require_grep "append_diagnostics" src/lint.ari
