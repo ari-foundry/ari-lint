@@ -179,6 +179,11 @@ selection, no-write behavior before output adapters exist, later output adapter
 wiring, diagnostic stream behavior, and parity behavior against current
 `tools/lint` once a parity runner exists.
 
+No executable stdout adapter tests are added yet. Future tests should cover the
+minimal `std::io::print_string` adapter, successful write status, failed write
+status if Ari exposes a practical failure path, no stderr writes, no OS argv
+reads, and later user-facing CLI output wiring.
+
 No diagnostic output tests are added yet. Future diagnostic tests should
 validate human-readable output, JSON output shape, line/column fields,
 endLine/endColumn fields if supported, severity, rule code, message, path

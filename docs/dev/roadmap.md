@@ -25,6 +25,7 @@ OS argv boundary placeholder added /
 stdout/stderr output boundary model added /
 internal exit-code model added /
 explicit-token list-rules command wiring added /
+minimal stdout adapter added /
 no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -68,6 +69,12 @@ and test work.
       serializing JSON, invoking the compiler, scanning sources, or executing
       lint rules. List-rules command tests and real output behavior remain
       future work.
+- [x] Add a minimal stdout adapter using the verified Ari `std::io::print_string`
+      API for caller-provided `String` text, returning local status data without
+      reading OS argv, wiring command output to `main`, writing stderr,
+      serializing JSON, invoking the compiler, scanning sources, executing lint
+      rules, or calling process exit. Stdout-adapter tests and user-facing CLI
+      output wiring remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain
