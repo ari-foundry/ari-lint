@@ -37,6 +37,7 @@ in-memory lint run aggregation added /
 file read boundary added /
 internal CLI file lint path added /
 source-only parity runner skeleton added /
+compiler-backed CI gate documented /
 no user-facing lint output yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -167,6 +168,12 @@ and test work.
       files, comparing output, invoking the compiler, calling `ari --check`, or
       adding CI parity behavior. Executable parity runner behavior, fixtures,
       golden output, source execution, and CI parity jobs remain future work.
+- [x] Record the compiler-backed CI gate by documenting that the GitHub Actions
+      workflow remains compiler-free and runs only `scripts/check.sh` until
+      explicit compiler provisioning, standalone tests, and compiler identity
+      recording are ready. Actual compiler-backed CI, Ari compiler execution,
+      `ari --check`, package manager commands, parity checks, release
+      automation, and compatibility claims remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain
@@ -346,6 +353,9 @@ and test work.
 - [x] Add source-only parity runner skeleton in `src/parity.ari`; executable
       parity runner behavior, fixture comparison, golden output, `tools/lint`
       execution, Ari compiler execution, and CI parity jobs remain future work.
+- [x] Record compiler-backed CI gate; `.github/workflows/check.yml` remains
+      lightweight and compiler-free until standalone tests and explicit Ari
+      compiler provisioning exist.
 - [ ] Wire standalone build.
 - [ ] Wire standalone tests.
 - [ ] Define release and compatibility policy after inspecting Ari releases and

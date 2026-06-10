@@ -154,6 +154,10 @@ It does not move `tools/lint` or change build behavior.
 - A local build scaffold now exists at `scripts/build.sh`. It requires an
   explicit Ari compiler path, compiles `src/main.ari` to `build/ari-lint` using
   the verified `ari input.ari -o output` invocation form, and is not run by CI.
+- The CI compiler-backed check gate is documented. The GitHub Actions workflow
+  remains compiler-free and runs only `scripts/check.sh` until explicit Ari
+  compiler provisioning, standalone tests, and compiler identity recording are
+  ready.
 - The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
   current bundled/reference implementation.
 - The future direction is Ari-language reimplementation in `ari-lint`.
@@ -361,6 +365,12 @@ The local build scaffold is not compiler-backed CI or full build validation.
 Compiler-backed CI, standalone test execution, compiler provisioning in CI,
 and compatibility validation remain future work.
 
+The compiler-backed CI gate keeps `.github/workflows/check.yml` limited to
+lightweight repository checks. It does not run `scripts/build.sh`, invoke the
+Ari compiler, invoke `ari --check`, download or build the compiler, run package
+manager commands, execute `tools/lint`, run parity checks, or claim
+compatibility.
+
 Config precedence is recorded from the current Ari lint reference docs. The
 minimal parser only handles caller-provided text; standalone config discovery
 and config precedence fixtures remain needs follow-up before this repository
@@ -441,6 +451,8 @@ config, traverse directories, invoke the compiler, call `ari --check`, call
 - add fixtures
 - add golden JSON diagnostics when schema is stable
 - run tests with explicit `--ari` compiler path
+- add compiler-backed CI only after compiler provisioning, standalone tests,
+  and compiler identity recording are ready
 
 The source-only parity runner skeleton in `src/parity.ari` records the future
 comparison boundary. It does not execute `tools/lint`, execute `ari-lint`, read
@@ -526,6 +538,8 @@ usable.
 - The source-only parity runner skeleton may be mistaken for an executable
   runner unless docs and checks continue to state that execution remains future
   work.
+- Compiler-backed CI may be added too early unless the lightweight workflow
+  continues to guard against implicit compiler execution.
 
 ## Follow-up Checklist
 
@@ -558,6 +572,8 @@ usable.
 - [x] Add internal CLI file lint path over explicit source-file arguments
 - [x] Add source-only parity runner skeleton without executing `tools/lint`,
       `ari-lint`, the Ari compiler, shell commands, file IO, or comparisons
+- [x] Record compiler-backed CI gate without running the Ari compiler,
+      `ari --check`, `tools/lint`, package managers, or release automation
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`

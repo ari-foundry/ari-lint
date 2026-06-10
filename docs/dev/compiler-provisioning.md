@@ -12,6 +12,9 @@ This step does not download, build, run, or validate the compiler.
 - `ari-lint` currently has lightweight repository checks only.
 - `scripts/check.sh` does not run the Ari compiler.
 - Compiler-backed behavior is future work.
+- The GitHub Actions workflow is intentionally compiler-free and runs only the
+  lightweight check until explicit compiler provisioning, standalone tests, and
+  compiler identity recording are ready.
 - The near-term dependency model remains invoking `ari --check` when compiler
   integration begins.
 - Current `tools/lint` in `ari-foundry/ari` remains the reference
@@ -55,6 +58,11 @@ planned but not implemented.
 ## CI Compiler Strategy
 
 Do not download or build the compiler in the current lightweight check.
+
+The current GitHub Actions workflow must not run `scripts/build.sh`, invoke the
+Ari compiler, invoke `ari --check`, execute `tools/lint`, install package
+manager dependencies, or claim compatibility. It is a gate that preserves
+compiler-free CI while compiler-backed test infrastructure remains future work.
 
 Future compiler-backed CI may use a pinned Ari release artifact or a pinned
 source commit.
@@ -119,6 +127,8 @@ Cross-boundary issues should link both repos if needed.
 - [ ] Define precedence between `--ari` and `ARI_COMPILER`
 - [ ] Decide compiler version/commit recording format
 - [ ] Decide future CI compiler source
+- [x] Keep current GitHub Actions workflow compiler-free until explicit
+      compiler provisioning and standalone tests exist
 - [ ] Add compiler-backed smoke test only after runner exists
 - [ ] Update compatibility docs only after tests pass
 
