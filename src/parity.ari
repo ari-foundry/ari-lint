@@ -1,0 +1,33 @@
+// Data-only parity runner boundary. This records the intended comparison
+// shape while avoiding command execution, filesystem traversal, compiler
+// calls, output comparison, and tools/lint invocation.
+
+pub struct ParityRunnerSkeleton {
+  reference_implementation: String,
+  implementation_under_test: String,
+  status: String,
+  invokes_tools_lint: bool,
+  invokes_ari_lint_binary: bool,
+  invokes_compiler: bool,
+  invokes_shell: bool,
+  reads_files: bool,
+  writes_files: bool,
+  compares_outputs: bool,
+  normalizes_paths: bool,
+}
+
+pub fn parity_runner_skeleton() -> ParityRunnerSkeleton {
+  return ParityRunnerSkeleton {
+    reference_implementation: "ari-foundry/ari tools/lint",
+    implementation_under_test: "ari-lint Ari-language implementation",
+    status: "source-only parity runner skeleton; executable comparison remains future work",
+    invokes_tools_lint: false,
+    invokes_ari_lint_binary: false,
+    invokes_compiler: false,
+    invokes_shell: false,
+    reads_files: false,
+    writes_files: false,
+    compares_outputs: false,
+    normalizes_paths: false,
+  };
+}

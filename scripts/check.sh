@@ -84,6 +84,7 @@ require_file src/rules/missing_final_newline.ari
 require_file src/config.ari
 require_file src/source.ari
 require_file src/lint.ari
+require_file src/parity.ari
 
 unexpected_trailing_fixture=$(find tests/fixtures/trailing-whitespace -type f ! -name clean.ari ! -name trailing-spaces.ari -print -quit)
 [ -z "$unexpected_trailing_fixture" ] || fail "unexpected trailing-whitespace fixture: $unexpected_trailing_fixture"
@@ -156,7 +157,7 @@ require_grep "docs/rules/trailing-whitespace-parity.md" tests/README.md
 require_grep "Do not add a parity runner in this step" docs/rules/trailing-whitespace-parity.md
 require_grep "parity plan exists but runner is not implemented" docs/rules/trailing-whitespace.md
 require_grep "Fixture comparison is planned but not automated yet" docs/rules/trailing-whitespace-fixtures.md
-require_grep "No parity runner exists yet" tests/README.md
+require_grep "No executable parity runner exists yet" tests/README.md
 require_grep "first minimal fixture coverage has started" docs/rules/trailing-whitespace-fixtures.md
 require_grep "initial clean and trailing-spaces fixtures are started" docs/rules/trailing-whitespace.md
 require_grep "trailing-whitespace design note" docs/dev/roadmap.md
@@ -188,19 +189,23 @@ require_grep "in-memory missing-final-newline execution added" docs/dev/roadmap.
 require_grep "in-memory lint run aggregation added" docs/dev/roadmap.md
 require_grep "file read boundary added" docs/dev/roadmap.md
 require_grep "internal CLI file lint path added" docs/dev/roadmap.md
+require_grep "source-only parity runner skeleton added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "lint run aggregation has also started" tests/README.md
 require_grep "file-read boundary for one" tests/README.md
 require_grep "internal CLI file lint path" tests/README.md
+require_grep "source-only parity runner skeleton" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
 require_grep "docs/dev/compiler-provisioning.md" tests/README.md
 require_grep "No executable missing-final-newline rule execution tests are added yet" tests/README.md
 require_grep "No executable in-memory lint run aggregation tests are added yet" tests/README.md
 require_grep "No executable file IO boundary tests are added yet" tests/README.md
 require_grep "No executable CLI file lint path tests are added yet" tests/README.md
+require_grep "No executable parity runner tests are added yet" tests/README.md
 require_grep "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
 require_grep "CLI file lint path is limited" docs/dev/ari-implementation-plan.md
+require_grep "source-only parity runner skeleton" docs/dev/ari-implementation-plan.md
 require_grep "in-memory lint run aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "File-backed aggregation" docs/dev/ari-implementation-plan.md
 require_grep "file-read boundary" docs/dev/ari-implementation-plan.md
@@ -448,6 +453,18 @@ require_grep "apply config" src/lint.ari
 require_grep "serialize JSON" src/lint.ari
 require_grep "invoke ari --check" src/lint.ari
 require_grep "tools/lint" src/lint.ari
+require_grep "pub mod parity" src/model.ari
+require_grep "ParityRunnerSkeleton" src/parity.ari
+require_grep "parity_runner_skeleton" src/parity.ari
+require_grep "source-only parity runner skeleton" src/parity.ari
+require_grep "ari-foundry/ari tools/lint" src/parity.ari
+require_grep "invokes_tools_lint: false" src/parity.ari
+require_grep "invokes_ari_lint_binary: false" src/parity.ari
+require_grep "invokes_compiler: false" src/parity.ari
+require_grep "invokes_shell: false" src/parity.ari
+require_grep "reads_files: false" src/parity.ari
+require_grep "writes_files: false" src/parity.ari
+require_grep "compares_outputs: false" src/parity.ari
 require_grep "InitialRuleMetadata" src/rules.ari
 require_grep "pub mod trailing_whitespace" src/rules.ari
 require_grep "pub mod missing_final_newline" src/rules.ari

@@ -36,6 +36,7 @@ in-memory missing-final-newline execution added /
 in-memory lint run aggregation added /
 file read boundary added /
 internal CLI file lint path added /
+source-only parity runner skeleton added /
 no user-facing lint output yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -160,6 +161,12 @@ and test work.
       `tools/lint`, or wiring `main` to user-facing process behavior. Output
       formatting, JSON arrays, config integration, compiler diagnostics, tests,
       and parity checks remain future work.
+- [x] Add a source-only parity runner skeleton that records the intended
+      comparison boundary against current `tools/lint` without executing
+      `tools/lint`, invoking an `ari-lint` binary, reading fixtures, writing
+      files, comparing output, invoking the compiler, calling `ari --check`, or
+      adding CI parity behavior. Executable parity runner behavior, fixtures,
+      golden output, source execution, and CI parity jobs remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain
@@ -336,6 +343,9 @@ and test work.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the future fixture and golden
       output strategy, but parity tests and CI parity jobs are not implemented.
+- [x] Add source-only parity runner skeleton in `src/parity.ari`; executable
+      parity runner behavior, fixture comparison, golden output, `tools/lint`
+      execution, Ari compiler execution, and CI parity jobs remain future work.
 - [ ] Wire standalone build.
 - [ ] Wire standalone tests.
 - [ ] Define release and compatibility policy after inspecting Ari releases and
