@@ -1,6 +1,6 @@
-// Diagnostic output models and internal list-rules formatting. This file does
-// not emit diagnostics. It does not format diagnostics, build diagnostic
-// strings, serialize JSON, or write stdout/stderr.
+// Diagnostic output models, internal list-rules formatting, and output boundary
+// data. This file does not emit diagnostics. It does not format diagnostics,
+// build diagnostic strings, serialize JSON, or write stdout/stderr.
 
 pub enum OutputModeName {
   Human,
@@ -42,6 +42,50 @@ pub struct ListRuleRow {
 
 pub struct ListRulesOutput {
   rows: std::vec::Vec[ListRuleRow],
+}
+
+pub enum OutputSinkName {
+  Stdout,
+  Stderr,
+}
+
+pub struct OutputSinkBoundary {
+  sink: OutputSinkName,
+  status: String,
+  writes_real_stream: bool,
+}
+
+pub struct OutputBoundaryResult {
+  stdout: OutputSinkBoundary,
+  stderr: OutputSinkBoundary,
+  writes_real_streams: bool,
+  detail: String,
+}
+
+fn output_sink_boundary(
+  sink: OutputSinkName,
+  status: String,
+) -> OutputSinkBoundary {
+  return OutputSinkBoundary {
+    sink: sink,
+    status: status,
+    writes_real_stream: false,
+  };
+}
+
+pub fn stdout_stderr_output_boundary() -> OutputBoundaryResult {
+  return OutputBoundaryResult {
+    stdout: output_sink_boundary(
+      Stdout,
+      "stdout boundary is modeled internally but does not write output.",
+    ),
+    stderr: output_sink_boundary(
+      Stderr,
+      "stderr boundary is modeled internally but does not write output.",
+    ),
+    writes_real_streams: false,
+    detail: "Output boundary model is internal only; user-facing output remains future work.",
+  };
 }
 
 pub fn list_rule_row_from_metadata(
@@ -111,6 +155,9 @@ pub fn format_list_rules_human(
 // lint/trailing-whitespace, then lint/missing-final-newline.
 // format_list_rules_human converts those rows into internal human-readable text
 // with one newline-terminated row per rule. It does not write stdout/stderr.
+//
+// stdout_stderr_output_boundary records stdout and stderr as named future output
+// sinks. It returns status data only and does not call real output APIs.
 //
 // Diagnostic string construction, stdout/stderr output, JSON serialization,
 // final user-facing list-rules CLI output, source scanning, CLI main wiring,

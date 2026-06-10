@@ -22,6 +22,7 @@ stdout-free command dispatcher added /
 internal explicit-token entry path added /
 minimal main entry shell added /
 OS argv boundary placeholder added /
+stdout/stderr output boundary model added /
 no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -49,6 +50,11 @@ and test work.
       environment variables, dispatching tokens, writing stdout/stderr output,
       invoking the compiler, scanning sources, or executing lint rules.
       Argv-boundary tests and user-facing CLI behavior remain future work.
+- [x] Add an internal stdout/stderr output boundary model that records named
+      future stdout and stderr sinks plus result status without writing real
+      streams, calling output APIs, wiring user-facing CLI output, serializing
+      JSON, invoking the compiler, scanning sources, or executing lint rules.
+      Output-boundary tests and output adapter behavior remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain

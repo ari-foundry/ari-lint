@@ -54,6 +54,10 @@ It does not move `tools/lint` or change build behavior.
   command paths. User-facing stdout/stderr output, OS argv/main wiring, JSON
   output, source scanning, compiler invocation, config parsing, diagnostics
   output, and parity tests remain future work.
+- An internal stdout/stderr output boundary model now records named stdout and
+  stderr sinks plus result status for future output handling. It is data-only:
+  it does not call real output APIs, write stdout/stderr, connect to OS argv or
+  `main`, serialize JSON, or emit user-facing CLI output.
 - An internal explicit-token entry path now composes the existing
   caller-provided token-list parser with the stdout-free command dispatcher and
   returns a `CliCommandResult`. It does not read OS argv, environment variables,
@@ -195,9 +199,11 @@ Current preparatory model skeleton files are source-only placeholders:
   JSON output modes, diagnostic location, file path, line, column, endLine,
   endColumn, severity, rule code, and message. It also defines an internal
   list-rules output row model, a known-rule output builder from existing rule
-  metadata, and an internal human-readable list-rules formatter. It does not
-  format diagnostics, build diagnostic strings, serialize JSON, emit
-  user-facing `--list-rules` CLI output, or write stdout/stderr output.
+  metadata, an internal human-readable list-rules formatter, and a data-only
+  stdout/stderr output boundary model for named future output sinks. It does
+  not format diagnostics, build diagnostic strings, serialize JSON, emit
+  user-facing `--list-rules` CLI output, call output APIs, or write
+  stdout/stderr output.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description.
 - `src/registry.ari` sketches rule registry concepts for planned reference
@@ -222,14 +228,16 @@ output, JSON serialization, file reads, or `ari --check` invocation. The main
 entry shell is limited to returning success, the OS argv boundary marker is
 limited to inactive status data, the CLI parser is limited to explicit
 caller-provided token lists and raw option values, the list-rules formatter is
-limited to internal text construction, and the command dispatcher is limited to
-stdout-free internal command results. OS argv reading, compiler invocation,
-config parsing, diagnostics output, stdout/stderr formatting, JSON
-serialization, environment handling, semantic `--rule` parsing, source scanning,
-lint execution, main-entry tests, argv-boundary tests, parser tests, dispatcher
-tests, and explicit-token entry tests remain future work. Severity parsing,
-CLI/config override behavior, rule registration behavior, and the JSON schema
-are not stable yet.
+limited to internal text construction, the command dispatcher is limited to
+stdout-free internal command results, and the stdout/stderr output boundary is
+limited to status data for named future sinks. OS argv reading, compiler
+invocation, config parsing, diagnostics output, real stdout/stderr writing,
+stdout/stderr adapter wiring, JSON serialization, environment handling,
+semantic `--rule` parsing, source scanning, lint execution, main-entry tests,
+argv-boundary tests, output-boundary tests, parser tests, dispatcher tests, and
+explicit-token entry tests remain future work. Severity parsing, CLI/config
+override behavior, rule registration behavior, and the JSON schema are not
+stable yet.
 
 The local build scaffold is not compiler-backed CI or full build validation.
 Compiler-backed CI, standalone test execution, compiler provisioning in CI,
