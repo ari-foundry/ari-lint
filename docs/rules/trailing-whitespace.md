@@ -2,10 +2,8 @@
 
 ## Purpose
 
-This document defines the planned behavior for `lint/trailing-whitespace`.
-
-This step does not implement the rule. It records the design target for a
-future Ari-language implementation.
+This document defines the current in-memory behavior and remaining planned
+behavior for `lint/trailing-whitespace`.
 
 ## Current Status
 
@@ -20,13 +18,11 @@ future Ari-language implementation.
   mapping records whether the helper found trailing whitespace, the planned
   diagnostic span, and default `warning` severity in an internal
   diagnostic-like data value.
-- The mapping does not construct full string-bearing diagnostics yet. Rule code
-  `lint/trailing-whitespace` and message `trailing whitespace` are confirmed
-  from the current reference implementation, but final value construction for
-  those `String` fields remains needs follow-up.
-- Full rule execution is not complete.
-- File scanning, diagnostics, config integration, CLI integration, JSON output,
-  and tests remain future work.
+- In-memory rule execution now scans caller-provided source text, splits it on
+  newline bytes, and returns internal `Diagnostic` values for lines with
+  trailing spaces or tabs.
+- File reading, filesystem scanning, config integration, CLI integration,
+  user-facing diagnostics, JSON output, and tests remain future work.
 - Fixture and test planning is tracked in
   [docs/rules/trailing-whitespace-fixtures.md](trailing-whitespace-fixtures.md);
   initial clean and trailing-spaces fixtures are started, while full fixture
@@ -41,7 +37,7 @@ future Ari-language implementation.
 
 ## Planned Detection
 
-The future rule should detect spaces or tabs at the end of a source line.
+The rule detects spaces or tabs at the end of a caller-provided source line.
 
 The newline itself should not be flagged. Empty lines that contain only spaces
 or tabs should be handled as trailing-whitespace diagnostics. A final line
@@ -53,9 +49,9 @@ not be flagged solely because of the carriage return. Future parity fixtures
 should confirm this behavior before the Ari-language implementation treats it as
 stable. Standalone CRLF fixture coverage remains needs follow-up.
 
-The current helper is limited to a single borrowed `Slice[u8]` line. It ignores
-a final carriage return before checking the last content byte, but it does not
-split source text into lines or compute a diagnostic span.
+The current in-memory implementation splits caller-provided source text on
+newline bytes and checks each logical line. The single-line helper ignores a
+final carriage return before checking the last content byte.
 
 ## Planned Diagnostic Location
 
@@ -73,11 +69,11 @@ The current reference implementation reports the column as the first trailing
 space or tab and `endColumn` as one past the logical line end after CRLF
 normalization.
 
-The current Ari-language skeleton maps a single helper result to an internal
-span using the explicit file path and line number passed to the mapping
-function. Full diagnostics output is not implemented. JSON serialization is not
-implemented. CLI integration, file scanning, config integration, and parity
-tests remain future work.
+The Ari-language implementation maps each matching in-memory line to an
+internal span using the explicit file path and computed line number. Full
+diagnostics output is not implemented. JSON serialization is not implemented.
+CLI integration, file scanning, config integration, and parity tests remain
+future work.
 
 ## Planned Message
 
@@ -87,9 +83,8 @@ The current reference implementation reports:
 trailing whitespace
 ```
 
-The future Ari-language implementation should use this message for behavior
-parity unless the reference implementation changes before the rule is
-implemented.
+The in-memory Ari-language implementation uses this message for internal
+diagnostics.
 
 ## Parity Expectations
 
@@ -137,8 +132,8 @@ and test runner behavior are not added yet.
 
 ## Non-Goals
 
-- Do not implement full trailing-whitespace rule execution in this step.
-- Do not scan source text in this step.
+- Do not read files in this step.
+- Do not scan the filesystem in this step.
 - Do not produce CLI, human-readable, or JSON diagnostics in this step.
 - Do not add full CLI, parity, golden, or diagnostic tests in this step.
 - Do not add JSON serialization in this step.

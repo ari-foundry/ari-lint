@@ -127,7 +127,8 @@ require_grep "docs/dev/compiler-invocation.md" docs/dev/parity-test-plan.md
 require_grep "docs/dev/compiler-provisioning.md" docs/dev/parity-test-plan.md
 require_grep "Do not add test fixtures in this step" docs/dev/parity-test-plan.md
 require_grep "# lint/trailing-whitespace" docs/rules/trailing-whitespace.md
-require_grep "Do not implement full trailing-whitespace rule execution in this step" docs/rules/trailing-whitespace.md
+require_grep "Do not read files in this step" docs/rules/trailing-whitespace.md
+require_grep "in-memory behavior" docs/rules/trailing-whitespace.md
 require_grep "# lint/missing-final-newline" docs/rules/missing-final-newline.md
 require_grep "Do not implement missing-final-newline in this step" docs/rules/missing-final-newline.md
 require_grep "docs/rules/trailing-whitespace.md" docs/dev/ari-implementation-plan.md
@@ -180,13 +181,14 @@ require_grep "minimal config text parser added" docs/dev/roadmap.md
 require_grep "rule override semantic parser added" docs/dev/roadmap.md
 require_grep "minimal diagnostic JSON serializer added" docs/dev/roadmap.md
 require_grep "source input boundary model added" docs/dev/roadmap.md
+require_grep "in-memory trailing-whitespace execution added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
 require_grep "docs/dev/compiler-provisioning.md" tests/README.md
 require_grep "No executable missing-final-newline helper tests are added yet" tests/README.md
 require_grep "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
-require_grep "These files do not implement real lint rules" docs/dev/ari-implementation-plan.md
+require_grep "These files do not implement file-backed linting" docs/dev/ari-implementation-plan.md
 require_grep "registry, severity, and config model skeleton" docs/dev/ari-implementation-plan.md
 require_grep "registry, severity, and config skeleton" docs/dev/roadmap.md
 require_grep "first planned rule metadata entries" docs/dev/ari-implementation-plan.md
@@ -243,14 +245,15 @@ require_grep "No executable config parser tests are added yet" tests/README.md
 require_grep "semantic parser for caller-provided .--rule. values" docs/dev/roadmap.md
 require_grep "No executable rule override parser tests are added yet" tests/README.md
 require_grep "No config override tests are added yet" tests/README.md
-require_grep "non-executing rule module layout" docs/dev/ari-implementation-plan.md
+require_grep "Current rule module state" docs/dev/ari-implementation-plan.md
 require_grep "rule module layout" docs/dev/roadmap.md
-require_grep "full rule behavior is not implemented" docs/dev/ari-implementation-plan.md
+require_grep "in-memory rule execution" docs/dev/ari-implementation-plan.md
+require_grep "Missing-final-newline full rule behavior is not" docs/dev/ari-implementation-plan.md
 require_grep "No rule module tests are added yet" tests/README.md
 require_grep "minimal internal single-line helper" docs/dev/ari-implementation-plan.md
 require_grep "single-line helper" docs/rules/trailing-whitespace.md
 require_grep "trailing-whitespace helper started" docs/dev/roadmap.md
-require_grep "No executable trailing-whitespace helper tests are added yet" tests/README.md
+require_grep "No executable trailing-whitespace rule execution tests are added yet" tests/README.md
 require_grep "fn main() -> i64" src/main.ari
 require_grep "run_main_entry_shell" src/main.ari
 require_grep "pub mod cli" src/model.ari
@@ -407,12 +410,21 @@ require_grep "line_has_trailing_whitespace" src/rules/trailing_whitespace.ari
 require_grep "is_trailing_space_byte" src/rules/trailing_whitespace.ari
 require_grep "TrailingWhitespaceDiagnosticMapping" src/rules/trailing_whitespace.ari
 require_grep "trailing_whitespace_diagnostic_mapping" src/rules/trailing_whitespace.ari
+require_grep "TrailingWhitespaceRuleResult" src/rules/trailing_whitespace.ari
+require_grep "lint_trailing_whitespace_in_memory" src/rules/trailing_whitespace.ari
+require_grep "push_trailing_whitespace_diagnostic" src/rules/trailing_whitespace.ari
+require_grep "diagnostic_from_span" src/diagnostic.ari
+require_grep "diagnostic_from_span" src/rules/trailing_whitespace.ari
+require_grep "std::vec::Vec" src/rules/trailing_whitespace.ari
+require_grep "diagnostics.push" src/rules/trailing_whitespace.ari
+require_grep "reads_files: false" src/rules/trailing_whitespace.ari
+require_grep "scans_filesystem: false" src/rules/trailing_whitespace.ari
 require_grep "source_span_with_end" src/diagnostic.ari
 require_grep "diagnostic mapping skeleton" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic mapping skeleton" docs/dev/roadmap.md
 require_grep "No diagnostic mapping tests are added yet" tests/README.md
 require_grep "does not read files" src/rules/trailing_whitespace.ari
-require_grep "whole source" src/rules/trailing_whitespace.ari
+require_grep "caller-provided source" src/rules/trailing_whitespace.ari
 require_grep "future work" src/rules/trailing_whitespace.ari
 require_grep "MissingFinalNewlineRuleModuleMetadata" src/rules/missing_final_newline.ari
 require_grep "lint/missing-final-newline" src/rules/missing_final_newline.ari

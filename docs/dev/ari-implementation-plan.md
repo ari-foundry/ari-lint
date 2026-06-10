@@ -21,8 +21,10 @@ It does not move `tools/lint` or change build behavior.
 - The rule registry, severity, and config model skeleton has started as
   preparatory source-only declarations.
 - First planned rule metadata entries have been added for
-  `lint/trailing-whitespace` and `lint/missing-final-newline` as metadata-only
-  placeholders. Real rule behavior remains future work.
+  `lint/trailing-whitespace` and `lint/missing-final-newline`. The
+  trailing-whitespace rule now has in-memory execution over caller-provided
+  source text. Missing-final-newline behavior and registry-backed execution
+  remain future work.
 - The CLI metadata skeleton for the planned surface has started as metadata-only
   declarations for positional source input and the documented options `--json`,
   `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`.
@@ -51,6 +53,10 @@ It does not move `tools/lint` or change build behavior.
   and path-only source entries. It records internal source inputs without
   reading files, recursively scanning the filesystem, inspecting source text, or
   running lint rules.
+- The trailing-whitespace rule now scans caller-provided in-memory source text
+  and returns internal `Diagnostic` values for lines ending in spaces or tabs,
+  without reading files, scanning the filesystem, applying config, writing
+  output, serializing JSON, invoking the compiler, or calling `tools/lint`.
 - An internal list-rules output path now converts known rule metadata into
   list-rules rows for `lint/trailing-whitespace` and
   `lint/missing-final-newline`, and an internal human-readable list-rules
@@ -100,22 +106,24 @@ It does not move `tools/lint` or change build behavior.
   rule override parser now handles `RULE=SEVERITY` values for `--rule`,
   including documented short-name normalization for the two known rules.
   `ari-lint.rules` discovery and file reading are not implemented yet.
-- The non-executing rule module layout has started with source-only child
-  modules for the planned trailing whitespace and missing final newline rules.
+- The rule module layout has started with source-only child modules for the
+  trailing whitespace and missing final newline rules.
   A minimal internal single-line helper has started for trailing whitespace,
   a minimal internal content helper has started for missing final newline, and
   internal diagnostic mapping skeletons have started for trailing whitespace and
   missing final newline.
-  The trailing-whitespace mapping converts a single-line helper result into
-  diagnostic-model span/severity data. The missing-final-newline mapping
-  converts a content-helper result plus explicit caller-provided final position
-  metadata into diagnostic-model span/severity data. Full rule behavior is not
+  The trailing-whitespace mapping now feeds an in-memory rule execution
+  function that produces internal diagnostics from caller-provided source text.
+  The missing-final-newline mapping converts a content-helper result plus
+  explicit caller-provided final position metadata into diagnostic-model
+  span/severity data. Missing-final-newline full rule behavior is not
   implemented yet.
 - Rule design notes have started:
-  `docs/rules/trailing-whitespace.md` records the planned
+  `docs/rules/trailing-whitespace.md` records the current in-memory
   `lint/trailing-whitespace` behavior, and
   `docs/rules/missing-final-newline.md` records the planned
-  `lint/missing-final-newline` behavior. Implementation remains future work.
+  `lint/missing-final-newline` behavior. File-backed linting, CLI integration,
+  config integration, output behavior, and tests remain future work.
 - Source directories should contain Ari source files only; source-layout
   documentation belongs in `docs/dev/` or other documentation directories.
 - A local build scaffold now exists at `scripts/build.sh`. It requires an
@@ -274,32 +282,34 @@ Current preparatory model skeleton files are source-only placeholders:
   rule codes. It does not discover config files, read `ari-lint.rules`, inspect
   CLI arguments, apply overrides, or validate unknown rule names.
 
-These files do not implement real lint rules, rule execution, argument
-validation, source scanning, diagnostics output, JSON serialization, file reads,
-or `ari --check` invocation. The main entry shell is limited to returning
-success, the OS argv entry path is limited to reading `std::env::args`, dropping
-argv[0], and dispatching internal tokens, the CLI parser is limited to explicit
-caller-provided token lists and raw option values, the config parser is limited
-to caller-provided text, rule/severity pairs, blank lines, and comments, the
-rule override parser is limited to caller-provided `--rule` text and internal
-override construction, the diagnostic JSON serializer is limited to one
-already-built internal Diagnostic, the source input boundary is limited to
-caller-provided source text and path-only entries, the list-rules formatter is
-limited to internal text construction, the command dispatcher is limited to
-stdout-free internal command results, the exit-code model is limited to
-internal data carried by those results, the explicit-token `--list-rules`
-command path is limited to caller-provided token construction, the stdout
-adapter is limited to caller-provided `String` text, and the stdout/stderr
-output boundary is limited to status data for named future sinks.
+These files do not implement file-backed linting, user-facing rule execution,
+argument validation, diagnostics output, JSON serialization, file reads, or
+`ari --check` invocation. The trailing-whitespace rule execution is limited to
+caller-provided in-memory source text, the main entry shell is limited to
+returning success, the OS argv entry path is limited to reading
+`std::env::args`, dropping argv[0], and dispatching internal tokens, the CLI
+parser is limited to explicit caller-provided token lists and raw option values,
+the config parser is limited to caller-provided text, rule/severity pairs, blank
+lines, and comments, the rule override parser is limited to caller-provided
+`--rule` text and internal override construction, the diagnostic JSON
+serializer is limited to one already-built internal Diagnostic, the source input
+boundary is limited to caller-provided source text and path-only entries, the
+list-rules formatter is limited to internal text construction, the command
+dispatcher is limited to stdout-free internal command results, the exit-code
+model is limited to internal data carried by those results, the explicit-token
+`--list-rules` command path is limited to caller-provided token construction,
+the stdout adapter is limited to caller-provided `String` text, and the
+stdout/stderr output boundary is limited to status data for named future sinks.
 Compiler invocation, config discovery, config file reading, override
 application, diagnostics output, stderr writing, stdout adapter wiring to
 commands or `main`, process exit, diagnostic array serialization, user-facing
 JSON output, environment handling, unknown-rule validation for `--rule`, source
-text inspection, filesystem scanning, lint execution, main-entry tests,
+filesystem scanning, missing-final-newline lint execution, main-entry tests,
 argv-boundary tests, OS-argv integration tests, config parser tests, rule
 override parser tests, diagnostic JSON serializer tests, source input tests,
-output-boundary tests, stdout-adapter tests, exit-code tests, list-rules command
-tests, parser tests, dispatcher tests, and
+trailing-whitespace execution tests, output-boundary tests,
+stdout-adapter tests, exit-code tests, list-rules command tests, parser tests,
+dispatcher tests, and
 explicit-token entry tests remain future work. Severity parsing, CLI/config
 override behavior, rule registration behavior, and the JSON schema are not
 stable yet.
@@ -318,24 +328,24 @@ need follow-up before this repository claims standalone output compatibility.
 
 ### Phase 4: first rules
 
-- start non-executing rule module layout before implementing rule behavior
+- start rule module layout before implementing rule behavior
 - use `docs/rules/trailing-whitespace.md` and
-  `docs/rules/missing-final-newline.md` as planned rule design notes
-- turn metadata-only entries into executable rule registrations when Ari syntax
-  and toolchain support are ready
-- implement `lint/trailing-whitespace`
+  `docs/rules/missing-final-newline.md` as rule design notes
+- turn metadata entries into executable rule registrations when Ari syntax and
+  toolchain support are ready
+- implement `lint/trailing-whitespace` over caller-provided in-memory source
 - implement `lint/missing-final-newline`
 - compare behavior with reference implementation
 
-Current non-executing rule module layout:
+Current rule module state:
 
 - `src/rules.ari` exposes planned child rule modules and keeps shared rule
   metadata entries.
-- `src/rules/trailing_whitespace.ari` records layout metadata and a minimal
-  internal single-line helper for the future `lint/trailing-whitespace`
-  implementation. It also records a diagnostic mapping skeleton for one
-  already-split line, mapping helper output to internal span/severity data
-  without constructing full string-bearing diagnostics.
+- `src/rules/trailing_whitespace.ari` records layout metadata, a minimal
+  internal single-line helper, diagnostic mapping for one already-split line,
+  and in-memory rule execution for caller-provided source text. The in-memory
+  execution returns internal `Diagnostic` values and records that it does not
+  read files or scan the filesystem.
 - `src/rules/missing_final_newline.ari` records layout metadata and a minimal
   internal content helper for the future `lint/missing-final-newline`
   implementation. The helper only checks already-provided bytes for a missing
@@ -344,14 +354,12 @@ Current non-executing rule module layout:
   internal span/severity data without constructing full string-bearing
   diagnostics.
 
-The trailing-whitespace helper, missing-final-newline helper, and diagnostic
-mapping skeletons are not full rule implementations. They only handle
-already-provided bytes or explicit caller-provided file/line data. These rule
-module files do not implement rule execution, file reading, whole-source
-scanning, full diagnostic production, config parsing, CLI parsing, diagnostics
-output, JSON serialization, compiler invocation, tests, or CI. Rule code and
-message value construction for full diagnostics remains needs follow-up. The
-full rule behavior is not implemented yet.
+The trailing-whitespace implementation only handles caller-provided bytes in
+memory. The missing-final-newline helper and diagnostic mapping skeleton are not
+full rule implementations. These rule module files do not implement file
+reading, filesystem scanning, config parsing, CLI parsing, diagnostics output,
+JSON serialization, compiler invocation, tests, or CI. Missing-final-newline
+full rule behavior remains future work.
 
 ### Phase 5: compiler boundary
 
@@ -462,8 +470,10 @@ usable.
 - [x] Add minimal caller-provided config text parsing
 - [x] Add minimal command-line rule override semantic parsing
 - [ ] Add config precedence fixtures before claiming stable config behavior
-- [ ] Define executable rule module API after the non-executing layout is
-      validated
+- [ ] Define executable rule module API after the initial layout and in-memory
+      rule execution shape are validated
+- [x] Add in-memory trailing-whitespace rule execution without file IO or
+      filesystem scanning
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`

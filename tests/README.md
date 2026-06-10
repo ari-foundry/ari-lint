@@ -1,10 +1,11 @@
 # ari-lint Tests
 
-Behavior tests will be added after actual implementation begins.
+Behavior tests will be added after executable test wiring begins.
 
 Current checks verify skeleton files, lightweight documentation/source guards,
 the first trailing-whitespace fixture shape, and the first
-missing-final-newline fixture shape.
+missing-final-newline fixture shape. In-memory trailing-whitespace execution
+has started in source, but it is not executed by these checks yet.
 
 Run the lightweight check script from the repository root:
 
@@ -70,17 +71,18 @@ and parity with current `tools/lint`.
 
 The future trailing-whitespace fixture and test plan is documented in
 [docs/rules/trailing-whitespace-fixtures.md](../docs/rules/trailing-whitespace-fixtures.md).
-Full trailing-whitespace behavior tests, golden files, and test runner behavior
-are not added yet.
+In-memory trailing-whitespace execution has started, but full
+trailing-whitespace behavior tests, golden files, and test runner behavior are
+not added yet.
 
 The rule-specific trailing-whitespace parity plan is documented in
 [docs/rules/trailing-whitespace-parity.md](../docs/rules/trailing-whitespace-parity.md).
 No parity runner exists yet.
 
-No executable trailing-whitespace helper tests are added yet. Future tests
-should cover no trailing whitespace, trailing spaces, trailing tabs,
+No executable trailing-whitespace rule execution tests are added yet. Future
+tests should cover no trailing whitespace, trailing spaces, trailing tabs,
 whitespace-only lines, final lines without trailing newlines, CRLF behavior,
-diagnostics, and parity behavior.
+diagnostics, no file reads, no filesystem scanning, and parity behavior.
 
 No diagnostic mapping tests are added yet. Future tests should validate mapping
 from the trailing-whitespace helper result to the internal diagnostic model,
