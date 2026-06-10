@@ -169,6 +169,7 @@ require_grep "compiler invocation plan added" docs/dev/roadmap.md
 require_grep "compiler provisioning plan added" docs/dev/roadmap.md
 require_grep "local build scaffold and gitignore hygiene added" docs/dev/roadmap.md
 require_grep "minimal main entry shell added" docs/dev/roadmap.md
+require_grep "OS argv boundary placeholder added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
@@ -197,6 +198,7 @@ require_grep "No executable CLI parser tests are added yet" tests/README.md
 require_grep "No executable dispatcher tests are added yet" tests/README.md
 require_grep "No executable explicit-token entry tests are added yet" tests/README.md
 require_grep "No executable main-entry tests are added yet" tests/README.md
+require_grep "No executable OS argv boundary tests are added yet" tests/README.md
 require_grep "scripts/build.sh" tests/README.md
 require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
@@ -253,6 +255,8 @@ require_grep "problems" src/cli.ari
 require_grep "parse_cli_tokens" src/cli.ari
 require_grep "dispatch_cli_command" src/cli.ari
 require_grep "run_explicit_cli_tokens" src/cli.ari
+require_grep "OsArgvBoundary" src/cli.ari
+require_grep "os_argv_boundary" src/cli.ari
 require_grep "CliListRulesText" src/cli.ari
 require_grep "CliSourceLintFuture" src/cli.ari
 require_grep "missing_value_problem" src/cli.ari
@@ -260,6 +264,7 @@ require_grep "unknown_argument_problem" src/cli.ari
 require_grep "raw_rule_override" src/cli.ari
 require_grep "does not read process arguments" src/cli.ari
 require_grep "OS process argv" src/cli.ari
+require_grep "does not inspect argv" src/cli.ari
 require_grep "write stdout/stderr" src/cli.ari
 require_grep "future work" src/cli.ari
 require_grep "DiagnosticOutputMetadata" src/output.ari

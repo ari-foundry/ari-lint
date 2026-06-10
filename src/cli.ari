@@ -1,9 +1,10 @@
-// CLI model, explicit-token parsing, stdout-free dispatch, and the internal
-// explicit-token entry point. The positional source file input and documented
-// options are represented here. This file does not read process arguments,
-// inspect OS process argv or environment state, validate input paths, read
-// config files, serialize JSON, produce diagnostics, write stdout/stderr, scan
-// source files, execute lint rules, call tools/lint, or invoke ari --check.
+// CLI model, explicit-token parsing, stdout-free dispatch, explicit-token entry
+// point, and OS argv boundary marker. The positional source file input and
+// documented options are represented here. This file does not read process arguments.
+// It also does not inspect OS process argv or environment state, validate input
+// paths, read config files, serialize JSON, produce diagnostics, write
+// stdout/stderr, scan source files, execute lint rules, call tools/lint, or
+// invoke ari --check.
 
 pub struct CliOptionMetadata {
   name: String,
@@ -68,6 +69,24 @@ pub struct CliCommandResult {
   kind: CliCommandResultKind,
   text: Option[String],
   detail: String,
+}
+
+pub struct OsArgvBoundary {
+  status: String,
+  reads_process_argv: bool,
+  reads_environment: bool,
+  writes_output: bool,
+  dispatches_tokens: bool,
+}
+
+pub fn os_argv_boundary() -> OsArgvBoundary {
+  return OsArgvBoundary {
+    status: "OS argv integration boundary is present but inactive.",
+    reads_process_argv: false,
+    reads_environment: false,
+    writes_output: false,
+    dispatches_tokens: false,
+  };
 }
 
 fn missing_value_problem(argument: String) -> CliArgumentProblem {
@@ -254,3 +273,7 @@ pub fn run_explicit_cli_tokens(
 // already have tokens. These entry paths do not write stdout/stderr, serialize
 // JSON, read source or config files, scan source text, execute lint rules, call
 // tools/lint, or invoke ari --check.
+//
+// os_argv_boundary names the future OS argv integration point. It records that
+// the boundary exists and is inactive. It does not inspect argv, read
+// environment variables, dispatch tokens, or write output.

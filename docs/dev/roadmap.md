@@ -21,6 +21,7 @@ human-readable list-rules formatter added /
 stdout-free command dispatcher added /
 internal explicit-token entry path added /
 minimal main entry shell added /
+OS argv boundary placeholder added /
 no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -43,6 +44,11 @@ and test work.
       shell function and returns success. OS argv integration, stdout/stderr
       output, JSON output, config parsing, compiler invocation, source scanning,
       lint execution, main-entry tests, and parity behavior remain future work.
+- [x] Add an explicit OS argv boundary placeholder that records the future
+      process-argument integration boundary without reading OS argv, reading
+      environment variables, dispatching tokens, writing stdout/stderr output,
+      invoking the compiler, scanning sources, or executing lint rules.
+      Argv-boundary tests and user-facing CLI behavior remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain
