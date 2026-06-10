@@ -12,6 +12,17 @@ if [ "$#" -gt 1 ]; then
 fi
 
 compiler="${1:-${ARI_COMPILER:-}}"
+original_pwd=$(pwd)
+
+script_dir=$(CDPATH= cd "$(dirname "$0")" && pwd)
+repo_root=$(CDPATH= cd "$script_dir/.." && pwd)
+
+case "$compiler" in
+  "" | /*) ;;
+  *) compiler="$original_pwd/$compiler" ;;
+esac
+
+cd "$repo_root"
 
 if [ -z "$compiler" ]; then
   fail "missing Ari compiler path; pass scripts/build.sh /path/to/ari or set ARI_COMPILER"

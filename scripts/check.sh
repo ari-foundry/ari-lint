@@ -118,6 +118,8 @@ require_grep "scripts/check.sh" README.md
 require_grep "scripts/build.sh" README.md
 require_grep "not a full test suite yet" README.md
 require_grep "explicit Ari compiler path" README.md
+require_grep "local standalone build wiring has started" README.md
+require_grep "relative compiler paths" README.md
 require_grep "docs/migration.md" docs/README.md
 require_grep "docs/dev/ari-implementation-plan.md" docs/README.md
 require_grep "docs/dev/compiler-invocation.md" docs/README.md
@@ -201,6 +203,7 @@ require_grep "file read boundary added" docs/dev/roadmap.md
 require_grep "internal CLI file lint path added" docs/dev/roadmap.md
 require_grep "source-only parity runner skeleton added" docs/dev/roadmap.md
 require_grep "compiler-backed CI gate documented" docs/dev/roadmap.md
+require_grep "standalone build root wiring added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "lint run aggregation has also started" tests/README.md
@@ -208,6 +211,8 @@ require_grep "file-read boundary for one" tests/README.md
 require_grep "internal CLI file lint path" tests/README.md
 require_grep "source-only parity runner skeleton" tests/README.md
 require_grep "GitHub Actions workflow is intentionally compiler-free" tests/README.md
+require_grep "No executable standalone build tests are added yet" tests/README.md
+require_grep "relative compiler path preservation" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
 require_grep "docs/dev/compiler-provisioning.md" tests/README.md
 require_grep "No executable missing-final-newline rule execution tests are added yet" tests/README.md
@@ -219,6 +224,8 @@ require_grep "Source directories should contain Ari source files only" docs/dev/
 require_grep "CLI file lint path is limited" docs/dev/ari-implementation-plan.md
 require_grep "source-only parity runner skeleton" docs/dev/ari-implementation-plan.md
 require_grep "compiler-backed CI gate" docs/dev/ari-implementation-plan.md
+require_grep "Standalone build wiring is local-only" docs/dev/ari-implementation-plan.md
+require_grep "relative compiler paths" docs/dev/ari-implementation-plan.md
 require_grep "The current GitHub Actions workflow must not run" docs/dev/compiler-provisioning.md
 require_grep "in-memory lint run aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "File-backed aggregation" docs/dev/ari-implementation-plan.md
@@ -537,9 +544,14 @@ require_grep "future work" src/rules/missing_final_newline.ari
 require_grep "provision the Ari compiler" scripts/README.md
 require_grep "build.sh" scripts/README.md
 require_grep "explicit Ari compiler path" scripts/README.md
+require_grep "repository root before compiling" scripts/README.md
+require_grep "relative compiler paths" scripts/README.md
 require_grep "does not download or build the Ari compiler" scripts/README.md
 require_grep "tools/lint" scripts/README.md
 require_grep "ARI_COMPILER" scripts/build.sh
+require_grep "original_pwd" scripts/build.sh
+require_grep "repo_root" scripts/build.sh
+require_grep 'cd "$repo_root"' scripts/build.sh
 require_grep "src/main.ari" scripts/build.sh
 require_grep "build/ari-lint" scripts/build.sh
 require_grep "does not run" tests/README.md

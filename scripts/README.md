@@ -8,10 +8,11 @@ run parity checks, run CLI tests, or compare golden files.
 
 `build.sh` is a local build scaffold for the Ari-language entrypoint. It
 requires an explicit Ari compiler path as the first argument or through
-`ARI_COMPILER`; if both are provided, the positional argument wins. It validates
-that the compiler path exists and is executable, creates `build/`, and uses the
-verified Ari compiler form `ari input.ari -o output` to compile `src/main.ari`
-to `build/ari-lint`.
+`ARI_COMPILER`; if both are provided, the positional argument wins. It resolves
+the repository root before compiling, preserves relative compiler paths from the
+caller's directory, validates that the compiler path exists and is executable,
+creates `build/`, and uses the verified Ari compiler form `ari input.ari -o
+output` to compile `src/main.ari` to `build/ari-lint`.
 
 `build.sh` does not download or build the Ari compiler. It does not execute
 `tools/lint`, run `ari --check`, install dependencies, run package manager

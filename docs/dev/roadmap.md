@@ -38,6 +38,7 @@ file read boundary added /
 internal CLI file lint path added /
 source-only parity runner skeleton added /
 compiler-backed CI gate documented /
+standalone build root wiring added /
 no user-facing lint output yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -174,6 +175,12 @@ and test work.
       recording are ready. Actual compiler-backed CI, Ari compiler execution,
       `ari --check`, package manager commands, parity checks, release
       automation, and compatibility claims remain future work.
+- [x] Wire local standalone build root handling in `scripts/build.sh` so the
+      script resolves the repository root before compiling `src/main.ari` to
+      `build/ari-lint` with an explicit compiler path, while preserving
+      relative compiler paths from the caller's directory. CI build execution,
+      compiler-backed checks, package manager files, release artifacts,
+      standalone tests, and compatibility claims remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain
@@ -356,7 +363,8 @@ and test work.
 - [x] Record compiler-backed CI gate; `.github/workflows/check.yml` remains
       lightweight and compiler-free until standalone tests and explicit Ari
       compiler provisioning exist.
-- [ ] Wire standalone build.
+- [x] Wire local standalone build script root handling; build execution remains
+      explicit/local and is not part of CI.
 - [ ] Wire standalone tests.
 - [ ] Define release and compatibility policy after inspecting Ari releases and
       Ari tags; define `ari-lint` compatibility only after Ari-language source
