@@ -144,8 +144,14 @@ exists.
 
 No executable dispatcher tests are added yet. Future dispatcher tests should
 cover list-rules dispatch, unsupported commands, source-file lint requests,
-parse-problem/error results, stdout-free behavior, and parity behavior against
-current `tools/lint` once a parity runner exists.
+parse-problem/error results, internal exit-code mapping, stdout-free behavior,
+and parity behavior against current `tools/lint` once a parity runner exists.
+
+No executable exit-code tests are added yet. Future tests should cover the
+internal command-result mappings for success, usage-error, and unavailable
+states, ensure no process exit is called by the model, and compare user-facing
+exit behavior with current `tools/lint` once CLI wiring and a parity runner
+exist.
 
 No executable explicit-token entry tests are added yet. Future entry-path tests
 should cover list-rules token input, parse problems, unsupported commands,

@@ -171,6 +171,7 @@ require_grep "local build scaffold and gitignore hygiene added" docs/dev/roadmap
 require_grep "minimal main entry shell added" docs/dev/roadmap.md
 require_grep "OS argv boundary placeholder added" docs/dev/roadmap.md
 require_grep "stdout/stderr output boundary model added" docs/dev/roadmap.md
+require_grep "internal exit-code model added" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
 require_grep "docs/dev/compiler-invocation.md" tests/README.md
@@ -188,6 +189,7 @@ require_grep "CLI argument result model" docs/dev/ari-implementation-plan.md
 require_grep "Minimal token-list parsing has started" docs/dev/ari-implementation-plan.md
 require_grep "Actual OS process argument parsing and environment handling remain future" docs/dev/ari-implementation-plan.md
 require_grep "internal stdout-free command dispatcher" docs/dev/ari-implementation-plan.md
+require_grep "Internal command results now carry data-only exit-code mappings" docs/dev/ari-implementation-plan.md
 require_grep "CLI metadata skeleton" docs/dev/roadmap.md
 require_grep "CLI argument model added" docs/dev/roadmap.md
 require_grep "minimal CLI token parser added" docs/dev/roadmap.md
@@ -197,6 +199,7 @@ require_grep "No CLI tests are added yet" tests/README.md
 require_grep "No CLI model tests are added yet" tests/README.md
 require_grep "No executable CLI parser tests are added yet" tests/README.md
 require_grep "No executable dispatcher tests are added yet" tests/README.md
+require_grep "No executable exit-code tests are added yet" tests/README.md
 require_grep "No executable explicit-token entry tests are added yet" tests/README.md
 require_grep "No executable main-entry tests are added yet" tests/README.md
 require_grep "No executable OS argv boundary tests are added yet" tests/README.md
@@ -239,6 +242,15 @@ require_grep "CliRuleOverrideArg" src/cli.ari
 require_grep "CliArgumentProblem" src/cli.ari
 require_grep "CliCommandResultKind" src/cli.ari
 require_grep "CliCommandResult" src/cli.ari
+require_grep "CliExitCodeKind" src/cli.ari
+require_grep "CliExitCodeMapping" src/cli.ari
+require_grep "CliExitSuccess" src/cli.ari
+require_grep "CliExitUsageError" src/cli.ari
+require_grep "CliExitUnavailable" src/cli.ari
+require_grep "cli_success_exit_code" src/cli.ari
+require_grep "cli_usage_error_exit_code" src/cli.ari
+require_grep "cli_unavailable_exit_code" src/cli.ari
+require_grep "calls_process_exit: false" src/cli.ari
 require_grep "positional source file input" src/cli.ari
 require_grep "source_files" src/cli.ari
 require_grep "--json" src/cli.ari
@@ -269,6 +281,7 @@ require_grep "does not read process arguments" src/cli.ari
 require_grep "OS process argv" src/cli.ari
 require_grep "does not inspect argv" src/cli.ari
 require_grep "write stdout/stderr" src/cli.ari
+require_grep "call process exit" src/cli.ari
 require_grep "future work" src/cli.ari
 require_grep "DiagnosticOutputMetadata" src/output.ari
 require_grep "Human" src/output.ari
