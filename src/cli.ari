@@ -1,9 +1,10 @@
-// CLI model, explicit-token parsing, stdout-free dispatch, internal exit-code
-// data, explicit-token list-rules command wiring, explicit-token entry point,
-// and OS argv integration. The positional source file input and documented
-// options are represented here. This file reads process arguments only through
-// the verified std::env::args boundary and keeps main wiring future work. It
-// does not read environment state, validate input paths, read config files,
+// CLI model, explicit-token parsing, semantic rule override parsing bridge,
+// stdout-free dispatch, internal exit-code data, explicit-token list-rules
+// command wiring, explicit-token entry point, and OS argv integration. The
+// positional source file input and documented options are represented here.
+// This file reads process arguments only through the verified std::env::args
+// boundary and keeps main wiring future work. It does not read environment
+// state, validate input paths, read config files, apply rule overrides,
 // serialize JSON, produce diagnostics, write stdout/stderr, scan source files,
 // execute lint rules, call tools/lint, call process exit, or invoke ari
 // --check.
@@ -121,7 +122,33 @@ fn unknown_argument_problem(argument: String) -> CliArgumentProblem {
   };
 }
 
-fn raw_rule_override(raw_text: String) -> CliRuleOverrideArg {
+fn optional_rule_override_part(
+  zone: ref mut Zone,
+  value: Slice[u8],
+) -> Option[String] {
+  if value.len() == 0 {
+    return None<String>();
+  }
+  return Some<String>(std::string::from(zone, value));
+}
+
+fn raw_rule_override(
+  zone: ref mut Zone,
+  raw_text: String,
+) -> CliRuleOverrideArg {
+  match std::string::split_once(raw_text.as_slice(), "=") {
+    Some(pair) => {
+      let rule_name = std::string::trim(pair.left());
+      let severity_name = std::string::trim(pair.right());
+      return CliRuleOverrideArg {
+        rule_name: optional_rule_override_part(zone, rule_name),
+        severity_name: optional_rule_override_part(zone, severity_name),
+        raw_text: raw_text,
+      };
+    }
+    None => {}
+  }
+
   return CliRuleOverrideArg {
     rule_name: None<String>(),
     severity_name: None<String>(),
@@ -234,7 +261,7 @@ pub fn parse_cli_tokens(
       }
     } else if token.equals("--rule") {
       if index + 1 < tokens.len() {
-        rule_overrides.push(raw_rule_override(tokens.get(index + 1)));
+        rule_overrides.push(raw_rule_override(zone, tokens.get(index + 1)));
         index = index + 2;
       } else {
         problems.push(missing_value_problem(token));
@@ -262,6 +289,17 @@ pub fn parse_cli_tokens(
     },
     problems: problems,
   };
+}
+
+pub fn parse_cli_rule_overrides(
+  zone: ref mut Zone,
+  rule_overrides: std::vec::Vec[CliRuleOverrideArg],
+) -> super::config::RuleOverrideParseResult {
+  var raw_values = std::vec::new<String>(zone, rule_overrides.len());
+  for rule_override in rule_overrides {
+    raw_values.push(rule_override.raw_text);
+  }
+  return super::config::parse_rule_override_texts(zone, raw_values);
 }
 
 pub fn dispatch_cli_command(
@@ -352,10 +390,15 @@ pub fn run_os_argv_cli(zone: ref mut Zone) -> CliCommandResult {
 }
 
 // parse_cli_tokens consumes a caller-provided token list and records source
-// files, flags/options, raw rule overrides, and parse problems in CliParseResult.
+// files, flags/options, raw rule override text plus split rule/severity names,
+// and parse problems in CliParseResult.
 // It intentionally leaves environment handling, path validation, config
-// parsing, semantic --rule parsing, diagnostic printing, and ari --check
-// invocation as future work.
+// file discovery, diagnostic printing, and ari --check invocation as future
+// work.
+//
+// parse_cli_rule_overrides converts those raw --rule values into the internal
+// config override model and parse problems. It does not apply overrides to rule
+// execution or command dispatch.
 //
 // dispatch_cli_command maps a CliParseResult to a stdout-free internal command
 // result with internal exit-code data. run_explicit_cli_tokens composes parsing

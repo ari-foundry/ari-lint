@@ -28,6 +28,7 @@ explicit-token list-rules command wiring added /
 minimal stdout adapter added /
 OS argv integration added /
 minimal config text parser added /
+rule override semantic parser added /
 no real lint implementation yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -93,6 +94,14 @@ and test work.
       invoking the compiler, or executing lint rules. Config parser tests,
       config discovery, `--config` behavior, and override application remain
       future work.
+- [x] Add a semantic parser for caller-provided `--rule` values using the
+      documented `RULE=SEVERITY` shape, normalizing the documented short rule
+      names to full lint rule codes and returning command-line-sourced internal
+      overrides plus parse problems without applying overrides, reading config
+      files, integrating with command dispatch, emitting diagnostics,
+      serializing JSON, scanning sources, invoking the compiler, or executing
+      lint rules. Rule override parser tests, unknown-rule validation, and
+      override application remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain
@@ -122,8 +131,9 @@ and test work.
       `--list-rules`, `--help`/`-h`, `--ari`, `-I`, `--config`, raw `--rule`
       values, missing-value problems, and unknown-argument problems. Main
       wiring, `ARI_COMPILER`, compiler path validation, config parsing,
-      semantic `--rule` parsing, compiler invocation, output behavior, tests,
-      and CI parser execution remain future work.
+      command dispatch integration for parsed rule overrides, compiler
+      invocation, output behavior, tests, and CI parser execution remain future
+      work.
 - [x] Add an internal list-rules output path that converts existing known rule
       metadata into rows for `lint/trailing-whitespace` and
       `lint/missing-final-newline`, including rule code, short name, default

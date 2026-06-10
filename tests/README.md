@@ -199,6 +199,12 @@ No executable config parser tests are added yet. Future config parser tests
 should validate caller-provided `RULE = SEVERITY` text, blank lines, comments,
 invalid lines, invalid severity names, and parse problem reporting.
 
+No executable rule override parser tests are added yet. Future rule override
+parser tests should validate caller-provided `--rule RULE=SEVERITY` text,
+documented short-name normalization, invalid lines, invalid severity names,
+parse problem reporting, unknown-rule handling once policy is set, and parity
+behavior.
+
 No config override tests are added yet. Future config override tests should
 validate `ari-lint.rules` discovery, `--config` behavior, `--rule` behavior,
 precedence, override application, diagnostics, and parity behavior against

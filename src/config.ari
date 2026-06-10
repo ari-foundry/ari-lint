@@ -51,6 +51,11 @@ pub struct ConfigParseResult {
   problems: std::vec::Vec[ConfigParseProblem],
 }
 
+pub struct RuleOverrideParseResult {
+  overrides: std::vec::Vec[RuleSeverityOverride],
+  problems: std::vec::Vec[ConfigParseProblem],
+}
+
 pub struct OverridePrecedenceMetadata {
   first: OverridePrecedenceStep,
   second: OverridePrecedenceStep,
@@ -122,6 +127,93 @@ fn config_override_from_parts(
     rule_code: std::string::from(zone, rule_code),
     severity: severity,
     source: source,
+  };
+}
+
+fn normalized_rule_override_code(rule_code: Slice[u8]) -> Slice[u8] {
+  if rule_code.equals("trailing-whitespace") {
+    return "lint/trailing-whitespace";
+  }
+  if rule_code.equals("missing-final-newline") {
+    return "lint/missing-final-newline";
+  }
+  return rule_code;
+}
+
+fn parse_rule_override_value(
+  zone: ref mut Zone,
+  raw_text: Slice[u8],
+  overrides: ref mut std::vec::Vec[RuleSeverityOverride],
+  problems: ref mut std::vec::Vec[ConfigParseProblem],
+) -> void {
+  let text = std::string::trim(raw_text);
+  match std::string::split_once(text, "=") {
+    None => {
+      problems.push(config_parse_problem(
+        zone,
+        0,
+        text,
+        ConfigMissingEquals,
+        "--rule value must use RULE=SEVERITY.",
+      ));
+      return;
+    }
+    Some(pair) => {
+      let rule_code = std::string::trim(pair.left());
+      let severity_text = std::string::trim(pair.right());
+      if rule_code.len() == 0 {
+        problems.push(config_parse_problem(
+          zone,
+          0,
+          text,
+          ConfigEmptyRule,
+          "--rule value is missing a rule name.",
+        ));
+        return;
+      }
+
+      match parse_config_severity(severity_text) {
+        None => {
+          problems.push(config_parse_problem(
+            zone,
+            0,
+            text,
+            ConfigInvalidSeverity,
+            "Severity must be off, hint, note, warning, or error.",
+          ));
+        }
+        Some(severity) => {
+          overrides.push(config_override_from_parts(
+            zone,
+            normalized_rule_override_code(rule_code),
+            severity,
+            CommandLineRuleOverride,
+          ));
+        }
+      }
+    }
+  }
+}
+
+pub fn parse_rule_override_texts(
+  zone: ref mut Zone,
+  raw_values: std::vec::Vec[String],
+) -> RuleOverrideParseResult {
+  var overrides = std::vec::new<RuleSeverityOverride>(zone, raw_values.len());
+  var problems = std::vec::new<ConfigParseProblem>(zone, raw_values.len());
+
+  for raw_value in raw_values {
+    parse_rule_override_value(
+      zone,
+      raw_value.as_slice(),
+      ref mut overrides,
+      ref mut problems,
+    );
+  }
+
+  return RuleOverrideParseResult {
+    overrides: overrides,
+    problems: problems,
   };
 }
 
@@ -231,6 +323,12 @@ pub fn parse_config_text(
 // warning, and error. It returns internal overrides and parse problems without
 // applying them.
 //
+// parse_rule_override_texts accepts caller-provided --rule values in
+// RULE=SEVERITY form, normalizes documented short rule names to full lint rule
+// codes, and returns command-line-sourced overrides plus parse problems without
+// applying them. Rule override parse problems use line 0 because they do not
+// come from config-file lines.
+//
 // ari-lint.rules discovery or reading, --config behavior, --rule behavior,
-// severity override application, CLI integration, diagnostics output, JSON
-// serialization, source scanning, and ari --check invocation are future work.
+// severity override application, diagnostics output, JSON serialization,
+// source scanning, and ari --check invocation are future work.

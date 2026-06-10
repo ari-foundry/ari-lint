@@ -30,9 +30,11 @@ It does not move `tools/lint` or change build behavior.
   OS argv reading has started through a verified stdlib boundary.
 - The CLI argument result model is now used by the minimal explicit-token
   parser for positional files, planned flags/options, optional compiler/config
-  paths, include paths, raw rule overrides, help requests, and parse problems.
-  Actual OS process argument collection now has a minimal internal entry path;
-  environment handling remains future work.
+  paths, include paths, raw rule override values, split rule/severity names,
+  help requests, and parse problems. A semantic parser now converts
+  caller-provided `--rule` values into command-line-sourced internal severity
+  overrides and parse problems. Actual OS process argument collection now has a
+  minimal internal entry path; environment handling remains future work.
 - An explicit OS argv boundary now exists in `src/cli.ari`. It reads process
   arguments through the verified Ari `std::env::args` API, drops argv[0], and
   reuses the existing explicit-token parser and stdout-free dispatcher. It does
@@ -88,8 +90,10 @@ It does not move `tools/lint` or change build behavior.
   for default config, `ari-lint.rules`, `--config`, `--rule`, rule severity
   overrides, and documented override precedence. A minimal caller-provided
   config text parser now handles `RULE = SEVERITY` lines, blank lines, and `#`
-  comments, returning internal overrides and parse problems. `ari-lint.rules`
-  discovery and file reading are not implemented yet.
+  comments, returning internal overrides and parse problems. The command-line
+  rule override parser now handles `RULE=SEVERITY` values for `--rule`,
+  including documented short-name normalization for the two known rules.
+  `ari-lint.rules` discovery and file reading are not implemented yet.
 - The non-executing rule module layout has started with source-only child
   modules for the planned trailing whitespace and missing final newline rules.
   A minimal internal single-line helper has started for trailing whitespace,
@@ -204,18 +208,21 @@ Current preparatory model skeleton files are source-only placeholders:
   also defines a CLI argument result model and a minimal explicit-token parser
   for caller-provided token lists, including positional files, requested
   output/list/help flags, optional compiler and config paths, include paths,
-  raw rule override entries, missing-value problems, and unknown-argument
-  problems. It also defines an internal stdout-free command result model and a
-  dispatcher that routes list-rules requests to internal formatted text while
-  keeping other command paths as explicit future-work placeholders, plus an
-  internal exit-code mapping carried by command results, plus an internal
-  explicit-token entry function that composes parsing and dispatch. It also has
-  a named explicit-token `--list-rules` command path that reaches formatted
-  text and exit-code data through that existing pipeline. It also defines an
-  OS argv integration path that reads process arguments through verified
+  raw rule override entries with split rule/severity names, missing-value
+  problems, and unknown-argument problems. It also exposes a semantic
+  `--rule` parser bridge that converts raw rule override values into the
+  internal config override model and parse problems without applying them. It
+  also defines an internal stdout-free command result model and a dispatcher
+  that routes list-rules requests to internal formatted text while keeping
+  other command paths as explicit future-work placeholders, plus an internal
+  exit-code mapping carried by command results, plus an internal explicit-token
+  entry function that composes parsing and dispatch. It also has a named
+  explicit-token `--list-rules` command path that reaches formatted text and
+  exit-code data through that existing pipeline. It also defines an OS argv
+  integration path that reads process arguments through verified
   `std::env::args`, drops argv[0], and dispatches through the existing
-  explicit-token path. It does not read environment variables, write
-  stdout/stderr output, wire `main`, or call process exit.
+  explicit-token path. It does not read environment variables, apply rule
+  overrides, write stdout/stderr output, wire `main`, or call process exit.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
@@ -251,8 +258,10 @@ Current preparatory model skeleton files are source-only placeholders:
   command-line `--rule` overrides, and that explicit `--config` disables
   discovery. It now parses caller-provided config text with blank lines,
   comments, and `RULE = SEVERITY` entries into internal overrides and parse
-  problems. It does not discover config files, read `ari-lint.rules`, inspect
-  CLI arguments, or apply overrides.
+  problems. It also parses caller-provided command-line rule override text in
+  `RULE=SEVERITY` form, normalizing documented short rule names into full lint
+  rule codes. It does not discover config files, read `ari-lint.rules`, inspect
+  CLI arguments, apply overrides, or validate unknown rule names.
 
 These files do not implement real lint rules, rule execution, argument
 validation, source scanning, diagnostics output, JSON serialization, file reads,
@@ -261,19 +270,21 @@ success, the OS argv entry path is limited to reading `std::env::args`, dropping
 argv[0], and dispatching internal tokens, the CLI parser is limited to explicit
 caller-provided token lists and raw option values, the config parser is limited
 to caller-provided text, rule/severity pairs, blank lines, and comments, the
-list-rules formatter is limited to internal text construction, the command
-dispatcher is limited to stdout-free internal command results, the exit-code
-model is limited to internal data carried by those results, the explicit-token
-`--list-rules` command path is limited to caller-provided token construction,
-the stdout adapter is limited to caller-provided `String` text, and the
-stdout/stderr output boundary is limited to status data for named future sinks.
+rule override parser is limited to caller-provided `--rule` text and internal
+override construction, the list-rules formatter is limited to internal text
+construction, the command dispatcher is limited to stdout-free internal command
+results, the exit-code model is limited to internal data carried by those
+results, the explicit-token `--list-rules` command path is limited to
+caller-provided token construction, the stdout adapter is limited to
+caller-provided `String` text, and the stdout/stderr output boundary is limited
+to status data for named future sinks.
 Compiler invocation, config discovery, config file reading, override
 application, diagnostics output, stderr writing, stdout adapter wiring to
 commands or `main`, process exit, JSON serialization, environment handling,
-semantic `--rule` parsing, source scanning, lint execution, main-entry tests,
-argv-boundary tests, OS-argv integration tests, config parser tests,
-output-boundary tests, stdout-adapter tests, exit-code tests, list-rules command
-tests, parser tests, dispatcher tests, and
+unknown-rule validation for `--rule`, source scanning, lint execution,
+main-entry tests, argv-boundary tests, OS-argv integration tests, config parser
+tests, rule override parser tests, output-boundary tests, stdout-adapter tests,
+exit-code tests, list-rules command tests, parser tests, dispatcher tests, and
 explicit-token entry tests remain future work. Severity parsing, CLI/config
 override behavior, rule registration behavior, and the JSON schema are not
 stable yet.
@@ -402,7 +413,7 @@ usable.
 - Tests may depend on a compatible Ari compiler binary.
 - Source layout may change after implementation starts.
 - Registry, severity, and config shapes may change when real rule execution,
-  config discovery, and override application begin.
+  config discovery, rule override validation, and override application begin.
 - Rule module boundaries may change once real rule behavior and shared rule
   execution APIs are designed.
 - Standalone config discovery and override precedence may need fixtures before
@@ -432,6 +443,7 @@ usable.
 - [ ] Define registry, severity, and config model behavior after source
       skeletons compile in the real build
 - [x] Add minimal caller-provided config text parsing
+- [x] Add minimal command-line rule override semantic parsing
 - [ ] Add config precedence fixtures before claiming stable config behavior
 - [ ] Define executable rule module API after the non-executing layout is
       validated
