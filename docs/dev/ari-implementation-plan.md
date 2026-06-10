@@ -54,6 +54,10 @@ It does not move `tools/lint` or change build behavior.
   command paths. User-facing stdout/stderr output, OS argv/main wiring, JSON
   output, source scanning, compiler invocation, config parsing, diagnostics
   output, and parity tests remain future work.
+- Internal command results now carry data-only exit-code mappings for success,
+  usage-error, and unavailable command states. The model does not call process
+  exit, run the CLI, read OS argv, write stdout/stderr, or claim stable
+  user-facing exit behavior.
 - An internal stdout/stderr output boundary model now records named stdout and
   stderr sinks plus result status for future output handling. It is data-only:
   it does not call real output APIs, write stdout/stderr, connect to OS argv or
@@ -185,9 +189,11 @@ Current preparatory model skeleton files are source-only placeholders:
   problems. It also defines an internal stdout-free command result model and a
   dispatcher that routes list-rules requests to internal formatted text while
   keeping other command paths as explicit future-work placeholders, plus an
-  internal explicit-token entry function that composes parsing and dispatch. It
-  also defines an inactive OS argv boundary marker for future process-argument
-  integration. It does not read OS process argv or write stdout/stderr output.
+  internal exit-code mapping carried by command results, plus an internal
+  explicit-token entry function that composes parsing and dispatch. It also
+  defines an inactive OS argv boundary marker for future process-argument
+  integration. It does not read OS process argv, write stdout/stderr output, or
+  call process exit.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
@@ -229,15 +235,16 @@ entry shell is limited to returning success, the OS argv boundary marker is
 limited to inactive status data, the CLI parser is limited to explicit
 caller-provided token lists and raw option values, the list-rules formatter is
 limited to internal text construction, the command dispatcher is limited to
-stdout-free internal command results, and the stdout/stderr output boundary is
-limited to status data for named future sinks. OS argv reading, compiler
-invocation, config parsing, diagnostics output, real stdout/stderr writing,
-stdout/stderr adapter wiring, JSON serialization, environment handling,
+stdout-free internal command results, the exit-code model is limited to internal
+data carried by those results, and the stdout/stderr output boundary is limited
+to status data for named future sinks. OS argv reading, compiler invocation,
+config parsing, diagnostics output, real stdout/stderr writing, stdout/stderr
+adapter wiring, process exit, JSON serialization, environment handling,
 semantic `--rule` parsing, source scanning, lint execution, main-entry tests,
-argv-boundary tests, output-boundary tests, parser tests, dispatcher tests, and
-explicit-token entry tests remain future work. Severity parsing, CLI/config
-override behavior, rule registration behavior, and the JSON schema are not
-stable yet.
+argv-boundary tests, output-boundary tests, exit-code tests, parser tests,
+dispatcher tests, and explicit-token entry tests remain future work. Severity
+parsing, CLI/config override behavior, rule registration behavior, and the JSON
+schema are not stable yet.
 
 The local build scaffold is not compiler-backed CI or full build validation.
 Compiler-backed CI, standalone test execution, compiler provisioning in CI,

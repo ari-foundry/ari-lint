@@ -1,10 +1,10 @@
-// CLI model, explicit-token parsing, stdout-free dispatch, explicit-token entry
-// point, and OS argv boundary marker. The positional source file input and
-// documented options are represented here. This file does not read process arguments.
-// It also does not inspect OS process argv or environment state, validate input
-// paths, read config files, serialize JSON, produce diagnostics, write
-// stdout/stderr, scan source files, execute lint rules, call tools/lint, or
-// invoke ari --check.
+// CLI model, explicit-token parsing, stdout-free dispatch, internal exit-code
+// data, explicit-token entry point, and OS argv boundary marker. The
+// positional source file input and documented options are represented here.
+// This file does not read process arguments or inspect OS process argv. It also
+// does not read environment state, validate input paths, read config files,
+// serialize JSON, produce diagnostics, write stdout/stderr, scan source files,
+// execute lint rules, call tools/lint, call process exit, or invoke ari --check.
 
 pub struct CliOptionMetadata {
   name: String,
@@ -65,9 +65,23 @@ pub enum CliCommandResultKind {
   CliUnsupportedFuture,
 }
 
+pub enum CliExitCodeKind {
+  CliExitSuccess,
+  CliExitUsageError,
+  CliExitUnavailable,
+}
+
+pub struct CliExitCodeMapping {
+  kind: CliExitCodeKind,
+  code: i64,
+  calls_process_exit: bool,
+  detail: String,
+}
+
 pub struct CliCommandResult {
   kind: CliCommandResultKind,
   text: Option[String],
+  exit_code: CliExitCodeMapping,
   detail: String,
 }
 
@@ -113,14 +127,53 @@ fn raw_rule_override(raw_text: String) -> CliRuleOverrideArg {
   };
 }
 
+fn cli_exit_code_mapping(
+  kind: CliExitCodeKind,
+  code: i64,
+  detail: String,
+) -> CliExitCodeMapping {
+  return CliExitCodeMapping {
+    kind: kind,
+    code: code,
+    calls_process_exit: false,
+    detail: detail,
+  };
+}
+
+fn cli_success_exit_code() -> CliExitCodeMapping {
+  return cli_exit_code_mapping(
+    CliExitSuccess,
+    0,
+    "Command result maps to success internally; process exit remains future work.",
+  );
+}
+
+fn cli_usage_error_exit_code() -> CliExitCodeMapping {
+  return cli_exit_code_mapping(
+    CliExitUsageError,
+    2,
+    "Command result maps to a usage error internally; process exit remains future work.",
+  );
+}
+
+fn cli_unavailable_exit_code() -> CliExitCodeMapping {
+  return cli_exit_code_mapping(
+    CliExitUnavailable,
+    1,
+    "Command result maps to unavailable behavior internally; process exit remains future work.",
+  );
+}
+
 fn cli_command_result(
   kind: CliCommandResultKind,
   text: Option[String],
+  exit_code: CliExitCodeMapping,
   detail: String,
 ) -> CliCommandResult {
   return CliCommandResult {
     kind: kind,
     text: text,
+    exit_code: exit_code,
     detail: detail,
   };
 }
@@ -217,6 +270,7 @@ pub fn dispatch_cli_command(
     return cli_command_result(
       CliParseProblems,
       None<String>(),
+      cli_usage_error_exit_code(),
       "CLI parse problems are recorded internally; diagnostic output remains future work.",
     );
   }
@@ -227,6 +281,7 @@ pub fn dispatch_cli_command(
     return cli_command_result(
       CliListRulesText,
       Some<String>(text),
+      cli_success_exit_code(),
       "List-rules text is available internally; stdout/stderr output remains future work.",
     );
   }
@@ -235,6 +290,7 @@ pub fn dispatch_cli_command(
     return cli_command_result(
       CliHelpFuture,
       None<String>(),
+      cli_success_exit_code(),
       "Help command dispatch is recognized internally; user-facing output remains future work.",
     );
   }
@@ -243,6 +299,7 @@ pub fn dispatch_cli_command(
     return cli_command_result(
       CliSourceLintFuture,
       None<String>(),
+      cli_unavailable_exit_code(),
       "Source-file lint dispatch is recognized internally; source scanning and compiler invocation remain future work.",
     );
   }
@@ -250,6 +307,7 @@ pub fn dispatch_cli_command(
   return cli_command_result(
     CliUnsupportedFuture,
     None<String>(),
+    cli_unavailable_exit_code(),
     "No executable command is available internally yet; CLI validation remains future work.",
   );
 }
@@ -269,10 +327,15 @@ pub fn run_explicit_cli_tokens(
 // future work.
 //
 // dispatch_cli_command maps a CliParseResult to a stdout-free internal command
-// result. run_explicit_cli_tokens composes parsing and dispatch for callers that
-// already have tokens. These entry paths do not write stdout/stderr, serialize
-// JSON, read source or config files, scan source text, execute lint rules, call
-// tools/lint, or invoke ari --check.
+// result with internal exit-code data. run_explicit_cli_tokens composes parsing
+// and dispatch for callers that already have tokens. These entry paths do not
+// write stdout/stderr, serialize JSON, read source or config files, scan source
+// text, execute lint rules, call tools/lint, call process exit, or invoke
+// ari --check.
+//
+// CliExitCodeMapping records internal command-result-to-code decisions. It does
+// not exit the process; main still returns its fixed shell status until real CLI
+// wiring is explicitly scoped.
 //
 // os_argv_boundary names the future OS argv integration point. It records that
 // the boundary exists and is inactive. It does not inspect argv, read
