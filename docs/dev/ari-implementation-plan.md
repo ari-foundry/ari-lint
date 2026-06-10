@@ -153,7 +153,8 @@ It does not move `tools/lint` or change build behavior.
   documentation belongs in `docs/dev/` or other documentation directories.
 - A local build scaffold now exists at `scripts/build.sh`. It requires an
   explicit Ari compiler path, compiles `src/main.ari` to `build/ari-lint` using
-  the verified `ari input.ari -o output` invocation form, and is not run by CI.
+  the verified `ari input.ari -o output` invocation form, resolves the
+  repository root before compiling, and is not run by CI.
 - The CI compiler-backed check gate is documented. The GitHub Actions workflow
   remains compiler-free and runs only `scripts/check.sh` until explicit Ari
   compiler provisioning, standalone tests, and compiler identity recording are
@@ -365,6 +366,11 @@ The local build scaffold is not compiler-backed CI or full build validation.
 Compiler-backed CI, standalone test execution, compiler provisioning in CI,
 and compatibility validation remain future work.
 
+Standalone build wiring is local-only. `scripts/build.sh` resolves the
+repository root, requires an explicit compiler path or `ARI_COMPILER`, writes
+`build/ari-lint`, preserves relative compiler paths from the caller's
+directory, and remains separate from the lightweight check workflow.
+
 The compiler-backed CI gate keeps `.github/workflows/check.yml` limited to
 lightweight repository checks. It does not run `scripts/build.sh`, invoke the
 Ari compiler, invoke `ari --check`, download or build the compiler, run package
@@ -574,6 +580,8 @@ usable.
       `ari-lint`, the Ari compiler, shell commands, file IO, or comparisons
 - [x] Record compiler-backed CI gate without running the Ari compiler,
       `ari --check`, `tools/lint`, package managers, or release automation
+- [x] Wire local standalone build script root handling without running the Ari
+      compiler in CI or adding package manager files
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`

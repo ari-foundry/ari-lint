@@ -33,7 +33,8 @@ provisioning are ready.
 
 `scripts/build.sh` is separate from the lightweight checks. It is a
 compiler-dependent local build scaffold that requires an explicit Ari compiler
-path and is not run by default tests or CI.
+path, resolves the repository root before compiling, and is not run by default
+tests or CI. Relative compiler paths are preserved from the caller's directory.
 
 Compiler-backed tests remain future work. Current checks do not run the
 compiler. Future compiler-backed tests should use explicit compiler
@@ -275,6 +276,12 @@ lightweight checks.
 No compiler-backed CI tests are added yet. Future compiler-backed CI should
 record the Ari compiler release tag or commit, use explicit compiler
 provisioning, and run only after standalone tests exist.
+
+No executable standalone build tests are added yet. Future build tests should
+cover repository-root resolution, explicit compiler path validation,
+relative compiler path preservation, `ARI_COMPILER` fallback behavior, output
+path handling, and failure diagnostics without adding compiler execution to
+lightweight checks.
 
 Future parity fixture categories include valid Ari source, trailing whitespace,
 missing final newline, compiler errors, config file overrides, command-line rule

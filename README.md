@@ -7,7 +7,8 @@ This repository is being initialized as part of the `ari-lint` split from
 
 - source extraction from ari-foundry/ari has not happened yet
 - docs migration from ari-foundry/ari has not happened yet
-- standalone build/test wiring has not happened yet
+- local standalone build wiring has started with an explicit compiler path
+- standalone test wiring has not happened yet
 
 The near-term dependency model is invoking `ari --check` for compiler-backed
 checking. Compiler behavior remains owned by the Ari compiler project.
@@ -60,8 +61,10 @@ scripts/build.sh /path/to/ari
 ```
 
 You may also set `ARI_COMPILER`; a positional compiler path takes precedence if
-both are provided. The build script writes `build/ari-lint`, does not download
-or build the Ari compiler, and does not run `tools/lint`.
+both are provided. The build script resolves the repository root before
+compiling, preserves relative compiler paths from the caller's directory,
+writes `build/ari-lint`, does not download or build the Ari compiler, and does
+not run `tools/lint`.
 
 CI does not run compiler-backed builds or tests yet, and this repository is not
 a standalone release.
