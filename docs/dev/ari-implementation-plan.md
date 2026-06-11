@@ -155,9 +155,11 @@ It does not move `tools/lint` or change build behavior.
 - The config precedence fixture plan is documented in
   `docs/dev/config-precedence-fixtures.md`. It records future default,
   config-file, explicit `--config`, and command-line `--rule` precedence
-  fixture areas without adding fixture files, reading config files, discovering
-  `ari-lint.rules`, running CLI tests, invoking the compiler, executing
-  `ari --check`, or claiming stable config behavior.
+  fixture areas. Initial fixture files now exist under
+  `tests/fixtures/config-precedence/`, with lightweight presence/content checks
+  only. They do not execute Ari parser code, read config files through CLI
+  behavior, discover `ari-lint.rules`, run CLI tests, invoke the compiler,
+  execute `ari --check`, or claim stable config behavior.
 - The rule module layout has started with source-only child modules for the
   trailing whitespace and missing final newline rules.
   A minimal internal single-line helper has started for trailing whitespace,
@@ -445,9 +447,10 @@ manager commands, execute `tools/lint`, run parity checks, or claim
 compatibility.
 
 Config precedence is recorded from the current Ari lint reference docs. The
-minimal parser only handles caller-provided text; standalone config discovery
-and config precedence fixture files remain needs follow-up before this
-repository claims stable config behavior. The fixture plan is documented in
+minimal parser only handles caller-provided text. Initial config precedence
+fixture files now exist, but standalone config discovery and executable config
+precedence checks remain needs follow-up before this repository claims stable
+config behavior. The fixture plan is documented in
 `docs/dev/config-precedence-fixtures.md`.
 
 The exact JSON schema and human-readable diagnostic text remain unstable and
@@ -680,8 +683,11 @@ usable.
       behavior without adding fixture files, reading config files, discovering
       config paths, running CLI tests, emitting output, serializing JSON,
       invoking the compiler, executing `ari --check`, or calling `tools/lint`
-- [ ] Add config precedence fixture files and executable checks before claiming
-      stable config behavior
+- [x] Add initial config precedence fixture files and lightweight checks without
+      parser execution, config discovery, CLI tests, output, JSON, compiler
+      execution, `ari --check`, or `tools/lint`
+- [ ] Add executable config precedence checks before claiming stable config
+      behavior
 - [ ] Define executable rule module API after the initial layout and in-memory
       rule execution shape are validated
 - [x] Add in-memory trailing-whitespace rule execution without file IO or

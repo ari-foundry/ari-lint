@@ -15,8 +15,10 @@ boundary and in-memory lint aggregation, and it applies parsed `--rule`
 overrides when provided, but the lightweight checks do not run CLI tests.
 A source-only parity runner skeleton records future comparison boundaries, but
 the lightweight checks do not execute a parity runner.
-The config precedence fixture plan is documented, but no config precedence
-fixture files or executable config precedence tests are added yet.
+The config precedence fixture plan is documented.
+No executable config precedence tests are added yet.
+Initial config precedence fixture files are checked for presence and expected
+text only.
 
 Run the lightweight check script from the repository root:
 
@@ -315,12 +317,19 @@ against current `tools/lint`.
 
 The future config precedence fixture plan is documented in
 [docs/dev/config-precedence-fixtures.md](../docs/dev/config-precedence-fixtures.md).
-No config precedence fixture files are added yet. Future fixture work should
-cover default severity, config-file overrides, explicit `--config`,
-command-line `--rule`, repeated overrides, unknown rules, invalid severities,
-and comments without adding golden JSON, CLI-process tests, compiler execution,
-`ari --check`, or `tools/lint` execution before those behaviors are explicitly
-scoped.
+Initial config precedence fixtures have started under
+`tests/fixtures/config-precedence/`:
+
+- `ari-lint.rules` records a future discovered config-file override shape.
+- `explicit-config.rules` records a future explicit `--config` override shape.
+- `command-line-overrides.txt` records future command-line `--rule` values,
+  including repeated override ordering.
+- `invalid.rules` records future unknown-rule and invalid-severity cases.
+
+The lightweight checks verify fixture presence and key text only. They do not
+parse these fixtures with Ari code, run CLI-process tests, compare golden JSON,
+invoke the compiler, execute `ari --check`, or execute `tools/lint`.
+Executable config precedence tests and parity checks remain future work.
 
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity

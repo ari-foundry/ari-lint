@@ -1,0 +1,3 @@
+# Invalid config fixture for future parser tests.
+lint/unknown-rule = warning
+lint/trailing-whitespace = loud

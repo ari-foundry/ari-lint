@@ -1,0 +1,3 @@
+# Discovered config fixture for future precedence tests.
+lint/trailing-whitespace = off
+lint/missing-final-newline = warning
