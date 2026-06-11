@@ -71,8 +71,9 @@ Known rule registry construction has started from the existing
 A data-only known rule registry lookup by exact full rule code has also
 started, but no registry, severity, or config behavior tests are added yet.
 Future tests should validate severity values, rule registry metadata, known
-rule lookup behavior, config overrides, diagnostics, JSON output after the
-schema is defined, and parity behavior against current `tools/lint`.
+rule lookup behavior, config overrides, severity override resolution,
+diagnostics, JSON output after the schema is defined, and parity behavior
+against current `tools/lint`.
 
 No rule metadata tests are added yet. Future metadata tests should validate the
 rule code, short name, default severity, and description for
@@ -273,10 +274,16 @@ parser tests should validate caller-provided `--rule RULE=SEVERITY` text,
 documented short-name normalization, invalid lines, invalid severity names,
 known-rule validation, parse problem reporting, and parity behavior.
 
+No executable severity override resolution tests are added yet. Future tests
+should validate effective severity for caller-provided rule codes,
+caller-provided override order, unknown rule reporting data, no diagnostic
+mutation, no config-file reads, no output, no compiler invocation, and parity
+behavior.
+
 No config override tests are added yet. Future config override tests should
 validate `ari-lint.rules` discovery, `--config` behavior, `--rule` behavior,
-precedence, override application, diagnostics, and parity behavior against
-current `tools/lint`.
+precedence, severity override resolution, diagnostic/rule execution override
+application, diagnostics, and parity behavior against current `tools/lint`.
 
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
