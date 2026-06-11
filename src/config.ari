@@ -364,22 +364,25 @@ pub fn parse_config_text(
   };
 }
 
-pub fn resolve_rule_severity(
+fn resolve_rule_severity_from_overrides(
   zone: ref mut Zone,
   rule_code: Slice[u8],
   default_severity: super::severity::Severity,
-  overrides: std::vec::Vec[RuleSeverityOverride],
+  overrides: ref std::vec::Vec[RuleSeverityOverride],
 ) -> RuleSeverityResolution {
   var severity = default_severity;
   var source = DefaultConfig;
   var matched_override = false;
 
-  for entry in overrides {
+  var index = 0;
+  while index < overrides.len() {
+    let entry = overrides.get(index);
     if entry.rule_code.as_slice().equals(rule_code) {
       severity = entry.severity;
       source = entry.source;
       matched_override = true;
     }
+    index = index + 1;
   }
 
   let rule_code_text = std::string::from(zone, rule_code);
@@ -398,12 +401,26 @@ pub fn resolve_rule_severity(
   };
 }
 
-pub fn apply_rule_severity_to_diagnostic(
+pub fn resolve_rule_severity(
+  zone: ref mut Zone,
+  rule_code: Slice[u8],
+  default_severity: super::severity::Severity,
+  overrides: std::vec::Vec[RuleSeverityOverride],
+) -> RuleSeverityResolution {
+  return resolve_rule_severity_from_overrides(
+    zone,
+    rule_code,
+    default_severity,
+    ref overrides,
+  );
+}
+
+pub fn apply_rule_severity_to_diagnostic_from_overrides(
   zone: ref mut Zone,
   diagnostic: super::diagnostic::Diagnostic,
-  overrides: std::vec::Vec[RuleSeverityOverride],
+  overrides: ref std::vec::Vec[RuleSeverityOverride],
 ) -> DiagnosticSeverityApplication {
-  let resolution = resolve_rule_severity(
+  let resolution = resolve_rule_severity_from_overrides(
     zone,
     diagnostic.rule_code.as_slice(),
     diagnostic.severity,
@@ -427,6 +444,18 @@ pub fn apply_rule_severity_to_diagnostic(
     serializes_json: false,
     invokes_compiler: false,
   };
+}
+
+pub fn apply_rule_severity_to_diagnostic(
+  zone: ref mut Zone,
+  diagnostic: super::diagnostic::Diagnostic,
+  overrides: std::vec::Vec[RuleSeverityOverride],
+) -> DiagnosticSeverityApplication {
+  return apply_rule_severity_to_diagnostic_from_overrides(
+    zone,
+    diagnostic,
+    ref overrides,
+  );
 }
 
 // Planned config concepts include default config, ari-lint.rules config source,
