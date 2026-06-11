@@ -33,6 +33,7 @@ minimal config text parser added /
 config text known-rule validation added /
 rule override semantic parser added /
 rule override known-rule validation added /
+data-only severity override resolution added /
 minimal diagnostic JSON serializer added /
 source input boundary model added /
 in-memory trailing-whitespace execution added /
@@ -131,6 +132,13 @@ and test work.
       integrating with command dispatch, emitting diagnostics, serializing
       JSON, scanning sources, invoking the compiler, or executing lint rules.
       Rule override parser tests and override application remain future work.
+- [x] Add data-only severity override resolution for a caller-provided rule code
+      and already-parsed override list, returning effective internal severity
+      data without reading config files, discovering config paths, integrating
+      with command dispatch, mutating diagnostics, applying config to lint
+      execution, emitting output, serializing JSON, scanning sources, invoking
+      the compiler, or executing lint rules. Severity resolution tests and
+      diagnostic/rule execution override application remain future work.
 - [x] Add a minimal internal diagnostic JSON serializer for one already-built
       internal `Diagnostic`, including file path, line, column, optional
       endLine/endColumn, severity, rule code, message, basic string escaping,

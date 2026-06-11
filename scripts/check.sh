@@ -226,10 +226,13 @@ require_grep "minimal stdout adapter added" docs/dev/roadmap.md
 require_grep "known rule registry lookup added" docs/dev/roadmap.md
 require_grep "config text known-rule validation added" docs/dev/roadmap.md
 require_grep "rule override known-rule validation added" docs/dev/roadmap.md
+require_grep "data-only severity override resolution added" docs/dev/roadmap.md
 require_grep "data-only lookup" docs/dev/ari-implementation-plan.md
 require_grep "known-rule validation" docs/dev/ari-implementation-plan.md
+require_grep "severity override resolver" docs/dev/ari-implementation-plan.md
 require_grep "known rule registry lookup" tests/README.md
 require_grep "known-rule validation" tests/README.md
+require_grep "No executable severity override resolution tests are added yet" tests/README.md
 require_grep "OS argv integration added" docs/dev/roadmap.md
 require_grep "minimal config text parser added" docs/dev/roadmap.md
 require_grep "rule override semantic parser added" docs/dev/roadmap.md
@@ -461,6 +464,7 @@ require_grep "ConfigSourceMetadata" src/config.ari
 require_grep "OverridePrecedenceMetadata" src/config.ari
 require_grep "ConfigParseResult" src/config.ari
 require_grep "RuleOverrideParseResult" src/config.ari
+require_grep "RuleSeverityResolution" src/config.ari
 require_grep "ConfigParseProblemKind" src/config.ari
 require_grep "ConfigMissingEquals" src/config.ari
 require_grep "ConfigUnknownRule" src/config.ari
@@ -469,6 +473,10 @@ require_grep "parse_config_text" src/config.ari
 require_grep "parse_config_severity" src/config.ari
 require_grep "parse_rule_override_texts" src/config.ari
 require_grep "parse_rule_override_value" src/config.ari
+require_grep "resolve_rule_severity" src/config.ari
+require_grep "matched_override" src/config.ari
+require_grep "applies_to_diagnostics: false" src/config.ari
+require_grep "applies_to_lint_execution: false" src/config.ari
 require_grep "normalized_rule_override_code" src/config.ari
 require_grep "known_rule_code" src/config.ari
 require_grep "lookup_known_rule" src/config.ari

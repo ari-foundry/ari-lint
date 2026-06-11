@@ -137,8 +137,11 @@ It does not move `tools/lint` or change build behavior.
   now handles `RULE=SEVERITY` values for `--rule`,
   including documented short-name normalization for the two known rules.
   It now validates normalized `--rule` codes against the known rule registry
-  and reports internal parse problems for unknown rules. `ari-lint.rules`
-  discovery and file reading are not implemented yet.
+  and reports internal parse problems for unknown rules. A data-only severity
+  override resolver now returns effective internal severity data for a
+  caller-provided rule code and already-parsed override list without applying
+  that data to diagnostics or lint execution. `ari-lint.rules` discovery and
+  file reading are not implemented yet.
 - The rule module layout has started with source-only child modules for the
   trailing whitespace and missing final newline rules.
   A minimal internal single-line helper has started for trailing whitespace,
@@ -340,9 +343,10 @@ Current preparatory model skeleton files are source-only placeholders:
   problems after validating rule codes against the known rule registry. It also
   parses caller-provided command-line rule override text in `RULE=SEVERITY`
   form, normalizing documented short rule names into full lint rule codes and
-  validating those codes against the known rule registry. It does not discover
-  config files, read `ari-lint.rules`, inspect CLI arguments, or apply
-  overrides.
+  validating those codes against the known rule registry. It also resolves
+  effective severity data for a caller-provided rule code from an already-parsed
+  override list. It does not discover config files, read `ari-lint.rules`,
+  inspect CLI arguments, mutate diagnostics, or apply config to lint execution.
 
 These files do not implement user-facing rule execution,
 argument validation, diagnostics output, JSON serialization, or `ari --check`
@@ -354,11 +358,12 @@ the CLI parser is limited to explicit caller-provided token lists and raw option
 values, the config parser is limited to caller-provided text, rule/severity
 pairs, blank lines, comments, and known-rule validation, the rule override
 parser is limited to caller-provided `--rule` text, internal override
-construction, and known-rule validation, the diagnostic JSON serializer is
-limited to one already-built internal Diagnostic, the source input boundary is
-limited to caller-provided source text and path-only entries, the lint run
-aggregation path is limited to combining diagnostics for one caller-provided
-in-memory source text,
+construction, and known-rule validation, the severity override resolver is
+limited to effective severity data for a caller-provided rule code and
+already-parsed overrides, the diagnostic JSON serializer is limited to one
+already-built internal Diagnostic, the source input boundary is limited to
+caller-provided source text and path-only entries, the lint run aggregation path
+is limited to combining diagnostics for one caller-provided in-memory source text,
 the file-read boundary is limited to reading one explicitly provided path with
 the verified Ari `std::fs::read_detailed` API and preserving file read errors,
 the CLI file lint path is limited to explicit source-file arguments, the
@@ -373,12 +378,12 @@ model is limited to internal data carried by those results, the explicit-token
 the stdout adapter is limited to caller-provided `String` text, and the
 stdout/stderr output boundary is limited to status data for named future sinks.
 Compiler invocation, config discovery, config file reading, override
-application, diagnostics output, stderr writing, stdout adapter wiring to
-commands or `main`, process exit, diagnostic array serialization, user-facing
-JSON output, environment handling, source filesystem scanning, directory
-traversal, main-entry tests, argv-boundary tests, OS-argv integration tests,
-config parser tests, rule
-override parser tests, diagnostic JSON serializer tests, source input tests,
+application to diagnostics or lint execution, diagnostics output, stderr
+writing, stdout adapter wiring to commands or `main`, process exit, diagnostic
+array serialization, user-facing JSON output, environment handling, source
+filesystem scanning, directory traversal, main-entry tests, argv-boundary tests,
+OS-argv integration tests, config parser tests, rule override parser tests,
+severity resolution tests, diagnostic JSON serializer tests, source input tests,
 trailing-whitespace execution tests, missing-final-newline execution tests,
 output-boundary tests,
 stdout-adapter tests, exit-code tests, list-rules command tests, parser tests,
@@ -613,6 +618,10 @@ usable.
 - [x] Add known-rule validation for caller-provided `--rule` override values
       without applying overrides, reading config files, scanning sources,
       emitting diagnostics, or invoking the compiler
+- [x] Add data-only severity override resolution for a caller-provided rule code
+      and already-parsed overrides without reading config files, mutating
+      diagnostics, applying config to lint execution, emitting output, scanning
+      sources, or invoking the compiler
 - [ ] Add config precedence fixtures before claiming stable config behavior
 - [ ] Define executable rule module API after the initial layout and in-memory
       rule execution shape are validated

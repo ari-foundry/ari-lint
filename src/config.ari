@@ -1,6 +1,6 @@
 // Config override model and caller-provided config text parsing. This file does
 // not discover or read ari-lint.rules files, inspect CLI input, or apply
-// severity overrides.
+// severity overrides to diagnostics or lint execution.
 
 pub enum ConfigSource {
   DefaultConfig,
@@ -55,6 +55,18 @@ pub struct ConfigParseResult {
 pub struct RuleOverrideParseResult {
   overrides: std::vec::Vec[RuleSeverityOverride],
   problems: std::vec::Vec[ConfigParseProblem],
+}
+
+pub struct RuleSeverityResolution {
+  rule_code: String,
+  severity: super::severity::Severity,
+  source: ConfigSource,
+  known_rule: bool,
+  matched_override: bool,
+  reads_config_files: bool,
+  applies_to_diagnostics: bool,
+  applies_to_lint_execution: bool,
+  invokes_compiler: bool,
 }
 
 pub struct OverridePrecedenceMetadata {
@@ -340,6 +352,40 @@ pub fn parse_config_text(
   };
 }
 
+pub fn resolve_rule_severity(
+  zone: ref mut Zone,
+  rule_code: Slice[u8],
+  default_severity: super::severity::Severity,
+  overrides: std::vec::Vec[RuleSeverityOverride],
+) -> RuleSeverityResolution {
+  var severity = default_severity;
+  var source = DefaultConfig;
+  var matched_override = false;
+
+  for entry in overrides {
+    if entry.rule_code.as_slice().equals(rule_code) {
+      severity = entry.severity;
+      source = entry.source;
+      matched_override = true;
+    }
+  }
+
+  let rule_code_text = std::string::from(zone, rule_code);
+  let is_known_rule = known_rule_code(zone, rule_code);
+
+  return RuleSeverityResolution {
+    rule_code: rule_code_text,
+    severity: severity,
+    source: source,
+    known_rule: is_known_rule,
+    matched_override: matched_override,
+    reads_config_files: false,
+    applies_to_diagnostics: false,
+    applies_to_lint_execution: false,
+    invokes_compiler: false,
+  };
+}
+
 // Planned config concepts include default config, ari-lint.rules config source,
 // explicit --config file path, --rule command-line override, rule severity
 // override, and override precedence.
@@ -360,7 +406,14 @@ pub fn parse_config_text(
 // Rule override parse problems use line 0 because they do not come from
 // config-file lines.
 //
+// resolve_rule_severity accepts an already-parsed override list and a
+// caller-provided rule code, then returns the effective internal severity data
+// for that rule. Later matching overrides in the caller-provided list win. This
+// resolver does not read config files, inspect CLI arguments, mutate
+// diagnostics, apply config to lint execution, write output, or invoke the
+// compiler.
+//
 // ari-lint.rules discovery or reading, --config file behavior, user-facing
-// --rule command dispatch behavior, severity override application, diagnostics
-// output, JSON serialization, source scanning, and ari --check invocation are
-// future work.
+// --rule command dispatch behavior, severity override application to diagnostics
+// or lint execution, diagnostics output, JSON serialization, source scanning,
+// and ari --check invocation are future work.
