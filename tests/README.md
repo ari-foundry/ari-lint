@@ -67,11 +67,12 @@ shape after the schema is defined, and parity behavior against current
 `tools/lint`.
 
 Known rule registry construction has started from the existing
-`lint/trailing-whitespace` and `lint/missing-final-newline` metadata entries,
-but no registry, severity, or config behavior tests are added yet. Future tests
-should validate severity values, rule registry metadata, config overrides,
-diagnostics, JSON output after the schema is defined, and parity behavior
-against current `tools/lint`.
+`lint/trailing-whitespace` and `lint/missing-final-newline` metadata entries.
+A data-only known rule registry lookup by exact full rule code has also
+started, but no registry, severity, or config behavior tests are added yet.
+Future tests should validate severity values, rule registry metadata, known
+rule lookup behavior, config overrides, diagnostics, JSON output after the
+schema is defined, and parity behavior against current `tools/lint`.
 
 No rule metadata tests are added yet. Future metadata tests should validate the
 rule code, short name, default severity, and description for

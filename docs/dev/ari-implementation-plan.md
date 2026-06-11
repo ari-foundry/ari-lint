@@ -21,7 +21,9 @@ It does not move `tools/lint` or change build behavior.
 - The rule registry, severity, and config model skeleton has started as
   preparatory source-only declarations. The registry now constructs known
   entries for `lint/trailing-whitespace` and `lint/missing-final-newline` from
-  the existing rule metadata without executing rules.
+  the existing rule metadata without executing rules. A data-only lookup now
+  accepts exact full rule codes for those entries and records that it does not
+  execute rules or scan source.
 - First planned rule metadata entries have been added for
   `lint/trailing-whitespace` and `lint/missing-final-newline`. Both rules now
   have in-memory execution over caller-provided source text. Registry-backed
@@ -317,8 +319,9 @@ Current preparatory model skeleton files are source-only placeholders:
   internal rule descriptors.
 - `src/registry.ari` constructs a known rule registry from the existing
   `lint/trailing-whitespace` and `lint/missing-final-newline` metadata entries.
-  It records reference-only registry entries and does not execute rules, apply
-  config, scan sources, emit diagnostics, or invoke the compiler.
+  It records reference-only registry entries and provides a data-only lookup
+  for exact full rule codes. It does not execute rules, apply config, scan
+  sources, emit diagnostics, or invoke the compiler.
 - `src/rules.ari` records the first planned rule metadata entries for
   `lint/trailing-whitespace` and `lint/missing-final-newline`, including their
   short names, default `warning` severity from the current Ari lint docs, and
@@ -355,6 +358,8 @@ the verified Ari `std::fs::read_detailed` API and preserving file read errors,
 the CLI file lint path is limited to explicit source-file arguments, the
 file-read boundary, in-memory lint aggregation, internal diagnostics, and
 internal read-error data,
+the known-rule registry lookup is limited to returning internal data for exact
+full rule codes,
 the list-rules formatter is limited to internal text construction, the command
 dispatcher is limited to stdout-free internal command results, the exit-code
 model is limited to internal data carried by those results, the explicit-token
@@ -589,6 +594,9 @@ usable.
 - [ ] Define registry, severity, and config model behavior after source
       skeletons compile in the real build
 - [x] Add known rule registry construction from existing rule metadata without
+      executing rules, applying config, scanning sources, emitting diagnostics,
+      or invoking the compiler
+- [x] Add data-only known rule registry lookup by exact full rule code without
       executing rules, applying config, scanning sources, emitting diagnostics,
       or invoking the compiler
 - [x] Add minimal caller-provided config text parsing

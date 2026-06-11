@@ -1,4 +1,5 @@
-// Known rule registry construction. This file does not run rules or scan source.
+// Known rule registry construction and lookup. This file does not run rules or
+// scan source.
 
 pub enum RegistryStatus {
   Planned,
@@ -15,6 +16,14 @@ pub struct RuleRegistry {
   missing_final_newline: RegistryEntry,
 }
 
+pub struct RegistryLookupResult {
+  found: bool,
+  entry: Option[RegistryEntry],
+  rule_code: String,
+  executes_rule: bool,
+  scans_source: bool,
+}
+
 fn registry_entry_from_metadata(
   metadata: super::rules::RuleMetadataEntry,
 ) -> RegistryEntry {
@@ -29,6 +38,21 @@ fn registry_entry_from_metadata(
   };
 }
 
+fn registry_lookup_result(
+  zone: ref mut Zone,
+  rule_code: Slice[u8],
+  found: bool,
+  entry: Option[RegistryEntry],
+) -> RegistryLookupResult {
+  return RegistryLookupResult {
+    found: found,
+    entry: entry,
+    rule_code: std::string::from(zone, rule_code),
+    executes_rule: false,
+    scans_source: false,
+  };
+}
+
 pub fn known_rule_registry(zone: ref mut Zone) -> RuleRegistry {
   let trailing = registry_entry_from_metadata(
     super::rules::trailing_whitespace_rule_metadata(zone),
@@ -40,4 +64,40 @@ pub fn known_rule_registry(zone: ref mut Zone) -> RuleRegistry {
     trailing_whitespace: trailing,
     missing_final_newline: missing_final,
   };
+}
+
+pub fn lookup_known_rule(
+  zone: ref mut Zone,
+  rule_code: Slice[u8],
+) -> RegistryLookupResult {
+  if rule_code.equals("lint/trailing-whitespace") {
+    let entry = registry_entry_from_metadata(
+      super::rules::trailing_whitespace_rule_metadata(zone),
+    );
+    return registry_lookup_result(
+      zone,
+      rule_code,
+      true,
+      Some<RegistryEntry>(entry),
+    );
+  }
+
+  if rule_code.equals("lint/missing-final-newline") {
+    let entry = registry_entry_from_metadata(
+      super::rules::missing_final_newline_rule_metadata(zone),
+    );
+    return registry_lookup_result(
+      zone,
+      rule_code,
+      true,
+      Some<RegistryEntry>(entry),
+    );
+  }
+
+  return registry_lookup_result(
+    zone,
+    rule_code,
+    false,
+    None<RegistryEntry>(),
+  );
 }
