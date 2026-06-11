@@ -40,6 +40,7 @@ source-only parity runner skeleton added /
 compiler-backed CI gate documented /
 standalone build root wiring added /
 standalone test entrypoint added /
+release and compatibility policy documented /
 no user-facing lint output yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -368,9 +369,11 @@ and test work.
       explicit/local and is not part of CI.
 - [x] Wire local standalone test entrypoint; executable compiler-backed, rule,
       CLI, parity, and golden-output tests remain future work.
-- [ ] Define release and compatibility policy after inspecting Ari releases and
-      Ari tags; define `ari-lint` compatibility only after Ari-language source
-      and standalone tests exist.
+- [x] Define initial release and compatibility policy in
+      `docs/dev/release-compatibility-policy.md` after inspecting Ari releases
+      and Ari tags; actual `ari-lint` compatibility entries still require
+      Ari-language source, compiler-backed standalone tests, and recorded Ari
+      compiler identity.
 - [ ] Move implementation toward Ari-language code when feasible, after the
       documented plan has enough verified compiler/toolchain support.
 - [ ] Update Ari Foundry portal after repo is usable.

@@ -38,6 +38,10 @@ planned in
 [docs/dev/compiler-invocation.md](dev/compiler-invocation.md). Compiler
 invocation is not implemented yet.
 
+The initial release and compatibility policy is documented in
+[docs/dev/release-compatibility-policy.md](dev/release-compatibility-policy.md).
+It does not claim compatibility with any Ari release or tag.
+
 Rule documentation is currently a set of design notes until Ari-language rule
 implementation exists. Current rule design notes include
 [docs/rules/trailing-whitespace.md](rules/trailing-whitespace.md) and

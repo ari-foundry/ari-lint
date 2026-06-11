@@ -161,6 +161,10 @@ It does not move `tools/lint` or change build behavior.
   checks. It does not run the Ari compiler, invoke `ari --check`, execute
   `tools/lint`, run CLI tests, run parity checks, install dependencies, or use
   package manager commands.
+- The initial release and compatibility policy is documented in
+  `docs/dev/release-compatibility-policy.md`. It uses Ari releases and tags as
+  read-only references only and does not claim support for any Ari release,
+  tag, or commit.
 - The CI compiler-backed check gate is documented. The GitHub Actions workflow
   remains compiler-free and runs only `scripts/check.sh` until explicit Ari
   compiler provisioning, standalone tests, and compiler identity recording are
@@ -522,6 +526,9 @@ link it from `ari-lint` if needed.
 
 Compatibility claims must not be invented.
 
+The initial policy is documented in
+`docs/dev/release-compatibility-policy.md`.
+
 Future compatibility must reference real Ari releases and tags:
 
 - https://github.com/ari-foundry/ari/releases
@@ -598,6 +605,9 @@ usable.
 - [x] Add a local standalone test entrypoint that resolves the repository root
       and delegates to `scripts/check.sh` only; executable rule, CLI,
       compiler-backed, parity, and golden-output tests remain future work
+- [x] Define the initial release and compatibility policy without adding a
+      release workflow, compatibility matrix, compiler-backed CI, or Ari
+      version support claims
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`
