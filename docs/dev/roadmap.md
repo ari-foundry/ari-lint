@@ -1,9 +1,10 @@
 # ari-lint Roadmap
 
 Current status: skeleton initialized / Ari source skeleton started / internal
-model skeleton started / registry-severity-config skeleton started / first rule
-metadata entries added / CLI metadata skeleton started / diagnostic output
-metadata skeleton started / config override skeleton refined / rule module
+model skeleton started / registry-severity-config skeleton started /
+known rule registry construction added / first rule metadata entries added /
+CLI metadata skeleton started / diagnostic output metadata skeleton started /
+config override skeleton refined / rule module
 layout started / trailing-whitespace design note added / minimal
 trailing-whitespace helper started / trailing-whitespace fixture and test plan
 added / initial trailing-whitespace fixtures and lightweight fixture check
@@ -192,6 +193,10 @@ and test work.
       in-memory missing-final-newline behavior has since started, while
       registry execution, severity parsing, config parsing, CLI overrides,
       diagnostics output, compiler invocation, tests, and CI remain future work.
+- [x] Add known rule registry construction from the existing
+      `lint/trailing-whitespace` and `lint/missing-final-newline` metadata
+      entries without executing rules, scanning sources, applying config,
+      emitting diagnostics, invoking the compiler, or adding tests.
 - [x] Add first planned rule metadata entries for
       `lint/trailing-whitespace` and `lint/missing-final-newline` as
       metadata-only Ari source placeholders; in-memory trailing-whitespace

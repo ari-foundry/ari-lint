@@ -264,6 +264,16 @@ require_grep "file-read boundary" docs/dev/ari-implementation-plan.md
 require_grep "std::fs::read_detailed" docs/dev/ari-implementation-plan.md
 require_grep "registry, severity, and config model skeleton" docs/dev/ari-implementation-plan.md
 require_grep "registry, severity, and config skeleton" docs/dev/roadmap.md
+require_grep "known rule registry construction" docs/dev/roadmap.md
+require_grep "Known rule registry construction" tests/README.md
+require_grep "known_rule_registry" src/registry.ari
+require_grep "registry_entry_from_metadata" src/registry.ari
+require_grep "RuleRegistry" src/registry.ari
+require_grep "ReferenceOnly" src/registry.ari
+require_grep "trailing_whitespace_rule_metadata" src/registry.ari
+require_grep "missing_final_newline_rule_metadata" src/registry.ari
+require_grep "does not run rules" src/registry.ari
+require_grep "scan source" src/registry.ari
 require_grep "first planned rule metadata entries" docs/dev/ari-implementation-plan.md
 require_grep "first planned rule metadata entries" docs/dev/roadmap.md
 require_grep "No rule metadata tests are added yet" tests/README.md
@@ -519,6 +529,7 @@ require_grep "reads_files: false" src/parity.ari
 require_grep "writes_files: false" src/parity.ari
 require_grep "compares_outputs: false" src/parity.ari
 require_grep "InitialRuleMetadata" src/rules.ari
+require_grep "rule_descriptor" src/rule.ari
 require_grep "pub mod trailing_whitespace" src/rules.ari
 require_grep "pub mod missing_final_newline" src/rules.ari
 require_grep "lint/trailing-whitespace" src/rules.ari
