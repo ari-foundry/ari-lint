@@ -1,10 +1,10 @@
 // Lint run aggregation over caller-provided source text and explicit file paths.
 //
-// The default and file-backed paths do not apply config. The with-overrides
-// in-memory path accepts already-parsed severity overrides and rebuilds
-// diagnostics only. The file-backed path reads only explicit paths through the
-// source boundary. No path should scan the filesystem, write output, serialize
-// JSON, invoke ari --check, or call tools/lint.
+// The default paths do not apply config. The with-overrides paths accept
+// already-parsed severity overrides and rebuild diagnostics only. Each
+// file-backed path reads only explicit paths through the source boundary. No
+// path should scan the filesystem, write output, serialize JSON, invoke
+// ari --check, or call tools/lint.
 
 pub struct InMemoryLintRunResult {
   diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
@@ -115,11 +115,11 @@ pub fn lint_in_memory_source(
   };
 }
 
-pub fn lint_in_memory_source_with_overrides(
+fn lint_in_memory_source_from_overrides(
   zone: ref mut Zone,
   file_path: Slice[u8],
   source_text: Slice[u8],
-  overrides: std::vec::Vec[super::config::RuleSeverityOverride],
+  overrides: ref std::vec::Vec[super::config::RuleSeverityOverride],
 ) -> InMemoryLintRunResult {
   var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 8);
 
@@ -132,7 +132,7 @@ pub fn lint_in_memory_source_with_overrides(
     zone,
     ref mut diagnostics,
     trailing.diagnostics,
-    ref overrides,
+    overrides,
   );
 
   let missing_final = super::rules::missing_final_newline::lint_missing_final_newline_in_memory(
@@ -144,7 +144,7 @@ pub fn lint_in_memory_source_with_overrides(
     zone,
     ref mut diagnostics,
     missing_final.diagnostics,
-    ref overrides,
+    overrides,
   );
 
   return InMemoryLintRunResult {
@@ -157,6 +157,20 @@ pub fn lint_in_memory_source_with_overrides(
     serializes_json: false,
     invokes_compiler: false,
   };
+}
+
+pub fn lint_in_memory_source_with_overrides(
+  zone: ref mut Zone,
+  file_path: Slice[u8],
+  source_text: Slice[u8],
+  overrides: std::vec::Vec[super::config::RuleSeverityOverride],
+) -> InMemoryLintRunResult {
+  return lint_in_memory_source_from_overrides(
+    zone,
+    file_path,
+    source_text,
+    ref overrides,
+  );
 }
 
 pub fn lint_file_source(
@@ -189,11 +203,56 @@ pub fn lint_file_source(
   return result;
 }
 
-// lint_in_memory_source_with_overrides applies already-parsed severity
-// overrides only after the in-memory rules return diagnostics. It does not read
-// config files, discover ari-lint.rules, inspect CLI arguments, read files,
-// scan directories, write output, serialize JSON, invoke ari --check, or call
-// tools/lint. File-backed and CLI config integration remain future work.
+fn lint_file_source_from_overrides(
+  zone: ref mut Zone,
+  path: String,
+  overrides: ref std::vec::Vec[super::config::RuleSeverityOverride],
+) -> FileLintRunResult {
+  var result = empty_file_lint_result(zone);
+  result.applies_config = true;
+
+  match super::source::source_input_from_file(zone, path.as_slice()) {
+    std::Ok(source) => {
+      match source.text {
+        Some(text) => {
+          let in_memory = lint_in_memory_source_from_overrides(
+            zone,
+            source.path.as_slice(),
+            text.as_slice(),
+            overrides,
+          );
+          append_diagnostics(ref mut result.diagnostics, in_memory.diagnostics);
+          result.source_count = result.source_count + 1;
+        }
+        None => {}
+      }
+    }
+    std::Err(problem) => {
+      result.read_errors.push(problem);
+      result.read_error_count = result.read_error_count + 1;
+    }
+  }
+
+  return result;
+}
+
+pub fn lint_file_source_with_overrides(
+  zone: ref mut Zone,
+  path: String,
+  overrides: std::vec::Vec[super::config::RuleSeverityOverride],
+) -> FileLintRunResult {
+  return lint_file_source_from_overrides(
+    zone,
+    path,
+    ref overrides,
+  );
+}
+
+// The with-overrides paths apply already-parsed severity overrides only after
+// the in-memory rules return diagnostics. They do not read config files,
+// discover ari-lint.rules, inspect CLI config arguments, scan directories, write
+// output, serialize JSON, invoke ari --check, or call tools/lint. CLI config
+// integration remains future work.
 
 pub fn lint_file_sources(
   zone: ref mut Zone,
@@ -204,6 +263,22 @@ pub fn lint_file_sources(
     append_file_lint_result(
       ref mut result,
       lint_file_source(zone, path),
+    );
+  }
+  return result;
+}
+
+pub fn lint_file_sources_with_overrides(
+  zone: ref mut Zone,
+  paths: std::vec::Vec[String],
+  overrides: std::vec::Vec[super::config::RuleSeverityOverride],
+) -> FileLintRunResult {
+  var result = empty_file_lint_result(zone);
+  result.applies_config = true;
+  for path in paths {
+    append_file_lint_result(
+      ref mut result,
+      lint_file_source_from_overrides(zone, path, ref overrides),
     );
   }
   return result;

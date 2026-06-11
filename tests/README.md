@@ -7,12 +7,12 @@ the first trailing-whitespace fixture shape, and the first
 missing-final-newline fixture shape. In-memory trailing-whitespace execution
 and in-memory missing-final-newline execution have started in source. In-memory
 lint run aggregation has also started for caller-provided source text, including
-an in-memory-only variant for already-parsed severity overrides, but these paths
-are not executed by these checks yet. A file-read boundary for one
-caller-provided path has started in source, but the lightweight checks do not
-execute file IO. An internal CLI file lint path now routes explicit source-file
-arguments through the file-read boundary and in-memory lint aggregation, but
-the lightweight checks do not run CLI tests.
+with-overrides variants for already-parsed severity overrides over in-memory
+source and explicitly provided file paths, but these paths are not executed by
+these checks yet. A file-read boundary for one caller-provided path has started
+in source, but the lightweight checks do not execute file IO. The internal CLI file lint path routes explicit source-file arguments through the file-read
+boundary and in-memory lint aggregation, but the lightweight checks do not run
+CLI tests.
 A source-only parity runner skeleton records future comparison boundaries, but
 the lightweight checks do not execute a parity runner.
 
@@ -251,6 +251,14 @@ successful single-file reads, missing-file `PathError` preservation,
 permission errors if practical, no directory traversal, no config-file
 discovery, no rule execution, no output, no JSON serialization, no compiler
 invocation, and parity behavior against current `tools/lint`.
+
+No executable file-backed lint severity override aggregation tests are added yet.
+Future tests should validate explicitly provided source paths, successful file
+reads feeding already-parsed overrides into in-memory rule diagnostics, read
+error preservation, multiple files sharing one override list, no config-file
+reads, no config discovery, no CLI config wiring, no directory traversal, no
+output, no JSON serialization, no compiler invocation, no `ari --check`, and
+parity behavior.
 
 No executable CLI file lint path tests are added yet. Future tests should cover
 explicit source-file arguments, successful file reads feeding in-memory lint

@@ -36,6 +36,7 @@ rule override known-rule validation added /
 data-only severity override resolution added /
 single-diagnostic severity override application added /
 in-memory lint severity override aggregation added /
+file-backed lint severity override aggregation added /
 minimal diagnostic JSON serializer added /
 source input boundary model added /
 in-memory trailing-whitespace execution added /
@@ -157,6 +158,15 @@ and test work.
       invoking the compiler, executing `ari --check`, or calling `tools/lint`.
       In-memory override aggregation tests, file-backed config integration,
       CLI config integration, and config discovery remain future work.
+- [x] Add file-backed lint aggregation with already-parsed severity overrides
+      for explicitly provided source paths, reusing the existing single-file
+      read boundary and applying overrides only to diagnostics returned by the
+      existing in-memory rule execution without reading config files,
+      discovering config paths, integrating with command dispatch, traversing
+      directories, writing output, serializing JSON, invoking the compiler,
+      executing `ari --check`, or calling `tools/lint`. File-backed override
+      aggregation tests, CLI config integration, and config discovery remain
+      future work.
 - [x] Add a minimal internal diagnostic JSON serializer for one already-built
       internal `Diagnostic`, including file path, line, column, optional
       endLine/endColumn, severity, rule code, message, basic string escaping,
