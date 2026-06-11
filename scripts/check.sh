@@ -224,8 +224,11 @@ require_grep "internal exit-code model added" docs/dev/roadmap.md
 require_grep "explicit-token list-rules command wiring added" docs/dev/roadmap.md
 require_grep "minimal stdout adapter added" docs/dev/roadmap.md
 require_grep "known rule registry lookup added" docs/dev/roadmap.md
+require_grep "rule override known-rule validation added" docs/dev/roadmap.md
 require_grep "data-only lookup" docs/dev/ari-implementation-plan.md
+require_grep "known-rule validation" docs/dev/ari-implementation-plan.md
 require_grep "known rule registry lookup" tests/README.md
+require_grep "known-rule validation" tests/README.md
 require_grep "OS argv integration added" docs/dev/roadmap.md
 require_grep "minimal config text parser added" docs/dev/roadmap.md
 require_grep "rule override semantic parser added" docs/dev/roadmap.md
@@ -459,12 +462,16 @@ require_grep "ConfigParseResult" src/config.ari
 require_grep "RuleOverrideParseResult" src/config.ari
 require_grep "ConfigParseProblemKind" src/config.ari
 require_grep "ConfigMissingEquals" src/config.ari
+require_grep "ConfigUnknownRule" src/config.ari
 require_grep "ConfigInvalidSeverity" src/config.ari
 require_grep "parse_config_text" src/config.ari
 require_grep "parse_config_severity" src/config.ari
 require_grep "parse_rule_override_texts" src/config.ari
 require_grep "parse_rule_override_value" src/config.ari
 require_grep "normalized_rule_override_code" src/config.ari
+require_grep "known_rule_override_code" src/config.ari
+require_grep "lookup_known_rule" src/config.ari
+require_grep "Unknown rule" src/config.ari
 require_grep "DefaultConfig" src/config.ari
 require_grep "AriLintRulesDiscovery" src/config.ari
 require_grep "ExplicitConfigFile" src/config.ari
