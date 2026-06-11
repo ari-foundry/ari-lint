@@ -78,10 +78,12 @@ It does not move `tools/lint` or change build behavior.
   `tools/lint`.
 - The CLI source-file dispatch path now reads explicitly provided file paths
   through the file-read boundary and returns internal lint diagnostics plus
-  file read errors in the command result. It does not write stdout/stderr,
-  serialize JSON, discover config files, apply config, traverse directories,
-  invoke the compiler, call `ari --check`, call `tools/lint`, or wire `main`
-  to user-facing process behavior.
+  file read errors in the command result. It now applies caller-provided
+  `--rule` overrides to source-file lint diagnostics when valid rule override
+  values are present. It does not write stdout/stderr, serialize JSON, discover
+  config files, read config files, traverse directories, invoke the compiler,
+  call `ari --check`, call `tools/lint`, or wire `main` to user-facing process
+  behavior.
 - A source-only parity runner skeleton now records intended comparison
   boundaries against current `tools/lint`, with all execution, file IO, and
   output-comparison flags false. It does not run `tools/lint`, invoke an
@@ -95,11 +97,13 @@ It does not move `tools/lint` or change build behavior.
   diagnostics output, and parity tests remain future work.
 - An internal stdout-free command dispatcher now maps parsed CLI arguments to
   internal command results. It routes list-rules requests to the internal
-  human-readable list-rules formatter and returns explicit future-work
-  placeholders for parse-problem, help, source-file linting, and unsupported
-  command paths. User-facing stdout/stderr output, `main` wiring, JSON
-  output, source scanning, compiler invocation, config parsing, diagnostics
-  output, and parity tests remain future work.
+  human-readable list-rules formatter and routes source-file requests through
+  file reading plus in-memory lint aggregation. It applies parsed `--rule`
+  overrides to source-file lint diagnostics when provided, while keeping
+  parse-problem, help, and unsupported command paths as internal command
+  results. User-facing stdout/stderr output, `main` wiring, JSON output, source
+  scanning, compiler invocation, config-file parsing, diagnostics output, and
+  parity tests remain future work.
 - Internal command results now carry data-only exit-code mappings for success,
   usage-error, and unavailable command states. The model does not call process
   exit, run the CLI, read OS argv, write stdout/stderr, or claim stable
@@ -297,7 +301,8 @@ Current preparatory model skeleton files are source-only placeholders:
   raw rule override entries with split rule/severity names, missing-value
   problems, and unknown-argument problems. It also exposes a semantic
   `--rule` parser bridge that converts raw rule override values into the
-  internal config override model and parse problems without applying them. It
+  internal config override model and parse problems. Source-file dispatch
+  applies valid parsed rule overrides to returned lint diagnostics. It
   also defines an internal stdout-free command result model and a dispatcher
   that routes list-rules requests to internal formatted text and routes
   source-file requests through file reading plus in-memory lint aggregation
@@ -308,8 +313,9 @@ Current preparatory model skeleton files are source-only placeholders:
   text and exit-code data through that existing pipeline. It also defines an OS
   argv integration path that reads process arguments through verified
   `std::env::args`, drops argv[0], and dispatches through the existing
-  explicit-token path. It does not read environment variables, apply rule
-  overrides, write stdout/stderr output, wire `main`, or call process exit.
+  explicit-token path. It does not read environment variables, read config
+  files, discover config files, write stdout/stderr output, wire `main`, or
+  call process exit.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
@@ -384,8 +390,8 @@ already-parsed severity overrides to returned diagnostics,
 the file-read boundary is limited to reading one explicitly provided path with
 the verified Ari `std::fs::read_detailed` API and preserving file read errors,
 the CLI file lint path is limited to explicit source-file arguments, the
-file-read boundary, in-memory lint aggregation, internal diagnostics, and
-internal read-error data,
+file-read boundary, in-memory lint aggregation, optional parsed `--rule`
+overrides, internal diagnostics, and internal read-error data,
 the known-rule registry lookup is limited to returning internal data for exact
 full rule codes,
 the list-rules formatter is limited to internal text construction, the command
@@ -494,9 +500,10 @@ serialize JSON, invoke the compiler, call `ari --check`, or call `tools/lint`.
 
 The CLI file lint path is internal command dispatch only. It reads explicit
 source-file arguments, runs the in-memory lint aggregation for successfully
-read files, preserves read errors, and carries the result in `CliCommandResult`.
-It does not write stdout/stderr, serialize JSON, discover config files, apply
-config, traverse directories, invoke the compiler, call `ari --check`, call
+read files, applies valid parsed `--rule` overrides when provided, preserves
+read errors, and carries the result in `CliCommandResult`. It does not write
+stdout/stderr, serialize JSON, discover config files, read config files,
+traverse directories, invoke the compiler, call `ari --check`, call
 `tools/lint`, or connect `main` to user-facing process behavior.
 
 ### Phase 5: compiler boundary
@@ -657,6 +664,11 @@ usable.
       discovering config paths, integrating with command dispatch, traversing
       directories, emitting output, serializing JSON, invoking the compiler,
       executing `ari --check`, or calling `tools/lint`
+- [x] Apply caller-provided `--rule` overrides to the internal CLI file lint
+      path without reading config files, discovering config paths, traversing
+      directories, emitting output, serializing JSON, invoking the compiler,
+      executing `ari --check`, calling `tools/lint`, wiring `main`, or calling
+      process exit
 - [ ] Add config precedence fixtures before claiming stable config behavior
 - [ ] Define executable rule module API after the initial layout and in-memory
       rule execution shape are validated

@@ -11,8 +11,8 @@ with-overrides variants for already-parsed severity overrides over in-memory
 source and explicitly provided file paths, but these paths are not executed by
 these checks yet. A file-read boundary for one caller-provided path has started
 in source, but the lightweight checks do not execute file IO. The internal CLI file lint path routes explicit source-file arguments through the file-read
-boundary and in-memory lint aggregation, but the lightweight checks do not run
-CLI tests.
+boundary and in-memory lint aggregation, and it applies parsed `--rule`
+overrides when provided, but the lightweight checks do not run CLI tests.
 A source-only parity runner skeleton records future comparison boundaries, but
 the lightweight checks do not execute a parity runner.
 
@@ -188,9 +188,10 @@ behavior against current `tools/lint` once a parity runner exists.
 
 No executable dispatcher tests are added yet. Future dispatcher tests should
 cover list-rules dispatch, unsupported commands, source-file lint requests,
-file read errors, lint diagnostics, parse-problem/error results, internal
-exit-code mapping, stdout-free behavior, and parity behavior against current
-`tools/lint` once a parity runner exists.
+file read errors, lint diagnostics, parsed `--rule` override application,
+rule override parse-problem results, internal exit-code mapping,
+stdout-free behavior, and parity behavior against current `tools/lint` once a
+parity runner exists.
 
 No executable exit-code tests are added yet. Future tests should cover the
 internal command-result mappings for success, usage-error, and unavailable
@@ -262,10 +263,11 @@ parity behavior.
 
 No executable CLI file lint path tests are added yet. Future tests should cover
 explicit source-file arguments, successful file reads feeding in-memory lint
-aggregation, file read error preservation, diagnostic counts, exit-code
-mapping, no directory traversal, no config discovery, no stdout/stderr output,
-no JSON serialization, no compiler invocation, no `ari --check`, and parity
-behavior against current `tools/lint`.
+aggregation, parsed `--rule` override application, rule override parse
+problems, file read error preservation, diagnostic counts, exit-code mapping,
+no directory traversal, no config discovery, no config-file reads, no
+stdout/stderr output, no JSON serialization, no compiler invocation, no
+`ari --check`, and parity behavior against current `tools/lint`.
 
 No executable list-rules formatter tests are added yet. Future tests should
 cover list-rules rows and formatting for rule code, short name, default
@@ -306,7 +308,8 @@ No config override tests are added yet. Future config override tests should
 validate `ari-lint.rules` discovery, `--config` behavior, `--rule` behavior,
 precedence, severity override resolution, single-diagnostic severity
 application, in-memory severity override aggregation, file-backed and CLI config
-application, diagnostics, and parity behavior against current `tools/lint`.
+application, CLI `--rule` lint dispatch, diagnostics, and parity behavior
+against current `tools/lint`.
 
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
