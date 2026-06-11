@@ -260,6 +260,7 @@ require_grep "internal exit-code model added" docs/dev/roadmap.md
 require_grep "explicit-token list-rules command wiring added" docs/dev/roadmap.md
 require_grep "minimal stdout adapter added" docs/dev/roadmap.md
 require_grep "known rule registry lookup added" docs/dev/roadmap.md
+require_grep "registry-backed in-memory rule dispatch added" docs/dev/roadmap.md
 require_grep "config text known-rule validation added" docs/dev/roadmap.md
 require_grep "rule override known-rule validation added" docs/dev/roadmap.md
 require_grep "data-only severity override resolution added" docs/dev/roadmap.md
@@ -281,7 +282,10 @@ require_grep "file-backed override aggregation path" docs/dev/ari-implementation
 require_grep "Apply caller-provided .--rule. overrides to the internal CLI file lint" docs/dev/ari-implementation-plan.md
 require_grep "shared rule execution input/result API" docs/dev/ari-implementation-plan.md
 require_grep "shared rule module API" docs/dev/ari-implementation-plan.md
+require_grep "registry-backed in-memory dispatch" docs/dev/ari-implementation-plan.md
 require_grep "known rule registry lookup" tests/README.md
+require_grep "Registry-backed in-memory rule dispatch" tests/README.md
+require_grep "No executable registry dispatch tests are added yet" tests/README.md
 require_grep "known-rule validation" tests/README.md
 require_grep "No executable severity override resolution tests are added yet" tests/README.md
 require_grep "No executable diagnostic severity application tests are added yet" tests/README.md
@@ -342,11 +346,21 @@ require_grep "Known rule registry construction" tests/README.md
 require_grep "known_rule_registry" src/registry.ari
 require_grep "registry_entry_from_metadata" src/registry.ari
 require_grep "RuleRegistry" src/registry.ari
+require_grep "RuleDispatchResult" src/registry.ari
+require_grep "dispatch_known_rule_in_memory" src/registry.ari
+require_grep "empty_rule_execution_result" src/registry.ari
+require_grep "rule_dispatch_result" src/registry.ari
 require_grep "ReferenceOnly" src/registry.ari
 require_grep "trailing_whitespace_rule_metadata" src/registry.ari
 require_grep "missing_final_newline_rule_metadata" src/registry.ari
-require_grep "does not run rules" src/registry.ari
-require_grep "scan source" src/registry.ari
+require_grep "Lookup is" src/registry.ari
+require_grep "caller-provided" src/registry.ari
+require_grep "reads_files: false" src/registry.ari
+require_grep "scans_filesystem: false" src/registry.ari
+require_grep "applies_config: false" src/registry.ari
+require_grep "writes_output: false" src/registry.ari
+require_grep "serializes_json: false" src/registry.ari
+require_grep "invokes_compiler: false" src/registry.ari
 require_grep "first planned rule metadata entries" docs/dev/ari-implementation-plan.md
 require_grep "first planned rule metadata entries" docs/dev/roadmap.md
 require_grep "No rule metadata tests are added yet" tests/README.md
@@ -649,7 +663,7 @@ require_grep "default severity warning" src/rules.ari
 require_grep "trailing_whitespace_rule_metadata" src/rules.ari
 require_grep "missing_final_newline_rule_metadata" src/rules.ari
 require_grep "initial_rule_metadata" src/rules.ari
-require_grep "future work" src/rules.ari
+require_grep "registry dispatch can select" src/rules.ari
 require_grep "does not run rules" src/rules.ari
 require_grep "TrailingWhitespaceRuleModuleMetadata" src/rules/trailing_whitespace.ari
 require_grep "lint/trailing-whitespace" src/rules/trailing_whitespace.ari

@@ -1,5 +1,7 @@
-// Known rule registry construction and lookup. This file does not run rules or
-// scan source.
+// Known rule registry construction, lookup, and in-memory dispatch. Lookup is
+// data-only. Dispatch only runs explicit known rule wrappers over caller-provided
+// source text; it does not read files, scan the filesystem, apply config, write
+// output, serialize JSON, invoke the compiler, or call tools/lint.
 
 pub enum RegistryStatus {
   Planned,
@@ -22,6 +24,18 @@ pub struct RegistryLookupResult {
   rule_code: String,
   executes_rule: bool,
   scans_source: bool,
+}
+
+pub struct RuleDispatchResult {
+  requested_rule_code: String,
+  found: bool,
+  result: super::rule::RuleExecutionResult,
+  reads_files: bool,
+  scans_filesystem: bool,
+  applies_config: bool,
+  writes_output: bool,
+  serializes_json: bool,
+  invokes_compiler: bool,
 }
 
 fn registry_entry_from_metadata(
@@ -50,6 +64,37 @@ fn registry_lookup_result(
     rule_code: std::string::from(zone, rule_code),
     executes_rule: false,
     scans_source: false,
+  };
+}
+
+fn empty_rule_execution_result(
+  zone: ref mut Zone,
+  rule_code: Slice[u8],
+) -> super::rule::RuleExecutionResult {
+  var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 0);
+  return super::rule::rule_execution_result(
+    zone,
+    rule_code,
+    diagnostics,
+  );
+}
+
+fn rule_dispatch_result(
+  zone: ref mut Zone,
+  rule_code: Slice[u8],
+  found: bool,
+  result: super::rule::RuleExecutionResult,
+) -> RuleDispatchResult {
+  return RuleDispatchResult {
+    requested_rule_code: std::string::from(zone, rule_code),
+    found: found,
+    result: result,
+    reads_files: false,
+    scans_filesystem: false,
+    applies_config: false,
+    writes_output: false,
+    serializes_json: false,
+    invokes_compiler: false,
   };
 }
 
@@ -99,5 +144,59 @@ pub fn lookup_known_rule(
     rule_code,
     false,
     None<RegistryEntry>(),
+  );
+}
+
+pub fn dispatch_known_rule_in_memory(
+  zone: ref mut Zone,
+  rule_code: Slice[u8],
+  file_path: Slice[u8],
+  source_text: Slice[u8],
+) -> RuleDispatchResult {
+  let lookup = lookup_known_rule(zone, rule_code);
+  if lookup.found {
+    if rule_code.equals("lint/trailing-whitespace") {
+      let input = super::rule::rule_execution_input_from_source(
+        zone,
+        file_path,
+        source_text,
+      );
+      let rule_result = super::rules::trailing_whitespace::lint_trailing_whitespace_rule(
+        zone,
+        input,
+      );
+      return rule_dispatch_result(
+        zone,
+        rule_code,
+        true,
+        rule_result,
+      );
+    }
+
+    if rule_code.equals("lint/missing-final-newline") {
+      let input = super::rule::rule_execution_input_from_source(
+        zone,
+        file_path,
+        source_text,
+      );
+      let rule_result = super::rules::missing_final_newline::lint_missing_final_newline_rule(
+        zone,
+        input,
+      );
+      return rule_dispatch_result(
+        zone,
+        rule_code,
+        true,
+        rule_result,
+      );
+    }
+  }
+
+  let empty_result = empty_rule_execution_result(zone, rule_code);
+  return rule_dispatch_result(
+    zone,
+    rule_code,
+    false,
+    empty_result,
   );
 }

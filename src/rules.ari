@@ -45,5 +45,7 @@ pub fn initial_rule_metadata(zone: ref mut Zone) -> InitialRuleMetadata {
 }
 
 // Concrete metadata value construction is present for internal callers. Rule
-// execution, source scanning, diagnostics, config parsing, JSON output, CLI
-// behavior, and ari --check invocation are future work.
+// behavior lives in child modules, and registry dispatch can select their
+// in-memory wrappers. File/source-tree scanning, config parsing, user-facing
+// diagnostics, JSON output, CLI output behavior, and ari --check invocation
+// remain outside this metadata layer.
