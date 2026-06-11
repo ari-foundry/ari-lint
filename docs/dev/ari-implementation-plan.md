@@ -142,6 +142,8 @@ It does not move `tools/lint` or change build behavior.
   caller-provided rule code and already-parsed override list without applying
   that data to lint execution. A single-diagnostic application helper now
   rebuilds one already-built diagnostic with the resolved severity.
+  In-memory lint aggregation can now apply already-parsed overrides to
+  diagnostics for caller-provided source text without reading config files.
   `ari-lint.rules` discovery and file reading are not implemented yet.
 - The rule module layout has started with source-only child modules for the
   trailing whitespace and missing final newline rules.
@@ -276,10 +278,13 @@ Current preparatory model skeleton files are source-only placeholders:
   lint rules.
 - `src/lint.ari` defines in-memory lint run aggregation over one
   caller-provided source text and file-backed aggregation for explicitly
-  provided file paths. It combines diagnostics from the in-memory
-  trailing-whitespace and missing-final-newline rule execution paths without
-  scanning the filesystem, applying config, writing output, serializing JSON,
-  invoking the compiler, or calling `tools/lint`.
+  provided file paths. The default aggregation combines diagnostics from the
+  in-memory trailing-whitespace and missing-final-newline rule execution paths
+  without applying config. A separate in-memory-only variant accepts
+  already-parsed severity overrides and rebuilds returned diagnostics with
+  resolved severities. It does not read config files, discover `ari-lint.rules`,
+  scan the filesystem, write output, serialize JSON, invoke the compiler, or
+  call `tools/lint`.
 - `src/cli.ari` sketches planned CLI option metadata for positional source file
   input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`,
   including each option's purpose, value requirement, and repeatability. It
@@ -366,8 +371,10 @@ already-parsed overrides, the diagnostic severity application helper is limited
 to rebuilding one already-built internal Diagnostic with resolved severity, the
 diagnostic JSON serializer is limited to one already-built internal Diagnostic,
 the source input boundary is limited to caller-provided source text and
-path-only entries, the lint run aggregation path is limited to combining
-diagnostics for one caller-provided in-memory source text,
+path-only entries, the default lint run aggregation path is limited to combining
+diagnostics for one caller-provided in-memory source text, the in-memory
+override aggregation path is limited to applying already-parsed severity
+overrides to those diagnostics,
 the file-read boundary is limited to reading one explicitly provided path with
 the verified Ari `std::fs::read_detailed` API and preserving file read errors,
 the CLI file lint path is limited to explicit source-file arguments, the
@@ -461,15 +468,17 @@ Current rule module state:
 - `src/lint.ari` combines diagnostics from the in-memory
   trailing-whitespace and missing-final-newline rule execution paths for one
   caller-provided source text or explicitly provided file paths, recording that
-  it does not scan the filesystem, apply config, write output, serialize JSON,
-  invoke the compiler, or call `tools/lint`.
+  it does not scan the filesystem, write output, serialize JSON, invoke the
+  compiler, or call `tools/lint`. Its in-memory-only override variant applies
+  already-parsed severity overrides to returned diagnostics without reading
+  config files or wiring CLI config behavior.
 
 The rule implementations only handle caller-provided bytes in memory. These
 rule module files do not implement file reading, filesystem scanning, config
 parsing, CLI parsing, diagnostics output, JSON serialization, compiler
 invocation, tests, or CI. File-backed aggregation, multi-source aggregation,
-config/severity override application, CLI wiring, user-facing output, JSON
-diagnostic arrays, tests, and parity checks remain future work.
+file-backed config integration, CLI wiring, user-facing output, JSON diagnostic
+arrays, tests, and parity checks remain future work.
 
 The source input file-read boundary reads one explicitly provided path into a
 source input using `std::fs::read_detailed`. It does not scan directories,
@@ -631,6 +640,11 @@ usable.
       diagnostic and already-parsed overrides without reading config files,
       running lint rules, applying config to lint execution, emitting output,
       serializing JSON, scanning sources, or invoking the compiler
+- [x] Add in-memory lint aggregation with already-parsed severity overrides
+      over caller-provided source text without reading config files, discovering
+      config paths, integrating with command dispatch, reading files, scanning
+      the filesystem, emitting output, serializing JSON, invoking the compiler,
+      executing `ari --check`, or calling `tools/lint`
 - [ ] Add config precedence fixtures before claiming stable config behavior
 - [ ] Define executable rule module API after the initial layout and in-memory
       rule execution shape are validated

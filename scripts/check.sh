@@ -228,14 +228,17 @@ require_grep "config text known-rule validation added" docs/dev/roadmap.md
 require_grep "rule override known-rule validation added" docs/dev/roadmap.md
 require_grep "data-only severity override resolution added" docs/dev/roadmap.md
 require_grep "single-diagnostic severity override application added" docs/dev/roadmap.md
+require_grep "in-memory lint severity override aggregation added" docs/dev/roadmap.md
 require_grep "data-only lookup" docs/dev/ari-implementation-plan.md
 require_grep "known-rule validation" docs/dev/ari-implementation-plan.md
 require_grep "severity override resolver" docs/dev/ari-implementation-plan.md
 require_grep "single-diagnostic application helper" docs/dev/ari-implementation-plan.md
+require_grep "override aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "known rule registry lookup" tests/README.md
 require_grep "known-rule validation" tests/README.md
 require_grep "No executable severity override resolution tests are added yet" tests/README.md
 require_grep "No executable diagnostic severity application tests are added yet" tests/README.md
+require_grep "No executable in-memory lint severity override aggregation tests are added yet" tests/README.md
 require_grep "OS argv integration added" docs/dev/roadmap.md
 require_grep "minimal config text parser added" docs/dev/roadmap.md
 require_grep "rule override semantic parser added" docs/dev/roadmap.md
@@ -469,6 +472,7 @@ require_grep "ConfigParseResult" src/config.ari
 require_grep "RuleOverrideParseResult" src/config.ari
 require_grep "RuleSeverityResolution" src/config.ari
 require_grep "DiagnosticSeverityApplication" src/config.ari
+require_grep "resolve_rule_severity_from_overrides" src/config.ari
 require_grep "ConfigParseProblemKind" src/config.ari
 require_grep "ConfigMissingEquals" src/config.ari
 require_grep "ConfigUnknownRule" src/config.ari
@@ -479,6 +483,7 @@ require_grep "parse_rule_override_texts" src/config.ari
 require_grep "parse_rule_override_value" src/config.ari
 require_grep "resolve_rule_severity" src/config.ari
 require_grep "apply_rule_severity_to_diagnostic" src/config.ari
+require_grep "apply_rule_severity_to_diagnostic_from_overrides" src/config.ari
 require_grep "matched_override" src/config.ari
 require_grep "applies_to_diagnostics: false" src/config.ari
 require_grep "applies_to_diagnostics: true" src/config.ari
@@ -525,9 +530,11 @@ require_grep "execute lint rules" src/source.ari
 require_grep "InMemoryLintRunResult" src/lint.ari
 require_grep "FileLintRunResult" src/lint.ari
 require_grep "lint_in_memory_source" src/lint.ari
+require_grep "lint_in_memory_source_with_overrides" src/lint.ari
 require_grep "lint_file_source" src/lint.ari
 require_grep "lint_file_sources" src/lint.ari
 require_grep "append_diagnostics" src/lint.ari
+require_grep "append_configured_diagnostics" src/lint.ari
 require_grep "append_file_lint_result" src/lint.ari
 require_grep "lint_trailing_whitespace_in_memory" src/lint.ari
 require_grep "lint_missing_final_newline_in_memory" src/lint.ari
@@ -539,6 +546,7 @@ require_grep "reads_files: false" src/lint.ari
 require_grep "reads_files: true" src/lint.ari
 require_grep "scans_filesystem: false" src/lint.ari
 require_grep "applies_config: false" src/lint.ari
+require_grep "applies_config: true" src/lint.ari
 require_grep "writes_output: false" src/lint.ari
 require_grep "serializes_json: false" src/lint.ari
 require_grep "invokes_compiler: false" src/lint.ari
