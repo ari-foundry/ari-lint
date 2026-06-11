@@ -38,6 +38,7 @@ single-diagnostic severity override application added /
 in-memory lint severity override aggregation added /
 file-backed lint severity override aggregation added /
 CLI file lint rule override application added /
+config precedence fixture plan added /
 minimal diagnostic JSON serializer added /
 source input boundary model added /
 in-memory trailing-whitespace execution added /
@@ -177,6 +178,13 @@ and test work.
       `tools/lint`, wiring `main`, or calling process exit. CLI rule override
       dispatch tests, config-file integration, output behavior, and parity
       checks remain future work.
+- [x] Add a config precedence fixture plan for future default, config-file,
+      explicit `--config`, and command-line `--rule` precedence coverage,
+      without adding fixture files, reading config files, discovering
+      `ari-lint.rules`, running CLI tests, writing output, serializing JSON,
+      invoking the compiler, executing `ari --check`, calling `tools/lint`, or
+      claiming stable config behavior. Actual config precedence fixture files,
+      executable tests, and parity checks remain future work.
 - [x] Add a minimal internal diagnostic JSON serializer for one already-built
       internal `Diagnostic`, including file path, line, column, optional
       endLine/endColumn, severity, rule code, message, basic string escaping,
@@ -332,8 +340,9 @@ and test work.
       source placeholders; caller-provided config text parsing has started, but
       config discovery, config file reading, override application, CLI parsing,
       diagnostics output, compiler invocation, tests, and CI remain future work.
-      Standalone config precedence fixtures remain needs follow-up before
-      claiming stable config behavior.
+      Standalone config precedence fixture files remain needs follow-up before
+      claiming stable config behavior; the fixture plan is documented in
+      `docs/dev/config-precedence-fixtures.md`.
 - [x] Start rule module layout for planned
       `lint/trailing-whitespace` and `lint/missing-final-newline` child modules
       as layout/metadata-only Ari source placeholders; in-memory
