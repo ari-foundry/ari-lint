@@ -224,6 +224,7 @@ require_grep "internal exit-code model added" docs/dev/roadmap.md
 require_grep "explicit-token list-rules command wiring added" docs/dev/roadmap.md
 require_grep "minimal stdout adapter added" docs/dev/roadmap.md
 require_grep "known rule registry lookup added" docs/dev/roadmap.md
+require_grep "config text known-rule validation added" docs/dev/roadmap.md
 require_grep "rule override known-rule validation added" docs/dev/roadmap.md
 require_grep "data-only lookup" docs/dev/ari-implementation-plan.md
 require_grep "known-rule validation" docs/dev/ari-implementation-plan.md
@@ -469,7 +470,7 @@ require_grep "parse_config_severity" src/config.ari
 require_grep "parse_rule_override_texts" src/config.ari
 require_grep "parse_rule_override_value" src/config.ari
 require_grep "normalized_rule_override_code" src/config.ari
-require_grep "known_rule_override_code" src/config.ari
+require_grep "known_rule_code" src/config.ari
 require_grep "lookup_known_rule" src/config.ari
 require_grep "Unknown rule" src/config.ari
 require_grep "DefaultConfig" src/config.ari

@@ -265,7 +265,8 @@ stability, future JSON formatting, and parity behavior against current
 
 No executable config parser tests are added yet. Future config parser tests
 should validate caller-provided `RULE = SEVERITY` text, blank lines, comments,
-invalid lines, invalid severity names, and parse problem reporting.
+invalid lines, invalid severity names, known-rule validation, and parse problem
+reporting.
 
 No executable rule override parser tests are added yet. Future rule override
 parser tests should validate caller-provided `--rule RULE=SEVERITY` text,

@@ -30,6 +30,7 @@ explicit-token list-rules command wiring added /
 minimal stdout adapter added /
 OS argv integration added /
 minimal config text parser added /
+config text known-rule validation added /
 rule override semantic parser added /
 rule override known-rule validation added /
 minimal diagnostic JSON serializer added /
@@ -109,6 +110,13 @@ and test work.
       invoking the compiler, or executing lint rules. Config parser tests,
       config discovery, `--config` behavior, and override application remain
       future work.
+- [x] Add known-rule validation to caller-provided config text using the known
+      rule registry lookup, returning internal parse problems for unknown rules
+      without reading `ari-lint.rules`, discovering config files, applying
+      overrides, inspecting CLI input, emitting diagnostics, serializing JSON,
+      scanning sources, invoking the compiler, or executing lint rules. Config
+      parser tests, config discovery, `--config` behavior, and override
+      application remain future work.
 - [x] Add a semantic parser for caller-provided `--rule` values using the
       documented `RULE=SEVERITY` shape, normalizing the documented short rule
       names to full lint rule codes and returning command-line-sourced internal

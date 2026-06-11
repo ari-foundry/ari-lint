@@ -132,8 +132,9 @@ It does not move `tools/lint` or change build behavior.
   for default config, `ari-lint.rules`, `--config`, `--rule`, rule severity
   overrides, and documented override precedence. A minimal caller-provided
   config text parser now handles `RULE = SEVERITY` lines, blank lines, and `#`
-  comments, returning internal overrides and parse problems. The command-line
-  rule override parser now handles `RULE=SEVERITY` values for `--rule`,
+  comments, validates rule codes against the known rule registry, and returns
+  internal overrides and parse problems. The command-line rule override parser
+  now handles `RULE=SEVERITY` values for `--rule`,
   including documented short-name normalization for the two known rules.
   It now validates normalized `--rule` codes against the known rule registry
   and reports internal parse problems for unknown rules. `ari-lint.rules`
@@ -336,11 +337,12 @@ Current preparatory model skeleton files are source-only placeholders:
   command-line `--rule` overrides, and that explicit `--config` disables
   discovery. It now parses caller-provided config text with blank lines,
   comments, and `RULE = SEVERITY` entries into internal overrides and parse
-  problems. It also parses caller-provided command-line rule override text in
-  `RULE=SEVERITY` form, normalizing documented short rule names into full lint
-  rule codes and validating those codes against the known rule registry. It
-  does not discover config files, read `ari-lint.rules`, inspect CLI arguments,
-  apply overrides, or validate config-file rule names.
+  problems after validating rule codes against the known rule registry. It also
+  parses caller-provided command-line rule override text in `RULE=SEVERITY`
+  form, normalizing documented short rule names into full lint rule codes and
+  validating those codes against the known rule registry. It does not discover
+  config files, read `ari-lint.rules`, inspect CLI arguments, or apply
+  overrides.
 
 These files do not implement user-facing rule execution,
 argument validation, diagnostics output, JSON serialization, or `ari --check`
@@ -350,12 +352,13 @@ entry shell is limited to returning success, the OS argv entry path is limited
 to reading `std::env::args`, dropping argv[0], and dispatching internal tokens,
 the CLI parser is limited to explicit caller-provided token lists and raw option
 values, the config parser is limited to caller-provided text, rule/severity
-pairs, blank lines, and comments, the rule override parser is limited to
-caller-provided `--rule` text, internal override construction, and known-rule
-validation, the diagnostic JSON serializer is limited to one already-built
-internal Diagnostic, the source input boundary is limited to caller-provided
-source text and path-only entries, the lint run aggregation path is limited to
-combining diagnostics for one caller-provided in-memory source text,
+pairs, blank lines, comments, and known-rule validation, the rule override
+parser is limited to caller-provided `--rule` text, internal override
+construction, and known-rule validation, the diagnostic JSON serializer is
+limited to one already-built internal Diagnostic, the source input boundary is
+limited to caller-provided source text and path-only entries, the lint run
+aggregation path is limited to combining diagnostics for one caller-provided
+in-memory source text,
 the file-read boundary is limited to reading one explicitly provided path with
 the verified Ari `std::fs::read_detailed` API and preserving file read errors,
 the CLI file lint path is limited to explicit source-file arguments, the
@@ -372,9 +375,9 @@ stdout/stderr output boundary is limited to status data for named future sinks.
 Compiler invocation, config discovery, config file reading, override
 application, diagnostics output, stderr writing, stdout adapter wiring to
 commands or `main`, process exit, diagnostic array serialization, user-facing
-JSON output, environment handling, config-file rule-name validation, source
-filesystem scanning, directory traversal, main-entry tests, argv-boundary tests,
-OS-argv integration tests, config parser tests, rule
+JSON output, environment handling, source filesystem scanning, directory
+traversal, main-entry tests, argv-boundary tests, OS-argv integration tests,
+config parser tests, rule
 override parser tests, diagnostic JSON serializer tests, source input tests,
 trailing-whitespace execution tests, missing-final-newline execution tests,
 output-boundary tests,
@@ -603,6 +606,9 @@ usable.
       executing rules, applying config, scanning sources, emitting diagnostics,
       or invoking the compiler
 - [x] Add minimal caller-provided config text parsing
+- [x] Add known-rule validation for caller-provided config text without reading
+      config files, discovering config paths, applying overrides, scanning
+      sources, emitting diagnostics, or invoking the compiler
 - [x] Add minimal command-line rule override semantic parsing
 - [x] Add known-rule validation for caller-provided `--rule` override values
       without applying overrides, reading config files, scanning sources,
