@@ -156,10 +156,11 @@ It does not move `tools/lint` or change build behavior.
   `docs/dev/config-precedence-fixtures.md`. It records future default,
   config-file, explicit `--config`, and command-line `--rule` precedence
   fixture areas. Initial fixture files now exist under
-  `tests/fixtures/config-precedence/`, with lightweight presence/content checks
-  only. They do not execute Ari parser code, read config files through CLI
-  behavior, discover `ari-lint.rules`, run CLI tests, invoke the compiler,
-  execute `ari --check`, or claim stable config behavior.
+  `tests/fixtures/config-precedence/`, with shell-only executable checks for
+  presence, exact line order, and key override values. They do not execute Ari
+  parser code, read config files through CLI behavior, discover
+  `ari-lint.rules`, run CLI tests, invoke the compiler, execute `ari --check`,
+  or claim stable config behavior.
 - The rule module layout has started with source-only child modules for the
   trailing whitespace and missing final newline rules.
   A minimal internal single-line helper has started for trailing whitespace,
@@ -448,9 +449,9 @@ compatibility.
 
 Config precedence is recorded from the current Ari lint reference docs. The
 minimal parser only handles caller-provided text. Initial config precedence
-fixture files now exist, but standalone config discovery and executable config
-precedence checks remain needs follow-up before this repository claims stable
-config behavior. The fixture plan is documented in
+fixture files and shell-only executable checks now exist, but standalone config
+discovery and Ari-backed config precedence checks remain needs follow-up before
+this repository claims stable config behavior. The fixture plan is documented in
 `docs/dev/config-precedence-fixtures.md`.
 
 The exact JSON schema and human-readable diagnostic text remain unstable and
@@ -686,7 +687,10 @@ usable.
 - [x] Add initial config precedence fixture files and lightweight checks without
       parser execution, config discovery, CLI tests, output, JSON, compiler
       execution, `ari --check`, or `tools/lint`
-- [ ] Add executable config precedence checks before claiming stable config
+- [x] Add shell-only executable config precedence fixture checks without parser
+      execution, config discovery, CLI tests, output, JSON, compiler execution,
+      `ari --check`, or `tools/lint`
+- [ ] Add Ari-backed config precedence checks before claiming stable config
       behavior
 - [ ] Define executable rule module API after the initial layout and in-memory
       rule execution shape are validated
