@@ -1,6 +1,6 @@
-// Config override model and caller-provided config text parsing. This file does
-// not discover or read ari-lint.rules files, inspect CLI input, or apply
-// severity overrides to diagnostics or lint execution.
+// Config override model, caller-provided config text parsing, and data-only
+// severity application helpers. This file does not discover or read ari-lint.rules
+// files, inspect CLI input, or apply severity overrides to lint execution.
 
 pub enum ConfigSource {
   DefaultConfig,
@@ -66,6 +66,18 @@ pub struct RuleSeverityResolution {
   reads_config_files: bool,
   applies_to_diagnostics: bool,
   applies_to_lint_execution: bool,
+  invokes_compiler: bool,
+}
+
+pub struct DiagnosticSeverityApplication {
+  diagnostic: super::diagnostic::Diagnostic,
+  known_rule: bool,
+  matched_override: bool,
+  reads_config_files: bool,
+  applies_to_diagnostics: bool,
+  applies_to_lint_execution: bool,
+  writes_output: bool,
+  serializes_json: bool,
   invokes_compiler: bool,
 }
 
@@ -386,6 +398,37 @@ pub fn resolve_rule_severity(
   };
 }
 
+pub fn apply_rule_severity_to_diagnostic(
+  zone: ref mut Zone,
+  diagnostic: super::diagnostic::Diagnostic,
+  overrides: std::vec::Vec[RuleSeverityOverride],
+) -> DiagnosticSeverityApplication {
+  let resolution = resolve_rule_severity(
+    zone,
+    diagnostic.rule_code.as_slice(),
+    diagnostic.severity,
+    overrides,
+  );
+  let configured_diagnostic = super::diagnostic::diagnostic_from_span(
+    diagnostic.span,
+    resolution.severity,
+    diagnostic.rule_code,
+    diagnostic.message,
+  );
+
+  return DiagnosticSeverityApplication {
+    diagnostic: configured_diagnostic,
+    known_rule: resolution.known_rule,
+    matched_override: resolution.matched_override,
+    reads_config_files: false,
+    applies_to_diagnostics: true,
+    applies_to_lint_execution: false,
+    writes_output: false,
+    serializes_json: false,
+    invokes_compiler: false,
+  };
+}
+
 // Planned config concepts include default config, ari-lint.rules config source,
 // explicit --config file path, --rule command-line override, rule severity
 // override, and override precedence.
@@ -413,7 +456,13 @@ pub fn resolve_rule_severity(
 // diagnostics, apply config to lint execution, write output, or invoke the
 // compiler.
 //
+// apply_rule_severity_to_diagnostic accepts one already-built diagnostic and an
+// already-parsed override list, then returns a diagnostic rebuilt with the
+// resolved severity. It does not read config files, inspect CLI arguments,
+// run lint rules, apply config to lint execution, write output, serialize JSON,
+// or invoke the compiler.
+//
 // ari-lint.rules discovery or reading, --config file behavior, user-facing
-// --rule command dispatch behavior, severity override application to diagnostics
-// or lint execution, diagnostics output, JSON serialization, source scanning,
-// and ari --check invocation are future work.
+// --rule command dispatch behavior, severity override application to lint
+// execution, diagnostics output, JSON serialization, source scanning, and
+// ari --check invocation are future work.

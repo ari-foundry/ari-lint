@@ -34,6 +34,7 @@ config text known-rule validation added /
 rule override semantic parser added /
 rule override known-rule validation added /
 data-only severity override resolution added /
+single-diagnostic severity override application added /
 minimal diagnostic JSON serializer added /
 source input boundary model added /
 in-memory trailing-whitespace execution added /
@@ -138,7 +139,15 @@ and test work.
       with command dispatch, mutating diagnostics, applying config to lint
       execution, emitting output, serializing JSON, scanning sources, invoking
       the compiler, or executing lint rules. Severity resolution tests and
-      diagnostic/rule execution override application remain future work.
+      lint-run config integration remain future work.
+- [x] Add single-diagnostic severity override application for one already-built
+      internal diagnostic and an already-parsed override list, returning a
+      rebuilt diagnostic with the resolved severity without reading config
+      files, discovering config paths, integrating with command dispatch,
+      running lint rules, applying config to lint execution, emitting output,
+      serializing JSON, scanning sources, invoking the compiler, or executing
+      `ari --check`. Diagnostic severity application tests and lint-run config
+      integration remain future work.
 - [x] Add a minimal internal diagnostic JSON serializer for one already-built
       internal `Diagnostic`, including file path, line, column, optional
       endLine/endColumn, severity, rule code, message, basic string escaping,
