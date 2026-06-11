@@ -37,6 +37,7 @@ data-only severity override resolution added /
 single-diagnostic severity override application added /
 in-memory lint severity override aggregation added /
 file-backed lint severity override aggregation added /
+CLI file lint rule override application added /
 minimal diagnostic JSON serializer added /
 source input boundary model added /
 in-memory trailing-whitespace execution added /
@@ -167,6 +168,15 @@ and test work.
       executing `ari --check`, or calling `tools/lint`. File-backed override
       aggregation tests, CLI config integration, and config discovery remain
       future work.
+- [x] Apply caller-provided `--rule` overrides to the internal CLI source-file
+      lint path by parsing already-captured rule override tokens and routing
+      explicit source paths through file-backed lint aggregation with
+      already-parsed overrides, without reading config files, discovering
+      config paths, traversing directories, writing stdout/stderr, serializing
+      JSON, invoking the compiler, executing `ari --check`, calling
+      `tools/lint`, wiring `main`, or calling process exit. CLI rule override
+      dispatch tests, config-file integration, output behavior, and parity
+      checks remain future work.
 - [x] Add a minimal internal diagnostic JSON serializer for one already-built
       internal `Diagnostic`, including file path, line, column, optional
       endLine/endColumn, severity, rule code, message, basic string escaping,
@@ -274,9 +284,8 @@ and test work.
       `--list-rules`, `--help`/`-h`, `--ari`, `-I`, `--config`, raw `--rule`
       values, missing-value problems, and unknown-argument problems. Main
       wiring, `ARI_COMPILER`, compiler path validation, config parsing,
-      command dispatch integration for parsed rule overrides, compiler
-      invocation, output behavior, tests, and CI parser execution remain future
-      work.
+      compiler invocation, output behavior, tests, and CI parser execution
+      remain future work.
 - [x] Add an internal list-rules output path that converts existing known rule
       metadata into rows for `lint/trailing-whitespace` and
       `lint/missing-final-newline`, including rule code, short name, default

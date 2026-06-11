@@ -230,18 +230,21 @@ require_grep "data-only severity override resolution added" docs/dev/roadmap.md
 require_grep "single-diagnostic severity override application added" docs/dev/roadmap.md
 require_grep "in-memory lint severity override aggregation added" docs/dev/roadmap.md
 require_grep "file-backed lint severity override aggregation added" docs/dev/roadmap.md
+require_grep "CLI file lint rule override application added" docs/dev/roadmap.md
 require_grep "data-only lookup" docs/dev/ari-implementation-plan.md
 require_grep "known-rule validation" docs/dev/ari-implementation-plan.md
 require_grep "severity override resolver" docs/dev/ari-implementation-plan.md
 require_grep "single-diagnostic application helper" docs/dev/ari-implementation-plan.md
 require_grep "override aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "file-backed override aggregation path" docs/dev/ari-implementation-plan.md
+require_grep "Apply caller-provided .--rule. overrides to the internal CLI file lint" docs/dev/ari-implementation-plan.md
 require_grep "known rule registry lookup" tests/README.md
 require_grep "known-rule validation" tests/README.md
 require_grep "No executable severity override resolution tests are added yet" tests/README.md
 require_grep "No executable diagnostic severity application tests are added yet" tests/README.md
 require_grep "No executable in-memory lint severity override aggregation tests are added yet" tests/README.md
 require_grep "No executable file-backed lint severity override aggregation tests are added yet" tests/README.md
+require_grep 'parsed `--rule` override application' tests/README.md
 require_grep "OS argv integration added" docs/dev/roadmap.md
 require_grep "minimal config text parser added" docs/dev/roadmap.md
 require_grep "rule override semantic parser added" docs/dev/roadmap.md
@@ -411,6 +414,9 @@ require_grep "read_os_argv_tokens" src/cli.ari
 require_grep "run_os_argv_cli" src/cli.ari
 require_grep "parse_cli_rule_overrides" src/cli.ari
 require_grep "cli_file_lint_exit_code" src/cli.ari
+require_grep "lint_file_sources_with_overrides" src/cli.ari
+require_grep "Rule override parse problems" src/cli.ari
+require_grep "with rule overrides" src/cli.ari
 require_grep "OsArgvBoundary" src/cli.ari
 require_grep "os_argv_boundary" src/cli.ari
 require_grep "std::env::args" src/cli.ari
@@ -423,7 +429,7 @@ require_grep "unknown_argument_problem" src/cli.ari
 require_grep "raw_rule_override" src/cli.ari
 require_grep "optional_rule_override_part" src/cli.ari
 require_grep "semantic rule override parsing bridge" src/cli.ari
-require_grep "does not apply overrides" src/cli.ari
+require_grep "applying parsed --rule overrides" src/cli.ari
 require_grep "does not read environment" src/cli.ari
 require_grep "main wiring remains future work" src/cli.ari
 require_grep "write stdout/stderr" src/cli.ari
