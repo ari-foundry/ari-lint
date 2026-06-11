@@ -1,0 +1,4 @@
+# explicit --config fixture for future precedence tests.
+# Future executable tests should treat this as disabling discovery.
+lint/trailing-whitespace = warning
+lint/missing-final-newline = error

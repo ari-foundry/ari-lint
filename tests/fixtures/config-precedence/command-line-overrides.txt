@@ -1,0 +1,4 @@
+# Future command-line --rule values. Later matching overrides should win.
+trailing-whitespace=warning
+lint/trailing-whitespace=error
+missing-final-newline=off

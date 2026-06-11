@@ -1,12 +1,11 @@
 # ari-lint Config Precedence Fixture Plan
 
-This document records the planned fixture coverage for future `ari-lint`
-configuration precedence behavior.
+This document records fixture coverage for future `ari-lint` configuration
+precedence behavior.
 
-It does not add fixture files, executable tests, config-file discovery,
-`--config` file reading, CLI output, compiler execution, `ari --check`,
-`tools/lint`, package manager wiring, release automation, or compatibility
-claims.
+It does not add executable parser tests, config-file discovery, `--config` file
+reading, CLI output, compiler execution, `ari --check`, `tools/lint`, package
+manager wiring, release automation, or compatibility claims.
 
 ## Current Status
 
@@ -14,9 +13,10 @@ claims.
 `--rule` values into internal severity overrides. The CLI source-file lint path
 can apply parsed `--rule` overrides to explicit source-file inputs.
 
-Standalone config discovery, explicit `--config` file reading, config
-precedence fixtures, executable config tests, and parity checks remain future
-work.
+Initial config precedence fixture files now exist under
+`tests/fixtures/config-precedence/`. Lightweight checks verify the fixture set
+and key contents only. Standalone config discovery, explicit `--config` file
+reading, executable config tests, and parity checks remain future work.
 
 ## Planned Precedence
 
@@ -33,7 +33,7 @@ the executable tests exist.
 
 ## Planned Fixture Areas
 
-Future fixtures should cover:
+Initial fixtures cover:
 
 - default severity when no override exists
 - a config-file override for one known rule
@@ -47,10 +47,20 @@ Future fixtures should cover:
 
 ## Boundaries
 
-Fixture files should be added only in a later step that explicitly scopes them.
-That later step should keep the fixture set narrow and avoid golden JSON,
-CLI-process tests, compiler execution, `ari --check`, `tools/lint`, and broad
-source fixture expansion.
+The current fixture set is intentionally narrow:
+
+- `tests/fixtures/config-precedence/ari-lint.rules`
+- `tests/fixtures/config-precedence/explicit-config.rules`
+- `tests/fixtures/config-precedence/command-line-overrides.txt`
+- `tests/fixtures/config-precedence/invalid.rules`
+
+The lightweight checks do not parse these fixtures with Ari code. They only
+verify presence and expected text. Future executable tests must still connect
+the fixture data to config parsing and precedence behavior.
+
+Avoid golden JSON, CLI-process tests, compiler execution, `ari --check`,
+`tools/lint`, and broad source fixture expansion until those behaviors are
+explicitly scoped.
 
 Config precedence must not be documented as stable until fixture files,
 executable tests, and parity checks exist.
