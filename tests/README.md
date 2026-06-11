@@ -16,9 +16,9 @@ overrides when provided, but the lightweight checks do not run CLI tests.
 A source-only parity runner skeleton records future comparison boundaries, but
 the lightweight checks do not execute a parity runner.
 The config precedence fixture plan is documented.
-No executable config precedence tests are added yet.
-Initial config precedence fixture files are checked for presence and expected
-text only.
+Shell-only executable config precedence fixture checks verify presence, exact
+line order, and expected text. Ari-backed config precedence tests are not added
+yet.
 
 Run the lightweight check script from the repository root:
 
@@ -326,10 +326,11 @@ Initial config precedence fixtures have started under
   including repeated override ordering.
 - `invalid.rules` records future unknown-rule and invalid-severity cases.
 
-The lightweight checks verify fixture presence and key text only. They do not
-parse these fixtures with Ari code, run CLI-process tests, compare golden JSON,
-invoke the compiler, execute `ari --check`, or execute `tools/lint`.
-Executable config precedence tests and parity checks remain future work.
+The lightweight checks verify fixture presence, exact line order, and key text
+only. They do not parse these fixtures with Ari code, run CLI-process tests,
+compare golden JSON, invoke the compiler, execute `ari --check`, or execute
+`tools/lint`. Ari-backed config precedence tests and parity checks remain
+future work.
 
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity

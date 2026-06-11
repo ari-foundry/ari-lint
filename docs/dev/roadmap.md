@@ -40,6 +40,7 @@ file-backed lint severity override aggregation added /
 CLI file lint rule override application added /
 config precedence fixture plan added /
 initial config precedence fixtures and lightweight checks added /
+shell-only config precedence fixture checks added /
 minimal diagnostic JSON serializer added /
 source input boundary model added /
 in-memory trailing-whitespace execution added /
@@ -194,6 +195,13 @@ and test work.
       output, serialize JSON, invoke the compiler, execute `ari --check`, call
       `tools/lint`, add golden output, or claim stable config behavior.
       Executable config precedence tests and parity checks remain future work.
+- [x] Add shell-only executable config precedence fixture checks for exact
+      fixture line order and key override values, without executing Ari parser
+      code, reading config files through CLI behavior, discovering config
+      paths, running CLI tests, writing output, serializing JSON, invoking the
+      compiler, executing `ari --check`, calling `tools/lint`, or claiming
+      stable config behavior. Ari-backed config precedence tests and parity
+      checks remain future work.
 - [x] Add a minimal internal diagnostic JSON serializer for one already-built
       internal `Diagnostic`, including file path, line, column, optional
       endLine/endColumn, severity, rule code, message, basic string escaping,
@@ -349,9 +357,9 @@ and test work.
       source placeholders; caller-provided config text parsing has started, but
       config discovery, config file reading, override application, CLI parsing,
       diagnostics output, compiler invocation, tests, and CI remain future work.
-      Initial standalone config precedence fixture files now exist, but
-      executable checks remain needs follow-up before claiming stable config
-      behavior; the fixture plan is documented in
+      Initial standalone config precedence fixture files and shell-only
+      executable checks now exist, but Ari-backed checks remain needs follow-up
+      before claiming stable config behavior; the fixture plan is documented in
       `docs/dev/config-precedence-fixtures.md`.
 - [x] Start rule module layout for planned
       `lint/trailing-whitespace` and `lint/missing-final-newline` child modules

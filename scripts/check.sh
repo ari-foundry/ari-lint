@@ -35,6 +35,11 @@ require_no_final_newline() {
   [ "$last_byte" != "0a" ] || fail "expected no final newline: $1"
 }
 
+require_line_equals() {
+  actual=$(sed -n "$2p" "$1")
+  [ "$actual" = "$3" ] || fail "expected line $2 in $1 to be: $3"
+}
+
 require_file README.md
 require_file AGENTS.md
 require_file .gitignore
@@ -141,6 +146,15 @@ require_grep "lint/trailing-whitespace=error" tests/fixtures/config-precedence/c
 require_grep "missing-final-newline=off" tests/fixtures/config-precedence/command-line-overrides.txt
 require_grep "lint/unknown-rule = warning" tests/fixtures/config-precedence/invalid.rules
 require_grep "lint/trailing-whitespace = loud" tests/fixtures/config-precedence/invalid.rules
+require_line_equals tests/fixtures/config-precedence/ari-lint.rules 2 "lint/trailing-whitespace = off"
+require_line_equals tests/fixtures/config-precedence/ari-lint.rules 3 "lint/missing-final-newline = warning"
+require_line_equals tests/fixtures/config-precedence/explicit-config.rules 3 "lint/trailing-whitespace = warning"
+require_line_equals tests/fixtures/config-precedence/explicit-config.rules 4 "lint/missing-final-newline = error"
+require_line_equals tests/fixtures/config-precedence/command-line-overrides.txt 2 "trailing-whitespace=warning"
+require_line_equals tests/fixtures/config-precedence/command-line-overrides.txt 3 "lint/trailing-whitespace=error"
+require_line_equals tests/fixtures/config-precedence/command-line-overrides.txt 4 "missing-final-newline=off"
+require_line_equals tests/fixtures/config-precedence/invalid.rules 2 "lint/unknown-rule = warning"
+require_line_equals tests/fixtures/config-precedence/invalid.rules 3 "lint/trailing-whitespace = loud"
 
 require_grep "source extraction from ari-foundry/ari has not happened yet" README.md
 require_grep "https://github.com/ari-foundry/ari" README.md
@@ -255,6 +269,7 @@ require_grep "file-backed lint severity override aggregation added" docs/dev/roa
 require_grep "CLI file lint rule override application added" docs/dev/roadmap.md
 require_grep "config precedence fixture plan added" docs/dev/roadmap.md
 require_grep "initial config precedence fixtures and lightweight checks added" docs/dev/roadmap.md
+require_grep "shell-only config precedence fixture checks added" docs/dev/roadmap.md
 require_grep "data-only lookup" docs/dev/ari-implementation-plan.md
 require_grep "known-rule validation" docs/dev/ari-implementation-plan.md
 require_grep "severity override resolver" docs/dev/ari-implementation-plan.md
@@ -269,7 +284,8 @@ require_grep "No executable diagnostic severity application tests are added yet"
 require_grep "No executable in-memory lint severity override aggregation tests are added yet" tests/README.md
 require_grep "No executable file-backed lint severity override aggregation tests are added yet" tests/README.md
 require_grep 'parsed `--rule` override application' tests/README.md
-require_grep "executable config precedence tests are added yet" tests/README.md
+require_grep "Shell-only executable config precedence fixture checks" tests/README.md
+require_grep "Ari-backed config precedence tests are not added" tests/README.md
 require_grep "Initial config precedence fixtures have started" tests/README.md
 require_grep "OS argv integration added" docs/dev/roadmap.md
 require_grep "minimal config text parser added" docs/dev/roadmap.md

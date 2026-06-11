@@ -15,8 +15,9 @@ can apply parsed `--rule` overrides to explicit source-file inputs.
 
 Initial config precedence fixture files now exist under
 `tests/fixtures/config-precedence/`. Lightweight checks verify the fixture set
-and key contents only. Standalone config discovery, explicit `--config` file
-reading, executable config tests, and parity checks remain future work.
+key contents, and exact fixture line order only. Standalone config discovery,
+explicit `--config` file reading, Ari-backed config tests, and parity checks
+remain future work.
 
 ## Planned Precedence
 
@@ -55,8 +56,8 @@ The current fixture set is intentionally narrow:
 - `tests/fixtures/config-precedence/invalid.rules`
 
 The lightweight checks do not parse these fixtures with Ari code. They only
-verify presence and expected text. Future executable tests must still connect
-the fixture data to config parsing and precedence behavior.
+verify presence, exact line order, and expected text. Future Ari-backed tests
+must still connect the fixture data to config parsing and precedence behavior.
 
 Avoid golden JSON, CLI-process tests, compiler execution, `ari --check`,
 `tools/lint`, and broad source fixture expansion until those behaviors are
