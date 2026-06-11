@@ -144,7 +144,10 @@ It does not move `tools/lint` or change build behavior.
   rebuilds one already-built diagnostic with the resolved severity.
   In-memory lint aggregation can now apply already-parsed overrides to
   diagnostics for caller-provided source text without reading config files.
-  `ari-lint.rules` discovery and file reading are not implemented yet.
+  File-backed lint aggregation can now apply already-parsed overrides while
+  reading explicitly provided source paths through the existing file-read
+  boundary. `ari-lint.rules` discovery and config file reading are not
+  implemented yet.
 - The rule module layout has started with source-only child modules for the
   trailing whitespace and missing final newline rules.
   A minimal internal single-line helper has started for trailing whitespace,
@@ -280,11 +283,11 @@ Current preparatory model skeleton files are source-only placeholders:
   caller-provided source text and file-backed aggregation for explicitly
   provided file paths. The default aggregation combines diagnostics from the
   in-memory trailing-whitespace and missing-final-newline rule execution paths
-  without applying config. A separate in-memory-only variant accepts
-  already-parsed severity overrides and rebuilds returned diagnostics with
-  resolved severities. It does not read config files, discover `ari-lint.rules`,
-  scan the filesystem, write output, serialize JSON, invoke the compiler, or
-  call `tools/lint`.
+  without applying config. Separate with-overrides variants accept
+  already-parsed severity overrides for caller-provided source text or explicit
+  file paths, then rebuild returned diagnostics with resolved severities. They
+  do not read config files, discover `ari-lint.rules`, scan the filesystem,
+  write output, serialize JSON, invoke the compiler, or call `tools/lint`.
 - `src/cli.ari` sketches planned CLI option metadata for positional source file
   input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`,
   including each option's purpose, value requirement, and repeatability. It
@@ -375,6 +378,9 @@ path-only entries, the default lint run aggregation path is limited to combining
 diagnostics for one caller-provided in-memory source text, the in-memory
 override aggregation path is limited to applying already-parsed severity
 overrides to those diagnostics,
+the file-backed override aggregation path is limited to reading explicitly
+provided source paths through the file-read boundary and applying
+already-parsed severity overrides to returned diagnostics,
 the file-read boundary is limited to reading one explicitly provided path with
 the verified Ari `std::fs::read_detailed` API and preserving file read errors,
 the CLI file lint path is limited to explicit source-file arguments, the
@@ -469,15 +475,16 @@ Current rule module state:
   trailing-whitespace and missing-final-newline rule execution paths for one
   caller-provided source text or explicitly provided file paths, recording that
   it does not scan the filesystem, write output, serialize JSON, invoke the
-  compiler, or call `tools/lint`. Its in-memory-only override variant applies
-  already-parsed severity overrides to returned diagnostics without reading
-  config files or wiring CLI config behavior.
+  compiler, or call `tools/lint`. Its with-overrides variants apply
+  already-parsed severity overrides to returned diagnostics for in-memory
+  source text or explicitly provided file paths without reading config files or
+  wiring CLI config behavior.
 
 The rule implementations only handle caller-provided bytes in memory. These
 rule module files do not implement file reading, filesystem scanning, config
 parsing, CLI parsing, diagnostics output, JSON serialization, compiler
-invocation, tests, or CI. File-backed aggregation, multi-source aggregation,
-file-backed config integration, CLI wiring, user-facing output, JSON diagnostic
+invocation, tests, or CI. File-backed aggregation beyond explicit source paths,
+CLI config integration, config discovery, user-facing output, JSON diagnostic
 arrays, tests, and parity checks remain future work.
 
 The source input file-read boundary reads one explicitly provided path into a
@@ -644,6 +651,11 @@ usable.
       over caller-provided source text without reading config files, discovering
       config paths, integrating with command dispatch, reading files, scanning
       the filesystem, emitting output, serializing JSON, invoking the compiler,
+      executing `ari --check`, or calling `tools/lint`
+- [x] Add file-backed lint aggregation with already-parsed severity overrides
+      over explicitly provided source paths without reading config files,
+      discovering config paths, integrating with command dispatch, traversing
+      directories, emitting output, serializing JSON, invoking the compiler,
       executing `ari --check`, or calling `tools/lint`
 - [ ] Add config precedence fixtures before claiming stable config behavior
 - [ ] Define executable rule module API after the initial layout and in-memory

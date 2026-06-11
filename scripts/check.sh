@@ -229,16 +229,19 @@ require_grep "rule override known-rule validation added" docs/dev/roadmap.md
 require_grep "data-only severity override resolution added" docs/dev/roadmap.md
 require_grep "single-diagnostic severity override application added" docs/dev/roadmap.md
 require_grep "in-memory lint severity override aggregation added" docs/dev/roadmap.md
+require_grep "file-backed lint severity override aggregation added" docs/dev/roadmap.md
 require_grep "data-only lookup" docs/dev/ari-implementation-plan.md
 require_grep "known-rule validation" docs/dev/ari-implementation-plan.md
 require_grep "severity override resolver" docs/dev/ari-implementation-plan.md
 require_grep "single-diagnostic application helper" docs/dev/ari-implementation-plan.md
 require_grep "override aggregation path" docs/dev/ari-implementation-plan.md
+require_grep "file-backed override aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "known rule registry lookup" tests/README.md
 require_grep "known-rule validation" tests/README.md
 require_grep "No executable severity override resolution tests are added yet" tests/README.md
 require_grep "No executable diagnostic severity application tests are added yet" tests/README.md
 require_grep "No executable in-memory lint severity override aggregation tests are added yet" tests/README.md
+require_grep "No executable file-backed lint severity override aggregation tests are added yet" tests/README.md
 require_grep "OS argv integration added" docs/dev/roadmap.md
 require_grep "minimal config text parser added" docs/dev/roadmap.md
 require_grep "rule override semantic parser added" docs/dev/roadmap.md
@@ -530,9 +533,13 @@ require_grep "execute lint rules" src/source.ari
 require_grep "InMemoryLintRunResult" src/lint.ari
 require_grep "FileLintRunResult" src/lint.ari
 require_grep "lint_in_memory_source" src/lint.ari
+require_grep "lint_in_memory_source_from_overrides" src/lint.ari
 require_grep "lint_in_memory_source_with_overrides" src/lint.ari
 require_grep "lint_file_source" src/lint.ari
+require_grep "lint_file_source_from_overrides" src/lint.ari
+require_grep "lint_file_source_with_overrides" src/lint.ari
 require_grep "lint_file_sources" src/lint.ari
+require_grep "lint_file_sources_with_overrides" src/lint.ari
 require_grep "append_diagnostics" src/lint.ari
 require_grep "append_configured_diagnostics" src/lint.ari
 require_grep "append_file_lint_result" src/lint.ari
