@@ -172,6 +172,11 @@ It does not move `tools/lint` or change build behavior.
   The missing-final-newline mapping now feeds an in-memory rule execution
   function that computes final position metadata from caller-provided source
   text and produces internal diagnostics when the final newline is missing.
+  A shared rule execution input/result API now gives both rule modules a common
+  wrapper shape for caller-provided in-memory source text without reading
+  files, scanning the filesystem, applying config, writing output, serializing
+  JSON, invoking the compiler, executing `ari --check`, or calling
+  `tools/lint`.
 - Rule design notes have started:
   `docs/rules/trailing-whitespace.md` records the current in-memory
   `lint/trailing-whitespace` behavior, and
@@ -346,7 +351,11 @@ Current preparatory model skeleton files are source-only placeholders:
   `--list-rules` CLI output, write stderr, read OS argv, or run the CLI.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description, and exposes a small constructor for
-  internal rule descriptors.
+  internal rule descriptors. It also defines shared rule execution input/result
+  shapes and constructors for caller-provided in-memory source text. The shared
+  rule API records that it does not read files, scan the filesystem, write
+  output, serialize JSON, invoke the compiler, execute `ari --check`, or call
+  `tools/lint`.
 - `src/registry.ari` constructs a known rule registry from the existing
   `lint/trailing-whitespace` and `lint/missing-final-newline` metadata entries.
   It records reference-only registry entries and provides a data-only lookup
@@ -479,15 +488,17 @@ Current rule module state:
 - `src/rules/trailing_whitespace.ari` records layout metadata, a minimal
   internal single-line helper, diagnostic mapping for one already-split line,
   and in-memory rule execution for caller-provided source text. The in-memory
-  execution returns internal `Diagnostic` values and records that it does not
-  read files or scan the filesystem.
+  execution returns internal `Diagnostic` values, has a shared rule module API
+  wrapper for caller-provided in-memory source input, and records that it does
+  not read files or scan the filesystem.
 - `src/rules/missing_final_newline.ari` records layout metadata and a minimal
   internal content helper for the `lint/missing-final-newline` implementation.
   It also records diagnostic mapping and in-memory rule execution for
   caller-provided source text. The in-memory execution computes final
   line/column metadata from caller-provided bytes, returns internal
-  `Diagnostic` values, and records that it does not read files or scan the
-  filesystem.
+  `Diagnostic` values, has a shared rule module API wrapper for
+  caller-provided in-memory source input, and records that it does not read
+  files or scan the filesystem.
 - `src/lint.ari` combines diagnostics from the in-memory
   trailing-whitespace and missing-final-newline rule execution paths for one
   caller-provided source text or explicitly provided file paths, recording that
@@ -692,8 +703,10 @@ usable.
       `ari --check`, or `tools/lint`
 - [ ] Add Ari-backed config precedence checks before claiming stable config
       behavior
-- [ ] Define executable rule module API after the initial layout and in-memory
-      rule execution shape are validated
+- [x] Define executable rule module API after the initial layout and in-memory
+      rule execution shape are validated, without file IO, filesystem scanning,
+      config application, output, JSON, compiler invocation, `ari --check`, or
+      `tools/lint`
 - [x] Add in-memory trailing-whitespace rule execution without file IO or
       filesystem scanning
 - [x] Add in-memory missing-final-newline rule execution without file IO or

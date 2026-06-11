@@ -19,6 +19,8 @@ The config precedence fixture plan is documented.
 Shell-only executable config precedence fixture checks verify presence, exact
 line order, and expected text. Ari-backed config precedence tests are not added
 yet.
+The shared rule module API has started for caller-provided in-memory source
+text, but the lightweight checks do not execute Ari rule API tests.
 
 Run the lightweight check script from the repository root:
 
@@ -86,9 +88,12 @@ rule code, short name, default severity, and description for
 override behavior, diagnostics, and parity with current `tools/lint` after real
 implementation begins.
 
-No rule module tests are added yet. Future rule module tests should validate
-rule module metadata, rule behavior, diagnostics, config interactions, and
-parity behavior against current `tools/lint`.
+No executable shared rule module API tests are added yet. Future rule module
+tests should validate `RuleExecutionInput`, `RuleExecutionResult`, per-rule
+shared wrappers, rule module metadata, rule behavior, diagnostics, no file
+reads, no filesystem scanning, no output or JSON serialization, no compiler
+invocation, config interactions, and parity behavior against current
+`tools/lint`.
 
 Initial trailing-whitespace fixtures have started under
 `tests/fixtures/trailing-whitespace/`:

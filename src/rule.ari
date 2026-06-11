@@ -1,4 +1,5 @@
-// Rule descriptor shapes. This file does not execute lint rules.
+// Shared rule descriptor and execution API shapes. This file does not run rule
+// bodies, read files, write output, serialize JSON, or invoke the compiler.
 
 pub struct RuleDescriptor {
   code: String,
@@ -10,6 +11,23 @@ pub struct RuleDescriptor {
 pub struct PlannedRuleCodes {
   trailing_whitespace: String,
   missing_final_newline: String,
+}
+
+pub struct RuleExecutionInput {
+  file_path: String,
+  source_text: String,
+  reads_files: bool,
+  scans_filesystem: bool,
+}
+
+pub struct RuleExecutionResult {
+  rule_code: String,
+  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
+  reads_files: bool,
+  scans_filesystem: bool,
+  writes_output: bool,
+  serializes_json: bool,
+  invokes_compiler: bool,
 }
 
 pub fn rule_descriptor(
@@ -26,5 +44,37 @@ pub fn rule_descriptor(
   };
 }
 
-// Rule execution, source scanning, config interaction, diagnostics output, JSON
-// output, and compiler invocation remain outside this layer.
+pub fn rule_execution_input_from_source(
+  zone: ref mut Zone,
+  file_path: Slice[u8],
+  source_text: Slice[u8],
+) -> RuleExecutionInput {
+  return RuleExecutionInput {
+    file_path: std::string::from(zone, file_path),
+    source_text: std::string::from(zone, source_text),
+    reads_files: false,
+    scans_filesystem: false,
+  };
+}
+
+pub fn rule_execution_result(
+  zone: ref mut Zone,
+  rule_code: Slice[u8],
+  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
+) -> RuleExecutionResult {
+  return RuleExecutionResult {
+    rule_code: std::string::from(zone, rule_code),
+    diagnostics: diagnostics,
+    reads_files: false,
+    scans_filesystem: false,
+    writes_output: false,
+    serializes_json: false,
+    invokes_compiler: false,
+  };
+}
+
+// RuleExecutionInput is limited to caller-provided source text. RuleExecutionResult
+// carries internal diagnostics and records that rule execution does not read files,
+// scan the filesystem, write output, serialize JSON, or invoke the compiler.
+// Config interaction, diagnostics output, JSON output, file-backed execution,
+// and compiler invocation remain outside this layer.
