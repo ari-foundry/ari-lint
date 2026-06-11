@@ -21,6 +21,9 @@ line order, and expected text. Ari-backed config precedence tests are not added
 yet.
 The shared rule module API has started for caller-provided in-memory source
 text, but the lightweight checks do not execute Ari rule API tests.
+Registry-backed in-memory rule dispatch has started for one exact known rule
+code and caller-provided source text, but the lightweight checks do not execute
+registry dispatch tests.
 
 Run the lightweight check script from the repository root:
 
@@ -76,11 +79,20 @@ shape after the schema is defined, and parity behavior against current
 Known rule registry construction has started from the existing
 `lint/trailing-whitespace` and `lint/missing-final-newline` metadata entries.
 A data-only known rule registry lookup by exact full rule code has also
-started, but no registry, severity, or config behavior tests are added yet.
+started. Registry-backed in-memory dispatch for one exact known rule code has
+also started, but no registry, severity, or config behavior tests are added yet.
 Future tests should validate severity values, rule registry metadata, known
-rule lookup behavior, config overrides, severity override resolution,
+rule lookup behavior, registry-backed in-memory rule dispatch, unknown rule
+dispatch results, config overrides, severity override resolution,
 single-diagnostic severity application, diagnostics, JSON output after the
 schema is defined, and parity behavior against current `tools/lint`.
+
+No executable registry dispatch tests are added yet. Future registry dispatch
+tests should validate exact full rule code matching, dispatch to
+`lint/trailing-whitespace`, dispatch to `lint/missing-final-newline`, unknown
+rule handling, caller-provided source text, no file reads, no filesystem
+scanning, no config application, no output or JSON serialization, no compiler
+invocation, no `ari --check`, and parity behavior.
 
 No rule metadata tests are added yet. Future metadata tests should validate the
 rule code, short name, default severity, and description for

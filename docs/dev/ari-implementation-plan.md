@@ -23,11 +23,17 @@ It does not move `tools/lint` or change build behavior.
   entries for `lint/trailing-whitespace` and `lint/missing-final-newline` from
   the existing rule metadata without executing rules. A data-only lookup now
   accepts exact full rule codes for those entries and records that it does not
-  execute rules or scan source.
+  execute rules or scan source. A registry-backed in-memory dispatch path now
+  uses that lookup to run one explicit known rule wrapper over caller-provided
+  source text without reading files, scanning the filesystem, applying config,
+  writing output, serializing JSON, invoking the compiler, executing
+  `ari --check`, or calling `tools/lint`.
 - First planned rule metadata entries have been added for
   `lint/trailing-whitespace` and `lint/missing-final-newline`. Both rules now
   have in-memory execution over caller-provided source text. Registry-backed
-  execution remains future work.
+  in-memory dispatch can select either known rule by exact full rule code.
+  Lint aggregation, CLI dispatch, config, output, tests, and parity are not
+  wired to that registry dispatch yet.
 - The CLI metadata skeleton for the planned surface has started as metadata-only
   declarations for positional source input and the documented options `--json`,
   `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`.
@@ -358,9 +364,12 @@ Current preparatory model skeleton files are source-only placeholders:
   `tools/lint`.
 - `src/registry.ari` constructs a known rule registry from the existing
   `lint/trailing-whitespace` and `lint/missing-final-newline` metadata entries.
-  It records reference-only registry entries and provides a data-only lookup
-  for exact full rule codes. It does not execute rules, apply config, scan
-  sources, emit diagnostics, or invoke the compiler.
+  It records reference-only registry entries, provides a data-only lookup for
+  exact full rule codes, and provides registry-backed in-memory dispatch for
+  one explicit known rule code over caller-provided source text. Lookup remains
+  data-only. Dispatch does not read files, scan the filesystem, apply config,
+  write output, serialize JSON, invoke the compiler, execute `ari --check`, or
+  call `tools/lint`.
 - `src/rules.ari` records the first planned rule metadata entries for
   `lint/trailing-whitespace` and `lint/missing-final-newline`, including their
   short names, default `warning` severity from the current Ari lint docs, and
@@ -411,7 +420,8 @@ the CLI file lint path is limited to explicit source-file arguments, the
 file-read boundary, in-memory lint aggregation, optional parsed `--rule`
 overrides, internal diagnostics, and internal read-error data,
 the known-rule registry lookup is limited to returning internal data for exact
-full rule codes,
+full rule codes, registry-backed rule dispatch is limited to selecting one
+known in-memory rule wrapper for caller-provided source text,
 the list-rules formatter is limited to internal text construction, the command
 dispatcher is limited to stdout-free internal command results, the exit-code
 model is limited to internal data carried by those results, the explicit-token
@@ -430,10 +440,10 @@ trailing-whitespace execution tests, missing-final-newline execution tests,
 output-boundary tests,
 stdout-adapter tests, exit-code tests, list-rules command tests, parser tests,
 dispatcher tests, and
-explicit-token entry tests remain future work. Registry execution, severity
-parsing, CLI/config override behavior, rule registration behavior, directory
-traversal policy, file-backed lint command behavior, and the JSON schema are
-not stable yet.
+explicit-token entry tests remain future work. Registry-backed dispatch is not
+yet wired into lint aggregation or CLI behavior. Severity parsing, CLI/config
+override behavior, rule registration behavior, directory traversal policy,
+file-backed lint command behavior, and the JSON schema are not stable yet.
 
 The local build scaffold is not compiler-backed CI or full build validation.
 Compiler-backed CI, standalone test execution, compiler provisioning in CI,
@@ -507,6 +517,11 @@ Current rule module state:
   already-parsed severity overrides to returned diagnostics for in-memory
   source text or explicitly provided file paths without reading config files or
   wiring CLI config behavior.
+- `src/registry.ari` can dispatch one exact known rule code to the corresponding
+  in-memory rule wrapper for caller-provided source text. It returns structured
+  found/not-found dispatch data and does not read files, scan the filesystem,
+  apply config, write output, serialize JSON, invoke the compiler, execute
+  `ari --check`, or call `tools/lint`.
 
 The rule implementations only handle caller-provided bytes in memory. These
 rule module files do not implement file reading, filesystem scanning, config
@@ -660,6 +675,10 @@ usable.
 - [x] Add data-only known rule registry lookup by exact full rule code without
       executing rules, applying config, scanning sources, emitting diagnostics,
       or invoking the compiler
+- [x] Add registry-backed in-memory rule dispatch for one exact known rule code
+      over caller-provided source text without reading files, scanning the
+      filesystem, applying config, emitting output, serializing JSON, invoking
+      the compiler, executing `ari --check`, or calling `tools/lint`
 - [x] Add minimal caller-provided config text parsing
 - [x] Add known-rule validation for caller-provided config text without reading
       config files, discovering config paths, applying overrides, scanning

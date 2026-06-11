@@ -3,6 +3,7 @@
 Current status: skeleton initialized / Ari source skeleton started / internal
 model skeleton started / registry-severity-config skeleton started /
 known rule registry construction added / known rule registry lookup added /
+registry-backed in-memory rule dispatch added /
 first rule metadata entries added /
 CLI metadata skeleton started / diagnostic output metadata skeleton started /
 config override skeleton refined / rule module
@@ -209,8 +210,15 @@ and test work.
       `lint/missing-final-newline`, without reading files, scanning the
       filesystem, applying config, writing output, serializing JSON, invoking
       the compiler, executing `ari --check`, calling `tools/lint`, or adding
-      tests. Registry-backed dispatch, config-aware rule execution, executable
-      tests, and parity checks remain future work.
+      tests. Registry-backed aggregation, config-aware rule execution,
+      executable tests, and parity checks remain future work.
+- [x] Add registry-backed in-memory rule dispatch for one exact known rule code
+      using the existing registry lookup and shared rule wrappers, without
+      reading files, scanning the filesystem, applying config, writing output,
+      serializing JSON, invoking the compiler, executing `ari --check`, calling
+      `tools/lint`, wiring lint aggregation or CLI dispatch, or adding tests.
+      Registry-backed aggregation, config-aware dispatch, executable tests, and
+      parity checks remain future work.
 - [x] Add a minimal internal diagnostic JSON serializer for one already-built
       internal `Diagnostic`, including file path, line, column, optional
       endLine/endColumn, severity, rule code, message, basic string escaping,
@@ -287,8 +295,9 @@ and test work.
 - [x] Start registry, severity, and config skeleton as preparatory Ari source
       work only; in-memory trailing-whitespace behavior has since started,
       in-memory missing-final-newline behavior has since started, while
-      registry execution, severity parsing, config parsing, CLI overrides,
-      diagnostics output, compiler invocation, tests, and CI remain future work.
+      registry-backed aggregation, severity parsing, config parsing, CLI
+      overrides, diagnostics output, compiler invocation, tests, and CI remain
+      future work.
 - [x] Add known rule registry construction from the existing
       `lint/trailing-whitespace` and `lint/missing-final-newline` metadata
       entries without executing rules, scanning sources, applying config,
@@ -297,12 +306,16 @@ and test work.
       `lint/trailing-whitespace` and `lint/missing-final-newline`, returning
       internal lookup data without executing rules, scanning sources, applying
       config, emitting diagnostics, invoking the compiler, or adding tests.
+      Registry-backed in-memory dispatch has since started for one explicit
+      known rule code, while lint aggregation and CLI dispatch are not wired to
+      registry dispatch yet.
 - [x] Add first planned rule metadata entries for
       `lint/trailing-whitespace` and `lint/missing-final-newline` as
       metadata-only Ari source placeholders; in-memory trailing-whitespace
       behavior and in-memory missing-final-newline behavior have since started,
-      while file-backed source scanning, diagnostics output, config parsing,
-      CLI behavior, compiler invocation, tests, and CI remain future work.
+      and registry-backed in-memory dispatch has since started. File-backed
+      source scanning, diagnostics output, config parsing, CLI behavior,
+      compiler invocation, tests, and CI remain future work.
 - [x] Start CLI metadata skeleton for positional source input, `--json`,
       `--ari`, `-I`, `--list-rules`, `--config`, and `--rule` as
       metadata-only Ari source placeholders; full user-facing argument
