@@ -52,6 +52,10 @@ provisioning as planned in
 Compiler invocation also remains future work; future compiler-backed tests
 should use explicit compiler invocation as planned in
 [docs/dev/compiler-invocation.md](../docs/dev/compiler-invocation.md).
+Release and compatibility policy is documented in
+[docs/dev/release-compatibility-policy.md](../docs/dev/release-compatibility-policy.md).
+No compatibility matrix entry should be added until compiler-backed tests pass
+against a recorded Ari release tag or commit.
 
 Future tests should cover CLI smoke tests, rule tests, configuration tests,
 diagnostic output, JSON diagnostic tests, compiler-boundary behavior, and

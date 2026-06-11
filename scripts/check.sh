@@ -42,6 +42,7 @@ require_file docs/README.md
 require_file docs/migration.md
 require_file docs/dev/compiler-invocation.md
 require_file docs/dev/compiler-provisioning.md
+require_file docs/dev/release-compatibility-policy.md
 require_file docs/dev/roadmap.md
 require_file docs/dev/ari-implementation-plan.md
 require_file docs/dev/parity-test-plan.md
@@ -138,6 +139,7 @@ require_grep "docs/migration.md" docs/README.md
 require_grep "docs/dev/ari-implementation-plan.md" docs/README.md
 require_grep "docs/dev/compiler-invocation.md" docs/README.md
 require_grep "docs/dev/compiler-provisioning.md" docs/README.md
+require_grep "docs/dev/release-compatibility-policy.md" docs/README.md
 require_grep "docs/rules/trailing-whitespace.md" docs/README.md
 require_grep "docs/rules/missing-final-newline.md" docs/README.md
 require_grep "docs/dev/ari-implementation-plan.md" docs/dev/roadmap.md
@@ -149,6 +151,17 @@ require_grep "compiler bugs belong in ari-foundry/ari" docs/dev/ari-implementati
 require_grep "standard library bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
 require_grep "docs/dev/compiler-invocation.md" docs/dev/ari-implementation-plan.md
 require_grep "docs/dev/compiler-provisioning.md" docs/dev/ari-implementation-plan.md
+require_grep "docs/dev/release-compatibility-policy.md" docs/dev/ari-implementation-plan.md
+require_grep "ari-lint Release And Compatibility Policy" docs/dev/release-compatibility-policy.md
+require_grep "https://github.com/ari-foundry/ari/releases" docs/dev/release-compatibility-policy.md
+require_grep "https://github.com/ari-foundry/ari/tags" docs/dev/release-compatibility-policy.md
+require_grep "No Ari compatibility claims are established yet" docs/dev/release-compatibility-policy.md
+require_grep "Do not invent version numbers" docs/dev/release-compatibility-policy.md
+require_grep "compiler-backed .ari-lint. tests pass" docs/dev/release-compatibility-policy.md
+require_grep "Do not add release automation in this step" docs/dev/release-compatibility-policy.md
+require_grep "Do not claim support for any Ari release" docs/dev/release-compatibility-policy.md
+require_grep "release and compatibility policy documented" docs/dev/roadmap.md
+require_grep "release-compatibility-policy.md" tests/README.md
 require_grep "ari-lint Parity Test Plan" docs/dev/parity-test-plan.md
 require_grep "tools/lint" docs/dev/parity-test-plan.md
 require_grep "docs/dev/compiler-invocation.md" docs/dev/parity-test-plan.md
