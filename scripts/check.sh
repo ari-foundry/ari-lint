@@ -109,6 +109,11 @@ require_file src/source.ari
 require_file src/lint.ari
 require_file src/parity.ari
 
+require_grep "RegistryLookupResult" src/registry.ari
+require_grep "lookup_known_rule" src/registry.ari
+require_grep "executes_rule: false" src/registry.ari
+require_grep "scans_source: false" src/registry.ari
+
 unexpected_trailing_fixture=$(find tests/fixtures/trailing-whitespace -type f ! -name clean.ari ! -name trailing-spaces.ari -print -quit)
 [ -z "$unexpected_trailing_fixture" ] || fail "unexpected trailing-whitespace fixture: $unexpected_trailing_fixture"
 
@@ -218,6 +223,9 @@ require_grep "stdout/stderr output boundary model added" docs/dev/roadmap.md
 require_grep "internal exit-code model added" docs/dev/roadmap.md
 require_grep "explicit-token list-rules command wiring added" docs/dev/roadmap.md
 require_grep "minimal stdout adapter added" docs/dev/roadmap.md
+require_grep "known rule registry lookup added" docs/dev/roadmap.md
+require_grep "data-only lookup" docs/dev/ari-implementation-plan.md
+require_grep "known rule registry lookup" tests/README.md
 require_grep "OS argv integration added" docs/dev/roadmap.md
 require_grep "minimal config text parser added" docs/dev/roadmap.md
 require_grep "rule override semantic parser added" docs/dev/roadmap.md

@@ -2,7 +2,8 @@
 
 Current status: skeleton initialized / Ari source skeleton started / internal
 model skeleton started / registry-severity-config skeleton started /
-known rule registry construction added / first rule metadata entries added /
+known rule registry construction added / known rule registry lookup added /
+first rule metadata entries added /
 CLI metadata skeleton started / diagnostic output metadata skeleton started /
 config override skeleton refined / rule module
 layout started / trailing-whitespace design note added / minimal
@@ -197,6 +198,10 @@ and test work.
       `lint/trailing-whitespace` and `lint/missing-final-newline` metadata
       entries without executing rules, scanning sources, applying config,
       emitting diagnostics, invoking the compiler, or adding tests.
+- [x] Add data-only known rule registry lookup by exact full rule code for
+      `lint/trailing-whitespace` and `lint/missing-final-newline`, returning
+      internal lookup data without executing rules, scanning sources, applying
+      config, emitting diagnostics, invoking the compiler, or adding tests.
 - [x] Add first planned rule metadata entries for
       `lint/trailing-whitespace` and `lint/missing-final-newline` as
       metadata-only Ari source placeholders; in-memory trailing-whitespace
