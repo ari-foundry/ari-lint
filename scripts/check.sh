@@ -42,6 +42,7 @@ require_file docs/README.md
 require_file docs/migration.md
 require_file docs/dev/compiler-invocation.md
 require_file docs/dev/compiler-provisioning.md
+require_file docs/dev/config-precedence-fixtures.md
 require_file docs/dev/release-compatibility-policy.md
 require_file docs/dev/roadmap.md
 require_file docs/dev/ari-implementation-plan.md
@@ -156,7 +157,12 @@ require_grep "compiler bugs belong in ari-foundry/ari" docs/dev/ari-implementati
 require_grep "standard library bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
 require_grep "docs/dev/compiler-invocation.md" docs/dev/ari-implementation-plan.md
 require_grep "docs/dev/compiler-provisioning.md" docs/dev/ari-implementation-plan.md
+require_grep "docs/dev/config-precedence-fixtures.md" docs/dev/ari-implementation-plan.md
 require_grep "docs/dev/release-compatibility-policy.md" docs/dev/ari-implementation-plan.md
+require_grep "ari-lint Config Precedence Fixture Plan" docs/dev/config-precedence-fixtures.md
+require_grep "does not add fixture files" docs/dev/config-precedence-fixtures.md
+require_grep "command-line .--rule. overrides" docs/dev/config-precedence-fixtures.md
+require_grep "Config precedence must not be documented as stable" docs/dev/config-precedence-fixtures.md
 require_grep "ari-lint Release And Compatibility Policy" docs/dev/release-compatibility-policy.md
 require_grep "https://github.com/ari-foundry/ari/releases" docs/dev/release-compatibility-policy.md
 require_grep "https://github.com/ari-foundry/ari/tags" docs/dev/release-compatibility-policy.md
@@ -231,6 +237,7 @@ require_grep "single-diagnostic severity override application added" docs/dev/ro
 require_grep "in-memory lint severity override aggregation added" docs/dev/roadmap.md
 require_grep "file-backed lint severity override aggregation added" docs/dev/roadmap.md
 require_grep "CLI file lint rule override application added" docs/dev/roadmap.md
+require_grep "config precedence fixture plan added" docs/dev/roadmap.md
 require_grep "data-only lookup" docs/dev/ari-implementation-plan.md
 require_grep "known-rule validation" docs/dev/ari-implementation-plan.md
 require_grep "severity override resolver" docs/dev/ari-implementation-plan.md
@@ -245,6 +252,7 @@ require_grep "No executable diagnostic severity application tests are added yet"
 require_grep "No executable in-memory lint severity override aggregation tests are added yet" tests/README.md
 require_grep "No executable file-backed lint severity override aggregation tests are added yet" tests/README.md
 require_grep 'parsed `--rule` override application' tests/README.md
+require_grep "No config precedence fixture files are added yet" tests/README.md
 require_grep "OS argv integration added" docs/dev/roadmap.md
 require_grep "minimal config text parser added" docs/dev/roadmap.md
 require_grep "rule override semantic parser added" docs/dev/roadmap.md

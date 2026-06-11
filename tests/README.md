@@ -15,6 +15,8 @@ boundary and in-memory lint aggregation, and it applies parsed `--rule`
 overrides when provided, but the lightweight checks do not run CLI tests.
 A source-only parity runner skeleton records future comparison boundaries, but
 the lightweight checks do not execute a parity runner.
+The config precedence fixture plan is documented, but no config precedence
+fixture files or executable config precedence tests are added yet.
 
 Run the lightweight check script from the repository root:
 
@@ -310,6 +312,15 @@ precedence, severity override resolution, single-diagnostic severity
 application, in-memory severity override aggregation, file-backed and CLI config
 application, CLI `--rule` lint dispatch, diagnostics, and parity behavior
 against current `tools/lint`.
+
+The future config precedence fixture plan is documented in
+[docs/dev/config-precedence-fixtures.md](../docs/dev/config-precedence-fixtures.md).
+No config precedence fixture files are added yet. Future fixture work should
+cover default severity, config-file overrides, explicit `--config`,
+command-line `--rule`, repeated overrides, unknown rules, invalid severities,
+and comments without adding golden JSON, CLI-process tests, compiler execution,
+`ari --check`, or `tools/lint` execution before those behaviors are explicitly
+scoped.
 
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
