@@ -31,6 +31,7 @@ minimal stdout adapter added /
 OS argv integration added /
 minimal config text parser added /
 rule override semantic parser added /
+rule override known-rule validation added /
 minimal diagnostic JSON serializer added /
 source input boundary model added /
 in-memory trailing-whitespace execution added /
@@ -114,8 +115,14 @@ and test work.
       overrides plus parse problems without applying overrides, reading config
       files, integrating with command dispatch, emitting diagnostics,
       serializing JSON, scanning sources, invoking the compiler, or executing
-      lint rules. Rule override parser tests, unknown-rule validation, and
-      override application remain future work.
+      lint rules. Rule override parser tests and override application remain
+      future work.
+- [x] Add known-rule validation to the caller-provided `--rule` semantic parser
+      using the known rule registry lookup, returning internal parse problems
+      for unknown rules without applying overrides, reading config files,
+      integrating with command dispatch, emitting diagnostics, serializing
+      JSON, scanning sources, invoking the compiler, or executing lint rules.
+      Rule override parser tests and override application remain future work.
 - [x] Add a minimal internal diagnostic JSON serializer for one already-built
       internal `Diagnostic`, including file path, line, column, optional
       endLine/endColumn, severity, rule code, message, basic string escaping,

@@ -135,7 +135,9 @@ It does not move `tools/lint` or change build behavior.
   comments, returning internal overrides and parse problems. The command-line
   rule override parser now handles `RULE=SEVERITY` values for `--rule`,
   including documented short-name normalization for the two known rules.
-  `ari-lint.rules` discovery and file reading are not implemented yet.
+  It now validates normalized `--rule` codes against the known rule registry
+  and reports internal parse problems for unknown rules. `ari-lint.rules`
+  discovery and file reading are not implemented yet.
 - The rule module layout has started with source-only child modules for the
   trailing whitespace and missing final newline rules.
   A minimal internal single-line helper has started for trailing whitespace,
@@ -336,8 +338,9 @@ Current preparatory model skeleton files are source-only placeholders:
   comments, and `RULE = SEVERITY` entries into internal overrides and parse
   problems. It also parses caller-provided command-line rule override text in
   `RULE=SEVERITY` form, normalizing documented short rule names into full lint
-  rule codes. It does not discover config files, read `ari-lint.rules`, inspect
-  CLI arguments, apply overrides, or validate unknown rule names.
+  rule codes and validating those codes against the known rule registry. It
+  does not discover config files, read `ari-lint.rules`, inspect CLI arguments,
+  apply overrides, or validate config-file rule names.
 
 These files do not implement user-facing rule execution,
 argument validation, diagnostics output, JSON serialization, or `ari --check`
@@ -348,11 +351,11 @@ to reading `std::env::args`, dropping argv[0], and dispatching internal tokens,
 the CLI parser is limited to explicit caller-provided token lists and raw option
 values, the config parser is limited to caller-provided text, rule/severity
 pairs, blank lines, and comments, the rule override parser is limited to
-caller-provided `--rule` text and internal override construction, the diagnostic
-JSON serializer is limited to one already-built internal Diagnostic, the source
-input boundary is limited to caller-provided source text and path-only entries,
-the lint run aggregation path is limited to combining diagnostics for one
-caller-provided in-memory source text,
+caller-provided `--rule` text, internal override construction, and known-rule
+validation, the diagnostic JSON serializer is limited to one already-built
+internal Diagnostic, the source input boundary is limited to caller-provided
+source text and path-only entries, the lint run aggregation path is limited to
+combining diagnostics for one caller-provided in-memory source text,
 the file-read boundary is limited to reading one explicitly provided path with
 the verified Ari `std::fs::read_detailed` API and preserving file read errors,
 the CLI file lint path is limited to explicit source-file arguments, the
@@ -369,7 +372,7 @@ stdout/stderr output boundary is limited to status data for named future sinks.
 Compiler invocation, config discovery, config file reading, override
 application, diagnostics output, stderr writing, stdout adapter wiring to
 commands or `main`, process exit, diagnostic array serialization, user-facing
-JSON output, environment handling, unknown-rule validation for `--rule`, source
+JSON output, environment handling, config-file rule-name validation, source
 filesystem scanning, directory traversal, main-entry tests, argv-boundary tests,
 OS-argv integration tests, config parser tests, rule
 override parser tests, diagnostic JSON serializer tests, source input tests,
@@ -601,6 +604,9 @@ usable.
       or invoking the compiler
 - [x] Add minimal caller-provided config text parsing
 - [x] Add minimal command-line rule override semantic parsing
+- [x] Add known-rule validation for caller-provided `--rule` override values
+      without applying overrides, reading config files, scanning sources,
+      emitting diagnostics, or invoking the compiler
 - [ ] Add config precedence fixtures before claiming stable config behavior
 - [ ] Define executable rule module API after the initial layout and in-memory
       rule execution shape are validated
