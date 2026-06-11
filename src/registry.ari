@@ -1,4 +1,4 @@
-// Rule registry shapes. This file does not run rules or scan source.
+// Known rule registry construction. This file does not run rules or scan source.
 
 pub enum RegistryStatus {
   Planned,
@@ -13,4 +13,31 @@ pub struct RegistryEntry {
 pub struct RuleRegistry {
   trailing_whitespace: RegistryEntry,
   missing_final_newline: RegistryEntry,
+}
+
+fn registry_entry_from_metadata(
+  metadata: super::rules::RuleMetadataEntry,
+) -> RegistryEntry {
+  return RegistryEntry {
+    descriptor: super::rule::rule_descriptor(
+      metadata.code,
+      metadata.short_name,
+      super::severity::Warning,
+      metadata.description,
+    ),
+    status: ReferenceOnly,
+  };
+}
+
+pub fn known_rule_registry(zone: ref mut Zone) -> RuleRegistry {
+  let trailing = registry_entry_from_metadata(
+    super::rules::trailing_whitespace_rule_metadata(zone),
+  );
+  let missing_final = registry_entry_from_metadata(
+    super::rules::missing_final_newline_rule_metadata(zone),
+  );
+  return RuleRegistry {
+    trailing_whitespace: trailing,
+    missing_final_newline: missing_final,
+  };
 }

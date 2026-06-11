@@ -12,5 +12,19 @@ pub struct PlannedRuleCodes {
   missing_final_newline: String,
 }
 
+pub fn rule_descriptor(
+  code: String,
+  short_name: String,
+  default_severity: super::severity::Severity,
+  description: String,
+) -> RuleDescriptor {
+  return RuleDescriptor {
+    code: code,
+    short_name: short_name,
+    default_severity: default_severity,
+    description: description,
+  };
+}
+
 // Rule execution, source scanning, config interaction, diagnostics output, JSON
 // output, and compiler invocation remain outside this layer.

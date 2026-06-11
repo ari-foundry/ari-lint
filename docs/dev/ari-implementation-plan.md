@@ -19,7 +19,9 @@ It does not move `tools/lint` or change build behavior.
   scanning sources, parsing config, invoking the compiler, invoking
   `ari --check`, or calling `tools/lint`.
 - The rule registry, severity, and config model skeleton has started as
-  preparatory source-only declarations.
+  preparatory source-only declarations. The registry now constructs known
+  entries for `lint/trailing-whitespace` and `lint/missing-final-newline` from
+  the existing rule metadata without executing rules.
 - First planned rule metadata entries have been added for
   `lint/trailing-whitespace` and `lint/missing-final-newline`. Both rules now
   have in-memory execution over caller-provided source text. Registry-backed
@@ -311,10 +313,12 @@ Current preparatory model skeleton files are source-only placeholders:
   diagnostic arrays, emit user-facing JSON output, emit user-facing
   `--list-rules` CLI output, write stderr, read OS argv, or run the CLI.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
-  default severity, and description.
-- `src/registry.ari` sketches rule registry concepts for planned reference
-  entries, including `lint/trailing-whitespace` and
-  `lint/missing-final-newline` metadata placeholders.
+  default severity, and description, and exposes a small constructor for
+  internal rule descriptors.
+- `src/registry.ari` constructs a known rule registry from the existing
+  `lint/trailing-whitespace` and `lint/missing-final-newline` metadata entries.
+  It records reference-only registry entries and does not execute rules, apply
+  config, scan sources, emit diagnostics, or invoke the compiler.
 - `src/rules.ari` records the first planned rule metadata entries for
   `lint/trailing-whitespace` and `lint/missing-final-newline`, including their
   short names, default `warning` severity from the current Ari lint docs, and
@@ -368,9 +372,10 @@ trailing-whitespace execution tests, missing-final-newline execution tests,
 output-boundary tests,
 stdout-adapter tests, exit-code tests, list-rules command tests, parser tests,
 dispatcher tests, and
-explicit-token entry tests remain future work. Severity parsing, CLI/config
-override behavior, rule registration behavior, directory traversal policy,
-file-backed lint command behavior, and the JSON schema are not stable yet.
+explicit-token entry tests remain future work. Registry execution, severity
+parsing, CLI/config override behavior, rule registration behavior, directory
+traversal policy, file-backed lint command behavior, and the JSON schema are
+not stable yet.
 
 The local build scaffold is not compiler-backed CI or full build validation.
 Compiler-backed CI, standalone test execution, compiler provisioning in CI,
@@ -583,6 +588,9 @@ usable.
 - [x] Add source input boundary model without file IO or filesystem scanning
 - [ ] Define registry, severity, and config model behavior after source
       skeletons compile in the real build
+- [x] Add known rule registry construction from existing rule metadata without
+      executing rules, applying config, scanning sources, emitting diagnostics,
+      or invoking the compiler
 - [x] Add minimal caller-provided config text parsing
 - [x] Add minimal command-line rule override semantic parsing
 - [ ] Add config precedence fixtures before claiming stable config behavior

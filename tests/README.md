@@ -66,7 +66,9 @@ handling, rule metadata, diagnostic data, config override data, JSON output
 shape after the schema is defined, and parity behavior against current
 `tools/lint`.
 
-No registry, severity, or config behavior tests are added yet. Future tests
+Known rule registry construction has started from the existing
+`lint/trailing-whitespace` and `lint/missing-final-newline` metadata entries,
+but no registry, severity, or config behavior tests are added yet. Future tests
 should validate severity values, rule registry metadata, config overrides,
 diagnostics, JSON output after the schema is defined, and parity behavior
 against current `tools/lint`.
