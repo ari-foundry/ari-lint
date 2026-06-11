@@ -41,6 +41,7 @@ CLI file lint rule override application added /
 config precedence fixture plan added /
 initial config precedence fixtures and lightweight checks added /
 shell-only config precedence fixture checks added /
+executable rule module API added /
 minimal diagnostic JSON serializer added /
 source input boundary model added /
 in-memory trailing-whitespace execution added /
@@ -202,6 +203,14 @@ and test work.
       compiler, executing `ari --check`, calling `tools/lint`, or claiming
       stable config behavior. Ari-backed config precedence tests and parity
       checks remain future work.
+- [x] Define a shared executable rule module API for caller-provided in-memory
+      source, including shared rule input/result data and per-rule wrapper
+      functions for `lint/trailing-whitespace` and
+      `lint/missing-final-newline`, without reading files, scanning the
+      filesystem, applying config, writing output, serializing JSON, invoking
+      the compiler, executing `ari --check`, calling `tools/lint`, or adding
+      tests. Registry-backed dispatch, config-aware rule execution, executable
+      tests, and parity checks remain future work.
 - [x] Add a minimal internal diagnostic JSON serializer for one already-built
       internal `Diagnostic`, including file path, line, column, optional
       endLine/endColumn, severity, rule code, message, basic string escaping,
@@ -365,9 +374,10 @@ and test work.
       `lint/trailing-whitespace` and `lint/missing-final-newline` child modules
       as layout/metadata-only Ari source placeholders; in-memory
       trailing-whitespace execution has since started, while
-      in-memory missing-final-newline execution has since started. File-backed
-      linting, config interactions, CLI parsing, compiler invocation, tests, and
-      CI remain future work.
+      in-memory missing-final-newline execution has since started. A shared
+      executable rule module API now wraps the in-memory rule functions for
+      caller-provided source text. File-backed linting, config interactions,
+      CLI parsing, compiler invocation, tests, and CI remain future work.
 - [x] Add `docs/rules/trailing-whitespace.md` as a design note for the planned
       `lint/trailing-whitespace` rule; in-memory implementation has since
       started, while file reading, filesystem scanning, tests, fixtures, JSON

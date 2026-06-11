@@ -270,6 +270,8 @@ require_grep "CLI file lint rule override application added" docs/dev/roadmap.md
 require_grep "config precedence fixture plan added" docs/dev/roadmap.md
 require_grep "initial config precedence fixtures and lightweight checks added" docs/dev/roadmap.md
 require_grep "shell-only config precedence fixture checks added" docs/dev/roadmap.md
+require_grep "executable rule module API added" docs/dev/roadmap.md
+require_grep "shared executable rule module API" docs/dev/roadmap.md
 require_grep "data-only lookup" docs/dev/ari-implementation-plan.md
 require_grep "known-rule validation" docs/dev/ari-implementation-plan.md
 require_grep "severity override resolver" docs/dev/ari-implementation-plan.md
@@ -277,6 +279,8 @@ require_grep "single-diagnostic application helper" docs/dev/ari-implementation-
 require_grep "override aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "file-backed override aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "Apply caller-provided .--rule. overrides to the internal CLI file lint" docs/dev/ari-implementation-plan.md
+require_grep "shared rule execution input/result API" docs/dev/ari-implementation-plan.md
+require_grep "shared rule module API" docs/dev/ari-implementation-plan.md
 require_grep "known rule registry lookup" tests/README.md
 require_grep "known-rule validation" tests/README.md
 require_grep "No executable severity override resolution tests are added yet" tests/README.md
@@ -402,7 +406,8 @@ require_grep "Current rule module state" docs/dev/ari-implementation-plan.md
 require_grep "rule module layout" docs/dev/roadmap.md
 require_grep "in-memory rule execution" docs/dev/ari-implementation-plan.md
 require_grep "Both rules now" docs/dev/ari-implementation-plan.md
-require_grep "No rule module tests are added yet" tests/README.md
+require_grep "shared rule module API" tests/README.md
+require_grep "No executable shared rule module API tests are added yet" tests/README.md
 require_grep "minimal internal single-line helper" docs/dev/ari-implementation-plan.md
 require_grep "single-line helper" docs/rules/trailing-whitespace.md
 require_grep "trailing-whitespace helper started" docs/dev/roadmap.md
@@ -625,6 +630,15 @@ require_grep "writes_files: false" src/parity.ari
 require_grep "compares_outputs: false" src/parity.ari
 require_grep "InitialRuleMetadata" src/rules.ari
 require_grep "rule_descriptor" src/rule.ari
+require_grep "RuleExecutionInput" src/rule.ari
+require_grep "RuleExecutionResult" src/rule.ari
+require_grep "rule_execution_input_from_source" src/rule.ari
+require_grep "rule_execution_result" src/rule.ari
+require_grep "reads_files: false" src/rule.ari
+require_grep "scans_filesystem: false" src/rule.ari
+require_grep "writes_output: false" src/rule.ari
+require_grep "serializes_json: false" src/rule.ari
+require_grep "invokes_compiler: false" src/rule.ari
 require_grep "pub mod trailing_whitespace" src/rules.ari
 require_grep "pub mod missing_final_newline" src/rules.ari
 require_grep "lint/trailing-whitespace" src/rules.ari
@@ -645,6 +659,9 @@ require_grep "TrailingWhitespaceDiagnosticMapping" src/rules/trailing_whitespace
 require_grep "trailing_whitespace_diagnostic_mapping" src/rules/trailing_whitespace.ari
 require_grep "TrailingWhitespaceRuleResult" src/rules/trailing_whitespace.ari
 require_grep "lint_trailing_whitespace_in_memory" src/rules/trailing_whitespace.ari
+require_grep "lint_trailing_whitespace_rule" src/rules/trailing_whitespace.ari
+require_grep "RuleExecutionInput" src/rules/trailing_whitespace.ari
+require_grep "RuleExecutionResult" src/rules/trailing_whitespace.ari
 require_grep "push_trailing_whitespace_diagnostic" src/rules/trailing_whitespace.ari
 require_grep "diagnostic_from_span" src/diagnostic.ari
 require_grep "diagnostic_from_span" src/rules/trailing_whitespace.ari
@@ -668,6 +685,9 @@ require_grep "MissingFinalNewlineFinalPosition" src/rules/missing_final_newline.
 require_grep "MissingFinalNewlineRuleResult" src/rules/missing_final_newline.ari
 require_grep "final_position_for_source" src/rules/missing_final_newline.ari
 require_grep "lint_missing_final_newline_in_memory" src/rules/missing_final_newline.ari
+require_grep "lint_missing_final_newline_rule" src/rules/missing_final_newline.ari
+require_grep "RuleExecutionInput" src/rules/missing_final_newline.ari
+require_grep "RuleExecutionResult" src/rules/missing_final_newline.ari
 require_grep "diagnostic_from_span" src/rules/missing_final_newline.ari
 require_grep "diagnostics.push" src/rules/missing_final_newline.ari
 require_grep "reads_files: false" src/rules/missing_final_newline.ari

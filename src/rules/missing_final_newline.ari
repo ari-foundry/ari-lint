@@ -113,3 +113,19 @@ pub fn lint_missing_final_newline_in_memory(
     scans_filesystem: false,
   };
 }
+
+pub fn lint_missing_final_newline_rule(
+  zone: ref mut Zone,
+  input: super::rule::RuleExecutionInput,
+) -> super::rule::RuleExecutionResult {
+  let result = lint_missing_final_newline_in_memory(
+    zone,
+    input.file_path.as_slice(),
+    input.source_text.as_slice(),
+  );
+  return super::rule::rule_execution_result(
+    zone,
+    "lint/missing-final-newline",
+    result.diagnostics,
+  );
+}
