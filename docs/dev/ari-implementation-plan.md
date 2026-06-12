@@ -16,8 +16,10 @@ It does not move `tools/lint` or change build behavior.
   OS argv CLI entry path and returns the internal command exit-code mapping.
   The main-facing `--list-rules` path writes stdout through the verified stdout
   adapter, and the main-facing source-file lint path writes collected human
-  diagnostics to stderr through the verified stderr adapter. It does not read
-  environment variables, serialize JSON, discover config files, traverse
+  diagnostics to stderr through the verified stderr adapter. The main-facing
+  source-file `--json` path writes collected diagnostic JSON to stdout, and CLI
+  parse problems write a short summary to stderr. It does not read environment
+  variables, produce parse-error JSON, discover config files, traverse
   directories, invoke the compiler, invoke `ari --check`, call `tools/lint`, or
   call process exit.
 - The rule registry, severity, and config model skeleton has started as
@@ -54,8 +56,10 @@ It does not move `tools/lint` or change build behavior.
   now returns the resulting internal exit-code mapping from this path. The
   main-facing `--list-rules` branch writes the existing human-readable
   list-rules text through the verified stdout adapter, and source-file linting
-  writes collected human diagnostics through the verified stderr adapter. The path
-  does not read environment variables, call process exit, serialize JSON,
+  writes collected human diagnostics through the verified stderr adapter.
+  Source-file `--json` output writes collected diagnostic JSON through stdout,
+  and CLI parse problems write a short summary through stderr. The path does
+  not read environment variables, call process exit, produce parse-error JSON,
   invoke the compiler, or recursively scan sources.
 - The diagnostic output metadata skeleton has started as data-only declarations
   for human and JSON output modes, diagnostic location fields, and planned
@@ -600,9 +604,11 @@ in-memory lint aggregation for successfully read files, validates parsed
 plus the first internal diagnostic in `CliCommandResult`. The main-facing OS
 argv path now also collects source-file diagnostics into a caller-provided
 vector, formats the collected human diagnostics, and writes them to stderr
-through the verified stderr adapter. It does not serialize JSON, discover
-config files, read config files, traverse directories, invoke the compiler,
-call `ari --check`, call `tools/lint`, or call process exit.
+through the verified stderr adapter. It can also serialize those collected
+source-file diagnostics as JSON to stdout when `--json` is requested. CLI parse
+problems write a short summary to stderr. It does not produce parse-error JSON,
+discover config files, read config files, traverse directories, invoke the
+compiler, call `ari --check`, call `tools/lint`, or call process exit.
 
 ### Phase 5: compiler boundary
 
@@ -826,6 +832,10 @@ usable.
       diagnostics and write them to stdout through the verified stdout adapter
       without parse-error JSON output, config discovery, compiler invocation,
       `ari --check`, `tools/lint`, or process exit
+- [x] Wire the main-facing CLI parse problem path to write a short usage-error
+      summary to stderr through the verified stderr adapter without
+      parse-error JSON output, help output, config discovery, compiler
+      invocation, `ari --check`, `tools/lint`, or process exit
 - [x] Add source-only parity runner skeleton without executing `tools/lint`,
       `ari-lint`, the Ari compiler, shell commands, file IO, or comparisons
 - [x] Record compiler-backed CI gate without running the Ari compiler,
