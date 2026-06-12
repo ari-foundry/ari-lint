@@ -1,7 +1,7 @@
-// Diagnostic output models, internal diagnostic JSON serialization,
-// internal list-rules formatting, output boundary data, and minimal stdout and
-// stderr adapters. This file does not emit diagnostics, read OS argv, or run
-// the CLI; stream writes happen only when callers explicitly invoke adapters.
+// Diagnostic output models, internal diagnostic text serialization, internal
+// list-rules formatting, output boundary data, and minimal stdout and stderr
+// adapters. This file does not emit diagnostics, read OS argv, or run the CLI;
+// stream writes happen only when callers explicitly invoke adapters.
 
 pub enum OutputModeName {
   Human,
@@ -124,6 +124,26 @@ pub fn serialize_diagnostic_json(
 ) -> std::string::String {
   var text = std::string::new(zone, 2);
   text.append_string_in(zone, "{}");
+  return text;
+}
+
+pub fn format_diagnostic_human(
+  zone: ref mut Zone,
+  diagnostic: super::diagnostic::Diagnostic
+) -> std::string::String {
+  var text = std::string::new(zone, 160);
+  text.append_string_in(zone, diagnostic.span.file_path);
+  text.append_string_in(zone, ":");
+  text.append_i64_in(zone, diagnostic.span.line);
+  text.append_string_in(zone, ":");
+  text.append_i64_in(zone, diagnostic.span.column);
+  text.append_string_in(zone, ": ");
+  text.append_string_in(zone, diagnostic_severity_name(diagnostic.severity));
+  text.append_string_in(zone, ": ");
+  text.append_string_in(zone, diagnostic.rule_code);
+  text.append_string_in(zone, ": ");
+  text.append_string_in(zone, diagnostic.message);
+  text.append_string_in(zone, "\n");
   return text;
 }
 
@@ -252,11 +272,14 @@ pub fn format_list_rules_human(
 // Human-readable text stability and JSON schema stability remain follow-up
 // items.
 //
-// serialize_diagnostic_json builds a single in-memory JSON object from one
-// internal Diagnostic. It escapes common JSON string bytes and serializes
-// missing optional end positions as null. It does not write stdout/stderr,
+// serialize_diagnostic_json currently returns a minimal in-memory JSON object
+// placeholder for one internal Diagnostic. It does not write stdout/stderr,
 // choose output mode, serialize diagnostic arrays, or claim the final JSON
 // schema is stable.
+//
+// format_diagnostic_human builds one newline-terminated human-readable
+// diagnostic line in memory. It does not write stdout/stderr, choose output
+// mode, serialize diagnostic arrays, or connect to CLI dispatch.
 //
 // ListRuleRow records the internal --list-rules row model for known rule
 // metadata: rule code, short name, default severity, and description.
@@ -278,8 +301,7 @@ pub fn format_list_rules_human(
 // status data. It does not read OS argv, inspect command results, write stdout,
 // serialize JSON, call process exit, or run the CLI.
 //
-// Human-readable diagnostic string construction, diagnostic arrays, stderr
-// diagnostic wiring, and final user-facing JSON output are future work.
-// Main-facing list-rules stdout wiring is handled by the CLI layer through the
-// explicit stdout adapter. Source scanning, diagnostic output wiring, config
-// parsing, and ari --check invocation are also future work.
+// Diagnostic arrays, stderr diagnostic wiring, and final user-facing JSON output
+// are future work. Main-facing list-rules stdout wiring is handled by the CLI
+// layer through the explicit stdout adapter. Source scanning, diagnostic output
+// wiring, config parsing, and ari --check invocation are also future work.

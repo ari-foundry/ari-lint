@@ -58,6 +58,7 @@ standalone test entrypoint added /
 release and compatibility policy documented /
 main OS argv exit-code wiring added /
 main-facing list-rules stdout output added /
+internal human diagnostic formatter added /
 no user-facing diagnostic lint output yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -247,6 +248,12 @@ and test work.
       sources, invoking the compiler, executing lint rules, or adding golden
       tests. JSON serializer tests and final schema stability remain future
       work.
+- [x] Add an internal human-readable formatter for one already-built diagnostic,
+      returning newline-terminated text in memory without writing stderr,
+      wiring CLI output, serializing diagnostic arrays, scanning sources,
+      invoking the compiler, executing lint rules, or adding golden tests.
+      Human formatter tests, diagnostic arrays, stderr wiring, and parity
+      checks remain future work.
 - [x] Add an internal source input boundary model for caller-provided source
       text and path-only source entries, including a path-list boundary for
       already-parsed CLI paths without reading files, recursively scanning the
