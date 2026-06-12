@@ -146,6 +146,32 @@ pub fn collect_lint_diagnostics_in_memory(
   return diagnostic_count;
 }
 
+pub fn collect_lint_diagnostics_in_memory_with_overrides(
+  zone: ref mut Zone,
+  file_path: Slice[u8],
+  source_text: Slice[u8],
+  overrides: ref std::vec::Vec[super::config::RuleSeverityOverride],
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> i64 {
+  var raw_diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 8);
+  let diagnostic_count = collect_lint_diagnostics_in_memory(
+    zone,
+    file_path,
+    source_text,
+    ref mut raw_diagnostics
+  );
+
+  for diagnostic in raw_diagnostics {
+    let application = super::config::apply_rule_severity_to_diagnostic_from_overrides(
+      zone,
+      diagnostic,
+      overrides
+    );
+    diagnostics.push(application.diagnostic);
+  }
+  return diagnostic_count;
+}
+
 fn lint_in_memory_source_from_overrides(
   zone: ref mut Zone,
   file_path: Slice[u8],
@@ -244,6 +270,29 @@ pub fn collect_file_lint_diagnostics(
   }
 }
 
+pub fn collect_file_lint_diagnostics_with_overrides(
+  zone: ref mut Zone,
+  path: Slice[u8],
+  overrides: std::vec::Vec[super::config::RuleSeverityOverride],
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> FileDiagnosticCollectionResult {
+  match super::source::source_input_from_file(zone, path) {
+    std::Ok(text) => {
+      let diagnostic_count = collect_lint_diagnostics_in_memory_with_overrides(
+        zone,
+        path,
+        text.as_slice(),
+        ref overrides,
+        diagnostics
+      );
+      return file_diagnostic_collection_result(diagnostic_count, 1, 0);
+    }
+    std::Err(problem) => {
+      return file_diagnostic_collection_result(0, 0, 1);
+    }
+  }
+}
+
 fn lint_file_source_from_overrides(
   zone: ref mut Zone,
   path: Slice[u8],
@@ -295,10 +344,11 @@ pub fn lint_file_source_with_overrides(
 // remain future work.
 //
 // collect_lint_diagnostics_in_memory and collect_file_lint_diagnostics push
-// full internal diagnostics into caller-provided vectors. They do not format
-// those diagnostics, write stderr, serialize JSON arrays, discover config
-// files, scan directories, invoke the compiler, execute ari --check, or call
-// tools/lint.
+// full internal diagnostics into caller-provided vectors. Their with-overrides
+// variants apply already-parsed severity overrides to those collected
+// diagnostics without reading config files. They do not format diagnostics,
+// write stderr, serialize JSON arrays, discover config files, scan directories,
+// invoke the compiler, execute ari --check, or call tools/lint.
 
 pub fn lint_file_sources(
   zone: ref mut Zone,

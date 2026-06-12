@@ -8,7 +8,7 @@
 // boundary. Main now returns the internal command exit-code mapping through
 // this path, while source-file dispatch reads explicitly provided file paths
 // through the source boundary, runs in-memory lint aggregation, carries the
-// first internal diagnostic, and validates parsed --rule overrides when
+// first internal diagnostic, and applies parsed --rule severity overrides when
 // provided. A separate collection path pushes full internal diagnostics into a
 // caller-provided vector. The main-facing path writes list-rules text to
 // stdout, source lint diagnostics to stderr, source-file JSON diagnostics to
@@ -213,7 +213,7 @@ fn cli_file_lint_exit_code(
 
 pub fn parse_cli_tokens(
   zone: ref mut Zone,
-  tokens: std::vec::Vec[std::string::String]
+  tokens: ref std::vec::Vec[std::string::String]
 ) -> CliParseResult {
   var source_count = 0;
   var first_source_file: Slice[u8] = "";
@@ -449,6 +449,7 @@ fn write_file_read_error_stderr(zone: ref mut Zone, path: Slice[u8]) -> bool {
 
 fn dispatch_cli_command_with_main_output(
   zone: ref mut Zone,
+  tokens: ref std::vec::Vec[std::string::String],
   parse_result: CliParseResult
 ) -> CliCommandResult {
   if parse_result.problem_count > 0 || parse_result.args.rule_override_problem_count > 0 {
@@ -521,8 +522,9 @@ fn dispatch_cli_command_with_main_output(
 
   if parse_result.args.has_source_file {
     var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 8);
-    var command_result = collect_cli_source_diagnostics(
+    var command_result = collect_cli_source_diagnostics_from_tokens(
       zone,
+      tokens,
       parse_result,
       ref mut diagnostics
     );
@@ -608,7 +610,7 @@ pub fn run_explicit_cli_tokens(
   zone: ref mut Zone,
   tokens: std::vec::Vec[std::string::String]
 ) -> CliCommandResult {
-  let parse_result = parse_cli_tokens(zone, tokens);
+  let parse_result = parse_cli_tokens(zone, ref tokens);
   return dispatch_cli_command(zone, parse_result);
 }
 
@@ -617,7 +619,100 @@ pub fn collect_explicit_cli_diagnostics(
   tokens: std::vec::Vec[std::string::String],
   diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
 ) -> CliCommandResult {
-  let parse_result = parse_cli_tokens(zone, tokens);
+  let parse_result = parse_cli_tokens(zone, ref tokens);
+  return collect_cli_source_diagnostics_from_tokens(
+    zone,
+    ref tokens,
+    parse_result,
+    diagnostics
+  );
+}
+
+fn collect_cli_rule_overrides_from_tokens(
+  zone: ref mut Zone,
+  tokens: ref std::vec::Vec[std::string::String],
+  overrides: ref mut std::vec::Vec[super::config::RuleSeverityOverride]
+) -> super::config::RuleOverrideParseResult {
+  var override_count = 0;
+  var problem_count = 0;
+  var index = 0;
+  while index < tokens.len() {
+    let token = tokens.get(index);
+    if token.equals("--rule") && index + 1 < tokens.len() {
+      let rule_override_result = super::config::parse_rule_override_text_into(
+        zone,
+        tokens.get(index + 1).as_slice(),
+        overrides
+      );
+      override_count = override_count + rule_override_result.override_count;
+      problem_count = problem_count + rule_override_result.problem_count;
+      index = index + 2;
+    } else {
+      index = index + 1;
+    }
+  }
+  return super::config::RuleOverrideParseResult {
+    override_count: override_count,
+    problem_count: problem_count,
+  };
+}
+
+fn collect_cli_source_diagnostics_from_tokens(
+  zone: ref mut Zone,
+  tokens: ref std::vec::Vec[std::string::String],
+  parse_result: CliParseResult,
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> CliCommandResult {
+  if parse_result.problem_count > 0 || parse_result.args.rule_override_problem_count > 0 {
+    return dispatch_cli_command(zone, parse_result);
+  }
+
+  if parse_result.args.has_source_file && parse_result.args.rule_override_count > 0 {
+    var rule_overrides = std::vec::new<super::config::RuleSeverityOverride>(
+      zone,
+      parse_result.args.rule_override_count
+    );
+    let rule_override_result = collect_cli_rule_overrides_from_tokens(
+      zone,
+      tokens,
+      ref mut rule_overrides
+    );
+    if rule_override_result.problem_count > 0 {
+      return cli_command_result(
+        CliParseProblems,
+        false,
+        0,
+        0,
+        cli_usage_error_exit_code(zone),
+        "CLI rule override problems are recorded internally before source diagnostics are collected."
+      );
+    }
+    let collection_result = super::lint::collect_file_lint_diagnostics_with_overrides(
+      zone,
+      parse_result.args.first_source_file,
+      rule_overrides,
+      diagnostics
+    );
+    let exit_code = cli_file_lint_exit_code(
+      zone,
+      collection_result.diagnostic_count,
+      collection_result.read_error_count
+    );
+    var command_result = cli_command_result(
+      CliSourceLintResult,
+      false,
+      collection_result.diagnostic_count,
+      collection_result.read_error_count,
+      exit_code,
+      "Source-file lint diagnostics were collected with parsed --rule severity overrides without writing output."
+    );
+    if diagnostics.len() > 0 {
+      command_result.first_diagnostic =
+        super::diagnostic::some_diagnostic(diagnostics.get(0));
+    }
+    return command_result;
+  }
+
   return collect_cli_source_diagnostics(zone, parse_result, diagnostics);
 }
 
@@ -685,26 +780,31 @@ pub fn read_os_argv_tokens(zone: ref mut Zone) -> std::vec::Vec[std::string::Str
 
 pub fn run_os_argv_cli(zone: ref mut Zone) -> CliCommandResult {
   let tokens = read_os_argv_tokens(zone);
-  return run_explicit_cli_tokens(zone, tokens);
+  let parse_result = parse_cli_tokens(zone, ref tokens);
+  return dispatch_cli_command(zone, parse_result);
 }
 
 pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult {
   let tokens = read_os_argv_tokens(zone);
-  let parse_result = parse_cli_tokens(zone, tokens);
-  return dispatch_cli_command_with_main_output(zone, parse_result);
+  let parse_result = parse_cli_tokens(zone, ref tokens);
+  return dispatch_cli_command_with_main_output(
+    zone,
+    ref tokens,
+    parse_result
+  );
 }
 
 // parse_cli_tokens consumes a caller-provided token list and records source
-// counts, first source file path, flags/options, raw rule override counts,
+// counts, first source file path, flags/options, parsed rule override values,
 // rule override problem count, and parse problem counts in CliParseResult.
 // It intentionally leaves environment handling, path validation, config
 // file discovery, diagnostic printing, and ari --check invocation as future
 // work.
 //
 // parse_cli_rule_overrides converts one raw --rule value into the internal
-// config override count model and parse problem count. Source-file dispatch
-// validates parsed --rule overrides without reading config files or discovering
-// ari-lint.rules.
+// config override count model and parse problem count. Source-file collection
+// applies parsed --rule severity overrides without reading config files or
+// discovering ari-lint.rules.
 //
 // dispatch_cli_command maps a CliParseResult to a stdout-free internal command
 // result with internal exit-code data. For source-file arguments it reads only
@@ -712,9 +812,10 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // carries the first internal diagnostic without writing output.
 // collect_cli_source_diagnostics and collect_explicit_cli_diagnostics use the
 // same explicit source-file boundary, but push full internal diagnostics into a
-// caller-provided vector. They do not write output, serialize JSON, discover
-// config files, scan directories, call tools/lint, call process exit, or invoke
-// ari --check.
+// caller-provided vector and apply already-parsed --rule severity overrides
+// when provided. They do not write output, serialize JSON, discover config
+// files, scan directories, call tools/lint, call process exit, or invoke ari
+// --check.
 // run_explicit_cli_tokens composes parsing and dispatch for callers that
 // already have tokens. These entry paths do not write stdout/stderr, serialize
 // JSON, read config files, recursively scan source trees, call tools/lint, call

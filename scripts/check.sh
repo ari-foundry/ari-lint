@@ -296,6 +296,7 @@ require_grep "single-diagnostic severity override application added" docs/dev/ro
 require_grep "in-memory lint severity override aggregation added" docs/dev/roadmap.md
 require_grep "file-backed lint severity override aggregation added" docs/dev/roadmap.md
 require_grep "CLI file lint rule override application added" docs/dev/roadmap.md
+require_grep "CLI diagnostic severity override application added" docs/dev/roadmap.md
 require_grep "config precedence fixture plan added" docs/dev/roadmap.md
 require_grep "initial config precedence fixtures and lightweight checks added" docs/dev/roadmap.md
 require_grep "shell-only config precedence fixture checks added" docs/dev/roadmap.md
@@ -447,6 +448,7 @@ require_grep "CLI parse problems write a short summary" docs/dev/ari-implementat
 require_grep "CLI help writes concise text" docs/dev/ari-implementation-plan.md
 require_grep "missing source-file input writes a short" docs/dev/ari-implementation-plan.md
 require_grep "source-file read errors write a short" docs/dev/ari-implementation-plan.md
+require_grep "Parsed command-line .--rule. severity overrides" docs/dev/ari-implementation-plan.md
 require_grep "read-error JSON output" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
 require_grep "human-readable list-rules formatter" docs/dev/ari-implementation-plan.md
@@ -539,7 +541,11 @@ require_grep "parse_cli_rule_overrides" src/cli.ari
 require_grep "cli_file_lint_exit_code" src/cli.ari
 require_grep "lint_file_source" src/cli.ari
 require_grep "rule override problem count" src/cli.ari
-require_grep "validates parsed --rule overrides" src/cli.ari
+require_grep "applies parsed --rule severity overrides" src/cli.ari
+require_grep "collect_cli_rule_overrides_from_tokens" src/cli.ari
+require_grep "collect_cli_source_diagnostics_from_tokens" src/cli.ari
+require_grep "parse_rule_override_text_into" src/config.ari
+require_grep "collect_file_lint_diagnostics_with_overrides" src/lint.ari
 require_grep "OsArgvBoundary" src/cli.ari
 require_grep "os_argv_boundary" src/cli.ari
 require_grep "std::env::args" src/cli.ari
@@ -551,7 +557,7 @@ require_grep "missing_value_problem" src/cli.ari
 require_grep "unknown_argument_problem" src/cli.ari
 require_grep "raw_rule_override" src/cli.ari
 require_grep "semantic rule override parsing bridge" src/cli.ari
-require_grep "validates parsed --rule overrides" src/cli.ari
+require_grep "applies parsed --rule severity overrides" src/cli.ari
 require_grep "does not read environment" src/cli.ari
 require_grep "The main-facing wrapper adds" src/cli.ari
 require_grep "write stdout/stderr" src/cli.ari

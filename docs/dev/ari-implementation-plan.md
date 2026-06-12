@@ -122,8 +122,10 @@ It does not move `tools/lint` or change build behavior.
   without reading config files. A separate internal CLI collection path accepts
   explicit caller-provided tokens or parsed source-file input and pushes full
   internal diagnostics into a caller-provided vector while returning existing
-  count and exit-code data. The main-facing OS argv path formats and writes
-  those collected human diagnostics to stderr, or serializes and writes those
+  count and exit-code data. Parsed command-line `--rule` severity overrides are
+  now applied to those collected diagnostics before main-facing human stderr or
+  JSON stdout output. The main-facing OS argv path formats and writes those
+  collected human diagnostics to stderr, or serializes and writes those
   collected diagnostics as JSON to stdout when `--json` is requested, through
   the verified output adapters. It does not discover config files, read config
   files, traverse directories, invoke the compiler, call `ari --check`, or call
@@ -145,7 +147,9 @@ It does not move `tools/lint` or change build behavior.
   internal command results. It routes list-rules requests to the internal
   human-readable list-rules formatter and routes source-file requests through
   file reading plus in-memory lint aggregation. It validates parsed `--rule`
-  overrides before source-file linting when provided, while keeping
+  overrides before source-file linting when provided, while the diagnostic
+  collection path applies parsed `--rule` severity overrides to collected
+  diagnostics. It keeps
   parse-problem, help, and missing-source command paths as internal command
   results. User-facing stdout/stderr output, JSON output, source
   scanning, compiler invocation, config-file parsing, diagnostics output, and
@@ -598,8 +602,9 @@ Current rule module state:
   it does not scan the filesystem, write output, serialize JSON, invoke the
   compiler, or call `tools/lint`. Its with-overrides variants preserve the same
   count and first-diagnostic shape for in-memory source text or explicitly
-  provided file paths without reading config files, rewriting diagnostic
-  severity, or wiring CLI config behavior.
+  provided file paths without reading config files or wiring config-file
+  behavior. Diagnostic collection variants can rewrite collected diagnostic
+  severity from already-parsed overrides.
 - `src/registry.ari` can dispatch one exact known rule code to the corresponding
   in-memory rule wrapper for caller-provided source text. It returns structured
   found/not-found dispatch data and does not read files, scan the filesystem,
@@ -623,14 +628,15 @@ in-memory lint aggregation for successfully read files, validates parsed
 `--rule` overrides when provided, preserves read errors, and carries counts
 plus the first internal diagnostic in `CliCommandResult`. The main-facing OS
 argv path now also collects source-file diagnostics into a caller-provided
-vector, formats the collected human diagnostics, and writes them to stderr
-through the verified stderr adapter. It can also serialize those collected
-source-file diagnostics as JSON to stdout when `--json` is requested. CLI parse
-problems write a short summary to stderr. Source-file read errors write a short
-stderr summary and do not produce read-error JSON output. It does not produce
-parse-error JSON, discover config files, read config files, traverse
-directories, invoke the compiler, call `ari --check`, call `tools/lint`, or
-call process exit.
+vector, applies parsed command-line `--rule` severity overrides to those
+collected diagnostics, formats them as human diagnostics, and writes them to
+stderr through the verified stderr adapter. It can also serialize those
+collected source-file diagnostics as JSON to stdout when `--json` is requested.
+CLI parse problems write a short summary to stderr. Source-file read errors
+write a short stderr summary and do not produce read-error JSON output. It does
+not produce parse-error JSON, discover config files, read config files,
+traverse directories, invoke the compiler, call `ari --check`, call
+`tools/lint`, or call process exit.
 
 ### Phase 5: compiler boundary
 
@@ -800,6 +806,11 @@ usable.
       path without reading config files, discovering config paths, traversing
       directories, emitting output, serializing JSON, invoking the compiler,
       executing `ari --check`, calling `tools/lint`, or calling process exit
+- [x] Apply parsed command-line `--rule` severity overrides to source-file
+      diagnostic collection for explicit token and main-facing paths without
+      reading config files, discovering config paths, traversing directories,
+      invoking the compiler, executing `ari --check`, calling `tools/lint`,
+      adding tests, or calling process exit
 - [x] Add a config precedence fixture plan before claiming stable config
       behavior without adding fixture files, reading config files, discovering
       config paths, running CLI tests, emitting output, serializing JSON,
