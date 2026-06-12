@@ -21,6 +21,8 @@ diagnostic in the command result. A separate internal CLI collection path can
 push full source-file diagnostics into a caller-provided vector. Parsed
 command-line `--rule` severity overrides are applied to collected source-file
 diagnostics before main-facing human stderr or JSON stdout output. The
+explicit `--config` path is captured in the CLI argument model, but config
+files are not read or applied by these checks yet. The
 main-facing source-file lint path writes collected human diagnostics to stderr
 through the verified stderr adapter, but the lightweight checks do not assert
 CLI output.
@@ -229,10 +231,11 @@ positional files, `--json`, `--list-rules`, `--ari`, `-I`, `--config`,
 
 No executable CLI parser tests are added yet. Future parser tests should cover
 the minimal explicit token-list parser for positional files, `--json`,
-`--list-rules`, `--help`/`-h`, `--ari`, `-I`, `--config`, raw `--rule` values,
-missing option values, unknown options, repeated `-I` and `--rule`, multiple
-positional files, the internal OS argv integration entry path, plus parity
-behavior against current `tools/lint` once a parity runner exists.
+`--list-rules`, `--help`/`-h`, `--ari`, `-I`, explicit `--config` path
+capture, raw `--rule` values, missing option values, unknown options, repeated
+`-I` and `--rule`, multiple positional files, the internal OS argv integration
+entry path, plus parity behavior against current `tools/lint` once a parity
+runner exists.
 
 No executable dispatcher tests are added yet. Future dispatcher tests should
 cover list-rules dispatch, missing-source commands, source-file lint requests,

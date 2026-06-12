@@ -41,6 +41,7 @@ in-memory lint severity override aggregation added /
 file-backed lint severity override aggregation added /
 CLI file lint rule override application added /
 CLI diagnostic severity override application added /
+CLI explicit config path capture added /
 config precedence fixture plan added /
 initial config precedence fixtures and lightweight checks added /
 shell-only config precedence fixture checks added /
@@ -233,6 +234,13 @@ and test work.
       directories, invoking the compiler, executing `ari --check`, calling
       `tools/lint`, adding tests, or calling process exit. Config-file
       integration, executable tests, and parity checks remain future work.
+- [x] Capture the explicit `--config` path in the CLI argument model for
+      caller-provided tokens and OS argv parsing, without reading config files,
+      discovering `ari-lint.rules`, applying config, changing diagnostics,
+      writing new output, invoking the compiler, executing `ari --check`,
+      calling `tools/lint`, adding tests, or calling process exit. Config-file
+      reading, config application, executable tests, and parity checks remain
+      future work.
 - [x] Add a config precedence fixture plan for future default, config-file,
       explicit `--config`, and command-line `--rule` precedence coverage,
       without adding fixture files, reading config files, discovering

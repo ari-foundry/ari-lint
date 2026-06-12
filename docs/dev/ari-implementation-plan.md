@@ -48,9 +48,11 @@ It does not move `tools/lint` or change build behavior.
 - The CLI argument result model is now used by the minimal explicit-token
   parser for positional files, planned flags/options, optional compiler/config
   paths, include paths, raw rule override values, help requests, and parse
-  problems. A semantic parser now converts caller-provided `--rule` values into
-  command-line-sourced internal severity overrides and parse problems. Actual
-  OS process argument collection now has a minimal internal entry path;
+  problems. The parser now captures the explicit `--config` path value when one
+  is provided, but still does not read config files or discover
+  `ari-lint.rules`. A semantic parser now converts caller-provided `--rule`
+  values into command-line-sourced internal severity overrides and parse
+  problems. Actual OS process argument collection now has a minimal internal entry path;
   environment handling remains future work.
 - An explicit OS argv boundary now exists in `src/cli.ari`. It reads process
   arguments through the verified Ari `std::env::args` API, drops argv[0], and
@@ -382,9 +384,11 @@ Current preparatory model skeleton files are source-only placeholders:
   including each option's purpose, value requirement, and repeatability. It
   also defines a CLI argument result model and a minimal explicit-token parser
   for caller-provided token lists, including positional files, requested
-  output/list/help flags, optional compiler and config paths, include paths,
-  raw rule override entries, missing-value problems, and unknown-argument
-  problems. It also exposes a semantic `--rule` parser bridge that converts raw
+  output/list/help flags, optional compiler path presence, explicit config path
+  capture, include paths, raw rule override entries, missing-value problems,
+  and unknown-argument problems. It does not read the captured config path or
+  discover `ari-lint.rules`. It also exposes a semantic `--rule` parser bridge
+  that converts raw
   rule override values into the internal config override model and parse
   problems. Source-file dispatch validates parsed rule overrides before
   file-backed linting. It
@@ -475,8 +479,9 @@ entry shell is limited to returning the internal exit-code mapping from the OS
 argv CLI entry path, the OS argv entry path is limited to reading
 `std::env::args`, dropping argv[0], dispatching internal tokens, and writing
 stdout only for the `--list-rules` command through the verified adapter,
-the CLI parser is limited to explicit caller-provided token lists and raw option
-values, the config parser is limited to caller-provided text, rule/severity
+the CLI parser is limited to explicit caller-provided token lists, raw option
+values, and explicit `--config` path capture without reading that path,
+the config parser is limited to caller-provided text, rule/severity
 pairs, blank lines, comments, and known-rule validation, the rule override
 parser is limited to caller-provided `--rule` text, internal override
 construction, and known-rule validation, the severity override resolver is
