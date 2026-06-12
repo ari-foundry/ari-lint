@@ -74,6 +74,7 @@ main-facing source-file JSON stdout output added /
 main-facing CLI parse problem stderr output added /
 main-facing CLI help stdout output added /
 main-facing missing source stderr output added /
+main-facing file read error stderr output added /
 internal human diagnostic formatter added /
 internal human diagnostic array formatter added /
 no stable JSON schema or JSON output tests yet.
@@ -420,6 +421,12 @@ and test work.
       invoking the compiler, executing `ari --check`, calling `tools/lint`, or
       calling process exit. Detailed usage diagnostics, tests, and parity
       checks remain future work.
+- [x] Wire the main-facing source-file read-error path to write a short
+      unavailable summary to stderr through the verified stderr adapter,
+      without read-error JSON output, config discovery, reading config files,
+      traversing directories, invoking the compiler, executing `ari --check`,
+      calling `tools/lint`, or calling process exit. Detailed read-error
+      diagnostics, tests, and parity checks remain future work.
 - [x] Add a source-only parity runner skeleton that records the intended
       comparison boundary against current `tools/lint` without executing
       `tools/lint`, invoking an `ari-lint` binary, reading fixtures, writing

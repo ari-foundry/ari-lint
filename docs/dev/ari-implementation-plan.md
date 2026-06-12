@@ -19,10 +19,11 @@ It does not move `tools/lint` or change build behavior.
   diagnostics to stderr through the verified stderr adapter. The main-facing
   source-file `--json` path writes collected diagnostic JSON to stdout, and CLI
   help writes concise text to stdout. CLI parse problems write a short summary
-  to stderr, and missing source-file input writes a short summary to stderr. It
-  does not read environment variables, produce parse-error JSON, discover
-  config files, traverse directories, invoke the compiler, invoke `ari --check`,
-  call `tools/lint`, or call process exit.
+  to stderr, missing source-file input writes a short summary to stderr, and
+  source-file read errors write a short summary to stderr. It does not read
+  environment variables, produce parse-error JSON, produce read-error JSON,
+  discover config files, traverse directories, invoke the compiler, invoke
+  `ari --check`, call `tools/lint`, or call process exit.
 - The rule registry, severity, and config model skeleton has started as
   preparatory source-only declarations. The registry now constructs known
   entries for `lint/trailing-whitespace` and `lint/missing-final-newline` from
@@ -60,10 +61,11 @@ It does not move `tools/lint` or change build behavior.
   writes collected human diagnostics through the verified stderr adapter.
   Source-file `--json` output writes collected diagnostic JSON through stdout,
   and CLI help writes concise text through stdout. CLI parse problems write a
-  short summary through stderr, and missing source-file input writes a short
-  summary through stderr. The path does not read environment variables, call
-  process exit, produce parse-error JSON, invoke the compiler, or recursively
-  scan sources.
+  short summary through stderr, missing source-file input writes a short
+  summary through stderr, and source-file read errors write a short summary
+  through stderr. The path does not read environment variables, call process
+  exit, produce parse-error JSON, produce read-error JSON, invoke the compiler,
+  or recursively scan sources.
 - The diagnostic output metadata skeleton has started as data-only declarations
   for human and JSON output modes, diagnostic location fields, and planned
   diagnostic fields. The JSON serializer now builds one internal JSON object
@@ -77,7 +79,8 @@ It does not move `tools/lint` or change build behavior.
   and the main-facing source-file lint path writes those collected human
   diagnostics to stderr. A JSON array serializer now joins caller-provided
   diagnostics in memory by reusing the single-diagnostic serializer, and the
-  main-facing source-file `--json` path writes that array to stdout. Executable
+  main-facing source-file `--json` path writes that array to stdout. Read
+  errors write a short stderr summary instead of JSON output. Executable
   serializer/output tests and final JSON schema stability remain future work.
 - The source input boundary model has started for caller-provided source text,
   path-only source entries, and explicit single-file reads. It records internal
@@ -124,7 +127,8 @@ It does not move `tools/lint` or change build behavior.
   collected diagnostics as JSON to stdout when `--json` is requested, through
   the verified output adapters. It does not discover config files, read config
   files, traverse directories, invoke the compiler, call `ari --check`, or call
-  `tools/lint`.
+  `tools/lint`. Source-file read errors write a short stderr summary and do not
+  produce read-error JSON output yet.
 - A source-only parity runner skeleton now records intended comparison
   boundaries against current `tools/lint`, with all execution, file IO, and
   output-comparison flags false. It does not run `tools/lint`, invoke an
@@ -160,8 +164,9 @@ It does not move `tools/lint` or change build behavior.
   status data. The stdout adapter is wired for the main-facing OS argv
   `--list-rules`, help, and source-file JSON diagnostic paths, and the stderr
   adapter is wired for source-file human diagnostics and parse problem
-  summaries. These adapters are not wired to process exit, compiler invocation,
-  source scanning, or config discovery.
+  summaries, missing-source summaries, and source-file read-error summaries.
+  These adapters are not wired to process exit, compiler invocation, source
+  scanning, or config discovery.
 - An internal OS argv entry path now reads arguments through the verified Ari
   `std::env::args` API, drops the program-name argument, and dispatches the
   remaining user tokens through the existing explicit-token parser and
@@ -170,8 +175,9 @@ It does not move `tools/lint` or change build behavior.
   human-readable list-rules text to stdout. The main-facing help, source-file
   diagnostic, source-file JSON diagnostic, and parse problem output paths are
   also wired through verified output adapters. Missing source-file input writes
-  a short stderr summary. Config discovery, compiler invocation, detailed help
-  parity, and tests remain future work.
+  a short stderr summary. Source-file read errors also write a short stderr
+  summary. Config discovery, compiler invocation, detailed help parity, and
+  tests remain future work.
 - An internal explicit-token entry path now composes the existing
   caller-provided token-list parser with the stdout-free command dispatcher and
   returns a `CliCommandResult`. It does not read OS argv, environment variables,
@@ -343,10 +349,10 @@ Current preparatory model skeleton files are source-only placeholders:
 
 - `src/main.ari` defines a minimal main entry shell and delegates `main` through
   a local `run_main_entry_shell` function. The shell calls the existing OS argv
-  CLI entry path and returns its internal exit-code mapping. It does not write
-  stderr, serialize JSON, invoke the compiler, call `ari --check`, call
-  `tools/lint`, or call process exit. The `--list-rules` path writes stdout
-  through the verified stdout adapter.
+  CLI entry path and returns the internal exit-code mapping. It does not invoke
+  the compiler, call `ari --check`, call `tools/lint`, or call process exit.
+  Scoped main-facing stdout/stderr output is delegated through the CLI layer's
+  verified adapters.
 - `src/model.ari` groups future model modules.
 - `src/source.ari` defines the internal source input boundary model for
   caller-provided source text, path-only source entries, and path-list inputs
@@ -390,9 +396,12 @@ Current preparatory model skeleton files are source-only placeholders:
   argv integration path that reads process arguments through verified
   `std::env::args`, drops argv[0], and dispatches through the existing
   explicit-token path. It does not read environment variables, read config
-  files, discover config files, write stderr output, or call process exit.
-  `main` returns the internal exit-code mapping from that path, and
-  `--list-rules` writes stdout through the verified adapter.
+  files, discover config files, or call process exit.
+  `main` returns the internal exit-code mapping from that path, and the scoped
+  main-facing paths
+  write list-rules/help/JSON text to stdout plus diagnostics, parse problems,
+  missing-source summaries, and file-read-error summaries to stderr through the
+  verified adapters.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
@@ -416,7 +425,8 @@ Current preparatory model skeleton files are source-only placeholders:
   read OS argv, or run the CLI. The CLI layer now calls the stdout adapter for
   main-facing `--list-rules` output, help text, and source-file JSON
   diagnostics, and the stderr adapter is wired for source-file human
-  diagnostics and parse problem summaries.
+  diagnostics, parse problem summaries, missing-source summaries, and
+  source-file read-error summaries.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description, and exposes a small constructor for
   internal rule descriptors. It also defines shared rule execution input/result
@@ -496,8 +506,9 @@ model is limited to internal data carried by those results, the explicit-token
 the main-facing `--list-rules` stdout path is limited to writing that formatted
 text through the stdout adapter, the main-facing help path is limited to
 concise stdout text, the stdout and stderr adapters are limited to
-caller-provided `String` text, and the stdout/stderr output boundary is limited
-to status data for named future sinks.
+caller-provided `String` text, the main-facing source-file read-error path is
+limited to a short stderr summary without read-error JSON output, and the
+stdout/stderr output boundary is limited to status data for named future sinks.
 Compiler invocation, config discovery, config file reading, override
 application to lint execution, diagnostics output, stderr writing, stdout
 adapter wiring beyond the scoped main-facing output paths, process exit, JSON
@@ -615,9 +626,11 @@ argv path now also collects source-file diagnostics into a caller-provided
 vector, formats the collected human diagnostics, and writes them to stderr
 through the verified stderr adapter. It can also serialize those collected
 source-file diagnostics as JSON to stdout when `--json` is requested. CLI parse
-problems write a short summary to stderr. It does not produce parse-error JSON,
-discover config files, read config files, traverse directories, invoke the
-compiler, call `ari --check`, call `tools/lint`, or call process exit.
+problems write a short summary to stderr. Source-file read errors write a short
+stderr summary and do not produce read-error JSON output. It does not produce
+parse-error JSON, discover config files, read config files, traverse
+directories, invoke the compiler, call `ari --check`, call `tools/lint`, or
+call process exit.
 
 ### Phase 5: compiler boundary
 
@@ -852,6 +865,10 @@ usable.
       usage-error summary to stderr through the verified stderr adapter without
       config discovery, compiler invocation, `ari --check`, `tools/lint`, or
       process exit
+- [x] Wire the main-facing source-file read-error path to write a short
+      unavailable summary to stderr through the verified stderr adapter without
+      read-error JSON output, config discovery, compiler invocation,
+      `ari --check`, `tools/lint`, or process exit
 - [x] Add source-only parity runner skeleton without executing `tools/lint`,
       `ari-lint`, the Ari compiler, shell commands, file IO, or comparisons
 - [x] Record compiler-backed CI gate without running the Ari compiler,
