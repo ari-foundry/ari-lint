@@ -1,16 +1,16 @@
 // CLI model, explicit-token parsing, semantic rule override parsing bridge,
 // stdout-free dispatch, internal exit-code data, explicit-token list-rules
 // command wiring, explicit-token entry point, OS argv integration, a
-// main-facing list-rules stdout path, and an internal source-file lint path.
+// main-facing output path, and an internal source-file lint path.
 // The positional source file input and documented options are represented here.
 // This file reads process arguments only through the verified std::env::args
 // boundary. Main now returns the internal command exit-code mapping through
 // this path, while source-file dispatch reads explicitly provided file paths
 // through the source boundary, runs in-memory lint aggregation, carries the
 // first internal diagnostic, and validates parsed --rule overrides when
-// provided. Only the main-facing list-rules path writes stdout through the
-// verified output adapter. It does not read
-// environment state, discover config files, serialize JSON, write stderr,
+// provided. The main-facing path writes list-rules text to stdout and the first
+// source lint diagnostic to stderr through verified output adapters. It does
+// not read environment state, discover config files, serialize JSON,
 // recursively scan source trees, call tools/lint, call process exit, or invoke
 // ari --check.
 
@@ -388,7 +388,23 @@ pub fn dispatch_cli_command(
   );
 }
 
-fn dispatch_cli_command_with_list_rules_stdout(
+fn write_optional_diagnostic_stderr(
+  zone: ref mut Zone,
+  diagnostic: super::diagnostic::OptionalDiagnostic
+) -> bool {
+  match diagnostic {
+    super::diagnostic::NoDiagnostic => {
+      return true;
+    }
+    super::diagnostic::SomeDiagnostic(value) => {
+      let text = super::output::format_diagnostic_human(zone, value);
+      let write_result = super::output::write_stderr_text(zone, ref text);
+      return write_result.wrote_stderr;
+    }
+  }
+}
+
+fn dispatch_cli_command_with_main_output(
   zone: ref mut Zone,
   parse_result: CliParseResult
 ) -> CliCommandResult {
@@ -418,6 +434,29 @@ fn dispatch_cli_command_with_list_rules_stdout(
       cli_success_exit_code(zone),
       "List-rules text was written to stdout through the verified stdout adapter."
     );
+  }
+
+  if parse_result.args.has_source_file {
+    var command_result = dispatch_cli_command(zone, parse_result);
+    if command_result.diagnostic_count > 0 {
+      let wrote_stderr = write_optional_diagnostic_stderr(
+        zone,
+        command_result.first_diagnostic
+      );
+      if !wrote_stderr {
+        var failed_result = cli_command_result(
+          CliSourceLintResult,
+          false,
+          command_result.diagnostic_count,
+          command_result.read_error_count,
+          cli_unavailable_exit_code(zone),
+          "Source-file diagnostic stderr write failed through the verified stderr adapter."
+        );
+        failed_result.first_diagnostic = command_result.first_diagnostic;
+        return failed_result;
+      }
+    }
+    return command_result;
   }
 
   return dispatch_cli_command(zone, parse_result);
@@ -460,10 +499,10 @@ pub fn run_os_argv_cli(zone: ref mut Zone) -> CliCommandResult {
   return run_explicit_cli_tokens(zone, tokens);
 }
 
-pub fn run_os_argv_cli_with_list_rules_stdout(zone: ref mut Zone) -> CliCommandResult {
+pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult {
   let tokens = read_os_argv_tokens(zone);
   let parse_result = parse_cli_tokens(zone, tokens);
-  return dispatch_cli_command_with_list_rules_stdout(zone, parse_result);
+  return dispatch_cli_command_with_main_output(zone, parse_result);
 }
 
 // parse_cli_tokens consumes a caller-provided token list and records source
@@ -502,9 +541,9 @@ pub fn run_os_argv_cli_with_list_rules_stdout(zone: ref mut Zone) -> CliCommandR
 // variables, write output, or call process exit. Main wiring is limited to
 // returning the internal command exit code from this path.
 //
-// run_os_argv_cli_with_list_rules_stdout is the main-facing output path for
-// --list-rules only. It writes the existing human-readable list-rules text to
-// stdout through the verified stdout adapter, while parse errors, help, source
-// lint results, diagnostics, stderr, JSON, config discovery, compiler
-// invocation, ari --check, tools/lint, and process exit remain outside this
+// run_os_argv_cli_with_main_output is the main-facing output path. It writes
+// the existing human-readable list-rules text to stdout and the first
+// source-file lint diagnostic to stderr through verified output adapters, while
+// parse errors, help, JSON, config discovery, compiler invocation, ari --check,
+// tools/lint, process exit, and full diagnostic arrays remain outside this
 // path.
