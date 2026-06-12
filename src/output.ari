@@ -147,6 +147,18 @@ pub fn format_diagnostic_human(
   return text;
 }
 
+pub fn format_diagnostics_human(
+  zone: ref mut Zone,
+  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic]
+) -> std::string::String {
+  var text = std::string::new(zone, diagnostics.len() * 160);
+  for diagnostic in diagnostics {
+    let line = format_diagnostic_human(zone, diagnostic);
+    text.append_string_in(zone, line);
+  }
+  return text;
+}
+
 fn output_sink_boundary(
   sink: OutputSinkName,
   status: Slice[u8]
@@ -280,6 +292,9 @@ pub fn format_list_rules_human(
 // format_diagnostic_human builds one newline-terminated human-readable
 // diagnostic line in memory. It does not write stdout/stderr, choose output
 // mode, serialize diagnostic arrays, or connect to CLI dispatch.
+// format_diagnostics_human joins caller-provided diagnostics into in-memory
+// human-readable text. It does not collect diagnostics from rule execution,
+// write stderr, choose output mode, serialize JSON, or connect to CLI dispatch.
 //
 // ListRuleRow records the internal --list-rules row model for known rule
 // metadata: rule code, short name, default severity, and description.
@@ -301,7 +316,7 @@ pub fn format_list_rules_human(
 // status data. It does not read OS argv, inspect command results, write stdout,
 // serialize JSON, call process exit, or run the CLI.
 //
-// Diagnostic arrays, stderr diagnostic wiring, and final user-facing JSON output
-// are future work. Main-facing list-rules stdout wiring is handled by the CLI
-// layer through the explicit stdout adapter. Source scanning, diagnostic output
-// wiring, config parsing, and ari --check invocation are also future work.
+// Stderr diagnostic wiring and final user-facing JSON output are future work.
+// Main-facing list-rules stdout wiring is handled by the CLI layer through the
+// explicit stdout adapter. Source scanning, diagnostic output wiring, config
+// parsing, and ari --check invocation are also future work.

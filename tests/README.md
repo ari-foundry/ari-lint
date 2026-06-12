@@ -274,6 +274,11 @@ tests should validate single-diagnostic text, severity names, rule codes,
 messages, newline termination, no stderr writes, no CLI wiring, and parity
 behavior against current `tools/lint`.
 
+No executable human diagnostic array formatter tests are added yet. Future
+formatter tests should validate caller-provided diagnostic ordering, joined
+newline-terminated text, empty arrays, no rule diagnostic collection, no stderr
+writes, no CLI wiring, and parity behavior against current `tools/lint`.
+
 No executable diagnostic JSON serializer tests are added yet. Future serializer
 tests should validate single-diagnostic JSON construction, string escaping,
 optional end positions, severity names, rule codes, messages, and final schema
