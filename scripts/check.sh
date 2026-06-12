@@ -261,11 +261,13 @@ require_grep "explicit-token list-rules command wiring added" docs/dev/roadmap.m
 require_grep "minimal stdout adapter added" docs/dev/roadmap.md
 require_grep "minimal stderr adapter added" docs/dev/roadmap.md
 require_grep "main-facing list-rules stdout output added" docs/dev/roadmap.md
-require_grep "run_os_argv_cli_with_list_rules_stdout" src/cli.ari
+require_grep "main-facing first diagnostic stderr output added" docs/dev/roadmap.md
+require_grep "run_os_argv_cli_with_main_output" src/cli.ari
 require_grep "write_stdout_text" src/cli.ari
+require_grep "write_optional_diagnostic_stderr" src/cli.ari
 require_grep "write_stderr_text" src/output.ari
 require_grep "std::io::eprint_string" src/output.ari
-require_grep "run_os_argv_cli_with_list_rules_stdout" src/main.ari
+require_grep "run_os_argv_cli_with_main_output" src/main.ari
 require_grep "known rule registry lookup added" docs/dev/roadmap.md
 require_grep "registry-backed in-memory rule dispatch added" docs/dev/roadmap.md
 require_grep "config text known-rule validation added" docs/dev/roadmap.md
@@ -420,7 +422,7 @@ require_grep "JSON serializer is an internal placeholder" docs/dev/ari-implement
 require_grep "human-readable formatter now" docs/dev/ari-implementation-plan.md
 require_grep "caller-provided diagnostics into" docs/dev/ari-implementation-plan.md
 require_grep "first already-built" docs/dev/ari-implementation-plan.md
-require_grep "User-facing diagnostic output" docs/dev/ari-implementation-plan.md
+require_grep "first diagnostic to stderr" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
 require_grep "human-readable list-rules formatter" docs/dev/ari-implementation-plan.md
 require_grep "stdout/stderr output boundary model" docs/dev/ari-implementation-plan.md

@@ -17,7 +17,9 @@ The internal CLI file lint path routes the first explicit source-file argument
 through the file-read boundary and in-memory lint aggregation, and it validates
 parsed `--rule` overrides when provided. It carries the first internal
 diagnostic in the command result, but the lightweight checks do not run CLI
-tests.
+tests. The main-facing source-file lint path writes that first diagnostic to
+stderr through the verified stderr adapter, but the lightweight checks do not
+assert CLI output.
 A source-only parity runner skeleton records future comparison boundaries, but
 the lightweight checks do not execute a parity runner.
 The config precedence fixture plan is documented.
@@ -242,15 +244,16 @@ parity behavior against current `tools/lint` once a parity runner exists.
 
 No executable main-entry tests are added yet. Future tests should cover main
 entry behavior, delegation from the main shell to OS argv CLI handling, returned
-exit-code mapping, list-rules stdout output, no stderr writes, no process exit
-calls, and parity behavior against current `tools/lint` once a parity runner
-exists.
+exit-code mapping, list-rules stdout output, first diagnostic stderr output for
+source-file lint results, no process exit calls, and parity behavior against
+current `tools/lint` once a parity runner exists.
 
 No executable OS argv integration tests are added yet. Future tests should
 cover `std::env::args` collection, argv[0] dropping, delegation into
-explicit-token parsing, environment isolation, list-rules stdout output,
-stdout-free behavior for non-output paths, no process exit calls, and parity
-behavior against current `tools/lint` once a parity runner exists.
+explicit-token parsing, environment isolation, list-rules stdout output, first
+diagnostic stderr output for source-file lint results, stdout-free behavior for
+non-output paths, no process exit calls, and parity behavior against current
+`tools/lint` once a parity runner exists.
 
 No executable stdout/stderr output boundary tests are added yet. Future tests
 should cover the internal sink/result model, stdout versus stderr stream
@@ -266,12 +269,13 @@ reads, and later user-facing CLI output wiring.
 No executable stderr adapter tests are added yet. Future tests should cover the
 minimal `std::io::eprint_string` adapter, successful write status, failed write
 status if Ari exposes a practical failure path, no stdout writes, no OS argv
-reads, and later diagnostic output wiring.
+reads, and the current first-diagnostic output wiring.
 
 No diagnostic output tests are added yet. Future diagnostic tests should
 validate human-readable output, JSON output shape, line/column fields,
-endLine/endColumn fields if supported, severity, rule code, message, path
-normalization, and parity behavior against current `tools/lint`.
+endLine/endColumn fields if supported, first diagnostic stderr output,
+severity, rule code, message, path normalization, and parity behavior against
+current `tools/lint`.
 
 No executable human diagnostic formatter tests are added yet. Future formatter
 tests should validate single-diagnostic text, severity names, rule codes,
