@@ -6,9 +6,10 @@
 // This file reads process arguments only through the verified std::env::args
 // boundary. Main now returns the internal command exit-code mapping through
 // this path, while source-file dispatch reads explicitly provided file paths
-// through the source boundary, runs in-memory lint aggregation, and validates
-// parsed --rule overrides when provided. Only the main-facing list-rules path
-// writes stdout through the verified output adapter. It does not read
+// through the source boundary, runs in-memory lint aggregation, carries the
+// first internal diagnostic, and validates parsed --rule overrides when
+// provided. Only the main-facing list-rules path writes stdout through the
+// verified output adapter. It does not read
 // environment state, discover config files, serialize JSON, write stderr,
 // recursively scan source trees, call tools/lint, call process exit, or invoke
 // ari --check.
@@ -90,6 +91,7 @@ pub struct CliCommandResult {
   kind: CliCommandResultKind,
   text_available: bool,
   diagnostic_count: i64,
+  mut first_diagnostic: super::diagnostic::OptionalDiagnostic,
   read_error_count: i64,
   exit_code: CliExitCodeMapping,
   detail: Slice[u8],
@@ -184,6 +186,7 @@ fn cli_command_result(
     kind: kind,
     text_available: text_available,
     diagnostic_count: diagnostic_count,
+    first_diagnostic: super::diagnostic::no_diagnostic(),
     read_error_count: read_error_count,
     exit_code: exit_code,
     detail: detail,
@@ -363,7 +366,7 @@ pub fn dispatch_cli_command(
       lint_result.diagnostic_count,
       lint_result.read_error_count
     );
-    return cli_command_result(
+    var command_result = cli_command_result(
       CliSourceLintResult,
       false,
       lint_result.diagnostic_count,
@@ -371,6 +374,8 @@ pub fn dispatch_cli_command(
       exit_code,
       "Source-file lint diagnostics are available internally; user-facing output remains future work."
     );
+    command_result.first_diagnostic = lint_result.first_diagnostic;
+    return command_result;
   }
 
   return cli_command_result(
@@ -475,7 +480,8 @@ pub fn run_os_argv_cli_with_list_rules_stdout(zone: ref mut Zone) -> CliCommandR
 //
 // dispatch_cli_command maps a CliParseResult to a stdout-free internal command
 // result with internal exit-code data. For source-file arguments it reads only
-// the first explicitly provided file path and runs in-memory lint aggregation.
+// the first explicitly provided file path, runs in-memory lint aggregation, and
+// carries the first internal diagnostic without writing output.
 // run_explicit_cli_tokens composes parsing and dispatch for callers that
 // already have tokens. These entry paths do not write stdout/stderr, serialize
 // JSON, read config files, recursively scan source trees, call tools/lint, call

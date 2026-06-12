@@ -91,12 +91,13 @@ It does not move `tools/lint` or change build behavior.
   filesystem, apply config, write output, serialize JSON, invoke the compiler,
   or call `tools/lint`.
 - The CLI source-file dispatch path now reads the first explicitly provided
-  file path through the file-read boundary and returns internal diagnostic and
-  read-error counts in the command result. It validates caller-provided `--rule`
-  override values and reports parse problems without reading config files. It
-  does not write stdout/stderr, serialize JSON, discover config files, read
-  config files, traverse directories, invoke the compiler, call `ari --check`,
-  call `tools/lint`, or wire `main` to user-facing process behavior.
+  file path through the file-read boundary and returns internal diagnostic
+  count, first diagnostic, and read-error count data in the command result. It
+  validates caller-provided `--rule` override values and reports parse problems
+  without reading config files. It does not write stdout/stderr, serialize JSON,
+  discover config files, read config files, traverse directories, invoke the
+  compiler, call `ari --check`, call `tools/lint`, or wire `main` to
+  user-facing diagnostic output.
 - A source-only parity runner skeleton now records intended comparison
   boundaries against current `tools/lint`, with all execution, file IO, and
   output-comparison flags false. It does not run `tools/lint`, invoke an
@@ -347,9 +348,10 @@ Current preparatory model skeleton files are source-only placeholders:
   also defines an internal stdout-free command result model and a dispatcher
   that routes list-rules requests to internal formatted text and routes
   source-file requests through file reading plus in-memory lint aggregation
-  while keeping other command paths as explicit future-work placeholders, plus
-  an internal exit-code mapping carried by command results, plus an internal
-  explicit-token entry function that composes parsing and dispatch. It also has
+  while carrying the first internal diagnostic and keeping other command paths
+  as explicit future-work placeholders, plus an internal exit-code mapping
+  carried by command results, plus an internal explicit-token entry function
+  that composes parsing and dispatch. It also has
   a named explicit-token `--list-rules` command path that reaches formatted
   text and exit-code data through that existing pipeline. It also defines an OS
   argv integration path that reads process arguments through verified
@@ -447,7 +449,8 @@ the file-read boundary is limited to reading one explicitly provided path with
 the verified Ari `std::fs::read_detailed` API and preserving file read errors,
 the CLI file lint path is limited to explicit source-file arguments, the
 file-read boundary, in-memory lint aggregation, optional parsed `--rule`
-override validation, internal diagnostic counts, and internal read-error counts,
+override validation, internal diagnostic counts, the first internal diagnostic,
+and internal read-error counts,
 the known-rule registry lookup is limited to returning internal data for exact
 full rule codes, registry-backed rule dispatch is limited to selecting one
 known in-memory rule wrapper for caller-provided source text,
@@ -571,10 +574,11 @@ serialize JSON, invoke the compiler, call `ari --check`, or call `tools/lint`.
 The CLI file lint path is internal command dispatch only. It reads the first
 explicit source-file argument, runs the in-memory lint aggregation for
 successfully read files, validates parsed `--rule` overrides when provided,
-preserves read errors, and carries counts in `CliCommandResult`. It does not write
-stdout/stderr, serialize JSON, discover config files, read config files,
-traverse directories, invoke the compiler, call `ari --check`, call
-`tools/lint`, or connect `main` to user-facing process behavior.
+preserves read errors, and carries counts plus the first internal diagnostic in
+`CliCommandResult`. It does not write stdout/stderr, serialize JSON, discover
+config files, read config files, traverse directories, invoke the compiler,
+call `ari --check`, call `tools/lint`, or connect `main` to user-facing
+diagnostic output.
 
 ### Phase 5: compiler boundary
 
@@ -770,6 +774,10 @@ usable.
 - [x] Add file read boundary for one caller-provided path using verified
       `std::fs::read_detailed`
 - [x] Add internal CLI file lint path over explicit source-file arguments
+- [x] Carry the first already-built internal diagnostic from source-file lint
+      aggregation into the internal CLI command result without writing output,
+      serializing JSON, invoking the compiler, executing `ari --check`, calling
+      `tools/lint`, or calling process exit
 - [x] Add source-only parity runner skeleton without executing `tools/lint`,
       `ari-lint`, the Ari compiler, shell commands, file IO, or comparisons
 - [x] Record compiler-backed CI gate without running the Ari compiler,

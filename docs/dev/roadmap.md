@@ -54,6 +54,7 @@ in-memory lint run aggregation added /
 lint aggregation first diagnostic capture added /
 file read boundary added /
 internal CLI file lint path added /
+CLI source lint first diagnostic carry added /
 source-only parity runner skeleton added /
 compiler-backed CI gate documented /
 standalone build root wiring added /
@@ -329,6 +330,13 @@ and test work.
       `tools/lint`, or wiring `main` to user-facing process behavior. Output
       formatting, JSON arrays, config integration, compiler diagnostics, tests,
       and parity checks remain future work.
+- [x] Carry the first already-built internal diagnostic from the source-file
+      lint aggregation result into the internal CLI command result, without
+      formatting diagnostics, writing stdout/stderr, serializing JSON,
+      discovering config files, reading config files, traversing directories,
+      invoking the compiler, executing `ari --check`, calling `tools/lint`, or
+      calling process exit. User-facing diagnostic output, JSON arrays, config
+      integration, tests, and parity checks remain future work.
 - [x] Add a source-only parity runner skeleton that records the intended
       comparison boundary against current `tools/lint` without executing
       `tools/lint`, invoking an `ari-lint` binary, reading fixtures, writing

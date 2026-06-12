@@ -313,6 +313,7 @@ require_grep "in-memory lint run aggregation added" docs/dev/roadmap.md
 require_grep "lint aggregation first diagnostic capture added" docs/dev/roadmap.md
 require_grep "file read boundary added" docs/dev/roadmap.md
 require_grep "internal CLI file lint path added" docs/dev/roadmap.md
+require_grep "CLI source lint first diagnostic carry added" docs/dev/roadmap.md
 require_grep "source-only parity runner skeleton added" docs/dev/roadmap.md
 require_grep "compiler-backed CI gate documented" docs/dev/roadmap.md
 require_grep "standalone build root wiring added" docs/dev/roadmap.md
@@ -324,6 +325,7 @@ require_grep "Initial missing-final-newline fixtures have started" tests/README.
 require_grep "lint run aggregation has also started" tests/README.md
 require_grep "file-read boundary for one" tests/README.md
 require_grep "internal CLI file lint path" tests/README.md
+require_grep "first diagnostic command-result carrying" tests/README.md
 require_grep "source-only parity runner skeleton" tests/README.md
 require_grep "GitHub Actions workflow is intentionally compiler-free" tests/README.md
 require_grep "local standalone test entrypoint" tests/README.md
@@ -471,6 +473,7 @@ require_grep "CliArgumentProblem" src/cli.ari
 require_grep "CliCommandResultKind" src/cli.ari
 require_grep "CliCommandResult" src/cli.ari
 require_grep "diagnostic_count" src/cli.ari
+require_grep "first_diagnostic" src/cli.ari
 require_grep "read_error_count" src/cli.ari
 require_grep "CliExitCodeKind" src/cli.ari
 require_grep "CliExitCodeMapping" src/cli.ari
@@ -528,6 +531,7 @@ require_grep "write stdout/stderr" src/cli.ari
 require_grep "call process exit" src/cli.ari
 require_grep "recursively scan source trees" src/cli.ari
 require_grep "Source-file lint diagnostics are available internally" src/cli.ari
+require_grep "carries the first internal diagnostic" src/cli.ari
 require_grep "future work" src/cli.ari
 require_grep "OptionalDiagnostic" src/diagnostic.ari
 require_grep "first_available_diagnostic" src/diagnostic.ari
