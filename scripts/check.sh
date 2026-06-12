@@ -422,10 +422,10 @@ require_grep "internal human diagnostic formatter added" docs/dev/roadmap.md
 require_grep "internal human diagnostic array formatter added" docs/dev/roadmap.md
 require_grep "trailing-whitespace first diagnostic capture added" docs/dev/roadmap.md
 require_grep "missing-final-newline first diagnostic capture added" docs/dev/roadmap.md
-require_grep "diagnostic JSON serializer is limited to placeholder internal text" docs/dev/ari-implementation-plan.md
-require_grep "JSON serializer is an internal placeholder" docs/dev/ari-implementation-plan.md
-require_grep "human-readable formatter now" docs/dev/ari-implementation-plan.md
-require_grep "caller-provided diagnostics into" docs/dev/ari-implementation-plan.md
+require_grep "diagnostic JSON serializer is limited to one internal diagnostic object" docs/dev/ari-implementation-plan.md
+require_grep "internal diagnostic JSON field serialization added" docs/dev/roadmap.md
+require_grep "A minimal human-readable formatter" docs/dev/ari-implementation-plan.md
+require_grep "caller-provided diagnostics" docs/dev/ari-implementation-plan.md
 require_grep "first already-built" docs/dev/ari-implementation-plan.md
 require_grep "collected human diagnostics to stderr" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
@@ -554,13 +554,14 @@ require_grep "severity" src/output.ari
 require_grep "rule code" src/output.ari
 require_grep "message" src/output.ari
 require_grep "serialize_diagnostic_json" src/output.ari
-require_grep "append_json_string" src/output.ari
-require_grep "append_json_optional_position" src/output.ari
+require_grep "format_json_string" src/output.ari
+require_grep "format_json_optional_position" src/output.ari
 require_grep "diagnostic_severity_name" src/output.ari
 require_grep "format_diagnostic_human" src/output.ari
 require_grep "format_diagnostics_human" src/output.ari
 require_grep "append_i64_in" src/output.ari
 require_grep "filePath" src/output.ari
+require_grep "ruleCode" src/output.ari
 require_grep "endLine" src/output.ari
 require_grep "endColumn" src/output.ari
 require_grep "does not write stdout/stderr" src/output.ari
@@ -571,7 +572,7 @@ require_grep "list_rule_row_from_metadata" src/output.ari
 require_grep "known_list_rules_output" src/output.ari
 require_grep "format_list_rule_row_human" src/output.ari
 require_grep "format_list_rules_human" src/output.ari
-require_grep "final user-facing JSON output" src/output.ari
+require_grep "Final user-facing JSON output" src/output.ari
 require_grep "list-rules stdout wiring" src/output.ari
 require_grep "OutputSinkName" src/output.ari
 require_grep "OutputSinkBoundary" src/output.ari

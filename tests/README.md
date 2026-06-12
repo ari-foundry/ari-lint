@@ -37,6 +37,9 @@ The main entry now returns the existing OS argv CLI command exit-code mapping,
 and the main-facing `--list-rules` path writes human-readable list-rules text
 through the verified stdout adapter, but the lightweight checks do not execute
 main-entry tests or user-facing CLI output tests.
+Internal single-diagnostic JSON field serialization has started, but the
+lightweight checks do not execute JSON serializer tests or assert a stable JSON
+schema.
 
 Run the lightweight check script from the repository root:
 
@@ -302,9 +305,10 @@ line/column metadata, no stderr writes, no JSON serialization, and parity
 behavior against current `tools/lint`.
 
 No executable diagnostic JSON serializer tests are added yet. Future serializer
-tests should validate single-diagnostic JSON construction, string escaping,
-optional end positions, severity names, rule codes, messages, and final schema
-stability once the schema is set.
+tests should validate the current single-diagnostic JSON field construction,
+string escaping, optional end positions, severity names, rule codes, messages,
+no stdout/stderr writes, no CLI wiring, and final schema stability once the
+schema is set.
 
 No executable source input boundary tests are added yet. Future source input
 tests should validate caller-provided source text, path-only source entries,

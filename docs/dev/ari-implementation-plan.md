@@ -59,14 +59,17 @@ It does not move `tools/lint` or change build behavior.
   invoke the compiler, or recursively scan sources.
 - The diagnostic output metadata skeleton has started as data-only declarations
   for human and JSON output modes, diagnostic location fields, and planned
-  diagnostic fields. The JSON serializer is an internal placeholder and does
-  not claim final field serialization. A minimal human-readable formatter now
-  builds one newline-terminated diagnostic line in memory from an already-built
-  diagnostic, and a related formatter joins caller-provided diagnostics into
-  in-memory human-readable text. Rule and lint aggregation paths can now push
-  full internal diagnostics into caller-provided vectors, and the main-facing
-  source-file lint path writes those collected human diagnostics to stderr.
-  JSON diagnostic arrays and final JSON schema stability remain future work.
+  diagnostic fields. The JSON serializer now builds one internal JSON object
+  for one already-built diagnostic, including filePath, line, column, nullable
+  endLine/endColumn, severity, ruleCode, message, and common string escaping,
+  without claiming final schema stability. A minimal human-readable formatter
+  now builds one newline-terminated diagnostic line in memory from an
+  already-built diagnostic, and a related formatter joins caller-provided
+  diagnostics into in-memory human-readable text. Rule and lint aggregation
+  paths can now push full internal diagnostics into caller-provided vectors,
+  and the main-facing source-file lint path writes those collected human
+  diagnostics to stderr. JSON diagnostic arrays and final JSON schema stability
+  remain future work.
 - The source input boundary model has started for caller-provided source text,
   path-only source entries, and explicit single-file reads. It records internal
   source inputs without recursively scanning the filesystem, discovering config
@@ -386,8 +389,8 @@ Current preparatory model skeleton files are source-only placeholders:
 - `src/output.ari` sketches diagnostic output metadata for human-readable and
   JSON output modes, diagnostic location, file path, line, column, endLine,
   endColumn, severity, rule code, and message. It also defines an internal
-  placeholder JSON serializer, list-rules output row model, a known-rule output
-  count builder from existing rule metadata, an internal human-readable
+  single-diagnostic JSON serializer, list-rules output row model, a known-rule
+  output count builder from existing rule metadata, an internal human-readable
   list-rules formatter, and a data-only stdout/stderr output boundary model for
   named future output sinks. It now includes a minimal human-readable formatter
   for one already-built diagnostic, a human-readable formatter for
@@ -397,8 +400,8 @@ Current preparatory model skeleton files are source-only placeholders:
   local status data. It does not collect diagnostics from rule execution,
   serialize JSON diagnostic arrays, emit user-facing JSON output, read OS argv,
   or run the CLI. The CLI layer now calls the stdout adapter for main-facing
-  `--list-rules` output, and the stderr adapter is wired only for the first
-  source-file lint diagnostic.
+  `--list-rules` output, and the stderr adapter is wired for source-file human
+  diagnostics.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description, and exposes a small constructor for
   internal rule descriptors. It also defines shared rule execution input/result
@@ -451,7 +454,7 @@ construction, and known-rule validation, the severity override resolver is
 limited to effective severity data for a caller-provided rule code and
 already-parsed overrides, the diagnostic severity application helper is limited
 to rebuilding one already-built internal Diagnostic with resolved severity, the
-diagnostic JSON serializer is limited to placeholder internal text,
+diagnostic JSON serializer is limited to one internal diagnostic object,
 the source input boundary is limited to caller-provided source text and
 path-only entries, the default lint run aggregation path is limited to combining
 diagnostic counts and preserving the first already-built diagnostic for one
@@ -720,6 +723,7 @@ usable.
       syntax choices are verified
 - [ ] Define stable JSON schema and human-readable diagnostic text policy
 - [x] Add minimal internal diagnostic JSON serialization placeholder for one diagnostic
+- [x] Add internal diagnostic JSON field serialization for one diagnostic
 - [x] Add source input boundary model without file IO or filesystem scanning
 - [ ] Define registry, severity, and config model behavior after source
       skeletons compile in the real build
@@ -841,6 +845,11 @@ usable.
       already-built diagnostic without writing stderr, wiring CLI output,
       serializing diagnostic arrays, invoking the compiler, executing
       `ari --check`, calling `tools/lint`, or calling process exit
+- [x] Replace the single-diagnostic JSON placeholder with internal field
+      serialization for one already-built diagnostic without writing
+      stdout/stderr, wiring CLI output, serializing diagnostic arrays, invoking
+      the compiler, executing `ari --check`, calling `tools/lint`, or calling
+      process exit
 - [x] Add a minimal internal human-readable diagnostic array formatter for
       caller-provided diagnostics without collecting diagnostics from rule
       execution, writing stderr, wiring CLI output, serializing JSON, invoking

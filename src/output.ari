@@ -95,25 +95,61 @@ fn diagnostic_severity_name(severity: super::severity::Severity) -> Slice[u8] {
   }
 }
 
-fn append_json_string(
+fn format_json_string(
   zone: ref mut Zone,
-  text: ref mut std::string::String,
   value: Slice[u8]
-) -> void {
-  return;
+) -> std::string::String {
+  var text = std::string::new(zone, value.len() + 2);
+  text.append_string_in(zone, "\"");
+  var chunk_start = 0;
+  var index = 0;
+  while index < value.len() {
+    let byte = value.get(index);
+    if byte == 34u8 || byte == 92u8 || byte == 10u8 || byte == 13u8 || byte == 9u8 {
+      if chunk_start < index {
+        text.append_string_in(
+          zone,
+          std::string::substring(value, chunk_start, index)
+        );
+      }
+      if byte == 34u8 {
+        text.append_string_in(zone, "\\\"");
+      } else if byte == 92u8 {
+        text.append_string_in(zone, "\\\\");
+      } else if byte == 10u8 {
+        text.append_string_in(zone, "\\n");
+      } else if byte == 13u8 {
+        text.append_string_in(zone, "\\r");
+      } else {
+        text.append_string_in(zone, "\\t");
+      }
+      chunk_start = index + 1;
+    }
+    index = index + 1;
+  }
+  if chunk_start < value.len() {
+    text.append_string_in(
+      zone,
+      std::string::substring(value, chunk_start, value.len())
+    );
+  }
+  text.append_string_in(zone, "\"");
+  return text;
 }
 
-fn append_json_optional_position(
+fn format_json_optional_position(
   zone: ref mut Zone,
-  text: ref mut std::string::String,
   position: super::diagnostic::OptionalPosition
-) -> void {
+) -> std::string::String {
+  var text = std::string::new(zone, 16);
   match position {
     super::diagnostic::Missing => {
-      return;
+      text.append_string_in(zone, "null");
+      return text;
     }
     super::diagnostic::Value(value) => {
-      return;
+      text.append_i64_in(zone, value);
+      return text;
     }
   }
 }
@@ -122,8 +158,30 @@ pub fn serialize_diagnostic_json(
   zone: ref mut Zone,
   diagnostic: super::diagnostic::Diagnostic
 ) -> std::string::String {
-  var text = std::string::new(zone, 2);
-  text.append_string_in(zone, "{}");
+  var text = std::string::new(zone, 256);
+  text.append_string_in(zone, "{\"filePath\":");
+  let file_path = format_json_string(zone, diagnostic.span.file_path);
+  text.append_string_in(zone, file_path);
+  text.append_string_in(zone, ",\"line\":");
+  text.append_i64_in(zone, diagnostic.span.line);
+  text.append_string_in(zone, ",\"column\":");
+  text.append_i64_in(zone, diagnostic.span.column);
+  text.append_string_in(zone, ",\"endLine\":");
+  let end_line = format_json_optional_position(zone, diagnostic.span.end_line);
+  text.append_string_in(zone, end_line);
+  text.append_string_in(zone, ",\"endColumn\":");
+  let end_column = format_json_optional_position(zone, diagnostic.span.end_column);
+  text.append_string_in(zone, end_column);
+  text.append_string_in(zone, ",\"severity\":");
+  let severity = format_json_string(zone, diagnostic_severity_name(diagnostic.severity));
+  text.append_string_in(zone, severity);
+  text.append_string_in(zone, ",\"ruleCode\":");
+  let rule_code = format_json_string(zone, diagnostic.rule_code);
+  text.append_string_in(zone, rule_code);
+  text.append_string_in(zone, ",\"message\":");
+  let message = format_json_string(zone, diagnostic.message);
+  text.append_string_in(zone, message);
+  text.append_string_in(zone, "}");
   return text;
 }
 
@@ -284,10 +342,10 @@ pub fn format_list_rules_human(
 // Human-readable text stability and JSON schema stability remain follow-up
 // items.
 //
-// serialize_diagnostic_json currently returns a minimal in-memory JSON object
-// placeholder for one internal Diagnostic. It does not write stdout/stderr,
-// choose output mode, serialize diagnostic arrays, or claim the final JSON
-// schema is stable.
+// serialize_diagnostic_json builds one in-memory JSON object from one internal
+// Diagnostic. It escapes common string characters and includes nullable
+// end-position fields. It does not write stdout/stderr, choose output mode,
+// serialize diagnostic arrays, or claim the final JSON schema is stable.
 //
 // format_diagnostic_human builds one newline-terminated human-readable
 // diagnostic line in memory. It does not write stdout/stderr, choose output
@@ -316,7 +374,8 @@ pub fn format_list_rules_human(
 // status data. It does not read OS argv, inspect command results, write stdout,
 // serialize JSON, call process exit, or run the CLI.
 //
-// Stderr diagnostic wiring and final user-facing JSON output are future work.
+// Final user-facing JSON output is future work.
 // Main-facing list-rules stdout wiring is handled by the CLI layer through the
-// explicit stdout adapter. Source scanning, diagnostic output wiring, config
-// parsing, and ari --check invocation are also future work.
+// explicit stdout adapter, and source-file human diagnostics are written by the
+// CLI layer through the stderr adapter. Source scanning, broader output mode
+// wiring, config parsing, and ari --check invocation are also future work.
