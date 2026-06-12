@@ -55,6 +55,7 @@ compiler-backed CI gate documented /
 standalone build root wiring added /
 standalone test entrypoint added /
 release and compatibility policy documented /
+main OS argv exit-code wiring added /
 no user-facing lint output yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -112,6 +113,12 @@ and test work.
       scanning sources, executing lint rules, or calling process exit.
       OS-argv integration tests and user-facing CLI process behavior remain
       future work.
+- [x] Wire `main` to return the existing OS argv CLI command exit-code mapping,
+      without writing stdout/stderr, serializing JSON, discovering config files,
+      traversing directories, invoking the compiler, executing `ari --check`,
+      calling `tools/lint`, or calling process exit. Main-entry tests,
+      user-facing output, config-file discovery, and parity checks remain future
+      work.
 - [x] Add a minimal config text parser for caller-provided text using the
       documented `RULE = SEVERITY` shape, blank lines, and `#` comments,
       returning internal overrides and parse problems without reading
@@ -219,13 +226,12 @@ and test work.
       `tools/lint`, wiring lint aggregation or CLI dispatch, or adding tests.
       Registry-backed aggregation, config-aware dispatch, executable tests, and
       parity checks remain future work.
-- [x] Add a minimal internal diagnostic JSON serializer for one already-built
-      internal `Diagnostic`, including file path, line, column, optional
-      endLine/endColumn, severity, rule code, message, basic string escaping,
-      and null optional positions without writing stdout/stderr, wiring CLI
-      output, serializing diagnostic arrays, scanning sources, invoking the
-      compiler, executing lint rules, or adding golden tests. JSON serializer
-      tests and final schema stability remain future work.
+- [x] Add a minimal internal diagnostic JSON serialization placeholder for one
+      diagnostic without claiming final field serialization, writing
+      stdout/stderr, wiring CLI output, serializing diagnostic arrays, scanning
+      sources, invoking the compiler, executing lint rules, or adding golden
+      tests. JSON serializer tests and final schema stability remain future
+      work.
 - [x] Add an internal source input boundary model for caller-provided source
       text and path-only source entries, including a path-list boundary for
       already-parsed CLI paths without reading files, recursively scanning the
@@ -234,21 +240,21 @@ and test work.
       directory traversal policy, CLI path execution, and rule execution remain
       future work.
 - [x] Add in-memory `lint/trailing-whitespace` execution over caller-provided
-      source text, returning internal diagnostics for lines ending in spaces or
+      source text, returning an internal diagnostic count for lines ending in spaces or
       tabs without reading files, scanning the filesystem, applying config,
       producing user-facing output, serializing JSON, invoking the compiler, or
       calling `tools/lint`. Rule execution tests, file-backed linting, config
       integration, CLI wiring, output behavior, and parity checks remain future
       work.
 - [x] Add in-memory `lint/missing-final-newline` execution over
-      caller-provided source text, returning an internal diagnostic for
+      caller-provided source text, returning an internal diagnostic count for
       non-empty content that does not end with a newline without reading files,
       scanning the filesystem, applying config, producing user-facing output,
       serializing JSON, invoking the compiler, or calling `tools/lint`. Rule
       execution tests, file-backed linting, config integration, CLI wiring,
       output behavior, and parity checks remain future work.
 - [x] Add in-memory lint run aggregation over caller-provided source text,
-      combining diagnostics from the in-memory `lint/trailing-whitespace` and
+      combining diagnostic counts from the in-memory `lint/trailing-whitespace` and
       `lint/missing-final-newline` rules without reading files, scanning the
       filesystem, applying config, producing user-facing output, serializing
       JSON, invoking the compiler, or calling `tools/lint`. Aggregation tests,
@@ -264,7 +270,7 @@ and test work.
       parity checks remain future work.
 - [x] Wire parsed source-file CLI input to the file-read boundary and
       in-memory lint aggregation as an internal command result, preserving
-      diagnostics and file read errors without writing stdout/stderr,
+      diagnostic and read-error counts without writing stdout/stderr,
       serializing JSON, discovering config files, applying config, traversing
       directories, invoking the compiler, calling `ari --check`, calling
       `tools/lint`, or wiring `main` to user-facing process behavior. Output
@@ -283,9 +289,10 @@ and test work.
       `ari --check`, package manager commands, parity checks, release
       automation, and compatibility claims remain future work.
 - [x] Wire local standalone build root handling in `scripts/build.sh` so the
-      script resolves the repository root before compiling `src/main.ari` to
-      `build/ari-lint` with an explicit compiler path, while preserving
-      relative compiler paths from the caller's directory. CI build execution,
+      script resolves the repository root, uses the compiler root when
+      `lib/std.arih` is available there, and compiles `src/main.ari` to
+      `build/ari-lint` with an explicit compiler path, while preserving relative
+      compiler paths from the caller's directory. CI build execution,
       compiler-backed checks, package manager files, release artifacts,
       standalone tests, and compatibility claims remain future work.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
@@ -334,14 +341,14 @@ and test work.
       compiler invocation, output behavior, tests, and CI parser execution
       remain future work.
 - [x] Add an internal list-rules output path that converts existing known rule
-      metadata into rows for `lint/trailing-whitespace` and
+      metadata into a count for `lint/trailing-whitespace` and
       `lint/missing-final-newline`, including rule code, short name, default
       severity, and description. User-facing `--list-rules` CLI completion,
       CLI main integration, stdout/stderr formatting, JSON output, config
       parsing, compiler invocation, tests, and parity behavior remain future
       work.
 - [x] Add an internal human-readable list-rules formatter that converts the
-      existing list-rules rows into newline-terminated text containing rule code,
+      existing list-rules metadata into newline-terminated text containing rule code,
       short name, default severity, and description. User-facing
       `--list-rules` CLI completion, CLI main integration, stdout/stderr output,
       JSON output, config parsing, compiler invocation, formatter tests, and
@@ -417,8 +424,8 @@ and test work.
       future work.
 - [x] Start trailing-whitespace diagnostic mapping skeleton for one
       already-split line, mapping helper output to internal span/severity data.
-      In-memory rule execution now constructs internal diagnostics with
-      message/rule-code values, while file-backed source scanning, CLI output,
+      In-memory rule execution now returns a diagnostic count while preserving
+      message/rule-code constants, while file-backed source scanning, CLI output,
       JSON serialization, config integration, tests, parity checks, compiler
       invocation, and CI remain future work.
 - [x] Add trailing-whitespace parity plan; `docs/rules/trailing-whitespace-parity.md`
@@ -452,8 +459,8 @@ and test work.
 - [x] Start missing-final-newline diagnostic mapping skeleton for explicit
       caller-provided final position metadata, mapping helper output to internal
       span/severity data. In-memory rule execution now computes final position
-      metadata and constructs internal diagnostics with message/rule-code
-      values, while file-backed source scanning, CLI output, JSON serialization,
+      metadata and returns a diagnostic count while preserving message/rule-code
+      constants, while file-backed source scanning, CLI output, JSON serialization,
       config integration, tests, parity checks, compiler invocation, and CI
       remain future work.
 - [x] Add missing-final-newline parity plan;

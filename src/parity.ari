@@ -3,9 +3,9 @@
 // calls, output comparison, and tools/lint invocation.
 
 pub struct ParityRunnerSkeleton {
-  reference_implementation: String,
-  implementation_under_test: String,
-  status: String,
+  reference_implementation: Slice[u8],
+  implementation_under_test: Slice[u8],
+  status: Slice[u8],
   invokes_tools_lint: bool,
   invokes_ari_lint_binary: bool,
   invokes_compiler: bool,
@@ -16,7 +16,7 @@ pub struct ParityRunnerSkeleton {
   normalizes_paths: bool,
 }
 
-pub fn parity_runner_skeleton() -> ParityRunnerSkeleton {
+pub fn parity_runner_skeleton(zone: ref mut Zone) -> ParityRunnerSkeleton {
   return ParityRunnerSkeleton {
     reference_implementation: "ari-foundry/ari tools/lint",
     implementation_under_test: "ari-lint Ari-language implementation",

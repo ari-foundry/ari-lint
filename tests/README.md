@@ -7,12 +7,14 @@ the first trailing-whitespace fixture shape, and the first
 missing-final-newline fixture shape. In-memory trailing-whitespace execution
 and in-memory missing-final-newline execution have started in source. In-memory
 lint run aggregation has also started for caller-provided source text, including
-with-overrides variants for already-parsed severity overrides over in-memory
-source and explicitly provided file paths, but these paths are not executed by
-these checks yet. A file-read boundary for one caller-provided path has started
-in source, but the lightweight checks do not execute file IO. The internal CLI file lint path routes explicit source-file arguments through the file-read
-boundary and in-memory lint aggregation, and it applies parsed `--rule`
-overrides when provided, but the lightweight checks do not run CLI tests.
+count-based with-overrides variants for already-parsed severity override inputs
+over in-memory source and explicitly provided file paths, but these paths are
+not executed by these checks yet. A file-read boundary for one caller-provided
+path has started in source, but the lightweight checks do not execute file IO.
+The internal CLI file lint path routes the first explicit source-file argument
+through the file-read boundary and in-memory lint aggregation, and it validates
+parsed `--rule` overrides when provided, but the lightweight checks do not run
+CLI tests.
 A source-only parity runner skeleton records future comparison boundaries, but
 the lightweight checks do not execute a parity runner.
 The config precedence fixture plan is documented.
@@ -24,6 +26,9 @@ text, but the lightweight checks do not execute Ari rule API tests.
 Registry-backed in-memory rule dispatch has started for one exact known rule
 code and caller-provided source text, but the lightweight checks do not execute
 registry dispatch tests.
+The main entry now returns the existing OS argv CLI command exit-code mapping,
+but the lightweight checks do not execute main-entry tests or user-facing CLI
+output tests.
 
 Run the lightweight check script from the repository root:
 
@@ -51,9 +56,9 @@ provisioning are ready.
 
 `scripts/build.sh` is separate from `scripts/test.sh` and the lightweight
 checks. It is a compiler-dependent local build scaffold that requires an
-explicit Ari compiler path, resolves the repository root before compiling, and
-is not run by default tests or CI. Relative compiler paths are preserved from
-the caller's directory.
+explicit Ari compiler path, resolves the repository root, uses the compiler root
+when `lib/std.arih` is available there, and is not run by default tests or CI.
+Relative compiler paths are preserved from the caller's directory.
 
 Compiler-backed tests remain future work. Current checks do not run the
 compiler. Future compiler-backed tests should use explicit compiler
@@ -231,9 +236,9 @@ presence, success exit-code mapping, stdout-free behavior, no OS argv reads, and
 parity behavior against current `tools/lint` once a parity runner exists.
 
 No executable main-entry tests are added yet. Future tests should cover main
-entry behavior, delegation from the main shell to explicit-token handling,
-stdout-free behavior, future OS argv integration, and parity behavior against
-current `tools/lint` once a parity runner exists.
+entry behavior, delegation from the main shell to OS argv CLI handling, returned
+exit-code mapping, stdout-free behavior, no process exit calls, and parity
+behavior against current `tools/lint` once a parity runner exists.
 
 No executable OS argv integration tests are added yet. Future tests should
 cover `std::env::args` collection, argv[0] dropping, delegation into
@@ -284,14 +289,14 @@ parity behavior.
 
 No executable CLI file lint path tests are added yet. Future tests should cover
 explicit source-file arguments, successful file reads feeding in-memory lint
-aggregation, parsed `--rule` override application, rule override parse
+aggregation, parsed `--rule` override validation, rule override parse
 problems, file read error preservation, diagnostic counts, exit-code mapping,
 no directory traversal, no config discovery, no config-file reads, no
 stdout/stderr output, no JSON serialization, no compiler invocation, no
 `ari --check`, and parity behavior against current `tools/lint`.
 
 No executable list-rules formatter tests are added yet. Future tests should
-cover list-rules rows and formatting for rule code, short name, default
+cover list-rules metadata and formatting for rule code, short name, default
 severity, description, ordering, newline behavior, human-readable text
 stability, future JSON formatting, and parity behavior against current
 `tools/lint`.

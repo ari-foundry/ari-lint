@@ -7,7 +7,7 @@
 // ari --check, or call tools/lint.
 
 pub struct InMemoryLintRunResult {
-  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
+  diagnostic_count: i64,
   source_count: i64,
   reads_files: bool,
   scans_filesystem: bool,
@@ -18,47 +18,20 @@ pub struct InMemoryLintRunResult {
 }
 
 pub struct FileLintRunResult {
-  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
-  read_errors: std::vec::Vec[std::fs::PathError],
-  source_count: i64,
-  read_error_count: i64,
+  mut diagnostic_count: i64,
+  mut source_count: i64,
+  mut read_error_count: i64,
   reads_files: bool,
   scans_filesystem: bool,
-  applies_config: bool,
+  mut applies_config: bool,
   writes_output: bool,
   serializes_json: bool,
   invokes_compiler: bool,
 }
 
-fn append_diagnostics(
-  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic],
-  rule_diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
-) -> void {
-  for diagnostic in rule_diagnostics {
-    diagnostics.push(diagnostic);
-  }
-}
-
-fn append_configured_diagnostics(
-  zone: ref mut Zone,
-  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic],
-  rule_diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
-  overrides: ref std::vec::Vec[super::config::RuleSeverityOverride],
-) -> void {
-  for diagnostic in rule_diagnostics {
-    let application = super::config::apply_rule_severity_to_diagnostic_from_overrides(
-      zone,
-      diagnostic,
-      overrides,
-    );
-    diagnostics.push(application.diagnostic);
-  }
-}
-
 fn empty_file_lint_result(zone: ref mut Zone) -> FileLintRunResult {
   return FileLintRunResult {
-    diagnostics: std::vec::new<super::diagnostic::Diagnostic>(zone, 8),
-    read_errors: std::vec::new<std::fs::PathError>(zone, 2),
+    diagnostic_count: 0,
     source_count: 0,
     read_error_count: 0,
     reads_files: true,
@@ -72,12 +45,9 @@ fn empty_file_lint_result(zone: ref mut Zone) -> FileLintRunResult {
 
 fn append_file_lint_result(
   target: ref mut FileLintRunResult,
-  result: FileLintRunResult,
+  result: FileLintRunResult
 ) -> void {
-  append_diagnostics(ref mut target.diagnostics, result.diagnostics);
-  for problem in result.read_errors {
-    target.read_errors.push(problem);
-  }
+  target.diagnostic_count = target.diagnostic_count + result.diagnostic_count;
   target.source_count = target.source_count + result.source_count;
   target.read_error_count = target.read_error_count + result.read_error_count;
 }
@@ -85,26 +55,22 @@ fn append_file_lint_result(
 pub fn lint_in_memory_source(
   zone: ref mut Zone,
   file_path: Slice[u8],
-  source_text: Slice[u8],
+  source_text: Slice[u8]
 ) -> InMemoryLintRunResult {
-  var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 8);
-
   let trailing = super::rules::trailing_whitespace::lint_trailing_whitespace_in_memory(
     zone,
     file_path,
-    source_text,
+    source_text
   );
-  append_diagnostics(ref mut diagnostics, trailing.diagnostics);
 
   let missing_final = super::rules::missing_final_newline::lint_missing_final_newline_in_memory(
     zone,
     file_path,
-    source_text,
+    source_text
   );
-  append_diagnostics(ref mut diagnostics, missing_final.diagnostics);
 
   return InMemoryLintRunResult {
-    diagnostics: diagnostics,
+    diagnostic_count: trailing.diagnostic_count + missing_final.diagnostic_count,
     source_count: 1,
     reads_files: false,
     scans_filesystem: false,
@@ -119,36 +85,22 @@ fn lint_in_memory_source_from_overrides(
   zone: ref mut Zone,
   file_path: Slice[u8],
   source_text: Slice[u8],
-  overrides: ref std::vec::Vec[super::config::RuleSeverityOverride],
+  overrides: ref std::vec::Vec[super::config::RuleSeverityOverride]
 ) -> InMemoryLintRunResult {
-  var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 8);
-
   let trailing = super::rules::trailing_whitespace::lint_trailing_whitespace_in_memory(
     zone,
     file_path,
-    source_text,
-  );
-  append_configured_diagnostics(
-    zone,
-    ref mut diagnostics,
-    trailing.diagnostics,
-    overrides,
+    source_text
   );
 
   let missing_final = super::rules::missing_final_newline::lint_missing_final_newline_in_memory(
     zone,
     file_path,
-    source_text,
-  );
-  append_configured_diagnostics(
-    zone,
-    ref mut diagnostics,
-    missing_final.diagnostics,
-    overrides,
+    source_text
   );
 
   return InMemoryLintRunResult {
-    diagnostics: diagnostics,
+    diagnostic_count: trailing.diagnostic_count + missing_final.diagnostic_count,
     source_count: 1,
     reads_files: false,
     scans_filesystem: false,
@@ -163,39 +115,33 @@ pub fn lint_in_memory_source_with_overrides(
   zone: ref mut Zone,
   file_path: Slice[u8],
   source_text: Slice[u8],
-  overrides: std::vec::Vec[super::config::RuleSeverityOverride],
+  overrides: std::vec::Vec[super::config::RuleSeverityOverride]
 ) -> InMemoryLintRunResult {
   return lint_in_memory_source_from_overrides(
     zone,
     file_path,
     source_text,
-    ref overrides,
+    ref overrides
   );
 }
 
 pub fn lint_file_source(
   zone: ref mut Zone,
-  path: String,
+  path: Slice[u8]
 ) -> FileLintRunResult {
   var result = empty_file_lint_result(zone);
 
-  match super::source::source_input_from_file(zone, path.as_slice()) {
-    std::Ok(source) => {
-      match source.text {
-        Some(text) => {
-          let in_memory = lint_in_memory_source(
-            zone,
-            source.path.as_slice(),
-            text.as_slice(),
-          );
-          append_diagnostics(ref mut result.diagnostics, in_memory.diagnostics);
-          result.source_count = result.source_count + 1;
-        }
-        None => {}
-      }
+  match super::source::source_input_from_file(zone, path) {
+    std::Ok(text) => {
+      let in_memory = lint_in_memory_source(
+        zone,
+        path,
+        text.as_slice()
+      );
+      result.diagnostic_count = result.diagnostic_count + in_memory.diagnostic_count;
+      result.source_count = result.source_count + 1;
     }
     std::Err(problem) => {
-      result.read_errors.push(problem);
       result.read_error_count = result.read_error_count + 1;
     }
   }
@@ -205,30 +151,24 @@ pub fn lint_file_source(
 
 fn lint_file_source_from_overrides(
   zone: ref mut Zone,
-  path: String,
-  overrides: ref std::vec::Vec[super::config::RuleSeverityOverride],
+  path: Slice[u8],
+  overrides: ref std::vec::Vec[super::config::RuleSeverityOverride]
 ) -> FileLintRunResult {
   var result = empty_file_lint_result(zone);
   result.applies_config = true;
 
-  match super::source::source_input_from_file(zone, path.as_slice()) {
-    std::Ok(source) => {
-      match source.text {
-        Some(text) => {
-          let in_memory = lint_in_memory_source_from_overrides(
-            zone,
-            source.path.as_slice(),
-            text.as_slice(),
-            overrides,
-          );
-          append_diagnostics(ref mut result.diagnostics, in_memory.diagnostics);
-          result.source_count = result.source_count + 1;
-        }
-        None => {}
-      }
+  match super::source::source_input_from_file(zone, path) {
+    std::Ok(text) => {
+      let in_memory = lint_in_memory_source_from_overrides(
+        zone,
+        path,
+        text.as_slice(),
+        overrides
+      );
+      result.diagnostic_count = result.diagnostic_count + in_memory.diagnostic_count;
+      result.source_count = result.source_count + 1;
     }
     std::Err(problem) => {
-      result.read_errors.push(problem);
       result.read_error_count = result.read_error_count + 1;
     }
   }
@@ -238,13 +178,13 @@ fn lint_file_source_from_overrides(
 
 pub fn lint_file_source_with_overrides(
   zone: ref mut Zone,
-  path: String,
-  overrides: std::vec::Vec[super::config::RuleSeverityOverride],
+  path: Slice[u8],
+  overrides: std::vec::Vec[super::config::RuleSeverityOverride]
 ) -> FileLintRunResult {
   return lint_file_source_from_overrides(
     zone,
     path,
-    ref overrides,
+    ref overrides
   );
 }
 
@@ -256,13 +196,13 @@ pub fn lint_file_source_with_overrides(
 
 pub fn lint_file_sources(
   zone: ref mut Zone,
-  paths: std::vec::Vec[String],
+  paths: std::vec::Vec[std::string::String]
 ) -> FileLintRunResult {
   var result = empty_file_lint_result(zone);
   for path in paths {
     append_file_lint_result(
       ref mut result,
-      lint_file_source(zone, path),
+      lint_file_source(zone, path.as_slice())
     );
   }
   return result;
@@ -270,15 +210,15 @@ pub fn lint_file_sources(
 
 pub fn lint_file_sources_with_overrides(
   zone: ref mut Zone,
-  paths: std::vec::Vec[String],
-  overrides: std::vec::Vec[super::config::RuleSeverityOverride],
+  paths: std::vec::Vec[std::string::String],
+  overrides: std::vec::Vec[super::config::RuleSeverityOverride]
 ) -> FileLintRunResult {
   var result = empty_file_lint_result(zone);
   result.applies_config = true;
   for path in paths {
     append_file_lint_result(
       ref mut result,
-      lint_file_source_from_overrides(zone, path, ref overrides),
+      lint_file_source_from_overrides(zone, path.as_slice(), ref overrides)
     );
   }
   return result;

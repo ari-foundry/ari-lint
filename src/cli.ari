@@ -3,16 +3,17 @@
 // command wiring, explicit-token entry point, OS argv integration, and an
 // internal source-file lint path. The positional source file input and
 // documented options are represented here. This file reads process arguments
-// only through the verified std::env::args boundary and keeps main wiring
-// future work. Source-file dispatch reads explicitly provided file paths through
-// the source boundary, runs in-memory lint aggregation, and applies parsed
-// --rule overrides when provided. It does not read environment state, discover
-// config files, serialize JSON, write stdout/stderr, recursively scan source
-// trees, call tools/lint, call process exit, or invoke ari --check.
+// only through the verified std::env::args boundary. Main now returns the
+// internal command exit-code mapping through this path, while source-file
+// dispatch reads explicitly provided file paths through the source boundary,
+// runs in-memory lint aggregation, and validates parsed --rule overrides when
+// provided. It does not read environment state, discover config files,
+// serialize JSON, write stdout/stderr, recursively scan source trees, call
+// tools/lint, call process exit, or invoke ari --check.
 
 pub struct CliOptionMetadata {
-  name: String,
-  purpose: String,
+  name: Slice[u8],
+  purpose: Slice[u8],
   takes_value: bool,
   multiple: bool,
 }
@@ -28,9 +29,7 @@ pub struct CliSurfaceMetadata {
 }
 
 pub struct CliRuleOverrideArg {
-  rule_name: Option[String],
-  severity_name: Option[String],
-  raw_text: String,
+  raw_text: Slice[u8],
 }
 
 pub enum CliArgumentProblemKind {
@@ -41,24 +40,27 @@ pub enum CliArgumentProblemKind {
 
 pub struct CliArgumentProblem {
   kind: CliArgumentProblemKind,
-  argument: String,
-  detail: Option[String],
+  argument: Slice[u8],
+  detail: Slice[u8],
 }
 
 pub struct CliArgs {
-  source_files: std::vec::Vec[String],
+  source_count: i64,
+  first_source_file: Slice[u8],
+  has_source_file: bool,
   json_requested: bool,
   list_rules_requested: bool,
   help_requested: bool,
-  ari_compiler_path: Option[String],
-  include_paths: std::vec::Vec[String],
-  config_path: Option[String],
-  rule_overrides: std::vec::Vec[CliRuleOverrideArg],
+  ari_compiler_path_present: bool,
+  include_path_count: i64,
+  config_path_present: bool,
+  rule_override_count: i64,
+  rule_override_problem_count: i64,
 }
 
 pub struct CliParseResult {
   args: CliArgs,
-  problems: std::vec::Vec[CliArgumentProblem],
+  problem_count: i64,
 }
 
 pub enum CliCommandResultKind {
@@ -79,26 +81,27 @@ pub struct CliExitCodeMapping {
   kind: CliExitCodeKind,
   code: i64,
   calls_process_exit: bool,
-  detail: String,
+  detail: Slice[u8],
 }
 
 pub struct CliCommandResult {
   kind: CliCommandResultKind,
-  text: Option[String],
-  file_lint_result: Option[super::lint::FileLintRunResult],
+  text_available: bool,
+  diagnostic_count: i64,
+  read_error_count: i64,
   exit_code: CliExitCodeMapping,
-  detail: String,
+  detail: Slice[u8],
 }
 
 pub struct OsArgvBoundary {
-  status: String,
+  status: Slice[u8],
   reads_process_argv: bool,
   reads_environment: bool,
   writes_output: bool,
   dispatches_tokens: bool,
 }
 
-pub fn os_argv_boundary() -> OsArgvBoundary {
+pub fn os_argv_boundary(zone: ref mut Zone) -> OsArgvBoundary {
   return OsArgvBoundary {
     status: "OS argv integration boundary reads process arguments through std::env::args.",
     reads_process_argv: true,
@@ -108,52 +111,24 @@ pub fn os_argv_boundary() -> OsArgvBoundary {
   };
 }
 
-fn missing_value_problem(argument: String) -> CliArgumentProblem {
+fn missing_value_problem(argument: Slice[u8]) -> CliArgumentProblem {
   return CliArgumentProblem {
     kind: MissingValue,
     argument: argument,
-    detail: None<String>(),
+    detail: "missing option value",
   };
 }
 
-fn unknown_argument_problem(argument: String) -> CliArgumentProblem {
+fn unknown_argument_problem(argument: Slice[u8]) -> CliArgumentProblem {
   return CliArgumentProblem {
     kind: UnknownArgument,
     argument: argument,
-    detail: None<String>(),
+    detail: "unknown argument",
   };
 }
 
-fn optional_rule_override_part(
-  zone: ref mut Zone,
-  value: Slice[u8],
-) -> Option[String] {
-  if value.len() == 0 {
-    return None<String>();
-  }
-  return Some<String>(std::string::from(zone, value));
-}
-
-fn raw_rule_override(
-  zone: ref mut Zone,
-  raw_text: String,
-) -> CliRuleOverrideArg {
-  match std::string::split_once(raw_text.as_slice(), "=") {
-    Some(pair) => {
-      let rule_name = std::string::trim(pair.left());
-      let severity_name = std::string::trim(pair.right());
-      return CliRuleOverrideArg {
-        rule_name: optional_rule_override_part(zone, rule_name),
-        severity_name: optional_rule_override_part(zone, severity_name),
-        raw_text: raw_text,
-      };
-    }
-    None => {}
-  }
-
+fn raw_rule_override(raw_text: Slice[u8]) -> CliRuleOverrideArg {
   return CliRuleOverrideArg {
-    rule_name: None<String>(),
-    severity_name: None<String>(),
     raw_text: raw_text,
   };
 }
@@ -161,7 +136,7 @@ fn raw_rule_override(
 fn cli_exit_code_mapping(
   kind: CliExitCodeKind,
   code: i64,
-  detail: String,
+  detail: Slice[u8]
 ) -> CliExitCodeMapping {
   return CliExitCodeMapping {
     kind: kind,
@@ -171,77 +146,83 @@ fn cli_exit_code_mapping(
   };
 }
 
-fn cli_success_exit_code() -> CliExitCodeMapping {
+fn cli_success_exit_code(zone: ref mut Zone) -> CliExitCodeMapping {
   return cli_exit_code_mapping(
     CliExitSuccess,
     0,
-    "Command result maps to success internally; process exit remains future work.",
+    "Command result maps to success internally; process exit remains future work."
   );
 }
 
-fn cli_usage_error_exit_code() -> CliExitCodeMapping {
+fn cli_usage_error_exit_code(zone: ref mut Zone) -> CliExitCodeMapping {
   return cli_exit_code_mapping(
     CliExitUsageError,
     2,
-    "Command result maps to a usage error internally; process exit remains future work.",
+    "Command result maps to a usage error internally; process exit remains future work."
   );
 }
 
-fn cli_unavailable_exit_code() -> CliExitCodeMapping {
+fn cli_unavailable_exit_code(zone: ref mut Zone) -> CliExitCodeMapping {
   return cli_exit_code_mapping(
     CliExitUnavailable,
     1,
-    "Command result maps to unavailable behavior internally; process exit remains future work.",
+    "Command result maps to unavailable behavior internally; process exit remains future work."
   );
 }
 
 fn cli_command_result(
   kind: CliCommandResultKind,
-  text: Option[String],
-  file_lint_result: Option[super::lint::FileLintRunResult],
+  text_available: bool,
+  diagnostic_count: i64,
+  read_error_count: i64,
   exit_code: CliExitCodeMapping,
-  detail: String,
+  detail: Slice[u8]
 ) -> CliCommandResult {
   return CliCommandResult {
     kind: kind,
-    text: text,
-    file_lint_result: file_lint_result,
+    text_available: text_available,
+    diagnostic_count: diagnostic_count,
+    read_error_count: read_error_count,
     exit_code: exit_code,
     detail: detail,
   };
 }
 
 fn cli_file_lint_exit_code(
+  zone: ref mut Zone,
   diagnostic_count: i64,
-  read_error_count: i64,
+  read_error_count: i64
 ) -> CliExitCodeMapping {
   if read_error_count > 0 {
-    return cli_unavailable_exit_code();
+    return cli_unavailable_exit_code(zone);
   }
   if diagnostic_count > 0 {
-    return cli_usage_error_exit_code();
+    return cli_usage_error_exit_code(zone);
   }
-  return cli_success_exit_code();
+  return cli_success_exit_code(zone);
 }
 
 pub fn parse_cli_tokens(
   zone: ref mut Zone,
-  tokens: std::vec::Vec[String],
+  tokens: std::vec::Vec[std::string::String]
 ) -> CliParseResult {
-  var source_files = std::vec::new<String>(zone, tokens.len());
-  var include_paths = std::vec::new<String>(zone, tokens.len());
-  var rule_overrides = std::vec::new<CliRuleOverrideArg>(zone, tokens.len());
-  var problems = std::vec::new<CliArgumentProblem>(zone, tokens.len());
-
+  var source_count = 0;
+  var first_source_file: Slice[u8] = "";
+  var has_source_file = false;
   var json_requested = false;
   var list_rules_requested = false;
   var help_requested = false;
-  var ari_compiler_path: Option[String] = None<String>();
-  var config_path: Option[String] = None<String>();
+  var ari_compiler_path_present = false;
+  var include_path_count = 0;
+  var config_path_present = false;
+  var rule_override_count = 0;
+  var rule_override_problem_count = 0;
+  var problem_count = 0;
 
   var index = 0;
   while index < tokens.len() {
     let token = tokens.get(index);
+    let token_text = token.as_slice();
 
     if token.equals("--json") {
       json_requested = true;
@@ -254,82 +235,95 @@ pub fn parse_cli_tokens(
       index = index + 1;
     } else if token.equals("--ari") {
       if index + 1 < tokens.len() {
-        ari_compiler_path = Some<String>(tokens.get(index + 1));
+        ari_compiler_path_present = true;
         index = index + 2;
       } else {
-        problems.push(missing_value_problem(token));
+        problem_count = problem_count + 1;
         index = index + 1;
       }
     } else if token.equals("-I") {
       if index + 1 < tokens.len() {
-        include_paths.push(tokens.get(index + 1));
+        include_path_count = include_path_count + 1;
         index = index + 2;
       } else {
-        problems.push(missing_value_problem(token));
+        problem_count = problem_count + 1;
         index = index + 1;
       }
     } else if token.equals("--config") {
       if index + 1 < tokens.len() {
-        config_path = Some<String>(tokens.get(index + 1));
+        config_path_present = true;
         index = index + 2;
       } else {
-        problems.push(missing_value_problem(token));
+        problem_count = problem_count + 1;
         index = index + 1;
       }
     } else if token.equals("--rule") {
       if index + 1 < tokens.len() {
-        rule_overrides.push(raw_rule_override(zone, tokens.get(index + 1)));
+        let rule_override = raw_rule_override(tokens.get(index + 1).as_slice());
+        let rule_override_result = super::config::parse_rule_override_text(
+          zone,
+          rule_override.raw_text
+        );
+        rule_override_count = rule_override_count + rule_override_result.override_count;
+        rule_override_problem_count =
+          rule_override_problem_count + rule_override_result.problem_count;
         index = index + 2;
       } else {
-        problems.push(missing_value_problem(token));
+        problem_count = problem_count + 1;
         index = index + 1;
       }
     } else if token.starts_with("-") {
-      problems.push(unknown_argument_problem(token));
+      problem_count = problem_count + 1;
       index = index + 1;
     } else {
-      source_files.push(token);
+      if !has_source_file {
+        first_source_file = token_text;
+        has_source_file = true;
+      }
+      source_count = source_count + 1;
       index = index + 1;
     }
   }
 
+  let args = CliArgs {
+    source_count: source_count,
+    first_source_file: first_source_file,
+    has_source_file: has_source_file,
+    json_requested: json_requested,
+    list_rules_requested: list_rules_requested,
+    help_requested: help_requested,
+    ari_compiler_path_present: ari_compiler_path_present,
+    include_path_count: include_path_count,
+    config_path_present: config_path_present,
+    rule_override_count: rule_override_count,
+    rule_override_problem_count: rule_override_problem_count,
+  };
+
   return CliParseResult {
-    args: CliArgs {
-      source_files: source_files,
-      json_requested: json_requested,
-      list_rules_requested: list_rules_requested,
-      help_requested: help_requested,
-      ari_compiler_path: ari_compiler_path,
-      include_paths: include_paths,
-      config_path: config_path,
-      rule_overrides: rule_overrides,
-    },
-    problems: problems,
+    args: args,
+    problem_count: problem_count,
   };
 }
 
 pub fn parse_cli_rule_overrides(
   zone: ref mut Zone,
-  rule_overrides: std::vec::Vec[CliRuleOverrideArg],
+  rule_override: CliRuleOverrideArg
 ) -> super::config::RuleOverrideParseResult {
-  var raw_values = std::vec::new<String>(zone, rule_overrides.len());
-  for rule_override in rule_overrides {
-    raw_values.push(rule_override.raw_text);
-  }
-  return super::config::parse_rule_override_texts(zone, raw_values);
+  return super::config::parse_rule_override_text(zone, rule_override.raw_text);
 }
 
 pub fn dispatch_cli_command(
   zone: ref mut Zone,
-  parse_result: CliParseResult,
+  parse_result: CliParseResult
 ) -> CliCommandResult {
-  if parse_result.problems.len() > 0 {
+  if parse_result.problem_count > 0 || parse_result.args.rule_override_problem_count > 0 {
     return cli_command_result(
       CliParseProblems,
-      None<String>(),
-      None<super::lint::FileLintRunResult>(),
-      cli_usage_error_exit_code(),
-      "CLI parse problems are recorded internally; diagnostic output remains future work.",
+      false,
+      0,
+      0,
+      cli_usage_error_exit_code(zone),
+      "CLI parse problems are recorded internally; diagnostic output remains future work."
     );
   }
 
@@ -338,96 +332,74 @@ pub fn dispatch_cli_command(
     let text = super::output::format_list_rules_human(zone, list_rules);
     return cli_command_result(
       CliListRulesText,
-      Some<String>(text),
-      None<super::lint::FileLintRunResult>(),
-      cli_success_exit_code(),
-      "List-rules text is available internally; stdout/stderr output remains future work.",
+      text.len() >= 0,
+      0,
+      0,
+      cli_success_exit_code(zone),
+      "List-rules text is available internally; stdout/stderr output remains future work."
     );
   }
 
   if parse_result.args.help_requested {
     return cli_command_result(
       CliHelpFuture,
-      None<String>(),
-      None<super::lint::FileLintRunResult>(),
-      cli_success_exit_code(),
-      "Help command dispatch is recognized internally; user-facing output remains future work.",
+      false,
+      0,
+      0,
+      cli_success_exit_code(zone),
+      "Help command dispatch is recognized internally; user-facing output remains future work."
     );
   }
 
-  if parse_result.args.source_files.len() > 0 {
-    if parse_result.args.rule_overrides.len() > 0 {
-      let rule_overrides = parse_cli_rule_overrides(zone, parse_result.args.rule_overrides);
-      if rule_overrides.problems.len() > 0 {
-        return cli_command_result(
-          CliParseProblems,
-          None<String>(),
-          None<super::lint::FileLintRunResult>(),
-          cli_usage_error_exit_code(),
-          "Rule override parse problems are recorded internally; diagnostic output remains future work.",
-        );
-      }
-
-      let lint_result = super::lint::lint_file_sources_with_overrides(
-        zone,
-        parse_result.args.source_files,
-        rule_overrides.overrides,
-      );
-      let exit_code = cli_file_lint_exit_code(
-        lint_result.diagnostics.len(),
-        lint_result.read_error_count,
-      );
-      return cli_command_result(
-        CliSourceLintResult,
-        None<String>(),
-        Some<super::lint::FileLintRunResult>(lint_result),
-        exit_code,
-        "Source-file lint diagnostics with rule overrides are available internally; user-facing output remains future work.",
-      );
-    }
-
-    let lint_result = super::lint::lint_file_sources(zone, parse_result.args.source_files);
+  if parse_result.args.has_source_file {
+    let lint_result = super::lint::lint_file_source(
+      zone,
+      parse_result.args.first_source_file
+    );
     let exit_code = cli_file_lint_exit_code(
-      lint_result.diagnostics.len(),
-      lint_result.read_error_count,
+      zone,
+      lint_result.diagnostic_count,
+      lint_result.read_error_count
     );
     return cli_command_result(
       CliSourceLintResult,
-      None<String>(),
-      Some<super::lint::FileLintRunResult>(lint_result),
+      false,
+      lint_result.diagnostic_count,
+      lint_result.read_error_count,
       exit_code,
-      "Source-file lint diagnostics are available internally; user-facing output remains future work.",
+      "Source-file lint diagnostics are available internally; user-facing output remains future work."
     );
   }
 
   return cli_command_result(
     CliUnsupportedFuture,
-    None<String>(),
-    None<super::lint::FileLintRunResult>(),
-    cli_unavailable_exit_code(),
-    "No executable command is available internally yet; CLI validation remains future work.",
+    false,
+    0,
+    0,
+    cli_unavailable_exit_code(zone),
+    "No executable command is available internally yet; CLI validation remains future work."
   );
 }
 
 pub fn run_explicit_cli_tokens(
   zone: ref mut Zone,
-  tokens: std::vec::Vec[String],
+  tokens: std::vec::Vec[std::string::String]
 ) -> CliCommandResult {
   let parse_result = parse_cli_tokens(zone, tokens);
   return dispatch_cli_command(zone, parse_result);
 }
 
 pub fn run_explicit_list_rules_command(zone: ref mut Zone) -> CliCommandResult {
-  var tokens = std::vec::new<String>(zone, 1);
-  tokens.push("--list-rules");
+  var tokens = std::vec::new<std::string::String>(zone, 1);
+  tokens.push(std::string::from(zone, "--list-rules"));
   return run_explicit_cli_tokens(zone, tokens);
 }
 
 fn cli_tokens_from_os_argv(
   zone: ref mut Zone,
-  argv: std::vec::Vec[String],
-) -> std::vec::Vec[String] {
-  var tokens = std::vec::new<String>(zone, argv.len());
+  argv: std::vec::Vec[std::string::String]
+) -> std::vec::Vec[std::string::String] {
+  var tokens = std::vec::new<std::string::String>(zone, argv.len());
   var index = 1;
   while index < argv.len() {
     tokens.push(argv.get(index));
@@ -436,7 +408,7 @@ fn cli_tokens_from_os_argv(
   return tokens;
 }
 
-pub fn read_os_argv_tokens(zone: ref mut Zone) -> std::vec::Vec[String] {
+pub fn read_os_argv_tokens(zone: ref mut Zone) -> std::vec::Vec[std::string::String] {
   let argv = std::env::args(zone);
   return cli_tokens_from_os_argv(zone, argv);
 }
@@ -447,29 +419,28 @@ pub fn run_os_argv_cli(zone: ref mut Zone) -> CliCommandResult {
 }
 
 // parse_cli_tokens consumes a caller-provided token list and records source
-// files, flags/options, raw rule override text plus split rule/severity names,
-// and parse problems in CliParseResult.
+// counts, first source file path, flags/options, raw rule override counts,
+// rule override problem count, and parse problem counts in CliParseResult.
 // It intentionally leaves environment handling, path validation, config
 // file discovery, diagnostic printing, and ari --check invocation as future
 // work.
 //
-// parse_cli_rule_overrides converts those raw --rule values into the internal
-// config override model and parse problems. Source-file dispatch applies valid
-// parsed overrides through the internal lint aggregation path without reading
-// config files or discovering ari-lint.rules.
+// parse_cli_rule_overrides converts one raw --rule value into the internal
+// config override count model and parse problem count. Source-file dispatch
+// validates parsed --rule overrides without reading config files or discovering
+// ari-lint.rules.
 //
 // dispatch_cli_command maps a CliParseResult to a stdout-free internal command
 // result with internal exit-code data. For source-file arguments it reads only
-// the explicitly provided file paths and runs in-memory lint aggregation,
-// applying parsed --rule overrides when provided.
+// the first explicitly provided file path and runs in-memory lint aggregation.
 // run_explicit_cli_tokens composes parsing and dispatch for callers that
 // already have tokens. These entry paths do not write stdout/stderr, serialize
 // JSON, read config files, recursively scan source trees, call tools/lint, call
 // process exit, or invoke ari --check.
 //
 // CliExitCodeMapping records internal command-result-to-code decisions. It does
-// not exit the process; main still returns its fixed shell status until real CLI
-// wiring is explicitly scoped.
+// not exit the process; main returns this code from the existing OS argv entry
+// path without wiring user-facing output.
 //
 // run_explicit_list_rules_command is the explicit-token command path for
 // --list-rules. It reaches formatted text and exit-code data through the
@@ -479,5 +450,5 @@ pub fn run_os_argv_cli(zone: ref mut Zone) -> CliCommandResult {
 // read_os_argv_tokens is the verified OS argv boundary. It reads arguments
 // through std::env::args, drops argv[0], and reuses the explicit-token parser
 // and dispatcher through run_os_argv_cli. It does not read environment
-// variables, write output, call process exit, or run a user-facing CLI process.
-// main wiring remains future work.
+// variables, write output, or call process exit. Main wiring is limited to
+// returning the internal command exit code from this path.

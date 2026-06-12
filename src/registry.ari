@@ -21,13 +21,13 @@ pub struct RuleRegistry {
 pub struct RegistryLookupResult {
   found: bool,
   entry: Option[RegistryEntry],
-  rule_code: String,
+  rule_code: Slice[u8],
   executes_rule: bool,
   scans_source: bool,
 }
 
 pub struct RuleDispatchResult {
-  requested_rule_code: String,
+  requested_rule_code: Slice[u8],
   found: bool,
   result: super::rule::RuleExecutionResult,
   reads_files: bool,
@@ -39,14 +39,14 @@ pub struct RuleDispatchResult {
 }
 
 fn registry_entry_from_metadata(
-  metadata: super::rules::RuleMetadataEntry,
+  metadata: super::rules::RuleMetadataEntry
 ) -> RegistryEntry {
   return RegistryEntry {
     descriptor: super::rule::rule_descriptor(
       metadata.code,
       metadata.short_name,
       super::severity::Warning,
-      metadata.description,
+      metadata.description
     ),
     status: ReferenceOnly,
   };
@@ -56,12 +56,12 @@ fn registry_lookup_result(
   zone: ref mut Zone,
   rule_code: Slice[u8],
   found: bool,
-  entry: Option[RegistryEntry],
+  entry: Option[RegistryEntry]
 ) -> RegistryLookupResult {
   return RegistryLookupResult {
     found: found,
     entry: entry,
-    rule_code: std::string::from(zone, rule_code),
+    rule_code: rule_code,
     executes_rule: false,
     scans_source: false,
   };
@@ -69,13 +69,11 @@ fn registry_lookup_result(
 
 fn empty_rule_execution_result(
   zone: ref mut Zone,
-  rule_code: Slice[u8],
+  rule_code: Slice[u8]
 ) -> super::rule::RuleExecutionResult {
-  var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 0);
   return super::rule::rule_execution_result(
-    zone,
     rule_code,
-    diagnostics,
+    0
   );
 }
 
@@ -83,10 +81,10 @@ fn rule_dispatch_result(
   zone: ref mut Zone,
   rule_code: Slice[u8],
   found: bool,
-  result: super::rule::RuleExecutionResult,
+  result: super::rule::RuleExecutionResult
 ) -> RuleDispatchResult {
   return RuleDispatchResult {
-    requested_rule_code: std::string::from(zone, rule_code),
+    requested_rule_code: rule_code,
     found: found,
     result: result,
     reads_files: false,
@@ -100,10 +98,10 @@ fn rule_dispatch_result(
 
 pub fn known_rule_registry(zone: ref mut Zone) -> RuleRegistry {
   let trailing = registry_entry_from_metadata(
-    super::rules::trailing_whitespace_rule_metadata(zone),
+    super::rules::trailing_whitespace_rule_metadata()
   );
   let missing_final = registry_entry_from_metadata(
-    super::rules::missing_final_newline_rule_metadata(zone),
+    super::rules::missing_final_newline_rule_metadata()
   );
   return RuleRegistry {
     trailing_whitespace: trailing,
@@ -113,29 +111,29 @@ pub fn known_rule_registry(zone: ref mut Zone) -> RuleRegistry {
 
 pub fn lookup_known_rule(
   zone: ref mut Zone,
-  rule_code: Slice[u8],
+  rule_code: Slice[u8]
 ) -> RegistryLookupResult {
   if rule_code.equals("lint/trailing-whitespace") {
-    let entry = registry_entry_from_metadata(
-      super::rules::trailing_whitespace_rule_metadata(zone),
+    let trailing_entry = registry_entry_from_metadata(
+      super::rules::trailing_whitespace_rule_metadata()
     );
     return registry_lookup_result(
       zone,
       rule_code,
       true,
-      Some<RegistryEntry>(entry),
+      Some<RegistryEntry>(trailing_entry)
     );
   }
 
   if rule_code.equals("lint/missing-final-newline") {
-    let entry = registry_entry_from_metadata(
-      super::rules::missing_final_newline_rule_metadata(zone),
+    let missing_entry = registry_entry_from_metadata(
+      super::rules::missing_final_newline_rule_metadata()
     );
     return registry_lookup_result(
       zone,
       rule_code,
       true,
-      Some<RegistryEntry>(entry),
+      Some<RegistryEntry>(missing_entry)
     );
   }
 
@@ -143,7 +141,7 @@ pub fn lookup_known_rule(
     zone,
     rule_code,
     false,
-    None<RegistryEntry>(),
+    None<RegistryEntry>()
   );
 }
 
@@ -151,43 +149,41 @@ pub fn dispatch_known_rule_in_memory(
   zone: ref mut Zone,
   rule_code: Slice[u8],
   file_path: Slice[u8],
-  source_text: Slice[u8],
+  source_text: Slice[u8]
 ) -> RuleDispatchResult {
   let lookup = lookup_known_rule(zone, rule_code);
   if lookup.found {
     if rule_code.equals("lint/trailing-whitespace") {
-      let input = super::rule::rule_execution_input_from_source(
-        zone,
+      let trailing_input = super::rule::rule_execution_input_from_source(
         file_path,
-        source_text,
+        source_text
       );
-      let rule_result = super::rules::trailing_whitespace::lint_trailing_whitespace_rule(
+      let trailing_result = super::rules::trailing_whitespace::lint_trailing_whitespace_rule(
         zone,
-        input,
+        trailing_input
       );
       return rule_dispatch_result(
         zone,
         rule_code,
         true,
-        rule_result,
+        trailing_result
       );
     }
 
     if rule_code.equals("lint/missing-final-newline") {
-      let input = super::rule::rule_execution_input_from_source(
-        zone,
+      let missing_input = super::rule::rule_execution_input_from_source(
         file_path,
-        source_text,
+        source_text
       );
-      let rule_result = super::rules::missing_final_newline::lint_missing_final_newline_rule(
+      let missing_result = super::rules::missing_final_newline::lint_missing_final_newline_rule(
         zone,
-        input,
+        missing_input
       );
       return rule_dispatch_result(
         zone,
         rule_code,
         true,
-        rule_result,
+        missing_result
       );
     }
   }
@@ -197,6 +193,6 @@ pub fn dispatch_known_rule_in_memory(
     zone,
     rule_code,
     false,
-    empty_result,
+    empty_result
   );
 }

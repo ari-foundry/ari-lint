@@ -68,10 +68,10 @@ scripts/build.sh /path/to/ari
 ```
 
 You may also set `ARI_COMPILER`; a positional compiler path takes precedence if
-both are provided. The build script resolves the repository root before
-compiling, preserves relative compiler paths from the caller's directory,
-writes `build/ari-lint`, does not download or build the Ari compiler, and does
-not run `tools/lint`.
+both are provided. The build script resolves the repository root, uses the
+compiler root when `lib/std.arih` is available there, writes `build/ari-lint`,
+does not download or build the Ari compiler, and does not run `tools/lint`. It
+preserves relative compiler paths from the caller's directory.
 
 CI does not run compiler-backed builds or tests yet, and this repository is not
 a standalone release.

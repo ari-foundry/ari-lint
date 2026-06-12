@@ -22,8 +22,6 @@ case "$compiler" in
   *) compiler="$original_pwd/$compiler" ;;
 esac
 
-cd "$repo_root"
-
 if [ -z "$compiler" ]; then
   fail "missing Ari compiler path; pass scripts/build.sh /path/to/ari or set ARI_COMPILER"
 fi
@@ -36,11 +34,19 @@ if [ ! -x "$compiler" ]; then
   fail "Ari compiler path is not executable: $compiler"
 fi
 
-mkdir -p build
+compiler_root=$(CDPATH= cd "$(dirname "$compiler")/.." && pwd)
+build_workdir="$repo_root"
+if [ -e "$compiler_root/lib/std.arih" ]; then
+  build_workdir="$compiler_root"
+fi
 
-output="build/ari-lint"
+mkdir -p "$repo_root/build"
+
+input="$repo_root/src/main.ari"
+output="$repo_root/build/ari-lint"
 
 printf '%s\n' "build.sh: using Ari compiler: $compiler"
-printf '%s\n' "build.sh: compiling src/main.ari -> $output"
-"$compiler" src/main.ari -o "$output"
+printf '%s\n' "build.sh: compiling $input -> $output"
+cd "$build_workdir"
+"$compiler" "$input" -o "$output"
 printf '%s\n' "build.sh: wrote $output"
