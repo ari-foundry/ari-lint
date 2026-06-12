@@ -51,6 +51,7 @@ trailing-whitespace first diagnostic capture added /
 in-memory missing-final-newline execution added /
 missing-final-newline first diagnostic capture added /
 in-memory lint run aggregation added /
+lint aggregation first diagnostic capture added /
 file read boundary added /
 internal CLI file lint path added /
 source-only parity runner skeleton added /
@@ -297,12 +298,21 @@ and test work.
       `ari --check`, or calling `tools/lint`. Aggregation-level diagnostic
       collection, stderr wiring, tests, and parity checks remain future work.
 - [x] Add in-memory lint run aggregation over caller-provided source text,
-      combining diagnostic counts from the in-memory `lint/trailing-whitespace` and
-      `lint/missing-final-newline` rules without reading files, scanning the
-      filesystem, applying config, producing user-facing output, serializing
-      JSON, invoking the compiler, or calling `tools/lint`. Aggregation tests,
-      config/severity override application, CLI wiring, file-backed linting,
-      output behavior, and parity checks remain future work.
+      combining diagnostic counts from the in-memory
+      `lint/trailing-whitespace` and `lint/missing-final-newline` rules without
+      reading files, scanning the filesystem, applying config, producing
+      user-facing output, serializing JSON, invoking the compiler, or calling
+      `tools/lint`. Aggregation tests, config/severity override application,
+      CLI wiring, file-backed linting, output behavior, and parity checks
+      remain future work.
+- [x] Capture the first already-built internal diagnostic at lint aggregation
+      boundaries for caller-provided in-memory source and explicit file paths,
+      while preserving diagnostic-count behavior and without collecting full
+      diagnostic arrays, reading config files, discovering config paths,
+      traversing directories, writing output, serializing JSON, invoking the
+      compiler, executing `ari --check`, or calling `tools/lint`. Config-aware
+      diagnostic rewriting, stderr wiring, tests, and parity checks remain
+      future work.
 - [x] Add an explicit file read boundary using the verified Ari
       `std::fs::read_detailed(ref mut zone, path)` API for one caller-provided
       path, preserving file read errors without scanning directories,

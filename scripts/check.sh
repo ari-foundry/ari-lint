@@ -310,6 +310,7 @@ require_grep "source input boundary model added" docs/dev/roadmap.md
 require_grep "in-memory trailing-whitespace execution added" docs/dev/roadmap.md
 require_grep "in-memory missing-final-newline execution added" docs/dev/roadmap.md
 require_grep "in-memory lint run aggregation added" docs/dev/roadmap.md
+require_grep "lint aggregation first diagnostic capture added" docs/dev/roadmap.md
 require_grep "file read boundary added" docs/dev/roadmap.md
 require_grep "internal CLI file lint path added" docs/dev/roadmap.md
 require_grep "source-only parity runner skeleton added" docs/dev/roadmap.md
@@ -332,6 +333,7 @@ require_grep "docs/dev/compiler-invocation.md" tests/README.md
 require_grep "docs/dev/compiler-provisioning.md" tests/README.md
 require_grep "No executable missing-final-newline rule execution tests are added yet" tests/README.md
 require_grep "No executable in-memory lint run aggregation tests are added yet" tests/README.md
+require_grep "first-diagnostic preservation" tests/README.md
 require_grep "No executable file IO boundary tests are added yet" tests/README.md
 require_grep "No executable CLI file lint path tests are added yet" tests/README.md
 require_grep "No executable parity runner tests are added yet" tests/README.md
@@ -344,6 +346,7 @@ require_grep "Standalone build wiring is local-only" docs/dev/ari-implementation
 require_grep "relative compiler paths" docs/dev/ari-implementation-plan.md
 require_grep "The current GitHub Actions workflow must not run" docs/dev/compiler-provisioning.md
 require_grep "in-memory lint run aggregation path" docs/dev/ari-implementation-plan.md
+require_grep "first already-built internal diagnostic" docs/dev/ari-implementation-plan.md
 require_grep "File-backed aggregation" docs/dev/ari-implementation-plan.md
 require_grep "file-read boundary" docs/dev/ari-implementation-plan.md
 require_grep "std::fs::read_detailed" docs/dev/ari-implementation-plan.md
@@ -635,6 +638,7 @@ require_grep "discover ari-lint.rules" src/source.ari
 require_grep "execute lint rules" src/source.ari
 require_grep "InMemoryLintRunResult" src/lint.ari
 require_grep "FileLintRunResult" src/lint.ari
+require_grep "first_diagnostic" src/lint.ari
 require_grep "lint_in_memory_source" src/lint.ari
 require_grep "lint_in_memory_source_from_overrides" src/lint.ari
 require_grep "lint_in_memory_source_with_overrides" src/lint.ari
@@ -658,6 +662,7 @@ require_grep "applies_config: true" src/lint.ari
 require_grep "writes_output: false" src/lint.ari
 require_grep "serializes_json: false" src/lint.ari
 require_grep "invokes_compiler: false" src/lint.ari
+require_no_grep "rebuild diagnostics only" src/lint.ari
 require_grep "reads only explicit paths" src/lint.ari
 require_grep "scan the filesystem" src/lint.ari
 require_grep "apply config" src/lint.ari

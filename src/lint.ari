@@ -1,13 +1,15 @@
 // Lint run aggregation over caller-provided source text and explicit file paths.
 //
 // The default paths do not apply config. The with-overrides paths accept
-// already-parsed severity overrides and rebuild diagnostics only. Each
-// file-backed path reads only explicit paths through the source boundary. No
-// path should scan the filesystem, write output, serialize JSON, invoke
-// ari --check, or call tools/lint.
+// already-parsed severity overrides and preserve the same count and first
+// diagnostic shape while config-aware diagnostic rewriting remains future
+// work. Each file-backed path reads only explicit paths through the source
+// boundary. No path should scan the filesystem, write output, serialize JSON,
+// invoke ari --check, or call tools/lint.
 
 pub struct InMemoryLintRunResult {
   diagnostic_count: i64,
+  first_diagnostic: super::diagnostic::OptionalDiagnostic,
   source_count: i64,
   reads_files: bool,
   scans_filesystem: bool,
@@ -19,6 +21,7 @@ pub struct InMemoryLintRunResult {
 
 pub struct FileLintRunResult {
   mut diagnostic_count: i64,
+  mut first_diagnostic: super::diagnostic::OptionalDiagnostic,
   mut source_count: i64,
   mut read_error_count: i64,
   reads_files: bool,
@@ -32,6 +35,7 @@ pub struct FileLintRunResult {
 fn empty_file_lint_result(zone: ref mut Zone) -> FileLintRunResult {
   return FileLintRunResult {
     diagnostic_count: 0,
+    first_diagnostic: super::diagnostic::no_diagnostic(),
     source_count: 0,
     read_error_count: 0,
     reads_files: true,
@@ -48,6 +52,10 @@ fn append_file_lint_result(
   result: FileLintRunResult
 ) -> void {
   target.diagnostic_count = target.diagnostic_count + result.diagnostic_count;
+  target.first_diagnostic = super::diagnostic::first_available_diagnostic(
+    target.first_diagnostic,
+    result.first_diagnostic
+  );
   target.source_count = target.source_count + result.source_count;
   target.read_error_count = target.read_error_count + result.read_error_count;
 }
@@ -71,6 +79,10 @@ pub fn lint_in_memory_source(
 
   return InMemoryLintRunResult {
     diagnostic_count: trailing.diagnostic_count + missing_final.diagnostic_count,
+    first_diagnostic: super::diagnostic::first_available_diagnostic(
+      trailing.first_diagnostic,
+      missing_final.first_diagnostic
+    ),
     source_count: 1,
     reads_files: false,
     scans_filesystem: false,
@@ -98,9 +110,14 @@ fn lint_in_memory_source_from_overrides(
     file_path,
     source_text
   );
+  let first_diagnostic = super::diagnostic::first_available_diagnostic(
+    trailing.first_diagnostic,
+    missing_final.first_diagnostic
+  );
 
   return InMemoryLintRunResult {
     diagnostic_count: trailing.diagnostic_count + missing_final.diagnostic_count,
+    first_diagnostic: first_diagnostic,
     source_count: 1,
     reads_files: false,
     scans_filesystem: false,
@@ -139,6 +156,10 @@ pub fn lint_file_source(
         text.as_slice()
       );
       result.diagnostic_count = result.diagnostic_count + in_memory.diagnostic_count;
+      result.first_diagnostic = super::diagnostic::first_available_diagnostic(
+        result.first_diagnostic,
+        in_memory.first_diagnostic
+      );
       result.source_count = result.source_count + 1;
     }
     std::Err(problem) => {
@@ -166,6 +187,10 @@ fn lint_file_source_from_overrides(
         overrides
       );
       result.diagnostic_count = result.diagnostic_count + in_memory.diagnostic_count;
+      result.first_diagnostic = super::diagnostic::first_available_diagnostic(
+        result.first_diagnostic,
+        in_memory.first_diagnostic
+      );
       result.source_count = result.source_count + 1;
     }
     std::Err(problem) => {
@@ -188,11 +213,12 @@ pub fn lint_file_source_with_overrides(
   );
 }
 
-// The with-overrides paths apply already-parsed severity overrides only after
-// the in-memory rules return diagnostics. They do not read config files,
-// discover ari-lint.rules, inspect CLI config arguments, scan directories, write
-// output, serialize JSON, invoke ari --check, or call tools/lint. CLI config
-// integration remains future work.
+// The with-overrides paths accept already-parsed severity override data and
+// preserve the same diagnostic count and first diagnostic result shape. They do
+// not read config files, discover ari-lint.rules, inspect CLI config arguments,
+// scan directories, write output, serialize JSON, invoke ari --check, or call
+// tools/lint. Config-aware diagnostic rewriting and CLI config integration
+// remain future work.
 
 pub fn lint_file_sources(
   zone: ref mut Zone,
