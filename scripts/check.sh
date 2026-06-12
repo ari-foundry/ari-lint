@@ -409,6 +409,7 @@ require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
 require_grep "internal human diagnostic formatter added" docs/dev/roadmap.md
 require_grep "internal human diagnostic array formatter added" docs/dev/roadmap.md
 require_grep "trailing-whitespace first diagnostic capture added" docs/dev/roadmap.md
+require_grep "missing-final-newline first diagnostic capture added" docs/dev/roadmap.md
 require_grep "diagnostic JSON serializer is limited to placeholder internal text" docs/dev/ari-implementation-plan.md
 require_grep "JSON serializer is an internal placeholder" docs/dev/ari-implementation-plan.md
 require_grep "human-readable formatter now" docs/dev/ari-implementation-plan.md
@@ -424,6 +425,7 @@ require_grep "No diagnostic output tests are added yet" tests/README.md
 require_grep "No executable human diagnostic formatter tests are added yet" tests/README.md
 require_grep "No executable human diagnostic array formatter tests are added yet" tests/README.md
 require_grep "No executable trailing-whitespace first-diagnostic capture tests are added yet" tests/README.md
+require_grep "No executable missing-final-newline first-diagnostic capture tests are added yet" tests/README.md
 require_grep "No executable diagnostic JSON serializer tests are added yet" tests/README.md
 require_grep "No executable source input boundary tests are added yet" tests/README.md
 require_grep "No executable list-rules formatter tests are added yet" tests/README.md
@@ -730,6 +732,7 @@ require_grep "MissingFinalNewlineDiagnosticMapping" src/rules/missing_final_newl
 require_grep "missing_final_newline_diagnostic_mapping" src/rules/missing_final_newline.ari
 require_grep "MissingFinalNewlineFinalPosition" src/rules/missing_final_newline.ari
 require_grep "MissingFinalNewlineRuleResult" src/rules/missing_final_newline.ari
+require_grep "first_diagnostic" src/rules/missing_final_newline.ari
 require_grep "final_position_for_source" src/rules/missing_final_newline.ari
 require_grep "lint_missing_final_newline_in_memory" src/rules/missing_final_newline.ari
 require_grep "lint_missing_final_newline_rule" src/rules/missing_final_newline.ari

@@ -1,5 +1,5 @@
 // Missing final newline rule helpers and in-memory execution. This file scans
-// only caller-provided source text.
+// only caller-provided source text and captures the first internal diagnostic.
 //
 // It does not read files, scan the filesystem, apply config overrides, print
 // output, serialize JSON, invoke ari --check, or call tools/lint.
@@ -24,16 +24,18 @@ struct MissingFinalNewlineFinalPosition {
 
 pub struct MissingFinalNewlineRuleResult {
   diagnostic_count: i64,
+  first_diagnostic: super::super::diagnostic::OptionalDiagnostic,
   reads_files: bool,
   scans_filesystem: bool,
 }
 
 // The content helper is intentionally limited to already-provided bytes. The
 // public in-memory rule function below computes final position metadata from
-// those same bytes and returns an internal diagnostic count when the final newline is
-// missing. File reading, filesystem traversal, config interaction, severity
-// override application, CLI parsing, diagnostics output, JSON serialization,
-// and ari --check invocation remain future work. Rule code
+// those same bytes and returns an internal diagnostic count plus the first
+// already-built internal diagnostic when the final newline is missing. File
+// reading, filesystem traversal, config interaction, severity override
+// application, CLI parsing, diagnostics output, JSON serialization, and
+// ari --check invocation remain future work. Rule code
 // lint/missing-final-newline, short name missing-final-newline, default severity
 // warning, and message missing final newline are confirmed by the reference
 // implementation.
@@ -98,6 +100,7 @@ pub fn lint_missing_final_newline_in_memory(
     source_text
   );
   var diagnostic_count = 0;
+  var first_diagnostic = super::super::diagnostic::no_diagnostic();
   if mapping.has_diagnostic {
     let diagnostic = super::super::diagnostic::diagnostic_from_span(
       mapping.span,
@@ -106,10 +109,12 @@ pub fn lint_missing_final_newline_in_memory(
       "missing final newline"
     );
     diagnostic_count = 1;
+    first_diagnostic = super::super::diagnostic::some_diagnostic(diagnostic);
   }
 
   return MissingFinalNewlineRuleResult {
     diagnostic_count: diagnostic_count,
+    first_diagnostic: first_diagnostic,
     reads_files: false,
     scans_filesystem: false,
   };

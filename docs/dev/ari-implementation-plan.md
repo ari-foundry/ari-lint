@@ -80,9 +80,10 @@ It does not move `tools/lint` or change build behavior.
   invoking the compiler, or calling `tools/lint`.
 - The missing-final-newline rule now scans caller-provided in-memory source
   text, computes final line/column metadata from those bytes, and returns an
-  internal diagnostic count when non-empty content does not end with a newline,
-  without reading files, scanning the filesystem, applying config, writing
-  output, serializing JSON, invoking the compiler, or calling `tools/lint`.
+  internal diagnostic count plus the first already-built diagnostic when
+  non-empty content does not end with a newline, without reading files,
+  scanning the filesystem, applying config, writing output, serializing JSON,
+  invoking the compiler, or calling `tools/lint`.
 - An in-memory lint run aggregation path now combines diagnostics from the
   trailing-whitespace and missing-final-newline in-memory rules for one
   caller-provided source text. It does not read files, scan the filesystem,
@@ -190,8 +191,8 @@ It does not move `tools/lint` or change build behavior.
   already-built diagnostic from caller-provided source text.
   The missing-final-newline mapping now feeds an in-memory rule execution
   function that computes final position metadata from caller-provided source
-  text and produces an internal diagnostic count when the final newline is
-  missing.
+  text and produces an internal diagnostic count plus the first already-built
+  diagnostic when the final newline is missing.
   A shared rule execution input/result API now gives both rule modules a common
   wrapper shape for caller-provided in-memory source text without reading
   files, scanning the filesystem, applying config, writing output, serializing
@@ -531,7 +532,8 @@ Current rule module state:
   It also records diagnostic mapping and in-memory rule execution for
   caller-provided source text. The in-memory execution computes final
   line/column metadata from caller-provided bytes, returns an internal
-  diagnostic count, has a shared rule module API wrapper for
+  diagnostic count plus the first already-built diagnostic, has a shared rule
+  module API wrapper for
   caller-provided in-memory source input, and records that it does not read
   files or scan the filesystem.
 - `src/lint.ari` combines diagnostic counts from the in-memory
@@ -794,6 +796,10 @@ usable.
       `lint/trailing-whitespace` execution without collecting full diagnostic
       arrays, writing output, serializing JSON, invoking the compiler, executing
       `ari --check`, calling `tools/lint`, or calling process exit
+- [x] Capture the first already-built internal diagnostic from in-memory
+      `lint/missing-final-newline` execution without collecting full diagnostic
+      arrays, writing output, serializing JSON, invoking the compiler,
+      executing `ari --check`, calling `tools/lint`, or calling process exit
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`
