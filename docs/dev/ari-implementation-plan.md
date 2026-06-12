@@ -86,9 +86,10 @@ It does not move `tools/lint` or change build behavior.
   invoking the compiler, or calling `tools/lint`.
 - An in-memory lint run aggregation path now combines diagnostics from the
   trailing-whitespace and missing-final-newline in-memory rules for one
-  caller-provided source text. It does not read files, scan the filesystem,
-  apply config, write output, serialize JSON, invoke the compiler, or call
-  `tools/lint`.
+  caller-provided source text and preserves the first already-built internal
+  diagnostic from those rule results. It does not read files, scan the
+  filesystem, apply config, write output, serialize JSON, invoke the compiler,
+  or call `tools/lint`.
 - The CLI source-file dispatch path now reads the first explicitly provided
   file path through the file-read boundary and returns internal diagnostic and
   read-error counts in the command result. It validates caller-provided `--rule`
@@ -325,10 +326,13 @@ Current preparatory model skeleton files are source-only placeholders:
   caller-provided source text and file-backed aggregation for explicitly
   provided file paths. The default aggregation combines diagnostic counts from
   the in-memory trailing-whitespace and missing-final-newline rule execution
-  paths without reading config. Separate with-overrides variants preserve the
-  same count-based shape while recording that config data was supplied. They do
-  not read config files, discover `ari-lint.rules`, scan the filesystem, write
-  output, serialize JSON, invoke the compiler, or call `tools/lint`.
+  paths and preserves the first already-built internal diagnostic without
+  reading config. File-backed aggregation preserves the first diagnostic across
+  explicit source paths. Separate with-overrides variants preserve the same
+  count and first-diagnostic shape while recording that config data was
+  supplied. They do not read config files, discover `ari-lint.rules`, scan the
+  filesystem, write output, serialize JSON, invoke the compiler, or call
+  `tools/lint`.
 - `src/cli.ari` sketches planned CLI option metadata for positional source file
   input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, and `--rule`,
   including each option's purpose, value requirement, and repeatability. It
@@ -432,12 +436,13 @@ to rebuilding one already-built internal Diagnostic with resolved severity, the
 diagnostic JSON serializer is limited to placeholder internal text,
 the source input boundary is limited to caller-provided source text and
 path-only entries, the default lint run aggregation path is limited to combining
-diagnostic counts for one caller-provided in-memory source text, the in-memory
-override aggregation path is limited to preserving that count-based result shape
-when already-parsed severity overrides are supplied,
+diagnostic counts and preserving the first already-built diagnostic for one
+caller-provided in-memory source text, the in-memory override aggregation path
+is limited to preserving that count and first-diagnostic result shape when
+already-parsed severity overrides are supplied,
 the file-backed override aggregation path is limited to reading explicitly
 provided source paths through the file-read boundary and preserving diagnostic
-counts,
+counts plus the first diagnostic,
 the file-read boundary is limited to reading one explicitly provided path with
 the verified Ari `std::fs::read_detailed` API and preserving file read errors,
 the CLI file lint path is limited to explicit source-file arguments, the
@@ -536,13 +541,15 @@ Current rule module state:
   module API wrapper for
   caller-provided in-memory source input, and records that it does not read
   files or scan the filesystem.
-- `src/lint.ari` combines diagnostic counts from the in-memory
+- `src/lint.ari` combines diagnostic counts and the first already-built
+  diagnostic from the in-memory
   trailing-whitespace and missing-final-newline rule execution paths for one
   caller-provided source text or explicitly provided file paths, recording that
   it does not scan the filesystem, write output, serialize JSON, invoke the
   compiler, or call `tools/lint`. Its with-overrides variants preserve the same
-  count-based shape for in-memory source text or explicitly provided file paths
-  without reading config files or wiring CLI config behavior.
+  count and first-diagnostic shape for in-memory source text or explicitly
+  provided file paths without reading config files, rewriting diagnostic
+  severity, or wiring CLI config behavior.
 - `src/registry.ari` can dispatch one exact known rule code to the corresponding
   in-memory rule wrapper for caller-provided source text. It returns structured
   found/not-found dispatch data and does not read files, scan the filesystem,
@@ -756,6 +763,10 @@ usable.
 - [x] Add in-memory missing-final-newline rule execution without file IO or
       filesystem scanning
 - [x] Add in-memory lint run aggregation without file IO or filesystem scanning
+- [x] Capture the first already-built internal diagnostic at lint aggregation
+      boundaries without collecting full diagnostic arrays, writing output,
+      serializing JSON, invoking the compiler, executing `ari --check`, calling
+      `tools/lint`, or calling process exit
 - [x] Add file read boundary for one caller-provided path using verified
       `std::fs::read_detailed`
 - [x] Add internal CLI file lint path over explicit source-file arguments

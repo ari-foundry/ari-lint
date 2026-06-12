@@ -6,11 +6,13 @@ Current checks verify skeleton files, lightweight documentation/source guards,
 the first trailing-whitespace fixture shape, and the first
 missing-final-newline fixture shape. In-memory trailing-whitespace execution
 and in-memory missing-final-newline execution have started in source. In-memory
-lint run aggregation has also started for caller-provided source text, including
-count-based with-overrides variants for already-parsed severity override inputs
-over in-memory source and explicitly provided file paths, but these paths are
-not executed by these checks yet. A file-read boundary for one caller-provided
-path has started in source, but the lightweight checks do not execute file IO.
+lint run aggregation has also started for caller-provided source text,
+including first-diagnostic capture and with-overrides variants that preserve
+the same count and first-diagnostic shape for already-parsed severity override
+inputs over in-memory source and explicitly provided file paths, but these
+paths are not executed by these checks yet. A file-read boundary for one
+caller-provided path has started in source, but the lightweight checks do not
+execute file IO.
 The internal CLI file lint path routes the first explicit source-file argument
 through the file-read boundary and in-memory lint aggregation, and it validates
 parsed `--rule` overrides when provided, but the lightweight checks do not run
@@ -194,9 +196,9 @@ current `tools/lint`.
 
 No executable in-memory lint run aggregation tests are added yet. Future tests
 should cover combining rule diagnostics, diagnostic ordering, empty diagnostic
-sets, already-parsed severity override application, no config-file reads, no
-filesystem scanning, no output or JSON serialization, no compiler invocation,
-and parity behavior against current `tools/lint`.
+sets, first-diagnostic preservation, already-parsed severity override data, no
+config-file reads, no filesystem scanning, no output or JSON serialization, no
+compiler invocation, and parity behavior against current `tools/lint`.
 
 No CLI tests are added yet. Future CLI tests should validate positional source
 input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, invalid
@@ -351,11 +353,12 @@ lint-run config application, no output, no JSON serialization, no compiler
 invocation, and parity behavior.
 
 No executable in-memory lint severity override aggregation tests are added yet.
-Future tests should validate already-parsed overrides applied to in-memory rule
-diagnostics, multiple diagnostics, default severities when no override matches,
-no config-file reads, no CLI config wiring, no file reads, no filesystem
-scanning, no output, no JSON serialization, no compiler invocation, no
-`ari --check`, and parity behavior.
+Future tests should validate already-parsed override data flowing through
+in-memory rule aggregation, first-diagnostic preservation, later config-aware
+diagnostic rewriting, multiple diagnostics, default severities when no override
+matches, no config-file reads, no CLI config wiring, no file reads, no
+filesystem scanning, no output, no JSON serialization, no compiler invocation,
+no `ari --check`, and parity behavior.
 
 No config override tests are added yet. Future config override tests should
 validate `ari-lint.rules` discovery, `--config` behavior, `--rule` behavior,
