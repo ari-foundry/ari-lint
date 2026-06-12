@@ -40,6 +40,7 @@ single-diagnostic severity override application added /
 in-memory lint severity override aggregation added /
 file-backed lint severity override aggregation added /
 CLI file lint rule override application added /
+CLI diagnostic severity override application added /
 config precedence fixture plan added /
 initial config precedence fixtures and lightweight checks added /
 shell-only config precedence fixture checks added /
@@ -225,6 +226,13 @@ and test work.
       `tools/lint`, wiring `main`, or calling process exit. CLI rule override
       dispatch tests, config-file integration, output behavior, and parity
       checks remain future work.
+- [x] Apply parsed command-line `--rule` severity overrides to source-file
+      diagnostic collection for explicit token and main-facing paths, rewriting
+      collected diagnostic severities before human stderr or JSON stdout output
+      without reading config files, discovering config paths, traversing
+      directories, invoking the compiler, executing `ari --check`, calling
+      `tools/lint`, adding tests, or calling process exit. Config-file
+      integration, executable tests, and parity checks remain future work.
 - [x] Add a config precedence fixture plan for future default, config-file,
       explicit `--config`, and command-line `--rule` precedence coverage,
       without adding fixture files, reading config files, discovering
