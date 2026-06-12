@@ -1,15 +1,17 @@
 // CLI model, explicit-token parsing, semantic rule override parsing bridge,
 // stdout-free dispatch, internal exit-code data, explicit-token list-rules
-// command wiring, explicit-token entry point, OS argv integration, and an
-// internal source-file lint path. The positional source file input and
-// documented options are represented here. This file reads process arguments
-// only through the verified std::env::args boundary. Main now returns the
-// internal command exit-code mapping through this path, while source-file
-// dispatch reads explicitly provided file paths through the source boundary,
-// runs in-memory lint aggregation, and validates parsed --rule overrides when
-// provided. It does not read environment state, discover config files,
-// serialize JSON, write stdout/stderr, recursively scan source trees, call
-// tools/lint, call process exit, or invoke ari --check.
+// command wiring, explicit-token entry point, OS argv integration, a
+// main-facing list-rules stdout path, and an internal source-file lint path.
+// The positional source file input and documented options are represented here.
+// This file reads process arguments only through the verified std::env::args
+// boundary. Main now returns the internal command exit-code mapping through
+// this path, while source-file dispatch reads explicitly provided file paths
+// through the source boundary, runs in-memory lint aggregation, and validates
+// parsed --rule overrides when provided. Only the main-facing list-rules path
+// writes stdout through the verified output adapter. It does not read
+// environment state, discover config files, serialize JSON, write stderr,
+// recursively scan source trees, call tools/lint, call process exit, or invoke
+// ari --check.
 
 pub struct CliOptionMetadata {
   name: Slice[u8],
@@ -381,6 +383,41 @@ pub fn dispatch_cli_command(
   );
 }
 
+fn dispatch_cli_command_with_list_rules_stdout(
+  zone: ref mut Zone,
+  parse_result: CliParseResult
+) -> CliCommandResult {
+  if parse_result.problem_count > 0 || parse_result.args.rule_override_problem_count > 0 {
+    return dispatch_cli_command(zone, parse_result);
+  }
+
+  if parse_result.args.list_rules_requested {
+    let list_rules = super::output::known_list_rules_output(zone);
+    let text = super::output::format_list_rules_human(zone, list_rules);
+    let write_result = super::output::write_stdout_text(zone, ref text);
+    if !write_result.wrote_stdout {
+      return cli_command_result(
+        CliListRulesText,
+        true,
+        0,
+        0,
+        cli_unavailable_exit_code(zone),
+        "List-rules stdout write failed through the verified stdout adapter."
+      );
+    }
+    return cli_command_result(
+      CliListRulesText,
+      true,
+      0,
+      0,
+      cli_success_exit_code(zone),
+      "List-rules text was written to stdout through the verified stdout adapter."
+    );
+  }
+
+  return dispatch_cli_command(zone, parse_result);
+}
+
 pub fn run_explicit_cli_tokens(
   zone: ref mut Zone,
   tokens: std::vec::Vec[std::string::String]
@@ -418,6 +455,12 @@ pub fn run_os_argv_cli(zone: ref mut Zone) -> CliCommandResult {
   return run_explicit_cli_tokens(zone, tokens);
 }
 
+pub fn run_os_argv_cli_with_list_rules_stdout(zone: ref mut Zone) -> CliCommandResult {
+  let tokens = read_os_argv_tokens(zone);
+  let parse_result = parse_cli_tokens(zone, tokens);
+  return dispatch_cli_command_with_list_rules_stdout(zone, parse_result);
+}
+
 // parse_cli_tokens consumes a caller-provided token list and records source
 // counts, first source file path, flags/options, raw rule override counts,
 // rule override problem count, and parse problem counts in CliParseResult.
@@ -452,3 +495,10 @@ pub fn run_os_argv_cli(zone: ref mut Zone) -> CliCommandResult {
 // and dispatcher through run_os_argv_cli. It does not read environment
 // variables, write output, or call process exit. Main wiring is limited to
 // returning the internal command exit code from this path.
+//
+// run_os_argv_cli_with_list_rules_stdout is the main-facing output path for
+// --list-rules only. It writes the existing human-readable list-rules text to
+// stdout through the verified stdout adapter, while parse errors, help, source
+// lint results, diagnostics, stderr, JSON, config discovery, compiler
+// invocation, ari --check, tools/lint, and process exit remain outside this
+// path.

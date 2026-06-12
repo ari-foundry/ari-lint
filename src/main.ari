@@ -12,7 +12,7 @@ mod parity;
 
 fn run_main_entry_shell() -> i64 {
   zone(65536) {
-    let result = cli::run_os_argv_cli();
+    let result = cli::run_os_argv_cli_with_list_rules_stdout();
     return result.exit_code.code;
   }
 }

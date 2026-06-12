@@ -27,8 +27,9 @@ Registry-backed in-memory rule dispatch has started for one exact known rule
 code and caller-provided source text, but the lightweight checks do not execute
 registry dispatch tests.
 The main entry now returns the existing OS argv CLI command exit-code mapping,
-but the lightweight checks do not execute main-entry tests or user-facing CLI
-output tests.
+and the main-facing `--list-rules` path writes human-readable list-rules text
+through the verified stdout adapter, but the lightweight checks do not execute
+main-entry tests or user-facing CLI output tests.
 
 Run the lightweight check script from the repository root:
 
@@ -237,14 +238,15 @@ parity behavior against current `tools/lint` once a parity runner exists.
 
 No executable main-entry tests are added yet. Future tests should cover main
 entry behavior, delegation from the main shell to OS argv CLI handling, returned
-exit-code mapping, stdout-free behavior, no process exit calls, and parity
-behavior against current `tools/lint` once a parity runner exists.
+exit-code mapping, list-rules stdout output, no stderr writes, no process exit
+calls, and parity behavior against current `tools/lint` once a parity runner
+exists.
 
 No executable OS argv integration tests are added yet. Future tests should
 cover `std::env::args` collection, argv[0] dropping, delegation into
-explicit-token parsing, environment isolation, stdout-free behavior, no process
-exit calls, and parity behavior against current `tools/lint` once a parity
-runner exists.
+explicit-token parsing, environment isolation, list-rules stdout output,
+stdout-free behavior for non-output paths, no process exit calls, and parity
+behavior against current `tools/lint` once a parity runner exists.
 
 No executable stdout/stderr output boundary tests are added yet. Future tests
 should cover the internal sink/result model, stdout versus stderr stream
@@ -298,8 +300,8 @@ stdout/stderr output, no JSON serialization, no compiler invocation, no
 No executable list-rules formatter tests are added yet. Future tests should
 cover list-rules metadata and formatting for rule code, short name, default
 severity, description, ordering, newline behavior, human-readable text
-stability, future JSON formatting, and parity behavior against current
-`tools/lint`.
+stability, main-facing stdout wiring, future JSON formatting, and parity
+behavior against current `tools/lint`.
 
 No executable config parser tests are added yet. Future config parser tests
 should validate caller-provided `RULE = SEVERITY` text, blank lines, comments,

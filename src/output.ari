@@ -1,7 +1,7 @@
 // Diagnostic output models, internal diagnostic JSON serialization,
 // internal list-rules formatting, output boundary data, and the minimal stdout
-// adapter. This file does not emit diagnostics, write stdout/stderr, read OS
-// argv, or run the CLI.
+// adapter. This file does not emit diagnostics, read OS argv, or run the CLI;
+// stdout writes happen only when callers explicitly invoke the adapter.
 
 pub enum OutputModeName {
   Human,
@@ -249,7 +249,7 @@ pub fn format_list_rules_human(
 // JSON, call process exit, or run the CLI.
 //
 // Human-readable diagnostic string construction, diagnostic arrays, stderr
-// output, final user-facing JSON output, and final user-facing list-rules CLI
-// output are future work. Source scanning, CLI main wiring, config parsing, and
-// ari --check invocation are also future work. The stdout adapter is internal
-// and must be called explicitly by future wiring.
+// output, and final user-facing JSON output are future work. Main-facing
+// list-rules stdout wiring is handled by the CLI layer through the explicit
+// stdout adapter. Source scanning, diagnostic output wiring, config parsing,
+// and ari --check invocation are also future work.

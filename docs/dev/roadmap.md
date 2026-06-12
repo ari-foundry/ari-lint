@@ -56,7 +56,8 @@ standalone build root wiring added /
 standalone test entrypoint added /
 release and compatibility policy documented /
 main OS argv exit-code wiring added /
-no user-facing lint output yet.
+main-facing list-rules stdout output added /
+no user-facing diagnostic lint output yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -119,6 +120,13 @@ and test work.
       calling `tools/lint`, or calling process exit. Main-entry tests,
       user-facing output, config-file discovery, and parity checks remain future
       work.
+- [x] Wire the main-facing OS argv `--list-rules` path to write the existing
+      human-readable list-rules text through the verified stdout adapter,
+      without writing stderr, serializing JSON, printing diagnostics,
+      discovering config files, traversing directories, invoking the compiler,
+      executing `ari --check`, calling `tools/lint`, or calling process exit.
+      User-facing diagnostic output, JSON output, stderr behavior, CLI output
+      tests, and parity checks remain future work.
 - [x] Add a minimal config text parser for caller-provided text using the
       documented `RULE = SEVERITY` shape, blank lines, and `#` comments,
       returning internal overrides and parse problems without reading
@@ -350,9 +358,9 @@ and test work.
 - [x] Add an internal human-readable list-rules formatter that converts the
       existing list-rules metadata into newline-terminated text containing rule code,
       short name, default severity, and description. User-facing
-      `--list-rules` CLI completion, CLI main integration, stdout/stderr output,
-      JSON output, config parsing, compiler invocation, formatter tests, and
-      parity behavior remain future work.
+      `--list-rules` CLI completion now writes stdout through the main-facing
+      OS argv path. Stderr output, JSON output, config parsing, compiler
+      invocation, formatter tests, and parity behavior remain future work.
 - [x] Add an internal stdout-free command dispatcher that maps parsed CLI args
       to internal command results, routes list-rules requests to the existing
       human-readable formatter, and returns explicit future-work placeholders for
