@@ -9,10 +9,11 @@ and in-memory missing-final-newline execution have started in source. In-memory
 lint run aggregation has also started for caller-provided source text,
 including first-diagnostic capture and with-overrides variants that preserve
 the same count and first-diagnostic shape for already-parsed severity override
-inputs over in-memory source and explicitly provided file paths, but these
-paths are not executed by these checks yet. A file-read boundary for one
-caller-provided path has started in source, but the lightweight checks do not
-execute file IO.
+inputs over in-memory source and explicitly provided file paths. Internal
+diagnostic vector collection APIs now push rule and lint diagnostics into
+caller-provided vectors, but these paths are not executed by these checks yet.
+A file-read boundary for one caller-provided path has started in source, but
+the lightweight checks do not execute file IO.
 The internal CLI file lint path routes the first explicit source-file argument
 through the file-read boundary and in-memory lint aggregation, and it validates
 parsed `--rule` overrides when provided. It carries the first internal
@@ -199,9 +200,10 @@ current `tools/lint`.
 
 No executable in-memory lint run aggregation tests are added yet. Future tests
 should cover combining rule diagnostics, diagnostic ordering, empty diagnostic
-sets, first-diagnostic preservation, already-parsed severity override data, no
-config-file reads, no filesystem scanning, no output or JSON serialization, no
-compiler invocation, and parity behavior against current `tools/lint`.
+sets, first-diagnostic preservation, caller-provided diagnostic vector
+collection, already-parsed severity override data, no config-file reads, no
+filesystem scanning, no output or JSON serialization, no compiler invocation,
+and parity behavior against current `tools/lint`.
 
 No CLI tests are added yet. Future CLI tests should validate positional source
 input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, invalid
@@ -274,8 +276,9 @@ reads, and the current first-diagnostic output wiring.
 No diagnostic output tests are added yet. Future diagnostic tests should
 validate human-readable output, JSON output shape, line/column fields,
 endLine/endColumn fields if supported, first diagnostic stderr output,
-severity, rule code, message, path normalization, and parity behavior against
-current `tools/lint`.
+internal diagnostic vector collection before output formatting, severity, rule
+code, message, path normalization, and parity behavior against current
+`tools/lint`.
 
 No executable human diagnostic formatter tests are added yet. Future formatter
 tests should validate single-diagnostic text, severity names, rule codes,
@@ -317,10 +320,10 @@ invocation, and parity behavior against current `tools/lint`.
 No executable file-backed lint severity override aggregation tests are added yet.
 Future tests should validate explicitly provided source paths, successful file
 reads feeding already-parsed overrides into in-memory rule diagnostics, read
-error preservation, multiple files sharing one override list, no config-file
-reads, no config discovery, no CLI config wiring, no directory traversal, no
-output, no JSON serialization, no compiler invocation, no `ari --check`, and
-parity behavior.
+error preservation, caller-provided diagnostic vector collection, multiple
+files sharing one override list, no config-file reads, no config discovery, no
+CLI config wiring, no directory traversal, no output, no JSON serialization, no
+compiler invocation, no `ari --check`, and parity behavior.
 
 No executable CLI file lint path tests are added yet. Future tests should cover
 explicit source-file arguments, successful file reads feeding in-memory lint

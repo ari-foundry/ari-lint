@@ -64,9 +64,10 @@ It does not move `tools/lint` or change build behavior.
   builds one newline-terminated diagnostic line in memory from an already-built
   diagnostic, and a related formatter joins caller-provided diagnostics into
   in-memory human-readable text. The main-facing source-file lint path writes
-  the first diagnostic to stderr. Full rule diagnostic collection, diagnostic
-  arrays, JSON diagnostic arrays, and final JSON schema stability remain future
-  work.
+  the first diagnostic to stderr. Rule and lint aggregation paths can now push
+  full internal diagnostics into caller-provided vectors without changing CLI
+  output. CLI diagnostic-array carrying, user-facing full diagnostic output,
+  JSON diagnostic arrays, and final JSON schema stability remain future work.
 - The source input boundary model has started for caller-provided source text,
   path-only source entries, and explicit single-file reads. It records internal
   source inputs without recursively scanning the filesystem, discovering config
@@ -79,21 +80,27 @@ It does not move `tools/lint` or change build behavior.
   call `tools/lint`.
 - The trailing-whitespace rule now scans caller-provided in-memory source text
   and returns an internal diagnostic count plus the first already-built
-  diagnostic for lines ending in spaces or tabs, without reading files,
-  scanning the filesystem, applying config, writing output, serializing JSON,
-  invoking the compiler, or calling `tools/lint`.
+  diagnostic for lines ending in spaces or tabs. It also has an internal
+  collection path that pushes each trailing-whitespace diagnostic into a
+  caller-provided vector, without reading files, scanning the filesystem,
+  applying config, writing output, serializing JSON, invoking the compiler, or
+  calling `tools/lint`.
 - The missing-final-newline rule now scans caller-provided in-memory source
   text, computes final line/column metadata from those bytes, and returns an
   internal diagnostic count plus the first already-built diagnostic when
-  non-empty content does not end with a newline, without reading files,
-  scanning the filesystem, applying config, writing output, serializing JSON,
-  invoking the compiler, or calling `tools/lint`.
+  non-empty content does not end with a newline. It also has an internal
+  collection path that pushes the missing-final-newline diagnostic into a
+  caller-provided vector, without reading files, scanning the filesystem,
+  applying config, writing output, serializing JSON, invoking the compiler, or
+  calling `tools/lint`.
 - An in-memory lint run aggregation path now combines diagnostics from the
   trailing-whitespace and missing-final-newline in-memory rules for one
   caller-provided source text and preserves the first already-built internal
-  diagnostic from those rule results. It does not read files, scan the
-  filesystem, apply config, write output, serialize JSON, invoke the compiler,
-  or call `tools/lint`.
+  diagnostic from those rule results. A related internal collection path pushes
+  the full collected diagnostics into a caller-provided vector for in-memory
+  source text and explicit single-file reads. It does not read config files,
+  scan the filesystem, apply config, write output, serialize JSON, invoke the
+  compiler, or call `tools/lint`.
 - The CLI source-file dispatch path now reads the first explicitly provided
   file path through the file-read boundary and returns internal diagnostic
   count, first diagnostic, and read-error count data in the command result. It
@@ -102,7 +109,8 @@ It does not move `tools/lint` or change build behavior.
   diagnostic to stderr through the verified stderr adapter. It does not
   serialize JSON, discover config files, read config files, traverse
   directories, invoke the compiler, call `ari --check`, call `tools/lint`, or
-  emit full diagnostic arrays.
+  emit full diagnostic arrays. CLI command results do not carry the internal
+  diagnostic vector yet.
 - A source-only parity runner skeleton now records intended comparison
   boundaries against current `tools/lint`, with all execution, file IO, and
   output-comparison flags false. It does not run `tools/lint`, invoke an
@@ -787,6 +795,11 @@ usable.
       to stderr through the verified stderr adapter without full diagnostic
       arrays, JSON output, config discovery, compiler invocation,
       `ari --check`, `tools/lint`, or process exit
+- [x] Add internal diagnostic vector collection for in-memory and explicit
+      file-backed linting through caller-provided vectors without CLI
+      diagnostic-array carrying, user-facing full diagnostic output, JSON
+      output, config discovery, compiler invocation, `ari --check`,
+      `tools/lint`, or process exit
 - [x] Add source-only parity runner skeleton without executing `tools/lint`,
       `ari-lint`, the Ari compiler, shell commands, file IO, or comparisons
 - [x] Record compiler-backed CI gate without running the Ari compiler,
