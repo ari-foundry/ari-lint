@@ -1,4 +1,5 @@
-// Diagnostic data shapes only. This file does not format output or serialize JSON.
+// Diagnostic data shapes and optional diagnostic carriers only. This file does
+// not format output or serialize JSON.
 
 pub enum OptionalPosition {
   Missing,
@@ -18,6 +19,11 @@ pub struct Diagnostic {
   severity: super::severity::Severity,
   rule_code: Slice[u8],
   message: Slice[u8],
+}
+
+pub enum OptionalDiagnostic {
+  NoDiagnostic,
+  SomeDiagnostic(Diagnostic),
 }
 
 pub fn source_span_with_end(
@@ -48,4 +54,26 @@ pub fn diagnostic_from_span(
     rule_code: rule_code,
     message: message,
   };
+}
+
+pub fn no_diagnostic() -> OptionalDiagnostic {
+  return NoDiagnostic;
+}
+
+pub fn some_diagnostic(diagnostic: Diagnostic) -> OptionalDiagnostic {
+  return SomeDiagnostic(diagnostic);
+}
+
+pub fn first_available_diagnostic(
+  current: OptionalDiagnostic,
+  candidate: OptionalDiagnostic
+) -> OptionalDiagnostic {
+  match current {
+    NoDiagnostic => {
+      return candidate;
+    }
+    SomeDiagnostic(diagnostic) => {
+      return SomeDiagnostic(diagnostic);
+    }
+  }
 }

@@ -408,10 +408,12 @@ require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-p
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
 require_grep "internal human diagnostic formatter added" docs/dev/roadmap.md
 require_grep "internal human diagnostic array formatter added" docs/dev/roadmap.md
+require_grep "trailing-whitespace first diagnostic capture added" docs/dev/roadmap.md
 require_grep "diagnostic JSON serializer is limited to placeholder internal text" docs/dev/ari-implementation-plan.md
 require_grep "JSON serializer is an internal placeholder" docs/dev/ari-implementation-plan.md
 require_grep "human-readable formatter now" docs/dev/ari-implementation-plan.md
 require_grep "caller-provided diagnostics into" docs/dev/ari-implementation-plan.md
+require_grep "first already-built" docs/dev/ari-implementation-plan.md
 require_grep "User-facing diagnostic output" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
 require_grep "human-readable list-rules formatter" docs/dev/ari-implementation-plan.md
@@ -421,6 +423,7 @@ require_grep "human-readable list-rules formatter added" docs/dev/roadmap.md
 require_grep "No diagnostic output tests are added yet" tests/README.md
 require_grep "No executable human diagnostic formatter tests are added yet" tests/README.md
 require_grep "No executable human diagnostic array formatter tests are added yet" tests/README.md
+require_grep "No executable trailing-whitespace first-diagnostic capture tests are added yet" tests/README.md
 require_grep "No executable diagnostic JSON serializer tests are added yet" tests/README.md
 require_grep "No executable source input boundary tests are added yet" tests/README.md
 require_grep "No executable list-rules formatter tests are added yet" tests/README.md
@@ -521,6 +524,8 @@ require_grep "call process exit" src/cli.ari
 require_grep "recursively scan source trees" src/cli.ari
 require_grep "Source-file lint diagnostics are available internally" src/cli.ari
 require_grep "future work" src/cli.ari
+require_grep "OptionalDiagnostic" src/diagnostic.ari
+require_grep "first_available_diagnostic" src/diagnostic.ari
 require_grep "DiagnosticOutputMetadata" src/output.ari
 require_grep "Human" src/output.ari
 require_grep "Json" src/output.ari
@@ -697,8 +702,10 @@ require_grep "lint/trailing-whitespace" src/rules/trailing_whitespace.ari
 require_grep "line_has_trailing_whitespace" src/rules/trailing_whitespace.ari
 require_grep "is_trailing_space_byte" src/rules/trailing_whitespace.ari
 require_grep "TrailingWhitespaceDiagnosticMapping" src/rules/trailing_whitespace.ari
+require_grep "TrailingWhitespaceLineResult" src/rules/trailing_whitespace.ari
 require_grep "trailing_whitespace_diagnostic_mapping" src/rules/trailing_whitespace.ari
 require_grep "TrailingWhitespaceRuleResult" src/rules/trailing_whitespace.ari
+require_grep "first_diagnostic" src/rules/trailing_whitespace.ari
 require_grep "lint_trailing_whitespace_in_memory" src/rules/trailing_whitespace.ari
 require_grep "lint_trailing_whitespace_rule" src/rules/trailing_whitespace.ari
 require_grep "RuleExecutionInput" src/rules/trailing_whitespace.ari
