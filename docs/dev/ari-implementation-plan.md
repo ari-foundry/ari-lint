@@ -69,9 +69,9 @@ It does not move `tools/lint` or change build behavior.
   paths can now push full internal diagnostics into caller-provided vectors,
   and the main-facing source-file lint path writes those collected human
   diagnostics to stderr. A JSON array serializer now joins caller-provided
-  diagnostics in memory by reusing the single-diagnostic serializer.
-  User-facing JSON output, executable serializer tests, and final JSON schema
-  stability remain future work.
+  diagnostics in memory by reusing the single-diagnostic serializer, and the
+  main-facing source-file `--json` path writes that array to stdout. Executable
+  serializer/output tests and final JSON schema stability remain future work.
 - The source input boundary model has started for caller-provided source text,
   path-only source entries, and explicit single-file reads. It records internal
   source inputs without recursively scanning the filesystem, discovering config
@@ -113,8 +113,9 @@ It does not move `tools/lint` or change build behavior.
   explicit caller-provided tokens or parsed source-file input and pushes full
   internal diagnostics into a caller-provided vector while returning existing
   count and exit-code data. The main-facing OS argv path formats and writes
-  those collected human diagnostics to stderr through the verified stderr
-  adapter. It does not serialize JSON, discover config files, read config
+  those collected human diagnostics to stderr, or serializes and writes those
+  collected diagnostics as JSON to stdout when `--json` is requested, through
+  the verified output adapters. It does not discover config files, read config
   files, traverse directories, invoke the compiler, call `ari --check`, or call
   `tools/lint`.
 - A source-only parity runner skeleton now records intended comparison
@@ -401,8 +402,8 @@ Current preparatory model skeleton files are source-only placeholders:
   the verified Ari `std::io::print_string` and
   `std::io::eprint_string` APIs for caller-provided `String` text and return
   local status data. It does not collect diagnostics from rule execution,
-  emit user-facing JSON output, read OS argv, or run the CLI. The CLI layer now
-  calls the stdout adapter for main-facing `--list-rules` output, and the
+  read OS argv, or run the CLI. The CLI layer now calls the stdout adapter for
+  main-facing `--list-rules` output and source-file JSON diagnostics, and the
   stderr adapter is wired for source-file human diagnostics.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description, and exposes a small constructor for
@@ -486,8 +487,8 @@ caller-provided `String` text, and the stdout/stderr output boundary is limited
 to status data for named future sinks.
 Compiler invocation, config discovery, config file reading, override
 application to lint execution, diagnostics output, stderr writing, stdout
-adapter wiring beyond main-facing `--list-rules`, process exit, diagnostic
-array serialization, user-facing JSON output, environment handling, source
+adapter wiring beyond main-facing `--list-rules` and source-file JSON output,
+process exit, JSON schema stability, environment handling, source
 filesystem scanning, directory traversal, main-entry tests, argv-boundary tests, OS-argv
 integration tests, config parser tests, rule override parser tests, severity
 resolution tests, diagnostic severity application tests, diagnostic JSON
@@ -821,6 +822,10 @@ usable.
       human diagnostics to stderr through the verified stderr adapter without
       JSON output, config discovery, compiler invocation, `ari --check`,
       `tools/lint`, or process exit
+- [x] Wire the main-facing source-file `--json` path to serialize collected
+      diagnostics and write them to stdout through the verified stdout adapter
+      without parse-error JSON output, config discovery, compiler invocation,
+      `ari --check`, `tools/lint`, or process exit
 - [x] Add source-only parity runner skeleton without executing `tools/lint`,
       `ari-lint`, the Ari compiler, shell commands, file IO, or comparisons
 - [x] Record compiler-backed CI gate without running the Ari compiler,
