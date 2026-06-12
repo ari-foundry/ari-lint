@@ -18,10 +18,10 @@ The internal CLI file lint path routes the first explicit source-file argument
 through the file-read boundary and in-memory lint aggregation, and it validates
 parsed `--rule` overrides when provided. It carries the first internal
 diagnostic in the command result. A separate internal CLI collection path can
-push full source-file diagnostics into a caller-provided vector, but the
-lightweight checks do not run CLI tests. The main-facing source-file lint path
-writes that first diagnostic to stderr through the verified stderr adapter, but
-the lightweight checks do not assert CLI output.
+push full source-file diagnostics into a caller-provided vector. The
+main-facing source-file lint path writes collected human diagnostics to stderr
+through the verified stderr adapter, but the lightweight checks do not assert
+CLI output.
 A source-only parity runner skeleton records future comparison boundaries, but
 the lightweight checks do not execute a parity runner.
 The config precedence fixture plan is documented.
@@ -247,16 +247,16 @@ parity behavior against current `tools/lint` once a parity runner exists.
 
 No executable main-entry tests are added yet. Future tests should cover main
 entry behavior, delegation from the main shell to OS argv CLI handling, returned
-exit-code mapping, list-rules stdout output, first diagnostic stderr output for
-source-file lint results, no process exit calls, and parity behavior against
-current `tools/lint` once a parity runner exists.
+exit-code mapping, list-rules stdout output, human diagnostics stderr output
+for source-file lint results, no process exit calls, and parity behavior
+against current `tools/lint` once a parity runner exists.
 
 No executable OS argv integration tests are added yet. Future tests should
 cover `std::env::args` collection, argv[0] dropping, delegation into
-explicit-token parsing, environment isolation, list-rules stdout output, first
-diagnostic stderr output for source-file lint results, stdout-free behavior for
-non-output paths, no process exit calls, and parity behavior against current
-`tools/lint` once a parity runner exists.
+explicit-token parsing, environment isolation, list-rules stdout output, human
+diagnostics stderr output for source-file lint results, stdout-free behavior
+for non-output paths, no process exit calls, and parity behavior against
+current `tools/lint` once a parity runner exists.
 
 No executable stdout/stderr output boundary tests are added yet. Future tests
 should cover the internal sink/result model, stdout versus stderr stream
@@ -272,11 +272,11 @@ reads, and later user-facing CLI output wiring.
 No executable stderr adapter tests are added yet. Future tests should cover the
 minimal `std::io::eprint_string` adapter, successful write status, failed write
 status if Ari exposes a practical failure path, no stdout writes, no OS argv
-reads, and the current first-diagnostic output wiring.
+reads, and the current human diagnostic output wiring.
 
 No diagnostic output tests are added yet. Future diagnostic tests should
 validate human-readable output, JSON output shape, line/column fields,
-endLine/endColumn fields if supported, first diagnostic stderr output,
+endLine/endColumn fields if supported, human diagnostics stderr output,
 internal diagnostic vector collection before output formatting, severity, rule
 code, message, path normalization, and parity behavior against current
 `tools/lint`.

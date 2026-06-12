@@ -58,6 +58,7 @@ CLI source lint first diagnostic carry added /
 main-facing first diagnostic stderr output added /
 internal diagnostic vector collection added /
 CLI diagnostic vector collection added /
+main-facing human diagnostics stderr output added /
 source-only parity runner skeleton added /
 compiler-backed CI gate documented /
 standalone build root wiring added /
@@ -66,9 +67,10 @@ release and compatibility policy documented /
 main OS argv exit-code wiring added /
 main-facing list-rules stdout output added /
 main-facing first diagnostic stderr output added /
+main-facing human diagnostics stderr output added /
 internal human diagnostic formatter added /
 internal human diagnostic array formatter added /
-no full user-facing diagnostic arrays or JSON output yet.
+no user-facing JSON output yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -122,7 +124,7 @@ and test work.
       API for caller-provided `String` text, returning local status data without
       reading OS argv, wiring diagnostic output, writing stdout, serializing
       JSON, invoking the compiler, scanning sources, executing lint rules, or
-      calling process exit. The main-facing first diagnostic stderr path has
+      calling process exit. The main-facing human diagnostic stderr path has
       since been wired; stderr-adapter tests and broader diagnostic output
       wiring remain future work.
 - [x] Add internal OS argv integration using the verified Ari `std::env::args`
@@ -365,8 +367,14 @@ and test work.
       main-facing output, writing full diagnostic arrays, serializing JSON,
       discovering config files, reading config files, traversing directories,
       invoking the compiler, executing `ari --check`, calling `tools/lint`, or
-      calling process exit. Main-facing full diagnostic output, JSON output,
-      tests, and parity checks remain future work.
+      calling process exit. Main-facing human diagnostic output has since been
+      wired; JSON output, tests, and parity checks remain future work.
+- [x] Wire the main-facing source-file lint path to format and write collected
+      human diagnostics to stderr through the verified stderr adapter, without
+      serializing JSON, discovering config files, reading config files,
+      traversing directories, invoking the compiler, executing `ari --check`,
+      calling `tools/lint`, or calling process exit. JSON output, tests, and
+      parity checks remain future work.
 - [x] Add a source-only parity runner skeleton that records the intended
       comparison boundary against current `tools/lint` without executing
       `tools/lint`, invoking an `ari-lint` binary, reading fixtures, writing

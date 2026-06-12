@@ -10,11 +10,11 @@
 // through the source boundary, runs in-memory lint aggregation, carries the
 // first internal diagnostic, and validates parsed --rule overrides when
 // provided. A separate collection path pushes full internal diagnostics into a
-// caller-provided vector without changing CLI output. The main-facing path
-// writes list-rules text to stdout and the first source lint diagnostic to
-// stderr through verified output adapters. It does not read environment state,
-// discover config files, serialize JSON, recursively scan source trees, call
-// tools/lint, call process exit, or invoke ari --check.
+// caller-provided vector. The main-facing path writes list-rules text to
+// stdout and source lint diagnostics to stderr through verified output
+// adapters. It does not read environment state, discover config files,
+// serialize JSON, recursively scan source trees, call tools/lint, call process
+// exit, or invoke ari --check.
 
 pub struct CliOptionMetadata {
   name: Slice[u8],
@@ -374,7 +374,7 @@ pub fn dispatch_cli_command(
       lint_result.diagnostic_count,
       lint_result.read_error_count,
       exit_code,
-      "Source-file lint diagnostics are available internally; user-facing output remains future work."
+      "Source-file lint diagnostics are available internally without writing output."
     );
     command_result.first_diagnostic = lint_result.first_diagnostic;
     return command_result;
@@ -390,20 +390,16 @@ pub fn dispatch_cli_command(
   );
 }
 
-fn write_optional_diagnostic_stderr(
+fn write_diagnostics_stderr(
   zone: ref mut Zone,
-  diagnostic: super::diagnostic::OptionalDiagnostic
+  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic]
 ) -> bool {
-  match diagnostic {
-    super::diagnostic::NoDiagnostic => {
-      return true;
-    }
-    super::diagnostic::SomeDiagnostic(value) => {
-      let text = super::output::format_diagnostic_human(zone, value);
-      let write_result = super::output::write_stderr_text(zone, ref text);
-      return write_result.wrote_stderr;
-    }
+  if diagnostics.len() == 0 {
+    return true;
   }
+  let text = super::output::format_diagnostics_human(zone, diagnostics);
+  let write_result = super::output::write_stderr_text(zone, ref text);
+  return write_result.wrote_stderr;
 }
 
 fn dispatch_cli_command_with_main_output(
@@ -439,11 +435,16 @@ fn dispatch_cli_command_with_main_output(
   }
 
   if parse_result.args.has_source_file {
-    var command_result = dispatch_cli_command(zone, parse_result);
+    var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 8);
+    var command_result = collect_cli_source_diagnostics(
+      zone,
+      parse_result,
+      ref mut diagnostics
+    );
     if command_result.diagnostic_count > 0 {
-      let wrote_stderr = write_optional_diagnostic_stderr(
+      let wrote_stderr = write_diagnostics_stderr(
         zone,
-        command_result.first_diagnostic
+        diagnostics
       );
       if !wrote_stderr {
         var failed_result = cli_command_result(
@@ -452,7 +453,7 @@ fn dispatch_cli_command_with_main_output(
           command_result.diagnostic_count,
           command_result.read_error_count,
           cli_unavailable_exit_code(zone),
-          "Source-file diagnostic stderr write failed through the verified stderr adapter."
+          "Source-file diagnostics stderr write failed through the verified stderr adapter."
         );
         failed_result.first_diagnostic = command_result.first_diagnostic;
         return failed_result;
@@ -507,7 +508,7 @@ pub fn collect_cli_source_diagnostics(
       collection_result.diagnostic_count,
       collection_result.read_error_count,
       exit_code,
-      "Source-file lint diagnostics were collected internally into a caller-provided vector; user-facing full diagnostic output remains future work."
+      "Source-file lint diagnostics were collected internally into a caller-provided vector; JSON output remains future work."
     );
     if diagnostics.len() > 0 {
       command_result.first_diagnostic =
@@ -592,12 +593,11 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // read_os_argv_tokens is the verified OS argv boundary. It reads arguments
 // through std::env::args, drops argv[0], and reuses the explicit-token parser
 // and dispatcher through run_os_argv_cli. It does not read environment
-// variables, write output, or call process exit. Main wiring is limited to
-// returning the internal command exit code from this path.
+// variables, write output, or call process exit. The main-facing wrapper adds
+// only the scoped stdout/stderr writes described below.
 //
 // run_os_argv_cli_with_main_output is the main-facing output path. It writes
-// the existing human-readable list-rules text to stdout and the first
-// source-file lint diagnostic to stderr through verified output adapters, while
-// parse errors, help, JSON, config discovery, compiler invocation, ari --check,
-// tools/lint, process exit, and full diagnostic arrays remain outside this
-// path.
+// the existing human-readable list-rules text to stdout and source-file lint
+// diagnostics to stderr through verified output adapters, while parse errors,
+// help, JSON, config discovery, compiler invocation, ari --check, tools/lint,
+// and process exit remain outside this path.
