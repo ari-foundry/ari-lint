@@ -40,8 +40,10 @@ writes collected diagnostics as a JSON array through the verified stdout
 adapter, the main-facing help path writes concise help text through the
 verified stdout adapter, and CLI parse problems write a short summary through
 the verified stderr adapter. Missing source-file input also writes a short
-summary through the verified stderr adapter, but the lightweight checks do not
-execute main-entry tests or user-facing CLI output tests.
+summary through the verified stderr adapter. Source-file read errors write a
+short summary through the verified stderr adapter without read-error JSON
+output, but the lightweight checks do not execute main-entry tests or
+user-facing CLI output tests.
 Internal single-diagnostic JSON field serialization has started, but the
 internal caller-provided diagnostic JSON array serializer has also started. The
 lightweight checks do not execute JSON serializer tests or assert a stable JSON
@@ -232,11 +234,12 @@ behavior against current `tools/lint` once a parity runner exists.
 
 No executable dispatcher tests are added yet. Future dispatcher tests should
 cover list-rules dispatch, missing-source commands, source-file lint requests,
-file read errors, lint diagnostics, first diagnostic command-result carrying,
-caller-provided diagnostic vector collection, parsed `--rule` override
-application, rule override parse-problem results, internal exit-code mapping,
-stdout-free behavior, and parity behavior against current `tools/lint` once a
-parity runner exists.
+file read errors, main-facing file read error stderr summaries, no read-error
+JSON output before a schema is defined, lint diagnostics,
+first diagnostic command-result carrying, caller-provided diagnostic vector
+collection, parsed `--rule` override application, rule override parse-problem
+results, internal exit-code mapping, stdout-free behavior, and parity behavior
+against current `tools/lint` once a parity runner exists.
 
 No executable exit-code tests are added yet. Future tests should cover the
 internal command-result mappings for success, usage-error, and unavailable

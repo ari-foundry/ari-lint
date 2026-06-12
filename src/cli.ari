@@ -12,11 +12,11 @@
 // provided. A separate collection path pushes full internal diagnostics into a
 // caller-provided vector. The main-facing path writes list-rules text to
 // stdout, source lint diagnostics to stderr, source-file JSON diagnostics to
-// stdout, CLI help text to stdout, and CLI parse problem summaries to stderr
-// through verified output adapters. Missing source-file input writes a short
-// stderr summary. It does not read environment state, discover config files,
-// recursively scan source trees, call tools/lint, call process exit, or invoke
-// ari --check.
+// stdout, CLI help text to stdout, CLI parse problem summaries to stderr, and
+// file read errors to stderr through verified output adapters. Missing
+// source-file input writes a short stderr summary. It does not read
+// environment state, discover config files, recursively scan source trees, call
+// tools/lint, call process exit, or invoke ari --check.
 
 pub struct CliOptionMetadata {
   name: Slice[u8],
@@ -438,6 +438,15 @@ fn write_missing_source_stderr(zone: ref mut Zone) -> bool {
   return write_result.wrote_stderr;
 }
 
+fn write_file_read_error_stderr(zone: ref mut Zone, path: Slice[u8]) -> bool {
+  var text = std::string::new(zone, 128);
+  text.append_string_in(zone, "ari-lint: unable to read source file: ");
+  text.append_string_in(zone, path);
+  text.append_string_in(zone, "\n");
+  let write_result = super::output::write_stderr_text(zone, ref text);
+  return write_result.wrote_stderr;
+}
+
 fn dispatch_cli_command_with_main_output(
   zone: ref mut Zone,
   parse_result: CliParseResult
@@ -517,6 +526,25 @@ fn dispatch_cli_command_with_main_output(
       parse_result,
       ref mut diagnostics
     );
+    if command_result.read_error_count > 0 {
+      let wrote_read_error_stderr = write_file_read_error_stderr(
+        zone,
+        parse_result.args.first_source_file
+      );
+      if !wrote_read_error_stderr {
+        var failed_read_result = cli_command_result(
+          CliSourceLintResult,
+          false,
+          command_result.diagnostic_count,
+          command_result.read_error_count,
+          cli_unavailable_exit_code(zone),
+          "Source-file read error stderr write failed through the verified stderr adapter."
+        );
+        failed_read_result.first_diagnostic = command_result.first_diagnostic;
+        return failed_read_result;
+      }
+      return command_result;
+    }
     if parse_result.args.json_requested {
       let wrote_stdout = write_diagnostics_json_stdout(
         zone,
@@ -710,8 +738,9 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // run_os_argv_cli_with_main_output is the main-facing output path. It writes
 // the existing human-readable list-rules text to stdout and source-file lint
 // diagnostics to stderr, or source-file JSON diagnostics to stdout when
-// --json is requested, through verified output adapters. CLI help writes a
-// concise stdout message, and CLI parse problems write a short summary to
-// stderr. Missing source-file input also writes a short stderr summary. Config
-// discovery, parse-error JSON, compiler invocation, ari --check, tools/lint,
-// and process exit remain outside this path.
+// --json is requested, through verified output adapters. Source-file read
+// errors write a short stderr summary without producing read-error JSON output.
+// CLI help writes a concise stdout message, and CLI parse problems write a
+// short summary to stderr. Missing source-file input also writes a short stderr
+// summary. Config discovery, parse-error JSON, compiler invocation, ari
+// --check, tools/lint, and process exit remain outside this path.
