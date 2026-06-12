@@ -185,6 +185,25 @@ pub fn serialize_diagnostic_json(
   return text;
 }
 
+pub fn serialize_diagnostics_json(
+  zone: ref mut Zone,
+  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic]
+) -> std::string::String {
+  var text = std::string::new(zone, diagnostics.len() * 256 + 2);
+  text.append_string_in(zone, "[");
+  var index = 0;
+  for diagnostic in diagnostics {
+    if index > 0 {
+      text.append_string_in(zone, ",");
+    }
+    let item = serialize_diagnostic_json(zone, diagnostic);
+    text.append_string_in(zone, item);
+    index = index + 1;
+  }
+  text.append_string_in(zone, "]");
+  return text;
+}
+
 pub fn format_diagnostic_human(
   zone: ref mut Zone,
   diagnostic: super::diagnostic::Diagnostic
@@ -346,6 +365,10 @@ pub fn format_list_rules_human(
 // Diagnostic. It escapes common string characters and includes nullable
 // end-position fields. It does not write stdout/stderr, choose output mode,
 // serialize diagnostic arrays, or claim the final JSON schema is stable.
+// serialize_diagnostics_json joins caller-provided diagnostics into one
+// in-memory JSON array by reusing the single-diagnostic serializer. It does not
+// collect diagnostics from rule execution, write stdout/stderr, choose output
+// mode, connect to CLI dispatch, or claim final schema stability.
 //
 // format_diagnostic_human builds one newline-terminated human-readable
 // diagnostic line in memory. It does not write stdout/stderr, choose output

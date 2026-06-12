@@ -422,8 +422,9 @@ require_grep "internal human diagnostic formatter added" docs/dev/roadmap.md
 require_grep "internal human diagnostic array formatter added" docs/dev/roadmap.md
 require_grep "trailing-whitespace first diagnostic capture added" docs/dev/roadmap.md
 require_grep "missing-final-newline first diagnostic capture added" docs/dev/roadmap.md
-require_grep "diagnostic JSON serializer is limited to one internal diagnostic object" docs/dev/ari-implementation-plan.md
+require_grep "diagnostic JSON serializers are limited to one internal diagnostic object" docs/dev/ari-implementation-plan.md
 require_grep "internal diagnostic JSON field serialization added" docs/dev/roadmap.md
+require_grep "internal diagnostic JSON array serialization added" docs/dev/roadmap.md
 require_grep "A minimal human-readable formatter" docs/dev/ari-implementation-plan.md
 require_grep "caller-provided diagnostics" docs/dev/ari-implementation-plan.md
 require_grep "first already-built" docs/dev/ari-implementation-plan.md
@@ -554,6 +555,7 @@ require_grep "severity" src/output.ari
 require_grep "rule code" src/output.ari
 require_grep "message" src/output.ari
 require_grep "serialize_diagnostic_json" src/output.ari
+require_grep "serialize_diagnostics_json" src/output.ari
 require_grep "format_json_string" src/output.ari
 require_grep "format_json_optional_position" src/output.ari
 require_grep "diagnostic_severity_name" src/output.ari
