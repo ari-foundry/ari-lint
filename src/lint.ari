@@ -3,7 +3,8 @@
 // The default paths do not apply config. The with-overrides paths accept
 // already-parsed severity overrides and preserve the same count and first
 // diagnostic shape while config-aware diagnostic rewriting remains future
-// work. Each file-backed path reads only explicit paths through the source
+// work. Internal diagnostic collection writes into caller-provided vectors
+// only. Each file-backed path reads only explicit paths through the source
 // boundary. No path should scan the filesystem, write output, serialize JSON,
 // invoke ari --check, or call tools/lint.
 
@@ -27,6 +28,17 @@ pub struct FileLintRunResult {
   reads_files: bool,
   scans_filesystem: bool,
   mut applies_config: bool,
+  writes_output: bool,
+  serializes_json: bool,
+  invokes_compiler: bool,
+}
+
+pub struct FileDiagnosticCollectionResult {
+  diagnostic_count: i64,
+  source_count: i64,
+  read_error_count: i64,
+  reads_files: bool,
+  scans_filesystem: bool,
   writes_output: bool,
   serializes_json: bool,
   invokes_compiler: bool,
@@ -60,6 +72,23 @@ fn append_file_lint_result(
   target.read_error_count = target.read_error_count + result.read_error_count;
 }
 
+fn file_diagnostic_collection_result(
+  diagnostic_count: i64,
+  source_count: i64,
+  read_error_count: i64
+) -> FileDiagnosticCollectionResult {
+  return FileDiagnosticCollectionResult {
+    diagnostic_count: diagnostic_count,
+    source_count: source_count,
+    read_error_count: read_error_count,
+    reads_files: true,
+    scans_filesystem: false,
+    writes_output: false,
+    serializes_json: false,
+    invokes_compiler: false,
+  };
+}
+
 pub fn lint_in_memory_source(
   zone: ref mut Zone,
   file_path: Slice[u8],
@@ -91,6 +120,30 @@ pub fn lint_in_memory_source(
     serializes_json: false,
     invokes_compiler: false,
   };
+}
+
+pub fn collect_lint_diagnostics_in_memory(
+  zone: ref mut Zone,
+  file_path: Slice[u8],
+  source_text: Slice[u8],
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> i64 {
+  var diagnostic_count = 0;
+  diagnostic_count = diagnostic_count +
+    super::rules::trailing_whitespace::collect_trailing_whitespace_diagnostics_in_memory(
+      zone,
+      file_path,
+      source_text,
+      diagnostics
+    );
+  diagnostic_count = diagnostic_count +
+    super::rules::missing_final_newline::collect_missing_final_newline_diagnostics_in_memory(
+      zone,
+      file_path,
+      source_text,
+      diagnostics
+    );
+  return diagnostic_count;
 }
 
 fn lint_in_memory_source_from_overrides(
@@ -170,6 +223,27 @@ pub fn lint_file_source(
   return result;
 }
 
+pub fn collect_file_lint_diagnostics(
+  zone: ref mut Zone,
+  path: Slice[u8],
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> FileDiagnosticCollectionResult {
+  match super::source::source_input_from_file(zone, path) {
+    std::Ok(text) => {
+      let diagnostic_count = collect_lint_diagnostics_in_memory(
+        zone,
+        path,
+        text.as_slice(),
+        diagnostics
+      );
+      return file_diagnostic_collection_result(diagnostic_count, 1, 0);
+    }
+    std::Err(problem) => {
+      return file_diagnostic_collection_result(0, 0, 1);
+    }
+  }
+}
+
 fn lint_file_source_from_overrides(
   zone: ref mut Zone,
   path: Slice[u8],
@@ -219,6 +293,12 @@ pub fn lint_file_source_with_overrides(
 // scan directories, write output, serialize JSON, invoke ari --check, or call
 // tools/lint. Config-aware diagnostic rewriting and CLI config integration
 // remain future work.
+//
+// collect_lint_diagnostics_in_memory and collect_file_lint_diagnostics push
+// full internal diagnostics into caller-provided vectors. They do not format
+// those diagnostics, write stderr, serialize JSON arrays, discover config
+// files, scan directories, invoke the compiler, execute ari --check, or call
+// tools/lint.
 
 pub fn lint_file_sources(
   zone: ref mut Zone,

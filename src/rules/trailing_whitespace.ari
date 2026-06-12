@@ -1,7 +1,8 @@
 // Trailing whitespace rule helpers and in-memory execution. This file scans
-// only caller-provided source text and captures the first internal diagnostic.
-// It does not read files, scan the filesystem, print diagnostics, serialize
-// JSON, or apply config overrides.
+// only caller-provided source text, captures the first internal diagnostic, and
+// can collect diagnostics into a caller-provided vector. This file does not
+// read external inputs and does not read files, scan the filesystem, print
+// diagnostics, serialize JSON, or apply config overrides.
 
 pub struct TrailingWhitespaceRuleModuleMetadata {
   code: Slice[u8],
@@ -32,9 +33,10 @@ pub struct TrailingWhitespaceRuleResult {
 // public in-memory rule function below performs whole caller-provided source
 // text scanning by splitting on newline bytes and reusing this helper. The
 // public result keeps a diagnostic count and the first already-built internal
-// diagnostic. File reading, filesystem traversal, config interaction, severity
-// override application, CLI parsing, diagnostics output, JSON serialization,
-// and ari --check invocation remain future work. Rule code
+// diagnostic; a separate collection path pushes each internal diagnostic into
+// a caller-provided vector. File reading, filesystem traversal, config
+// interaction, severity override application, CLI parsing, diagnostics output,
+// JSON serialization, and ari --check invocation remain future work. Rule code
 // lint/trailing-whitespace, short name trailing-whitespace, default severity
 // warning, and message trailing whitespace are confirmed by the reference
 // implementation.
@@ -132,6 +134,29 @@ fn trailing_whitespace_line_diagnostic(
   };
 }
 
+fn collect_trailing_whitespace_line_diagnostic(
+  file_path: Slice[u8],
+  line_number: i64,
+  line: Slice[u8],
+  diagnostics: ref mut std::vec::Vec[super::super::diagnostic::Diagnostic]
+) -> i64 {
+  let mapping = trailing_whitespace_diagnostic_mapping(
+    file_path,
+    line_number,
+    line
+  );
+  if mapping.has_diagnostic {
+    diagnostics.push(super::super::diagnostic::diagnostic_from_span(
+      mapping.span,
+      mapping.severity,
+      "lint/trailing-whitespace",
+      "trailing whitespace"
+    ));
+    return 1;
+  }
+  return 0;
+}
+
 pub fn lint_trailing_whitespace_in_memory(
   zone: ref mut Zone,
   file_path: Slice[u8],
@@ -179,6 +204,42 @@ pub fn lint_trailing_whitespace_in_memory(
     reads_files: false,
     scans_filesystem: false,
   };
+}
+
+pub fn collect_trailing_whitespace_diagnostics_in_memory(
+  zone: ref mut Zone,
+  file_path: Slice[u8],
+  source_text: Slice[u8],
+  diagnostics: ref mut std::vec::Vec[super::super::diagnostic::Diagnostic]
+) -> i64 {
+  var diagnostic_count = 0;
+  var line_start = 0;
+  var line_number = 1;
+  var index = 0;
+  while index < source_text.len() {
+    if source_text.get(index) == 10u8 {
+      diagnostic_count = diagnostic_count + collect_trailing_whitespace_line_diagnostic(
+        file_path,
+        line_number,
+        std::string::substring(source_text, line_start, index),
+        diagnostics
+      );
+      line_start = index + 1;
+      line_number = line_number + 1;
+    }
+    index = index + 1;
+  }
+
+  if line_start < source_text.len() {
+    diagnostic_count = diagnostic_count + collect_trailing_whitespace_line_diagnostic(
+      file_path,
+      line_number,
+      std::string::substring(source_text, line_start, source_text.len()),
+      diagnostics
+    );
+  }
+
+  return diagnostic_count;
 }
 
 pub fn lint_trailing_whitespace_rule(

@@ -1,5 +1,6 @@
 // Missing final newline rule helpers and in-memory execution. This file scans
-// only caller-provided source text and captures the first internal diagnostic.
+// only caller-provided source text, captures the first internal diagnostic, and
+// can collect diagnostics into a caller-provided vector.
 //
 // It does not read files, scan the filesystem, apply config overrides, print
 // output, serialize JSON, invoke ari --check, or call tools/lint.
@@ -32,10 +33,11 @@ pub struct MissingFinalNewlineRuleResult {
 // The content helper is intentionally limited to already-provided bytes. The
 // public in-memory rule function below computes final position metadata from
 // those same bytes and returns an internal diagnostic count plus the first
-// already-built internal diagnostic when the final newline is missing. File
-// reading, filesystem traversal, config interaction, severity override
-// application, CLI parsing, diagnostics output, JSON serialization, and
-// ari --check invocation remain future work. Rule code
+// already-built internal diagnostic when the final newline is missing. A
+// separate collection path pushes that internal diagnostic into a
+// caller-provided vector. File reading, filesystem traversal, config
+// interaction, severity override application, CLI parsing, diagnostics output,
+// JSON serialization, and ari --check invocation remain future work. Rule code
 // lint/missing-final-newline, short name missing-final-newline, default severity
 // warning, and message missing final newline are confirmed by the reference
 // implementation.
@@ -118,6 +120,31 @@ pub fn lint_missing_final_newline_in_memory(
     reads_files: false,
     scans_filesystem: false,
   };
+}
+
+pub fn collect_missing_final_newline_diagnostics_in_memory(
+  zone: ref mut Zone,
+  file_path: Slice[u8],
+  source_text: Slice[u8],
+  diagnostics: ref mut std::vec::Vec[super::super::diagnostic::Diagnostic]
+) -> i64 {
+  let position = final_position_for_source(source_text);
+  let mapping = missing_final_newline_diagnostic_mapping(
+    file_path,
+    position.line,
+    position.column,
+    source_text
+  );
+  if mapping.has_diagnostic {
+    diagnostics.push(super::super::diagnostic::diagnostic_from_span(
+      mapping.span,
+      mapping.severity,
+      "lint/missing-final-newline",
+      "missing final newline"
+    ));
+    return 1;
+  }
+  return 0;
 }
 
 pub fn lint_missing_final_newline_rule(

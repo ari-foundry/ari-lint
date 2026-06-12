@@ -262,6 +262,7 @@ require_grep "minimal stdout adapter added" docs/dev/roadmap.md
 require_grep "minimal stderr adapter added" docs/dev/roadmap.md
 require_grep "main-facing list-rules stdout output added" docs/dev/roadmap.md
 require_grep "main-facing first diagnostic stderr output added" docs/dev/roadmap.md
+require_grep "internal diagnostic vector collection added" docs/dev/roadmap.md
 require_grep "run_os_argv_cli_with_main_output" src/cli.ari
 require_grep "write_stdout_text" src/cli.ari
 require_grep "write_optional_diagnostic_stderr" src/cli.ari
@@ -653,6 +654,8 @@ require_grep "lint_file_source_from_overrides" src/lint.ari
 require_grep "lint_file_source_with_overrides" src/lint.ari
 require_grep "lint_file_sources" src/lint.ari
 require_grep "lint_file_sources_with_overrides" src/lint.ari
+require_grep "collect_lint_diagnostics_in_memory" src/lint.ari
+require_grep "collect_file_lint_diagnostics" src/lint.ari
 require_grep "append_file_lint_result" src/lint.ari
 require_grep "lint_trailing_whitespace_in_memory" src/lint.ari
 require_grep "lint_missing_final_newline_in_memory" src/lint.ari
@@ -720,6 +723,7 @@ require_grep "trailing_whitespace_diagnostic_mapping" src/rules/trailing_whitesp
 require_grep "TrailingWhitespaceRuleResult" src/rules/trailing_whitespace.ari
 require_grep "first_diagnostic" src/rules/trailing_whitespace.ari
 require_grep "lint_trailing_whitespace_in_memory" src/rules/trailing_whitespace.ari
+require_grep "collect_trailing_whitespace_diagnostics_in_memory" src/rules/trailing_whitespace.ari
 require_grep "lint_trailing_whitespace_rule" src/rules/trailing_whitespace.ari
 require_grep "RuleExecutionInput" src/rules/trailing_whitespace.ari
 require_grep "RuleExecutionResult" src/rules/trailing_whitespace.ari
@@ -746,6 +750,7 @@ require_grep "MissingFinalNewlineRuleResult" src/rules/missing_final_newline.ari
 require_grep "first_diagnostic" src/rules/missing_final_newline.ari
 require_grep "final_position_for_source" src/rules/missing_final_newline.ari
 require_grep "lint_missing_final_newline_in_memory" src/rules/missing_final_newline.ari
+require_grep "collect_missing_final_newline_diagnostics_in_memory" src/rules/missing_final_newline.ari
 require_grep "lint_missing_final_newline_rule" src/rules/missing_final_newline.ari
 require_grep "RuleExecutionInput" src/rules/missing_final_newline.ari
 require_grep "RuleExecutionResult" src/rules/missing_final_newline.ari
