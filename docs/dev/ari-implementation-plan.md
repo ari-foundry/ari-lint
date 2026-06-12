@@ -216,8 +216,11 @@ It does not move `tools/lint` or change build behavior.
   diagnostics for caller-provided source text without reading config files.
   File-backed lint aggregation can now apply already-parsed overrides while
   reading explicitly provided source paths through the existing file-read
-  boundary. `ari-lint.rules` discovery and config file reading are not
-  implemented yet.
+  boundary. An explicit config file parse boundary can now read one
+  caller-provided config file path and parse its text into the existing
+  internal override model without discovering `ari-lint.rules` or wiring CLI
+  config behavior. `ari-lint.rules` discovery, CLI config integration, and
+  config application remain future work.
 - The config precedence fixture plan is documented in
   `docs/dev/config-precedence-fixtures.md`. It records future default,
   config-file, explicit `--config`, and command-line `--rule` precedence
@@ -468,8 +471,10 @@ Current preparatory model skeleton files are source-only placeholders:
   validating those codes against the known rule registry. It also resolves
   effective severity data for a caller-provided rule code from an already-parsed
   override list and can rebuild one already-built diagnostic with that resolved
-  severity. It does not discover config files, read `ari-lint.rules`, inspect
-  CLI arguments, run lint rules, or apply config to lint execution.
+  severity. It can read and parse one explicit caller-provided config file path
+  into internal override data. It does not discover config files, read
+  `ari-lint.rules`, inspect CLI arguments, run lint rules, or apply config to
+  lint execution.
 
 These files do not implement user-facing rule execution,
 argument validation, diagnostics output, JSON serialization, or `ari --check`
@@ -482,7 +487,8 @@ stdout only for the `--list-rules` command through the verified adapter,
 the CLI parser is limited to explicit caller-provided token lists, raw option
 values, and explicit `--config` path capture without reading that path,
 the config parser is limited to caller-provided text, rule/severity
-pairs, blank lines, comments, and known-rule validation, the rule override
+pairs, blank lines, comments, known-rule validation, and one explicit
+caller-provided config file path without discovery or CLI integration, the rule override
 parser is limited to caller-provided `--rule` text, internal override
 construction, and known-rule validation, the severity override resolver is
 limited to effective severity data for a caller-provided rule code and
@@ -826,6 +832,11 @@ usable.
 - [x] Add shell-only executable config precedence fixture checks without parser
       execution, config discovery, CLI tests, output, JSON, compiler execution,
       `ari --check`, or `tools/lint`
+- [x] Add an explicit config file parse boundary that reads one caller-provided
+      config path and parses it into existing override data without
+      discovering `ari-lint.rules`, wiring CLI config behavior, applying config,
+      emitting output, serializing JSON, invoking the compiler, executing
+      `ari --check`, or calling `tools/lint`
 - [ ] Add Ari-backed config precedence checks before claiming stable config
       behavior
 - [x] Define executable rule module API after the initial layout and in-memory

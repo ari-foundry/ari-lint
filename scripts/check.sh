@@ -298,6 +298,7 @@ require_grep "file-backed lint severity override aggregation added" docs/dev/roa
 require_grep "CLI file lint rule override application added" docs/dev/roadmap.md
 require_grep "CLI diagnostic severity override application added" docs/dev/roadmap.md
 require_grep "CLI explicit config path capture added" docs/dev/roadmap.md
+require_grep "explicit config file parse boundary added" docs/dev/roadmap.md
 require_grep "config precedence fixture plan added" docs/dev/roadmap.md
 require_grep "initial config precedence fixtures and lightweight checks added" docs/dev/roadmap.md
 require_grep "shell-only config precedence fixture checks added" docs/dev/roadmap.md
@@ -310,6 +311,7 @@ require_grep "single-diagnostic application helper" docs/dev/ari-implementation-
 require_grep "override aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "file-backed override aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "captures the explicit .--config. path" docs/dev/ari-implementation-plan.md
+require_grep "explicit config file parse boundary" docs/dev/ari-implementation-plan.md
 require_grep "Validate caller-provided .--rule. overrides in the internal CLI file lint" docs/dev/ari-implementation-plan.md
 require_grep "shared rule execution input/result API" docs/dev/ari-implementation-plan.md
 require_grep "shared rule module API" docs/dev/ari-implementation-plan.md
@@ -324,6 +326,7 @@ require_grep "No executable in-memory lint severity override aggregation tests a
 require_grep "No executable file-backed lint severity override aggregation tests are added yet" tests/README.md
 require_grep 'parsed `--rule` override validation' tests/README.md
 require_grep 'explicit `--config` path is captured' tests/README.md
+require_grep "explicit config file parse boundary" tests/README.md
 require_grep "Shell-only executable config precedence fixture checks" tests/README.md
 require_grep "Ari-backed config precedence tests are not added" tests/README.md
 require_grep "Initial config precedence fixtures have started" tests/README.md
@@ -621,6 +624,7 @@ require_grep "ConfigSkeleton" src/config.ari
 require_grep "ConfigSourceMetadata" src/config.ari
 require_grep "OverridePrecedenceMetadata" src/config.ari
 require_grep "ConfigParseResult" src/config.ari
+require_grep "ConfigFileParseResult" src/config.ari
 require_grep "RuleOverrideParseResult" src/config.ari
 require_grep "RuleSeverityResolution" src/config.ari
 require_grep "DiagnosticSeverityApplication" src/config.ari
@@ -630,6 +634,9 @@ require_grep "ConfigMissingEquals" src/config.ari
 require_grep "ConfigUnknownRule" src/config.ari
 require_grep "ConfigInvalidSeverity" src/config.ari
 require_grep "parse_config_text" src/config.ari
+require_grep "parse_config_text_into" src/config.ari
+require_grep "parse_explicit_config_file" src/config.ari
+require_grep "parse_explicit_config_file_into" src/config.ari
 require_grep "parse_config_severity" src/config.ari
 require_grep "parse_rule_override_texts" src/config.ari
 require_grep "parse_rule_override_value" src/config.ari
@@ -640,6 +647,8 @@ require_grep "matched_override" src/config.ari
 require_grep "applies_to_diagnostics: false" src/config.ari
 require_grep "applies_to_diagnostics: true" src/config.ari
 require_grep "applies_to_lint_execution: false" src/config.ari
+require_grep "reads_config_files: true" src/config.ari
+require_grep "discovers_config_files: false" src/config.ari
 require_grep "writes_output: false" src/config.ari
 require_grep "serializes_json: false" src/config.ari
 require_grep "normalized_rule_override_code" src/config.ari
