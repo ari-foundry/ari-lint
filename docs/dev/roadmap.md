@@ -57,6 +57,7 @@ internal CLI file lint path added /
 CLI source lint first diagnostic carry added /
 main-facing first diagnostic stderr output added /
 internal diagnostic vector collection added /
+CLI diagnostic vector collection added /
 source-only parity runner skeleton added /
 compiler-backed CI gate documented /
 standalone build root wiring added /
@@ -357,6 +358,15 @@ and test work.
       `ari --check`, calling `tools/lint`, or calling process exit. CLI
       diagnostic-array carrying, user-facing full diagnostic output, JSON
       output, tests, and parity checks remain future work.
+- [x] Add an internal CLI diagnostic vector collection path for explicit
+      caller-provided tokens and parsed source-file input, pushing full
+      internal diagnostics into a caller-provided vector while returning
+      existing command-result count and exit-code data, without changing
+      main-facing output, writing full diagnostic arrays, serializing JSON,
+      discovering config files, reading config files, traversing directories,
+      invoking the compiler, executing `ari --check`, calling `tools/lint`, or
+      calling process exit. Main-facing full diagnostic output, JSON output,
+      tests, and parity checks remain future work.
 - [x] Add a source-only parity runner skeleton that records the intended
       comparison boundary against current `tools/lint` without executing
       `tools/lint`, invoking an `ari-lint` binary, reading fixtures, writing

@@ -1,18 +1,20 @@
 // CLI model, explicit-token parsing, semantic rule override parsing bridge,
 // stdout-free dispatch, internal exit-code data, explicit-token list-rules
 // command wiring, explicit-token entry point, OS argv integration, a
-// main-facing output path, and an internal source-file lint path.
+// main-facing output path, an internal source-file lint path, and an internal
+// caller-provided diagnostic collection path.
 // The positional source file input and documented options are represented here.
 // This file reads process arguments only through the verified std::env::args
 // boundary. Main now returns the internal command exit-code mapping through
 // this path, while source-file dispatch reads explicitly provided file paths
 // through the source boundary, runs in-memory lint aggregation, carries the
 // first internal diagnostic, and validates parsed --rule overrides when
-// provided. The main-facing path writes list-rules text to stdout and the first
-// source lint diagnostic to stderr through verified output adapters. It does
-// not read environment state, discover config files, serialize JSON,
-// recursively scan source trees, call tools/lint, call process exit, or invoke
-// ari --check.
+// provided. A separate collection path pushes full internal diagnostics into a
+// caller-provided vector without changing CLI output. The main-facing path
+// writes list-rules text to stdout and the first source lint diagnostic to
+// stderr through verified output adapters. It does not read environment state,
+// discover config files, serialize JSON, recursively scan source trees, call
+// tools/lint, call process exit, or invoke ari --check.
 
 pub struct CliOptionMetadata {
   name: Slice[u8],
@@ -470,6 +472,53 @@ pub fn run_explicit_cli_tokens(
   return dispatch_cli_command(zone, parse_result);
 }
 
+pub fn collect_explicit_cli_diagnostics(
+  zone: ref mut Zone,
+  tokens: std::vec::Vec[std::string::String],
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> CliCommandResult {
+  let parse_result = parse_cli_tokens(zone, tokens);
+  return collect_cli_source_diagnostics(zone, parse_result, diagnostics);
+}
+
+pub fn collect_cli_source_diagnostics(
+  zone: ref mut Zone,
+  parse_result: CliParseResult,
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> CliCommandResult {
+  if parse_result.problem_count > 0 || parse_result.args.rule_override_problem_count > 0 {
+    return dispatch_cli_command(zone, parse_result);
+  }
+
+  if parse_result.args.has_source_file {
+    let collection_result = super::lint::collect_file_lint_diagnostics(
+      zone,
+      parse_result.args.first_source_file,
+      diagnostics
+    );
+    let exit_code = cli_file_lint_exit_code(
+      zone,
+      collection_result.diagnostic_count,
+      collection_result.read_error_count
+    );
+    var command_result = cli_command_result(
+      CliSourceLintResult,
+      false,
+      collection_result.diagnostic_count,
+      collection_result.read_error_count,
+      exit_code,
+      "Source-file lint diagnostics were collected internally into a caller-provided vector; user-facing full diagnostic output remains future work."
+    );
+    if diagnostics.len() > 0 {
+      command_result.first_diagnostic =
+        super::diagnostic::some_diagnostic(diagnostics.get(0));
+    }
+    return command_result;
+  }
+
+  return dispatch_cli_command(zone, parse_result);
+}
+
 pub fn run_explicit_list_rules_command(zone: ref mut Zone) -> CliCommandResult {
   var tokens = std::vec::new<std::string::String>(zone, 1);
   tokens.push(std::string::from(zone, "--list-rules"));
@@ -521,6 +570,11 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // result with internal exit-code data. For source-file arguments it reads only
 // the first explicitly provided file path, runs in-memory lint aggregation, and
 // carries the first internal diagnostic without writing output.
+// collect_cli_source_diagnostics and collect_explicit_cli_diagnostics use the
+// same explicit source-file boundary, but push full internal diagnostics into a
+// caller-provided vector. They do not write output, serialize JSON, discover
+// config files, scan directories, call tools/lint, call process exit, or invoke
+// ari --check.
 // run_explicit_cli_tokens composes parsing and dispatch for callers that
 // already have tokens. These entry paths do not write stdout/stderr, serialize
 // JSON, read config files, recursively scan source trees, call tools/lint, call

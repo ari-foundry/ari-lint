@@ -109,8 +109,11 @@ It does not move `tools/lint` or change build behavior.
   diagnostic to stderr through the verified stderr adapter. It does not
   serialize JSON, discover config files, read config files, traverse
   directories, invoke the compiler, call `ari --check`, call `tools/lint`, or
-  emit full diagnostic arrays. CLI command results do not carry the internal
-  diagnostic vector yet.
+  emit full diagnostic arrays. A separate internal CLI collection path accepts
+  explicit caller-provided tokens or parsed source-file input and pushes full
+  internal diagnostics into a caller-provided vector while returning existing
+  count and exit-code data. Main-facing full diagnostic output and JSON output
+  remain future work.
 - A source-only parity runner skeleton now records intended comparison
   boundaries against current `tools/lint`, with all execution, file IO, and
   output-comparison flags false. It does not run `tools/lint`, invoke an
@@ -158,7 +161,9 @@ It does not move `tools/lint` or change build behavior.
   caller-provided token-list parser with the stdout-free command dispatcher and
   returns a `CliCommandResult`. It does not read OS argv, environment variables,
   stdout/stderr, JSON, config files, source files, compiler output, or
-  `tools/lint`.
+  `tools/lint`. A related explicit-token diagnostic collection path parses the
+  same caller-provided tokens and fills a caller-provided diagnostic vector
+  without writing output or serializing JSON.
 - A named explicit-token `--list-rules` command entry now builds the
   caller-provided `--list-rules` token list and reuses the existing parser,
   dispatcher, human-readable formatter, and exit-code mapping. It does not read
@@ -800,6 +805,11 @@ usable.
       diagnostic-array carrying, user-facing full diagnostic output, JSON
       output, config discovery, compiler invocation, `ari --check`,
       `tools/lint`, or process exit
+- [x] Add internal CLI diagnostic vector collection for explicit
+      caller-provided tokens and parsed source-file input through
+      caller-provided vectors without changing main-facing output, emitting
+      full diagnostic arrays, JSON output, config discovery, compiler
+      invocation, `ari --check`, `tools/lint`, or process exit
 - [x] Add source-only parity runner skeleton without executing `tools/lint`,
       `ari-lint`, the Ari compiler, shell commands, file IO, or comparisons
 - [x] Record compiler-backed CI gate without running the Ari compiler,

@@ -17,10 +17,11 @@ the lightweight checks do not execute file IO.
 The internal CLI file lint path routes the first explicit source-file argument
 through the file-read boundary and in-memory lint aggregation, and it validates
 parsed `--rule` overrides when provided. It carries the first internal
-diagnostic in the command result, but the lightweight checks do not run CLI
-tests. The main-facing source-file lint path writes that first diagnostic to
-stderr through the verified stderr adapter, but the lightweight checks do not
-assert CLI output.
+diagnostic in the command result. A separate internal CLI collection path can
+push full source-file diagnostics into a caller-provided vector, but the
+lightweight checks do not run CLI tests. The main-facing source-file lint path
+writes that first diagnostic to stderr through the verified stderr adapter, but
+the lightweight checks do not assert CLI output.
 A source-only parity runner skeleton records future comparison boundaries, but
 the lightweight checks do not execute a parity runner.
 The config precedence fixture plan is documented.
@@ -223,8 +224,8 @@ behavior against current `tools/lint` once a parity runner exists.
 No executable dispatcher tests are added yet. Future dispatcher tests should
 cover list-rules dispatch, unsupported commands, source-file lint requests,
 file read errors, lint diagnostics, first diagnostic command-result carrying,
-parsed `--rule` override application, rule override parse-problem results,
-internal exit-code mapping,
+caller-provided diagnostic vector collection, parsed `--rule` override
+application, rule override parse-problem results, internal exit-code mapping,
 stdout-free behavior, and parity behavior against current `tools/lint` once a
 parity runner exists.
 
@@ -329,10 +330,10 @@ No executable CLI file lint path tests are added yet. Future tests should cover
 explicit source-file arguments, successful file reads feeding in-memory lint
 aggregation, parsed `--rule` override validation, rule override parse
 problems, file read error preservation, diagnostic counts, first diagnostic
-command-result carrying, exit-code mapping, no directory traversal, no config
-discovery, no config-file reads, no stdout/stderr output, no JSON
-serialization, no compiler invocation, no `ari --check`, and parity behavior
-against current `tools/lint`.
+command-result carrying, caller-provided diagnostic vector collection,
+exit-code mapping, no directory traversal, no config discovery, no config-file
+reads, no stdout/stderr output, no JSON serialization, no compiler invocation,
+no `ari --check`, and parity behavior against current `tools/lint`.
 
 No executable list-rules formatter tests are added yet. Future tests should
 cover list-rules metadata and formatting for rule code, short name, default
