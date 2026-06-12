@@ -19,9 +19,10 @@ It does not move `tools/lint` or change build behavior.
   diagnostics to stderr through the verified stderr adapter. The main-facing
   source-file `--json` path writes collected diagnostic JSON to stdout, and CLI
   help writes concise text to stdout. CLI parse problems write a short summary
-  to stderr. It does not read environment variables, produce parse-error JSON,
-  discover config files, traverse directories, invoke the compiler, invoke
-  `ari --check`, call `tools/lint`, or call process exit.
+  to stderr, and missing source-file input writes a short summary to stderr. It
+  does not read environment variables, produce parse-error JSON, discover
+  config files, traverse directories, invoke the compiler, invoke `ari --check`,
+  call `tools/lint`, or call process exit.
 - The rule registry, severity, and config model skeleton has started as
   preparatory source-only declarations. The registry now constructs known
   entries for `lint/trailing-whitespace` and `lint/missing-final-newline` from
@@ -59,9 +60,10 @@ It does not move `tools/lint` or change build behavior.
   writes collected human diagnostics through the verified stderr adapter.
   Source-file `--json` output writes collected diagnostic JSON through stdout,
   and CLI help writes concise text through stdout. CLI parse problems write a
-  short summary through stderr. The path does not read environment variables,
-  call process exit, produce parse-error JSON, invoke the compiler, or
-  recursively scan sources.
+  short summary through stderr, and missing source-file input writes a short
+  summary through stderr. The path does not read environment variables, call
+  process exit, produce parse-error JSON, invoke the compiler, or recursively
+  scan sources.
 - The diagnostic output metadata skeleton has started as data-only declarations
   for human and JSON output modes, diagnostic location fields, and planned
   diagnostic fields. The JSON serializer now builds one internal JSON object
@@ -140,7 +142,7 @@ It does not move `tools/lint` or change build behavior.
   human-readable list-rules formatter and routes source-file requests through
   file reading plus in-memory lint aggregation. It validates parsed `--rule`
   overrides before source-file linting when provided, while keeping
-  parse-problem, help, and unsupported command paths as internal command
+  parse-problem, help, and missing-source command paths as internal command
   results. User-facing stdout/stderr output, JSON output, source
   scanning, compiler invocation, config-file parsing, diagnostics output, and
   parity tests remain future work.
@@ -167,8 +169,9 @@ It does not move `tools/lint` or change build behavior.
   mapping from this path, and the main-facing `--list-rules` branch writes
   human-readable list-rules text to stdout. The main-facing help, source-file
   diagnostic, source-file JSON diagnostic, and parse problem output paths are
-  also wired through verified output adapters. Config discovery, compiler
-  invocation, detailed help parity, and tests remain future work.
+  also wired through verified output adapters. Missing source-file input writes
+  a short stderr summary. Config discovery, compiler invocation, detailed help
+  parity, and tests remain future work.
 - An internal explicit-token entry path now composes the existing
   caller-provided token-list parser with the stdout-free command dispatcher and
   returns a `CliCommandResult`. It does not read OS argv, environment variables,
@@ -845,6 +848,10 @@ usable.
 - [x] Wire the main-facing CLI help path to write concise help text to stdout
       through the verified stdout adapter without config discovery, compiler
       invocation, `ari --check`, `tools/lint`, or process exit
+- [x] Wire the main-facing missing source-file path to write a short
+      usage-error summary to stderr through the verified stderr adapter without
+      config discovery, compiler invocation, `ari --check`, `tools/lint`, or
+      process exit
 - [x] Add source-only parity runner skeleton without executing `tools/lint`,
       `ari-lint`, the Ari compiler, shell commands, file IO, or comparisons
 - [x] Record compiler-backed CI gate without running the Ari compiler,

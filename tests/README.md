@@ -39,8 +39,9 @@ through the verified stdout adapter. The main-facing source-file `--json` path
 writes collected diagnostics as a JSON array through the verified stdout
 adapter, the main-facing help path writes concise help text through the
 verified stdout adapter, and CLI parse problems write a short summary through
-the verified stderr adapter, but the lightweight checks do not execute
-main-entry tests or user-facing CLI output tests.
+the verified stderr adapter. Missing source-file input also writes a short
+summary through the verified stderr adapter, but the lightweight checks do not
+execute main-entry tests or user-facing CLI output tests.
 Internal single-diagnostic JSON field serialization has started, but the
 internal caller-provided diagnostic JSON array serializer has also started. The
 lightweight checks do not execute JSON serializer tests or assert a stable JSON
@@ -230,7 +231,7 @@ positional files, the internal OS argv integration entry path, plus parity
 behavior against current `tools/lint` once a parity runner exists.
 
 No executable dispatcher tests are added yet. Future dispatcher tests should
-cover list-rules dispatch, unsupported commands, source-file lint requests,
+cover list-rules dispatch, missing-source commands, source-file lint requests,
 file read errors, lint diagnostics, first diagnostic command-result carrying,
 caller-provided diagnostic vector collection, parsed `--rule` override
 application, rule override parse-problem results, internal exit-code mapping,
@@ -244,7 +245,7 @@ exit behavior with current `tools/lint` once CLI wiring and a parity runner
 exist.
 
 No executable explicit-token entry tests are added yet. Future entry-path tests
-should cover list-rules token input, parse problems, unsupported commands,
+should cover list-rules token input, parse problems, missing source input,
 source-file lint requests, stdout-free behavior, and parity behavior against
 current `tools/lint` once a parity runner exists.
 
@@ -257,16 +258,18 @@ No executable main-entry tests are added yet. Future tests should cover main
 entry behavior, delegation from the main shell to OS argv CLI handling, returned
 exit-code mapping, list-rules stdout output, human diagnostics stderr output
 for source-file lint results, source-file JSON stdout output, help stdout
-output, CLI parse problem stderr output, no process exit calls, and parity
-behavior against current `tools/lint` once a parity runner exists.
+output, CLI parse problem stderr output, missing source stderr output, no
+process exit calls, and parity behavior against current `tools/lint` once a
+parity runner exists.
 
 No executable OS argv integration tests are added yet. Future tests should
 cover `std::env::args` collection, argv[0] dropping, delegation into
 explicit-token parsing, environment isolation, list-rules stdout output, human
 diagnostics stderr output for source-file lint results, stdout-free behavior
 for non-output paths, source-file JSON stdout output, help stdout output, CLI
-parse problem stderr output, no process exit calls, and parity behavior against
-current `tools/lint` once a parity runner exists.
+parse problem stderr output, missing source stderr output, no process exit
+calls, and parity behavior against current `tools/lint` once a parity runner
+exists.
 
 No executable stdout/stderr output boundary tests are added yet. Future tests
 should cover the internal sink/result model, stdout versus stderr stream
