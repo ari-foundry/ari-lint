@@ -264,9 +264,10 @@ require_grep "main-facing list-rules stdout output added" docs/dev/roadmap.md
 require_grep "main-facing first diagnostic stderr output added" docs/dev/roadmap.md
 require_grep "internal diagnostic vector collection added" docs/dev/roadmap.md
 require_grep "CLI diagnostic vector collection added" docs/dev/roadmap.md
+require_grep "main-facing human diagnostics stderr output added" docs/dev/roadmap.md
 require_grep "run_os_argv_cli_with_main_output" src/cli.ari
 require_grep "write_stdout_text" src/cli.ari
-require_grep "write_optional_diagnostic_stderr" src/cli.ari
+require_grep "write_diagnostics_stderr" src/cli.ari
 require_grep "collect_cli_source_diagnostics" src/cli.ari
 require_grep "collect_explicit_cli_diagnostics" src/cli.ari
 require_grep "write_stderr_text" src/output.ari
@@ -426,7 +427,7 @@ require_grep "JSON serializer is an internal placeholder" docs/dev/ari-implement
 require_grep "human-readable formatter now" docs/dev/ari-implementation-plan.md
 require_grep "caller-provided diagnostics into" docs/dev/ari-implementation-plan.md
 require_grep "first already-built" docs/dev/ari-implementation-plan.md
-require_grep "first diagnostic to stderr" docs/dev/ari-implementation-plan.md
+require_grep "collected human diagnostics to stderr" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
 require_grep "human-readable list-rules formatter" docs/dev/ari-implementation-plan.md
 require_grep "stdout/stderr output boundary model" docs/dev/ari-implementation-plan.md
@@ -532,7 +533,7 @@ require_grep "raw_rule_override" src/cli.ari
 require_grep "semantic rule override parsing bridge" src/cli.ari
 require_grep "validates parsed --rule overrides" src/cli.ari
 require_grep "does not read environment" src/cli.ari
-require_grep "Main wiring is limited to" src/cli.ari
+require_grep "The main-facing wrapper adds" src/cli.ari
 require_grep "write stdout/stderr" src/cli.ari
 require_grep "call process exit" src/cli.ari
 require_grep "recursively scan source trees" src/cli.ari
