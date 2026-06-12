@@ -5,16 +5,16 @@
 // output, serialize JSON, invoke ari --check, or call tools/lint.
 
 pub struct MissingFinalNewlineRuleModuleMetadata {
-  code: String,
-  short_name: String,
-  default_severity: String,
-  layout_status: String,
+  code: Slice[u8],
+  short_name: Slice[u8],
+  default_severity: Slice[u8],
+  layout_status: Slice[u8],
 }
 
 struct MissingFinalNewlineDiagnosticMapping {
   has_diagnostic: bool,
-  span: super::diagnostic::SourceSpan,
-  severity: super::severity::Severity,
+  span: super::super::diagnostic::SourceSpan,
+  severity: super::super::severity::Severity,
 }
 
 struct MissingFinalNewlineFinalPosition {
@@ -23,14 +23,14 @@ struct MissingFinalNewlineFinalPosition {
 }
 
 pub struct MissingFinalNewlineRuleResult {
-  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
+  diagnostic_count: i64,
   reads_files: bool,
   scans_filesystem: bool,
 }
 
 // The content helper is intentionally limited to already-provided bytes. The
 // public in-memory rule function below computes final position metadata from
-// those same bytes and returns internal diagnostics when the final newline is
+// those same bytes and returns an internal diagnostic count when the final newline is
 // missing. File reading, filesystem traversal, config interaction, severity
 // override application, CLI parsing, diagnostics output, JSON serialization,
 // and ari --check invocation remain future work. Rule code
@@ -66,49 +66,50 @@ fn final_position_for_source(content: Slice[u8]) -> MissingFinalNewlineFinalPosi
 }
 
 fn missing_final_newline_diagnostic_mapping(
-  file_path: String,
+  file_path: Slice[u8],
   final_line: i64,
   final_column: i64,
-  content: Slice[u8],
+  content: Slice[u8]
 ) -> MissingFinalNewlineDiagnosticMapping {
   let has_diagnostic = content_is_missing_final_newline(content);
   return MissingFinalNewlineDiagnosticMapping {
     has_diagnostic: has_diagnostic,
-    span: super::diagnostic::source_span_with_end(
+    span: super::super::diagnostic::source_span_with_end(
       file_path,
       final_line,
       final_column,
       final_line,
-      final_column + 1,
+      final_column + 1
     ),
-    severity: super::severity::Warning,
+    severity: super::super::severity::Warning,
   };
 }
 
 pub fn lint_missing_final_newline_in_memory(
   zone: ref mut Zone,
   file_path: Slice[u8],
-  source_text: Slice[u8],
+  source_text: Slice[u8]
 ) -> MissingFinalNewlineRuleResult {
-  var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 1);
   let position = final_position_for_source(source_text);
   let mapping = missing_final_newline_diagnostic_mapping(
-    std::string::from(zone, file_path),
+    file_path,
     position.line,
     position.column,
-    source_text,
+    source_text
   );
+  var diagnostic_count = 0;
   if mapping.has_diagnostic {
-    diagnostics.push(super::diagnostic::diagnostic_from_span(
+    let diagnostic = super::super::diagnostic::diagnostic_from_span(
       mapping.span,
       mapping.severity,
       "lint/missing-final-newline",
-      "missing final newline",
-    ));
+      "missing final newline"
+    );
+    diagnostic_count = 1;
   }
 
   return MissingFinalNewlineRuleResult {
-    diagnostics: diagnostics,
+    diagnostic_count: diagnostic_count,
     reads_files: false,
     scans_filesystem: false,
   };
@@ -116,16 +117,15 @@ pub fn lint_missing_final_newline_in_memory(
 
 pub fn lint_missing_final_newline_rule(
   zone: ref mut Zone,
-  input: super::rule::RuleExecutionInput,
-) -> super::rule::RuleExecutionResult {
+  input: super::super::rule::RuleExecutionInput
+) -> super::super::rule::RuleExecutionResult {
   let result = lint_missing_final_newline_in_memory(
     zone,
-    input.file_path.as_slice(),
-    input.source_text.as_slice(),
+    input.file_path,
+    input.source_text
   );
-  return super::rule::rule_execution_result(
-    zone,
+  return super::super::rule::rule_execution_result(
     "lint/missing-final-newline",
-    result.diagnostics,
+    result.diagnostic_count
   );
 }

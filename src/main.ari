@@ -1,9 +1,20 @@
-// Main entry shell only. It returns success without reading process state,
-// producing output, scanning source files, executing lint rules, calling
-// tools/lint, or invoking ari --check.
+mod cli;
+mod severity;
+mod diagnostic;
+mod output;
+mod rule;
+mod registry;
+mod rules;
+mod config;
+mod source;
+mod lint;
+mod parity;
 
 fn run_main_entry_shell() -> i64 {
-  return 0;
+  zone(65536) {
+    let result = cli::run_os_argv_cli();
+    return result.exit_code.code;
+  }
 }
 
 fn main() -> i64 {

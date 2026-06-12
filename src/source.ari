@@ -10,21 +10,21 @@ pub enum SourceInputOrigin {
 }
 
 pub struct SourceInput {
-  path: String,
-  text: Option[String],
+  path: Slice[u8],
+  has_text: bool,
   origin: SourceInputOrigin,
   reads_file: bool,
   recursively_scans_filesystem: bool,
 }
 
 pub struct SourceInputSet {
-  inputs: std::vec::Vec[SourceInput],
+  input_count: i64,
   reads_files: bool,
   recursively_scans_filesystem: bool,
 }
 
 pub struct SourceFileReadBoundary {
-  api: String,
+  api: Slice[u8],
   reads_file: bool,
   recursively_scans_filesystem: bool,
   discovers_config: bool,
@@ -35,11 +35,11 @@ pub struct SourceFileReadBoundary {
 pub fn source_input_from_text(
   zone: ref mut Zone,
   path: Slice[u8],
-  text: Slice[u8],
+  text: Slice[u8]
 ) -> SourceInput {
   return SourceInput {
-    path: std::string::from(zone, path),
-    text: Some<String>(std::string::from(zone, text)),
+    path: path,
+    has_text: true,
     origin: ProvidedText,
     reads_file: false,
     recursively_scans_filesystem: false,
@@ -48,21 +48,11 @@ pub fn source_input_from_text(
 
 pub fn source_input_from_path(
   zone: ref mut Zone,
-  path: Slice[u8],
+  path: Slice[u8]
 ) -> SourceInput {
   return SourceInput {
-    path: std::string::from(zone, path),
-    text: None<String>(),
-    origin: PathOnly,
-    reads_file: false,
-    recursively_scans_filesystem: false,
-  };
-}
-
-fn source_input_from_owned_path(path: String) -> SourceInput {
-  return SourceInput {
     path: path,
-    text: None<String>(),
+    has_text: false,
     origin: PathOnly,
     reads_file: false,
     recursively_scans_filesystem: false,
@@ -71,20 +61,16 @@ fn source_input_from_owned_path(path: String) -> SourceInput {
 
 pub fn source_input_set_from_paths(
   zone: ref mut Zone,
-  paths: std::vec::Vec[String],
+  paths: std::vec::Vec[std::string::String]
 ) -> SourceInputSet {
-  var inputs = std::vec::new<SourceInput>(zone, paths.len());
-  for path in paths {
-    inputs.push(source_input_from_owned_path(path));
-  }
   return SourceInputSet {
-    inputs: inputs,
+    input_count: paths.len(),
     reads_files: false,
     recursively_scans_filesystem: false,
   };
 }
 
-pub fn source_file_read_boundary() -> SourceFileReadBoundary {
+pub fn source_file_read_boundary(zone: ref mut Zone) -> SourceFileReadBoundary {
   return SourceFileReadBoundary {
     api: "std::fs::read_detailed(ref mut zone, path)",
     reads_file: true,
@@ -97,22 +83,9 @@ pub fn source_file_read_boundary() -> SourceFileReadBoundary {
 
 pub fn source_input_from_file(
   zone: ref mut Zone,
-  path: Slice[u8],
-) -> std::Result[SourceInput, std::fs::PathError] {
-  match std::fs::read_detailed(zone, path) {
-    std::Ok(text) => {
-      return std::Ok<SourceInput, std::fs::PathError>(SourceInput {
-        path: std::string::from(zone, path),
-        text: Some<String>(text),
-        origin: FileRead,
-        reads_file: true,
-        recursively_scans_filesystem: false,
-      });
-    }
-    std::Err(problem) => {
-      return std::Err<SourceInput, std::fs::PathError>(problem);
-    }
-  }
+  path: Slice[u8]
+) -> std::Result[std::string::String, std::fs::PathError] {
+  return std::fs::read_detailed(zone, path);
 }
 
 // source_input_from_text is for already-provided in-memory source. It copies the

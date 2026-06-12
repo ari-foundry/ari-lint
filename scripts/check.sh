@@ -279,7 +279,7 @@ require_grep "severity override resolver" docs/dev/ari-implementation-plan.md
 require_grep "single-diagnostic application helper" docs/dev/ari-implementation-plan.md
 require_grep "override aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "file-backed override aggregation path" docs/dev/ari-implementation-plan.md
-require_grep "Apply caller-provided .--rule. overrides to the internal CLI file lint" docs/dev/ari-implementation-plan.md
+require_grep "Validate caller-provided .--rule. overrides in the internal CLI file lint" docs/dev/ari-implementation-plan.md
 require_grep "shared rule execution input/result API" docs/dev/ari-implementation-plan.md
 require_grep "shared rule module API" docs/dev/ari-implementation-plan.md
 require_grep "registry-backed in-memory dispatch" docs/dev/ari-implementation-plan.md
@@ -291,7 +291,7 @@ require_grep "No executable severity override resolution tests are added yet" te
 require_grep "No executable diagnostic severity application tests are added yet" tests/README.md
 require_grep "No executable in-memory lint severity override aggregation tests are added yet" tests/README.md
 require_grep "No executable file-backed lint severity override aggregation tests are added yet" tests/README.md
-require_grep 'parsed `--rule` override application' tests/README.md
+require_grep 'parsed `--rule` override validation' tests/README.md
 require_grep "Shell-only executable config precedence fixture checks" tests/README.md
 require_grep "Ari-backed config precedence tests are not added" tests/README.md
 require_grep "Initial config precedence fixtures have started" tests/README.md
@@ -309,6 +309,7 @@ require_grep "source-only parity runner skeleton added" docs/dev/roadmap.md
 require_grep "compiler-backed CI gate documented" docs/dev/roadmap.md
 require_grep "standalone build root wiring added" docs/dev/roadmap.md
 require_grep "standalone test entrypoint added" docs/dev/roadmap.md
+require_grep "main OS argv exit-code wiring added" docs/dev/roadmap.md
 require_grep "Wire local standalone test entrypoint" docs/dev/roadmap.md
 require_grep "Initial trailing-whitespace fixtures have started" tests/README.md
 require_grep "Initial missing-final-newline fixtures have started" tests/README.md
@@ -367,10 +368,12 @@ require_grep "No rule metadata tests are added yet" tests/README.md
 require_grep "CLI metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "CLI argument result model" docs/dev/ari-implementation-plan.md
 require_grep "Minimal token-list parsing has started" docs/dev/ari-implementation-plan.md
-require_grep "Actual OS process argument collection now has a" docs/dev/ari-implementation-plan.md
+require_grep "OS process argument collection" docs/dev/ari-implementation-plan.md
 require_grep "minimal internal entry path" docs/dev/ari-implementation-plan.md
 require_grep "std::env::args" docs/dev/ari-implementation-plan.md
 require_grep "internal stdout-free command dispatcher" docs/dev/ari-implementation-plan.md
+require_grep "main entry shell" docs/dev/ari-implementation-plan.md
+require_grep "returns the internal exit-code mapping" docs/dev/ari-implementation-plan.md
 require_grep "Internal command results now carry data-only exit-code mappings" docs/dev/ari-implementation-plan.md
 require_grep "named explicit-token .--list-rules. command entry" docs/dev/ari-implementation-plan.md
 require_grep "minimal stdout adapter" docs/dev/ari-implementation-plan.md
@@ -395,11 +398,11 @@ require_grep "scripts/build.sh" tests/README.md
 require_grep "scripts/test.sh" tests/README.md
 require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
-require_grep "minimal internal single-diagnostic JSON" docs/dev/ari-implementation-plan.md
-require_grep "serializer now builds JSON text" docs/dev/ari-implementation-plan.md
+require_grep "diagnostic JSON serializer is limited to placeholder internal text" docs/dev/ari-implementation-plan.md
+require_grep "JSON serializer is an internal placeholder" docs/dev/ari-implementation-plan.md
 require_grep "User-facing diagnostic output" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
-require_grep "internal human-readable list-rules formatter" docs/dev/ari-implementation-plan.md
+require_grep "human-readable list-rules formatter" docs/dev/ari-implementation-plan.md
 require_grep "stdout/stderr output boundary model" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path added" docs/dev/roadmap.md
 require_grep "human-readable list-rules formatter added" docs/dev/roadmap.md
@@ -428,6 +431,10 @@ require_grep "trailing-whitespace helper started" docs/dev/roadmap.md
 require_grep "No executable trailing-whitespace rule execution tests are added yet" tests/README.md
 require_grep "fn main() -> i64" src/main.ari
 require_grep "run_main_entry_shell" src/main.ari
+require_grep "mod cli" src/main.ari
+require_grep "mod lint" src/main.ari
+require_grep "cli::run_os_argv_cli" src/main.ari
+require_grep "result.exit_code.code" src/main.ari
 require_grep "pub mod cli" src/model.ari
 require_grep "pub mod output" src/model.ari
 require_grep "pub mod config" src/model.ari
@@ -441,7 +448,8 @@ require_grep "CliRuleOverrideArg" src/cli.ari
 require_grep "CliArgumentProblem" src/cli.ari
 require_grep "CliCommandResultKind" src/cli.ari
 require_grep "CliCommandResult" src/cli.ari
-require_grep "file_lint_result" src/cli.ari
+require_grep "diagnostic_count" src/cli.ari
+require_grep "read_error_count" src/cli.ari
 require_grep "CliExitCodeKind" src/cli.ari
 require_grep "CliExitCodeMapping" src/cli.ari
 require_grep "CliExitSuccess" src/cli.ari
@@ -452,21 +460,23 @@ require_grep "cli_usage_error_exit_code" src/cli.ari
 require_grep "cli_unavailable_exit_code" src/cli.ari
 require_grep "calls_process_exit: false" src/cli.ari
 require_grep "positional source file input" src/cli.ari
-require_grep "source_files" src/cli.ari
+require_grep "source_count" src/cli.ari
+require_grep "first_source_file" src/cli.ari
 require_grep "--json" src/cli.ari
 require_grep "json_requested" src/cli.ari
 require_grep "--ari" src/cli.ari
-require_grep "ari_compiler_path" src/cli.ari
+require_grep "ari_compiler_path_present" src/cli.ari
 require_grep "-I" src/cli.ari
-require_grep "include_paths" src/cli.ari
+require_grep "include_path_count" src/cli.ari
 require_grep "--list-rules" src/cli.ari
 require_grep "list_rules_requested" src/cli.ari
 require_grep "--config" src/cli.ari
-require_grep "config_path" src/cli.ari
+require_grep "config_path_present" src/cli.ari
 require_grep "--rule" src/cli.ari
-require_grep "rule_overrides" src/cli.ari
+require_grep "rule_override_count" src/cli.ari
+require_grep "rule_override_problem_count" src/cli.ari
 require_grep "help_requested" src/cli.ari
-require_grep "problems" src/cli.ari
+require_grep "problem_count" src/cli.ari
 require_grep "parse_cli_tokens" src/cli.ari
 require_grep "dispatch_cli_command" src/cli.ari
 require_grep "run_explicit_cli_tokens" src/cli.ari
@@ -475,24 +485,23 @@ require_grep "read_os_argv_tokens" src/cli.ari
 require_grep "run_os_argv_cli" src/cli.ari
 require_grep "parse_cli_rule_overrides" src/cli.ari
 require_grep "cli_file_lint_exit_code" src/cli.ari
-require_grep "lint_file_sources_with_overrides" src/cli.ari
-require_grep "Rule override parse problems" src/cli.ari
-require_grep "with rule overrides" src/cli.ari
+require_grep "lint_file_source" src/cli.ari
+require_grep "rule override problem count" src/cli.ari
+require_grep "validates parsed --rule overrides" src/cli.ari
 require_grep "OsArgvBoundary" src/cli.ari
 require_grep "os_argv_boundary" src/cli.ari
 require_grep "std::env::args" src/cli.ari
 require_grep "reads_process_argv: true" src/cli.ari
 require_grep "CliListRulesText" src/cli.ari
 require_grep "CliSourceLintResult" src/cli.ari
-require_grep "lint_file_sources" src/cli.ari
+require_grep "lint_file_source" src/cli.ari
 require_grep "missing_value_problem" src/cli.ari
 require_grep "unknown_argument_problem" src/cli.ari
 require_grep "raw_rule_override" src/cli.ari
-require_grep "optional_rule_override_part" src/cli.ari
 require_grep "semantic rule override parsing bridge" src/cli.ari
-require_grep "applying parsed --rule overrides" src/cli.ari
+require_grep "validates parsed --rule overrides" src/cli.ari
 require_grep "does not read environment" src/cli.ari
-require_grep "main wiring remains future work" src/cli.ari
+require_grep "Main wiring is limited to" src/cli.ari
 require_grep "write stdout/stderr" src/cli.ari
 require_grep "call process exit" src/cli.ari
 require_grep "recursively scan source trees" src/cli.ari
@@ -607,13 +616,11 @@ require_grep "lint_file_source_from_overrides" src/lint.ari
 require_grep "lint_file_source_with_overrides" src/lint.ari
 require_grep "lint_file_sources" src/lint.ari
 require_grep "lint_file_sources_with_overrides" src/lint.ari
-require_grep "append_diagnostics" src/lint.ari
-require_grep "append_configured_diagnostics" src/lint.ari
 require_grep "append_file_lint_result" src/lint.ari
 require_grep "lint_trailing_whitespace_in_memory" src/lint.ari
 require_grep "lint_missing_final_newline_in_memory" src/lint.ari
 require_grep "source_input_from_file" src/lint.ari
-require_grep "read_errors" src/lint.ari
+require_grep "diagnostic_count" src/lint.ari
 require_grep "read_error_count" src/lint.ari
 require_grep "source_count: 1" src/lint.ari
 require_grep "reads_files: false" src/lint.ari
@@ -676,11 +683,10 @@ require_grep "lint_trailing_whitespace_in_memory" src/rules/trailing_whitespace.
 require_grep "lint_trailing_whitespace_rule" src/rules/trailing_whitespace.ari
 require_grep "RuleExecutionInput" src/rules/trailing_whitespace.ari
 require_grep "RuleExecutionResult" src/rules/trailing_whitespace.ari
-require_grep "push_trailing_whitespace_diagnostic" src/rules/trailing_whitespace.ari
+require_grep "trailing_whitespace_line_diagnostic_count" src/rules/trailing_whitespace.ari
 require_grep "diagnostic_from_span" src/diagnostic.ari
 require_grep "diagnostic_from_span" src/rules/trailing_whitespace.ari
-require_grep "std::vec::Vec" src/rules/trailing_whitespace.ari
-require_grep "diagnostics.push" src/rules/trailing_whitespace.ari
+require_grep "diagnostic_count" src/rules/trailing_whitespace.ari
 require_grep "reads_files: false" src/rules/trailing_whitespace.ari
 require_grep "scans_filesystem: false" src/rules/trailing_whitespace.ari
 require_grep "source_span_with_end" src/diagnostic.ari
@@ -703,7 +709,7 @@ require_grep "lint_missing_final_newline_rule" src/rules/missing_final_newline.a
 require_grep "RuleExecutionInput" src/rules/missing_final_newline.ari
 require_grep "RuleExecutionResult" src/rules/missing_final_newline.ari
 require_grep "diagnostic_from_span" src/rules/missing_final_newline.ari
-require_grep "diagnostics.push" src/rules/missing_final_newline.ari
+require_grep "diagnostic_count" src/rules/missing_final_newline.ari
 require_grep "reads_files: false" src/rules/missing_final_newline.ari
 require_grep "scans_filesystem: false" src/rules/missing_final_newline.ari
 require_grep "source_span_with_end" src/rules/missing_final_newline.ari
@@ -716,14 +722,15 @@ require_grep "future work" src/rules/missing_final_newline.ari
 require_grep "provision the Ari compiler" scripts/README.md
 require_grep "build.sh" scripts/README.md
 require_grep "explicit Ari compiler path" scripts/README.md
-require_grep "repository root before compiling" scripts/README.md
+require_grep "compiler root" scripts/README.md
 require_grep "relative compiler paths" scripts/README.md
 require_grep "does not download or build the Ari compiler" scripts/README.md
 require_grep "tools/lint" scripts/README.md
 require_grep "ARI_COMPILER" scripts/build.sh
 require_grep "original_pwd" scripts/build.sh
 require_grep "repo_root" scripts/build.sh
-require_grep 'cd "$repo_root"' scripts/build.sh
+require_grep "compiler_root" scripts/build.sh
+require_grep "build_workdir" scripts/build.sh
 require_grep "src/main.ari" scripts/build.sh
 require_grep "build/ari-lint" scripts/build.sh
 require_grep "does not run" tests/README.md

@@ -6,10 +6,10 @@ pub mod trailing_whitespace;
 pub mod missing_final_newline;
 
 pub struct RuleMetadataEntry {
-  code: String,
-  short_name: String,
-  default_severity: String,
-  description: String,
+  code: Slice[u8],
+  short_name: Slice[u8],
+  default_severity: Slice[u8],
+  description: Slice[u8],
 }
 
 pub struct InitialRuleMetadata {
@@ -17,7 +17,7 @@ pub struct InitialRuleMetadata {
   missing_final_newline: RuleMetadataEntry,
 }
 
-pub fn trailing_whitespace_rule_metadata(zone: ref mut Zone) -> RuleMetadataEntry {
+pub fn trailing_whitespace_rule_metadata() -> RuleMetadataEntry {
   return RuleMetadataEntry {
     code: "lint/trailing-whitespace",
     short_name: "trailing-whitespace",
@@ -26,7 +26,7 @@ pub fn trailing_whitespace_rule_metadata(zone: ref mut Zone) -> RuleMetadataEntr
   };
 }
 
-pub fn missing_final_newline_rule_metadata(zone: ref mut Zone) -> RuleMetadataEntry {
+pub fn missing_final_newline_rule_metadata() -> RuleMetadataEntry {
   return RuleMetadataEntry {
     code: "lint/missing-final-newline",
     short_name: "missing-final-newline",
@@ -35,9 +35,9 @@ pub fn missing_final_newline_rule_metadata(zone: ref mut Zone) -> RuleMetadataEn
   };
 }
 
-pub fn initial_rule_metadata(zone: ref mut Zone) -> InitialRuleMetadata {
-  let trailing = trailing_whitespace_rule_metadata(zone);
-  let missing_final = missing_final_newline_rule_metadata(zone);
+pub fn initial_rule_metadata() -> InitialRuleMetadata {
+  let trailing = trailing_whitespace_rule_metadata();
+  let missing_final = missing_final_newline_rule_metadata();
   return InitialRuleMetadata {
     trailing_whitespace: trailing,
     missing_final_newline: missing_final,

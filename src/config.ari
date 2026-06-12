@@ -17,18 +17,18 @@ pub enum OverridePrecedenceStep {
 
 pub struct ConfigSourceMetadata {
   source: ConfigSource,
-  name: String,
-  purpose: String,
+  name: Slice[u8],
+  purpose: Slice[u8],
 }
 
 pub struct ConfigFileMetadata {
-  default_file_name: String,
-  explicit_option: String,
-  discovery_status: String,
+  default_file_name: Slice[u8],
+  explicit_option: Slice[u8],
+  discovery_status: Slice[u8],
 }
 
 pub struct RuleSeverityOverride {
-  rule_code: String,
+  rule_code: Slice[u8],
   severity: super::severity::Severity,
   source: ConfigSource,
 }
@@ -43,22 +43,22 @@ pub enum ConfigParseProblemKind {
 pub struct ConfigParseProblem {
   kind: ConfigParseProblemKind,
   line: i64,
-  text: String,
-  detail: String,
+  text: Slice[u8],
+  detail: Slice[u8],
 }
 
 pub struct ConfigParseResult {
-  overrides: std::vec::Vec[RuleSeverityOverride],
-  problems: std::vec::Vec[ConfigParseProblem],
+  override_count: i64,
+  problem_count: i64,
 }
 
 pub struct RuleOverrideParseResult {
-  overrides: std::vec::Vec[RuleSeverityOverride],
-  problems: std::vec::Vec[ConfigParseProblem],
+  override_count: i64,
+  problem_count: i64,
 }
 
 pub struct RuleSeverityResolution {
-  rule_code: String,
+  rule_code: Slice[u8],
   severity: super::severity::Severity,
   source: ConfigSource,
   known_rule: bool,
@@ -85,7 +85,7 @@ pub struct OverridePrecedenceMetadata {
   first: OverridePrecedenceStep,
   second: OverridePrecedenceStep,
   third: OverridePrecedenceStep,
-  status: String,
+  status: Slice[u8],
 }
 
 pub struct ConfigSkeleton {
@@ -97,7 +97,7 @@ pub struct ConfigSkeleton {
 }
 
 fn parse_config_severity(
-  value: Slice[u8],
+  value: Slice[u8]
 ) -> Option[super::severity::Severity] {
   if value.equals("off") {
     return Some<super::severity::Severity>(super::severity::Off);
@@ -128,28 +128,26 @@ fn config_text_without_comment(line: Slice[u8]) -> Slice[u8] {
 }
 
 fn config_parse_problem(
-  zone: ref mut Zone,
   line_number: i64,
   line: Slice[u8],
   kind: ConfigParseProblemKind,
-  detail: String,
+  detail: Slice[u8]
 ) -> ConfigParseProblem {
   return ConfigParseProblem {
     kind: kind,
     line: line_number,
-    text: std::string::from(zone, line),
+    text: line,
     detail: detail,
   };
 }
 
 fn config_override_from_parts(
-  zone: ref mut Zone,
   rule_code: Slice[u8],
   severity: super::severity::Severity,
-  source: ConfigSource,
+  source: ConfigSource
 ) -> RuleSeverityOverride {
   return RuleSeverityOverride {
-    rule_code: std::string::from(zone, rule_code),
+    rule_code: rule_code,
     severity: severity,
     source: source,
   };
@@ -167,7 +165,7 @@ fn normalized_rule_override_code(rule_code: Slice[u8]) -> Slice[u8] {
 
 fn known_rule_code(
   zone: ref mut Zone,
-  rule_code: Slice[u8],
+  rule_code: Slice[u8]
 ) -> bool {
   let lookup = super::registry::lookup_known_rule(zone, rule_code);
   return lookup.found;
@@ -177,17 +175,16 @@ fn parse_rule_override_value(
   zone: ref mut Zone,
   raw_text: Slice[u8],
   overrides: ref mut std::vec::Vec[RuleSeverityOverride],
-  problems: ref mut std::vec::Vec[ConfigParseProblem],
+  problems: ref mut std::vec::Vec[ConfigParseProblem]
 ) -> void {
   let text = std::string::trim(raw_text);
   match std::string::split_once(text, "=") {
     None => {
       problems.push(config_parse_problem(
-        zone,
         0,
         text,
         ConfigMissingEquals,
-        "--rule value must use RULE=SEVERITY.",
+        "--rule value must use RULE=SEVERITY."
       ));
       return;
     }
@@ -196,11 +193,10 @@ fn parse_rule_override_value(
       let severity_text = std::string::trim(pair.right());
       if rule_code.len() == 0 {
         problems.push(config_parse_problem(
-          zone,
           0,
           text,
           ConfigEmptyRule,
-          "--rule value is missing a rule name.",
+          "--rule value is missing a rule name."
         ));
         return;
       }
@@ -208,30 +204,27 @@ fn parse_rule_override_value(
       match parse_config_severity(severity_text) {
         None => {
           problems.push(config_parse_problem(
-            zone,
             0,
             text,
             ConfigInvalidSeverity,
-            "Severity must be off, hint, note, warning, or error.",
+            "Severity must be off, hint, note, warning, or error."
           ));
         }
         Some(severity) => {
           let normalized_rule_code = normalized_rule_override_code(rule_code);
           if known_rule_code(zone, normalized_rule_code) {
             overrides.push(config_override_from_parts(
-              zone,
               normalized_rule_code,
               severity,
-              CommandLineRuleOverride,
+              CommandLineRuleOverride
             ));
             return;
           }
           problems.push(config_parse_problem(
-            zone,
             0,
             text,
             ConfigUnknownRule,
-            "Unknown rule; expected lint/trailing-whitespace or lint/missing-final-newline.",
+            "Unknown rule; expected lint/trailing-whitespace or lint/missing-final-newline."
           ));
         }
       }
@@ -241,7 +234,7 @@ fn parse_rule_override_value(
 
 pub fn parse_rule_override_texts(
   zone: ref mut Zone,
-  raw_values: std::vec::Vec[String],
+  raw_values: std::vec::Vec[std::string::String]
 ) -> RuleOverrideParseResult {
   var overrides = std::vec::new<RuleSeverityOverride>(zone, raw_values.len());
   var problems = std::vec::new<ConfigParseProblem>(zone, raw_values.len());
@@ -251,13 +244,31 @@ pub fn parse_rule_override_texts(
       zone,
       raw_value.as_slice(),
       ref mut overrides,
-      ref mut problems,
+      ref mut problems
     );
   }
 
   return RuleOverrideParseResult {
-    overrides: overrides,
-    problems: problems,
+    override_count: overrides.len(),
+    problem_count: problems.len(),
+  };
+}
+
+pub fn parse_rule_override_text(
+  zone: ref mut Zone,
+  raw_value: Slice[u8]
+) -> RuleOverrideParseResult {
+  var overrides = std::vec::new<RuleSeverityOverride>(zone, 1);
+  var problems = std::vec::new<ConfigParseProblem>(zone, 1);
+  parse_rule_override_value(
+    zone,
+    raw_value,
+    ref mut overrides,
+    ref mut problems
+  );
+  return RuleOverrideParseResult {
+    override_count: overrides.len(),
+    problem_count: problems.len(),
   };
 }
 
@@ -266,7 +277,7 @@ fn parse_config_line(
   line_number: i64,
   raw_line: Slice[u8],
   overrides: ref mut std::vec::Vec[RuleSeverityOverride],
-  problems: ref mut std::vec::Vec[ConfigParseProblem],
+  problems: ref mut std::vec::Vec[ConfigParseProblem]
 ) -> void {
   let line = config_text_without_comment(raw_line);
   if line.len() == 0 {
@@ -276,11 +287,10 @@ fn parse_config_line(
   match std::string::split_once(line, "=") {
     None => {
       problems.push(config_parse_problem(
-        zone,
         line_number,
         line,
         ConfigMissingEquals,
-        "Config line must use RULE = SEVERITY.",
+        "Config line must use RULE = SEVERITY."
       ));
       return;
     }
@@ -289,11 +299,10 @@ fn parse_config_line(
       let severity_text = std::string::trim(pair.right());
       if rule_code.len() == 0 {
         problems.push(config_parse_problem(
-          zone,
           line_number,
           line,
           ConfigEmptyRule,
-          "Config line is missing a rule name.",
+          "Config line is missing a rule name."
         ));
         return;
       }
@@ -301,29 +310,26 @@ fn parse_config_line(
       match parse_config_severity(severity_text) {
         None => {
           problems.push(config_parse_problem(
-            zone,
             line_number,
             line,
             ConfigInvalidSeverity,
-            "Severity must be off, hint, note, warning, or error.",
+            "Severity must be off, hint, note, warning, or error."
           ));
         }
         Some(severity) => {
           if known_rule_code(zone, rule_code) {
             overrides.push(config_override_from_parts(
-              zone,
               rule_code,
               severity,
-              AriLintRulesDiscovery,
+              AriLintRulesDiscovery
             ));
             return;
           }
           problems.push(config_parse_problem(
-            zone,
             line_number,
             line,
             ConfigUnknownRule,
-            "Unknown rule; expected lint/trailing-whitespace or lint/missing-final-newline.",
+            "Unknown rule; expected lint/trailing-whitespace or lint/missing-final-newline."
           ));
         }
       }
@@ -333,7 +339,7 @@ fn parse_config_line(
 
 pub fn parse_config_text(
   zone: ref mut Zone,
-  text: Slice[u8],
+  text: Slice[u8]
 ) -> ConfigParseResult {
   var overrides = std::vec::new<RuleSeverityOverride>(zone, 4);
   var problems = std::vec::new<ConfigParseProblem>(zone, 4);
@@ -351,7 +357,7 @@ pub fn parse_config_text(
           line_number,
           line,
           ref mut overrides,
-          ref mut problems,
+          ref mut problems
         );
         line_number = line_number + 1;
       }
@@ -359,8 +365,8 @@ pub fn parse_config_text(
   }
 
   return ConfigParseResult {
-    overrides: overrides,
-    problems: problems,
+    override_count: overrides.len(),
+    problem_count: problems.len(),
   };
 }
 
@@ -368,7 +374,7 @@ fn resolve_rule_severity_from_overrides(
   zone: ref mut Zone,
   rule_code: Slice[u8],
   default_severity: super::severity::Severity,
-  overrides: ref std::vec::Vec[RuleSeverityOverride],
+  overrides: ref std::vec::Vec[RuleSeverityOverride]
 ) -> RuleSeverityResolution {
   var severity = default_severity;
   var source = DefaultConfig;
@@ -377,7 +383,7 @@ fn resolve_rule_severity_from_overrides(
   var index = 0;
   while index < overrides.len() {
     let entry = overrides.get(index);
-    if entry.rule_code.as_slice().equals(rule_code) {
+    if entry.rule_code.equals(rule_code) {
       severity = entry.severity;
       source = entry.source;
       matched_override = true;
@@ -385,11 +391,10 @@ fn resolve_rule_severity_from_overrides(
     index = index + 1;
   }
 
-  let rule_code_text = std::string::from(zone, rule_code);
   let is_known_rule = known_rule_code(zone, rule_code);
 
   return RuleSeverityResolution {
-    rule_code: rule_code_text,
+    rule_code: rule_code,
     severity: severity,
     source: source,
     known_rule: is_known_rule,
@@ -405,32 +410,32 @@ pub fn resolve_rule_severity(
   zone: ref mut Zone,
   rule_code: Slice[u8],
   default_severity: super::severity::Severity,
-  overrides: std::vec::Vec[RuleSeverityOverride],
+  overrides: std::vec::Vec[RuleSeverityOverride]
 ) -> RuleSeverityResolution {
   return resolve_rule_severity_from_overrides(
     zone,
     rule_code,
     default_severity,
-    ref overrides,
+    ref overrides
   );
 }
 
 pub fn apply_rule_severity_to_diagnostic_from_overrides(
   zone: ref mut Zone,
   diagnostic: super::diagnostic::Diagnostic,
-  overrides: ref std::vec::Vec[RuleSeverityOverride],
+  overrides: ref std::vec::Vec[RuleSeverityOverride]
 ) -> DiagnosticSeverityApplication {
   let resolution = resolve_rule_severity_from_overrides(
     zone,
-    diagnostic.rule_code.as_slice(),
+    diagnostic.rule_code,
     diagnostic.severity,
-    overrides,
+    overrides
   );
   let configured_diagnostic = super::diagnostic::diagnostic_from_span(
     diagnostic.span,
     resolution.severity,
     diagnostic.rule_code,
-    diagnostic.message,
+    diagnostic.message
   );
 
   return DiagnosticSeverityApplication {
@@ -449,12 +454,12 @@ pub fn apply_rule_severity_to_diagnostic_from_overrides(
 pub fn apply_rule_severity_to_diagnostic(
   zone: ref mut Zone,
   diagnostic: super::diagnostic::Diagnostic,
-  overrides: std::vec::Vec[RuleSeverityOverride],
+  overrides: std::vec::Vec[RuleSeverityOverride]
 ) -> DiagnosticSeverityApplication {
   return apply_rule_severity_to_diagnostic_from_overrides(
     zone,
     diagnostic,
-    ref overrides,
+    ref overrides
   );
 }
 

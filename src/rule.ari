@@ -2,27 +2,27 @@
 // bodies, read files, write output, serialize JSON, or invoke the compiler.
 
 pub struct RuleDescriptor {
-  code: String,
-  short_name: String,
+  code: Slice[u8],
+  short_name: Slice[u8],
   default_severity: super::severity::Severity,
-  description: String,
+  description: Slice[u8],
 }
 
 pub struct PlannedRuleCodes {
-  trailing_whitespace: String,
-  missing_final_newline: String,
+  trailing_whitespace: Slice[u8],
+  missing_final_newline: Slice[u8],
 }
 
 pub struct RuleExecutionInput {
-  file_path: String,
-  source_text: String,
+  file_path: Slice[u8],
+  source_text: Slice[u8],
   reads_files: bool,
   scans_filesystem: bool,
 }
 
 pub struct RuleExecutionResult {
-  rule_code: String,
-  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
+  rule_code: Slice[u8],
+  diagnostic_count: i64,
   reads_files: bool,
   scans_filesystem: bool,
   writes_output: bool,
@@ -31,10 +31,10 @@ pub struct RuleExecutionResult {
 }
 
 pub fn rule_descriptor(
-  code: String,
-  short_name: String,
+  code: Slice[u8],
+  short_name: Slice[u8],
   default_severity: super::severity::Severity,
-  description: String,
+  description: Slice[u8]
 ) -> RuleDescriptor {
   return RuleDescriptor {
     code: code,
@@ -45,26 +45,24 @@ pub fn rule_descriptor(
 }
 
 pub fn rule_execution_input_from_source(
-  zone: ref mut Zone,
   file_path: Slice[u8],
-  source_text: Slice[u8],
+  source_text: Slice[u8]
 ) -> RuleExecutionInput {
   return RuleExecutionInput {
-    file_path: std::string::from(zone, file_path),
-    source_text: std::string::from(zone, source_text),
+    file_path: file_path,
+    source_text: source_text,
     reads_files: false,
     scans_filesystem: false,
   };
 }
 
 pub fn rule_execution_result(
-  zone: ref mut Zone,
   rule_code: Slice[u8],
-  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic],
+  diagnostic_count: i64
 ) -> RuleExecutionResult {
   return RuleExecutionResult {
-    rule_code: std::string::from(zone, rule_code),
-    diagnostics: diagnostics,
+    rule_code: rule_code,
+    diagnostic_count: diagnostic_count,
     reads_files: false,
     scans_filesystem: false,
     writes_output: false,
@@ -74,7 +72,7 @@ pub fn rule_execution_result(
 }
 
 // RuleExecutionInput is limited to caller-provided source text. RuleExecutionResult
-// carries internal diagnostics and records that rule execution does not read files,
+// carries an internal diagnostic count and records that rule execution does not read files,
 // scan the filesystem, write output, serialize JSON, or invoke the compiler.
 // Config interaction, diagnostics output, JSON output, file-backed execution,
 // and compiler invocation remain outside this layer.

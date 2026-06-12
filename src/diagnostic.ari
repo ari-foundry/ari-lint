@@ -6,7 +6,7 @@ pub enum OptionalPosition {
 }
 
 pub struct SourceSpan {
-  file_path: String,
+  file_path: Slice[u8],
   line: i64,
   column: i64,
   end_line: OptionalPosition,
@@ -16,16 +16,16 @@ pub struct SourceSpan {
 pub struct Diagnostic {
   span: SourceSpan,
   severity: super::severity::Severity,
-  rule_code: String,
-  message: String,
+  rule_code: Slice[u8],
+  message: Slice[u8],
 }
 
 pub fn source_span_with_end(
-  file_path: String,
+  file_path: Slice[u8],
   line: i64,
   column: i64,
   end_line: i64,
-  end_column: i64,
+  end_column: i64
 ) -> SourceSpan {
   return SourceSpan {
     file_path: file_path,
@@ -39,8 +39,8 @@ pub fn source_span_with_end(
 pub fn diagnostic_from_span(
   span: SourceSpan,
   severity: super::severity::Severity,
-  rule_code: String,
-  message: String,
+  rule_code: Slice[u8],
+  message: Slice[u8]
 ) -> Diagnostic {
   return Diagnostic {
     span: span,
