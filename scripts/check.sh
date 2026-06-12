@@ -263,9 +263,12 @@ require_grep "minimal stderr adapter added" docs/dev/roadmap.md
 require_grep "main-facing list-rules stdout output added" docs/dev/roadmap.md
 require_grep "main-facing first diagnostic stderr output added" docs/dev/roadmap.md
 require_grep "internal diagnostic vector collection added" docs/dev/roadmap.md
+require_grep "CLI diagnostic vector collection added" docs/dev/roadmap.md
 require_grep "run_os_argv_cli_with_main_output" src/cli.ari
 require_grep "write_stdout_text" src/cli.ari
 require_grep "write_optional_diagnostic_stderr" src/cli.ari
+require_grep "collect_cli_source_diagnostics" src/cli.ari
+require_grep "collect_explicit_cli_diagnostics" src/cli.ari
 require_grep "write_stderr_text" src/output.ari
 require_grep "std::io::eprint_string" src/output.ari
 require_grep "run_os_argv_cli_with_main_output" src/main.ari
