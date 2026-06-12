@@ -48,9 +48,11 @@ It does not move `tools/lint` or change build behavior.
 - An explicit OS argv boundary now exists in `src/cli.ari`. It reads process
   arguments through the verified Ari `std::env::args` API, drops argv[0], and
   reuses the existing explicit-token parser and stdout-free dispatcher. `main`
-  now returns the resulting internal exit-code mapping from this path. The path
-  does not read environment variables, write stdout/stderr, call process exit,
-  serialize JSON, invoke the compiler, or recursively scan sources.
+  now returns the resulting internal exit-code mapping from this path. The
+  main-facing `--list-rules` branch writes the existing human-readable
+  list-rules text through the verified stdout adapter. The path does not read
+  environment variables, write stderr, call process exit, serialize JSON,
+  invoke the compiler, or recursively scan sources.
 - The diagnostic output metadata skeleton has started as data-only declarations
   for human and JSON output modes, diagnostic location fields, and planned
   diagnostic fields. The JSON serializer is an internal placeholder and does
@@ -96,8 +98,10 @@ It does not move `tools/lint` or change build behavior.
 - An internal list-rules output path now records the known rule count for
   `lint/trailing-whitespace` and `lint/missing-final-newline`, and an internal
   human-readable list-rules formatter builds text from the same metadata.
-  User-facing stdout/stderr output, JSON output, compiler invocation, config
-  parsing, diagnostics output, and parity tests remain future work.
+  The main-facing OS argv `--list-rules` path now writes that text to stdout
+  through the verified stdout adapter. Stderr output, JSON output, compiler
+  invocation, config parsing, diagnostics output, and parity tests remain
+  future work.
 - An internal stdout-free command dispatcher now maps parsed CLI arguments to
   internal command results. It routes list-rules requests to the internal
   human-readable list-rules formatter and routes source-file requests through
@@ -117,13 +121,16 @@ It does not move `tools/lint` or change build behavior.
   `main`, serialize JSON, or emit user-facing CLI output.
 - A minimal stdout adapter now writes caller-provided `String` text through the
   verified Ari `std::io::print_string` API and returns local status data. It is
-  not wired to OS argv, `main`, command dispatch, stderr, JSON output, process
-  exit, compiler invocation, source scanning, or lint execution.
+  now wired only for the main-facing OS argv `--list-rules` path. It is not
+  wired to diagnostics, stderr, JSON output, process exit, compiler invocation,
+  source scanning, or lint execution.
 - An internal OS argv entry path now reads arguments through the verified Ari
   `std::env::args` API, drops the program-name argument, and dispatches the
   remaining user tokens through the existing explicit-token parser and
   stdout-free command dispatcher. `main` now returns the internal exit-code
-  mapping from this path. User-facing output behavior remains future work.
+  mapping from this path, and the main-facing `--list-rules` branch writes
+  human-readable list-rules text to stdout. Other user-facing output behavior
+  remains future work.
 - An internal explicit-token entry path now composes the existing
   caller-provided token-list parser with the stdout-free command dispatcher and
   returns a `CliCommandResult`. It does not read OS argv, environment variables,
@@ -134,7 +141,8 @@ It does not move `tools/lint` or change build behavior.
   dispatcher, human-readable formatter, and exit-code mapping. It does not read
   OS argv, write stdout/stderr, call process exit, run a user-facing CLI
   process, serialize JSON, invoke the compiler, scan sources, or execute lint
-  rules.
+  rules. A separate main-facing OS argv path now writes the same formatted text
+  to stdout through the verified stdout adapter.
 - The config override skeleton has been refined as metadata-only declarations
   for default config, `ari-lint.rules`, `--config`, `--rule`, rule severity
   overrides, and documented override precedence. A minimal caller-provided
@@ -293,8 +301,9 @@ Current preparatory model skeleton files are source-only placeholders:
 - `src/main.ari` defines a minimal main entry shell and delegates `main` through
   a local `run_main_entry_shell` function. The shell calls the existing OS argv
   CLI entry path and returns its internal exit-code mapping. It does not write
-  stdout/stderr, serialize JSON, invoke the compiler, call `ari --check`, call
-  `tools/lint`, or call process exit.
+  stderr, serialize JSON, invoke the compiler, call `ari --check`, call
+  `tools/lint`, or call process exit. The `--list-rules` path writes stdout
+  through the verified stdout adapter.
 - `src/model.ari` groups future model modules.
 - `src/source.ari` defines the internal source input boundary model for
   caller-provided source text, path-only source entries, and path-list inputs
@@ -334,8 +343,9 @@ Current preparatory model skeleton files are source-only placeholders:
   argv integration path that reads process arguments through verified
   `std::env::args`, drops argv[0], and dispatches through the existing
   explicit-token path. It does not read environment variables, read config
-  files, discover config files, write stdout/stderr output, or call process
-  exit. `main` returns the internal exit-code mapping from that path.
+  files, discover config files, write stderr output, or call process exit.
+  `main` returns the internal exit-code mapping from that path, and
+  `--list-rules` writes stdout through the verified adapter.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
@@ -353,8 +363,9 @@ Current preparatory model skeleton files are source-only placeholders:
   includes a minimal stdout adapter that uses the verified Ari
   `std::io::print_string` API for caller-provided `String` text and returns
   local status data. It does not format human-readable diagnostics, serialize
-  diagnostic arrays, emit user-facing JSON output, emit user-facing
-  `--list-rules` CLI output, write stderr, read OS argv, or run the CLI.
+  diagnostic arrays, emit user-facing JSON output, write stderr, read OS argv,
+  or run the CLI. The CLI layer now calls this adapter for main-facing
+  `--list-rules` stdout output.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description, and exposes a small constructor for
   internal rule descriptors. It also defines shared rule execution input/result
@@ -397,7 +408,8 @@ invocation. The trailing-whitespace and missing-final-newline rule
 execution paths are limited to caller-provided in-memory source text, the main
 entry shell is limited to returning the internal exit-code mapping from the OS
 argv CLI entry path, the OS argv entry path is limited to reading
-`std::env::args`, dropping argv[0], and dispatching internal tokens,
+`std::env::args`, dropping argv[0], dispatching internal tokens, and writing
+stdout only for the `--list-rules` command through the verified adapter,
 the CLI parser is limited to explicit caller-provided token lists and raw option
 values, the config parser is limited to caller-provided text, rule/severity
 pairs, blank lines, comments, and known-rule validation, the rule override
@@ -427,13 +439,15 @@ the list-rules formatter is limited to internal text construction, the command
 dispatcher is limited to stdout-free internal command results, the exit-code
 model is limited to internal data carried by those results, the explicit-token
 `--list-rules` command path is limited to caller-provided token construction,
-the stdout adapter is limited to caller-provided `String` text, and the
-stdout/stderr output boundary is limited to status data for named future sinks.
+the main-facing `--list-rules` stdout path is limited to writing that formatted
+text through the stdout adapter, the stdout adapter is limited to
+caller-provided `String` text, and the stdout/stderr output boundary is limited
+to status data for named future sinks.
 Compiler invocation, config discovery, config file reading, override
 application to lint execution, diagnostics output, stderr writing, stdout
-adapter wiring to commands or `main`, process exit, diagnostic array
-serialization, user-facing JSON output, environment handling, source filesystem
-scanning, directory traversal, main-entry tests, argv-boundary tests, OS-argv
+adapter wiring beyond main-facing `--list-rules`, process exit, diagnostic
+array serialization, user-facing JSON output, environment handling, source
+filesystem scanning, directory traversal, main-entry tests, argv-boundary tests, OS-argv
 integration tests, config parser tests, rule override parser tests, severity
 resolution tests, diagnostic severity application tests, diagnostic JSON
 serializer tests, source input tests,
@@ -749,6 +763,10 @@ usable.
       command exit-code mapping without writing stdout/stderr, serializing JSON,
       discovering config files, traversing directories, invoking the compiler,
       executing `ari --check`, calling `tools/lint`, or calling process exit
+- [x] Wire the main-facing OS argv `--list-rules` branch to stdout through the
+      verified stdout adapter without writing stderr, serializing JSON,
+      printing diagnostics, invoking the compiler, executing `ari --check`,
+      calling `tools/lint`, or calling process exit
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`
@@ -759,7 +777,8 @@ usable.
 
 - Do not move `tools/lint` in this step.
 - Do not copy `tools/lint` source in this step.
-- Do not add user-facing CLI/output integration in this step.
+- Do not add user-facing CLI/output integration beyond the main-facing
+  `--list-rules` stdout path in this step.
 - Do not add tests in this step.
 - Do not add release workflows in this step.
 - Do not claim compatibility matrix support in this step.

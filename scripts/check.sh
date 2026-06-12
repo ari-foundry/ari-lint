@@ -259,6 +259,10 @@ require_grep "stdout/stderr output boundary model added" docs/dev/roadmap.md
 require_grep "internal exit-code model added" docs/dev/roadmap.md
 require_grep "explicit-token list-rules command wiring added" docs/dev/roadmap.md
 require_grep "minimal stdout adapter added" docs/dev/roadmap.md
+require_grep "main-facing list-rules stdout output added" docs/dev/roadmap.md
+require_grep "run_os_argv_cli_with_list_rules_stdout" src/cli.ari
+require_grep "write_stdout_text" src/cli.ari
+require_grep "run_os_argv_cli_with_list_rules_stdout" src/main.ari
 require_grep "known rule registry lookup added" docs/dev/roadmap.md
 require_grep "registry-backed in-memory rule dispatch added" docs/dev/roadmap.md
 require_grep "config text known-rule validation added" docs/dev/roadmap.md
@@ -534,7 +538,7 @@ require_grep "known_list_rules_output" src/output.ari
 require_grep "format_list_rule_row_human" src/output.ari
 require_grep "format_list_rules_human" src/output.ari
 require_grep "final user-facing JSON output" src/output.ari
-require_grep "list-rules CLI" src/output.ari
+require_grep "list-rules stdout wiring" src/output.ari
 require_grep "OutputSinkName" src/output.ari
 require_grep "OutputSinkBoundary" src/output.ari
 require_grep "OutputBoundaryResult" src/output.ari
