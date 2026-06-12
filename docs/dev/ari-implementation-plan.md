@@ -18,10 +18,10 @@ It does not move `tools/lint` or change build behavior.
   adapter, and the main-facing source-file lint path writes collected human
   diagnostics to stderr through the verified stderr adapter. The main-facing
   source-file `--json` path writes collected diagnostic JSON to stdout, and CLI
-  parse problems write a short summary to stderr. It does not read environment
-  variables, produce parse-error JSON, discover config files, traverse
-  directories, invoke the compiler, invoke `ari --check`, call `tools/lint`, or
-  call process exit.
+  help writes concise text to stdout. CLI parse problems write a short summary
+  to stderr. It does not read environment variables, produce parse-error JSON,
+  discover config files, traverse directories, invoke the compiler, invoke
+  `ari --check`, call `tools/lint`, or call process exit.
 - The rule registry, severity, and config model skeleton has started as
   preparatory source-only declarations. The registry now constructs known
   entries for `lint/trailing-whitespace` and `lint/missing-final-newline` from
@@ -58,9 +58,10 @@ It does not move `tools/lint` or change build behavior.
   list-rules text through the verified stdout adapter, and source-file linting
   writes collected human diagnostics through the verified stderr adapter.
   Source-file `--json` output writes collected diagnostic JSON through stdout,
-  and CLI parse problems write a short summary through stderr. The path does
-  not read environment variables, call process exit, produce parse-error JSON,
-  invoke the compiler, or recursively scan sources.
+  and CLI help writes concise text through stdout. CLI parse problems write a
+  short summary through stderr. The path does not read environment variables,
+  call process exit, produce parse-error JSON, invoke the compiler, or
+  recursively scan sources.
 - The diagnostic output metadata skeleton has started as data-only declarations
   for human and JSON output modes, diagnostic location fields, and planned
   diagnostic fields. The JSON serializer now builds one internal JSON object
@@ -154,17 +155,20 @@ It does not move `tools/lint` or change build behavior.
 - A minimal stdout adapter and a minimal stderr adapter now write
   caller-provided `String` text through the verified Ari
   `std::io::print_string` and `std::io::eprint_string` APIs and return local
-  status data. The stdout adapter is wired only for the main-facing OS argv
-  `--list-rules` path, and the stderr adapter is wired for source-file human
-  diagnostics. These adapters are not wired to JSON output, process exit,
-  compiler invocation, source scanning, or JSON diagnostic arrays.
+  status data. The stdout adapter is wired for the main-facing OS argv
+  `--list-rules`, help, and source-file JSON diagnostic paths, and the stderr
+  adapter is wired for source-file human diagnostics and parse problem
+  summaries. These adapters are not wired to process exit, compiler invocation,
+  source scanning, or config discovery.
 - An internal OS argv entry path now reads arguments through the verified Ari
   `std::env::args` API, drops the program-name argument, and dispatches the
   remaining user tokens through the existing explicit-token parser and
   stdout-free command dispatcher. `main` now returns the internal exit-code
   mapping from this path, and the main-facing `--list-rules` branch writes
-  human-readable list-rules text to stdout. Other user-facing output behavior
-  remains future work.
+  human-readable list-rules text to stdout. The main-facing help, source-file
+  diagnostic, source-file JSON diagnostic, and parse problem output paths are
+  also wired through verified output adapters. Config discovery, compiler
+  invocation, detailed help parity, and tests remain future work.
 - An internal explicit-token entry path now composes the existing
   caller-provided token-list parser with the stdout-free command dispatcher and
   returns a `CliCommandResult`. It does not read OS argv, environment variables,
@@ -407,8 +411,9 @@ Current preparatory model skeleton files are source-only placeholders:
   `std::io::eprint_string` APIs for caller-provided `String` text and return
   local status data. It does not collect diagnostics from rule execution,
   read OS argv, or run the CLI. The CLI layer now calls the stdout adapter for
-  main-facing `--list-rules` output and source-file JSON diagnostics, and the
-  stderr adapter is wired for source-file human diagnostics.
+  main-facing `--list-rules` output, help text, and source-file JSON
+  diagnostics, and the stderr adapter is wired for source-file human
+  diagnostics and parse problem summaries.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description, and exposes a small constructor for
   internal rule descriptors. It also defines shared rule execution input/result
@@ -486,13 +491,14 @@ dispatcher is limited to stdout-free internal command results, the exit-code
 model is limited to internal data carried by those results, the explicit-token
 `--list-rules` command path is limited to caller-provided token construction,
 the main-facing `--list-rules` stdout path is limited to writing that formatted
-text through the stdout adapter, the stdout and stderr adapters are limited to
+text through the stdout adapter, the main-facing help path is limited to
+concise stdout text, the stdout and stderr adapters are limited to
 caller-provided `String` text, and the stdout/stderr output boundary is limited
 to status data for named future sinks.
 Compiler invocation, config discovery, config file reading, override
 application to lint execution, diagnostics output, stderr writing, stdout
-adapter wiring beyond main-facing `--list-rules` and source-file JSON output,
-process exit, JSON schema stability, environment handling, source
+adapter wiring beyond the scoped main-facing output paths, process exit, JSON
+schema stability, environment handling, source
 filesystem scanning, directory traversal, main-entry tests, argv-boundary tests, OS-argv
 integration tests, config parser tests, rule override parser tests, severity
 resolution tests, diagnostic severity application tests, diagnostic JSON
@@ -834,7 +840,10 @@ usable.
       `ari --check`, `tools/lint`, or process exit
 - [x] Wire the main-facing CLI parse problem path to write a short usage-error
       summary to stderr through the verified stderr adapter without
-      parse-error JSON output, help output, config discovery, compiler
+      parse-error JSON output, config discovery, compiler
+      invocation, `ari --check`, `tools/lint`, or process exit
+- [x] Wire the main-facing CLI help path to write concise help text to stdout
+      through the verified stdout adapter without config discovery, compiler
       invocation, `ari --check`, `tools/lint`, or process exit
 - [x] Add source-only parity runner skeleton without executing `tools/lint`,
       `ari-lint`, the Ari compiler, shell commands, file IO, or comparisons
@@ -896,8 +905,8 @@ usable.
 
 - Do not move `tools/lint` in this step.
 - Do not copy `tools/lint` source in this step.
-- Do not add user-facing CLI/output integration beyond the main-facing
-  `--list-rules` stdout path in this step.
+- Do not add user-facing CLI/output integration beyond the scoped
+  main-facing output paths in this step.
 - Do not add tests in this step.
 - Do not add release workflows in this step.
 - Do not claim compatibility matrix support in this step.
