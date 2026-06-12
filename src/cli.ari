@@ -1,15 +1,16 @@
 // CLI model, explicit-token parsing, semantic rule override parsing bridge,
 // stdout-free dispatch, internal exit-code data, explicit-token list-rules
 // command wiring, explicit-token entry point, OS argv integration, a
-// main-facing output path, an internal source-file lint path, and an internal
-// caller-provided diagnostic collection path.
+// main-facing output path, an internal source-file lint path, explicit config
+// path capture, and an internal caller-provided diagnostic collection path.
 // The positional source file input and documented options are represented here.
 // This file reads process arguments only through the verified std::env::args
 // boundary. Main now returns the internal command exit-code mapping through
 // this path, while source-file dispatch reads explicitly provided file paths
 // through the source boundary, runs in-memory lint aggregation, carries the
-// first internal diagnostic, and applies parsed --rule severity overrides when
-// provided. A separate collection path pushes full internal diagnostics into a
+// first internal diagnostic, captures the explicit --config path without
+// reading it, and applies parsed --rule severity overrides when provided. A
+// separate collection path pushes full internal diagnostics into a
 // caller-provided vector. The main-facing path writes list-rules text to
 // stdout, source lint diagnostics to stderr, source-file JSON diagnostics to
 // stdout, CLI help text to stdout, CLI parse problem summaries to stderr, and
@@ -61,6 +62,7 @@ pub struct CliArgs {
   ari_compiler_path_present: bool,
   include_path_count: i64,
   config_path_present: bool,
+  config_file_path: Slice[u8],
   rule_override_count: i64,
   rule_override_problem_count: i64,
 }
@@ -224,6 +226,7 @@ pub fn parse_cli_tokens(
   var ari_compiler_path_present = false;
   var include_path_count = 0;
   var config_path_present = false;
+  var config_file_path: Slice[u8] = "";
   var rule_override_count = 0;
   var rule_override_problem_count = 0;
   var problem_count = 0;
@@ -261,6 +264,7 @@ pub fn parse_cli_tokens(
     } else if token.equals("--config") {
       if index + 1 < tokens.len() {
         config_path_present = true;
+        config_file_path = tokens.get(index + 1).as_slice();
         index = index + 2;
       } else {
         problem_count = problem_count + 1;
@@ -304,6 +308,7 @@ pub fn parse_cli_tokens(
     ari_compiler_path_present: ari_compiler_path_present,
     include_path_count: include_path_count,
     config_path_present: config_path_present,
+    config_file_path: config_file_path,
     rule_override_count: rule_override_count,
     rule_override_problem_count: rule_override_problem_count,
   };

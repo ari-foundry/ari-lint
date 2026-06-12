@@ -297,6 +297,7 @@ require_grep "in-memory lint severity override aggregation added" docs/dev/roadm
 require_grep "file-backed lint severity override aggregation added" docs/dev/roadmap.md
 require_grep "CLI file lint rule override application added" docs/dev/roadmap.md
 require_grep "CLI diagnostic severity override application added" docs/dev/roadmap.md
+require_grep "CLI explicit config path capture added" docs/dev/roadmap.md
 require_grep "config precedence fixture plan added" docs/dev/roadmap.md
 require_grep "initial config precedence fixtures and lightweight checks added" docs/dev/roadmap.md
 require_grep "shell-only config precedence fixture checks added" docs/dev/roadmap.md
@@ -308,6 +309,7 @@ require_grep "severity override resolver" docs/dev/ari-implementation-plan.md
 require_grep "single-diagnostic application helper" docs/dev/ari-implementation-plan.md
 require_grep "override aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "file-backed override aggregation path" docs/dev/ari-implementation-plan.md
+require_grep "captures the explicit .--config. path" docs/dev/ari-implementation-plan.md
 require_grep "Validate caller-provided .--rule. overrides in the internal CLI file lint" docs/dev/ari-implementation-plan.md
 require_grep "shared rule execution input/result API" docs/dev/ari-implementation-plan.md
 require_grep "shared rule module API" docs/dev/ari-implementation-plan.md
@@ -321,6 +323,7 @@ require_grep "No executable diagnostic severity application tests are added yet"
 require_grep "No executable in-memory lint severity override aggregation tests are added yet" tests/README.md
 require_grep "No executable file-backed lint severity override aggregation tests are added yet" tests/README.md
 require_grep 'parsed `--rule` override validation' tests/README.md
+require_grep 'explicit `--config` path is captured' tests/README.md
 require_grep "Shell-only executable config precedence fixture checks" tests/README.md
 require_grep "Ari-backed config precedence tests are not added" tests/README.md
 require_grep "Initial config precedence fixtures have started" tests/README.md
@@ -526,6 +529,7 @@ require_grep "--list-rules" src/cli.ari
 require_grep "list_rules_requested" src/cli.ari
 require_grep "--config" src/cli.ari
 require_grep "config_path_present" src/cli.ari
+require_grep "config_file_path" src/cli.ari
 require_grep "--rule" src/cli.ari
 require_grep "rule_override_count" src/cli.ari
 require_grep "rule_override_problem_count" src/cli.ari
