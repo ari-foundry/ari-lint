@@ -70,9 +70,10 @@ main OS argv exit-code wiring added /
 main-facing list-rules stdout output added /
 main-facing first diagnostic stderr output added /
 main-facing human diagnostics stderr output added /
+main-facing source-file JSON stdout output added /
 internal human diagnostic formatter added /
 internal human diagnostic array formatter added /
-no user-facing JSON output yet.
+no stable JSON schema or JSON output tests yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -148,8 +149,8 @@ and test work.
       discovering config files, traversing directories, invoking the compiler,
       executing `ari --check`, calling `tools/lint`, or calling process exit.
       First diagnostic stderr output has since been wired for source-file lint
-      results; JSON output, broader stderr behavior, CLI output tests, and
-      parity checks remain future work.
+      results, and source-file `--json` output has since been wired through
+      stdout; broader output tests and parity checks remain future work.
 - [x] Add a minimal config text parser for caller-provided text using the
       documented `RULE = SEVERITY` shape, blank lines, and `#` comments,
       returning internal overrides and parse problems without reading
@@ -390,6 +391,13 @@ and test work.
       traversing directories, invoking the compiler, executing `ari --check`,
       calling `tools/lint`, or calling process exit. JSON output, tests, and
       parity checks remain future work.
+- [x] Wire the main-facing source-file `--json` path to serialize collected
+      diagnostics as a JSON array and write it to stdout through the verified
+      stdout adapter, without changing parse-error output, discovering config
+      files, reading config files, traversing directories, invoking the
+      compiler, executing `ari --check`, calling `tools/lint`, or calling
+      process exit. JSON schema stability, JSON output tests, config
+      integration, and parity checks remain future work.
 - [x] Add a source-only parity runner skeleton that records the intended
       comparison boundary against current `tools/lint` without executing
       `tools/lint`, invoking an `ari-lint` binary, reading fixtures, writing
