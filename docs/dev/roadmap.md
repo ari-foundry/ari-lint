@@ -73,6 +73,7 @@ main-facing human diagnostics stderr output added /
 main-facing source-file JSON stdout output added /
 main-facing CLI parse problem stderr output added /
 main-facing CLI help stdout output added /
+main-facing missing source stderr output added /
 internal human diagnostic formatter added /
 internal human diagnostic array formatter added /
 no stable JSON schema or JSON output tests yet.
@@ -413,6 +414,12 @@ and test work.
       `ari --check`, calling `tools/lint`, or calling process exit. Expanded
       option help, tests, and parity checks remain future
       work.
+- [x] Wire the main-facing missing source-file path to write a short
+      usage-error summary to stderr through the verified stderr adapter,
+      without config discovery, reading config files, traversing directories,
+      invoking the compiler, executing `ari --check`, calling `tools/lint`, or
+      calling process exit. Detailed usage diagnostics, tests, and parity
+      checks remain future work.
 - [x] Add a source-only parity runner skeleton that records the intended
       comparison boundary against current `tools/lint` without executing
       `tools/lint`, invoking an `ari-lint` binary, reading fixtures, writing
@@ -493,7 +500,7 @@ and test work.
 - [x] Add an internal stdout-free command dispatcher that maps parsed CLI args
       to internal command results, routes list-rules requests to the existing
       human-readable formatter, and returns explicit future-work placeholders for
-      parse-problem, help, source-file linting, and unsupported command paths.
+      parse-problem, help, source-file linting, and missing-source command paths.
       User-facing CLI completion, `main` wiring, stdout/stderr output,
       JSON output, source scanning, lint execution, config parsing, compiler
       invocation, dispatcher tests, and parity behavior remain future work.
