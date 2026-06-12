@@ -269,6 +269,11 @@ validate human-readable output, JSON output shape, line/column fields,
 endLine/endColumn fields if supported, severity, rule code, message, path
 normalization, and parity behavior against current `tools/lint`.
 
+No executable human diagnostic formatter tests are added yet. Future formatter
+tests should validate single-diagnostic text, severity names, rule codes,
+messages, newline termination, no stderr writes, no CLI wiring, and parity
+behavior against current `tools/lint`.
+
 No executable diagnostic JSON serializer tests are added yet. Future serializer
 tests should validate single-diagnostic JSON construction, string escaping,
 optional end positions, severity names, rule codes, messages, and final schema

@@ -57,9 +57,10 @@ It does not move `tools/lint` or change build behavior.
 - The diagnostic output metadata skeleton has started as data-only declarations
   for human and JSON output modes, diagnostic location fields, and planned
   diagnostic fields. The JSON serializer is an internal placeholder and does
-  not claim final field serialization. User-facing diagnostic output,
-  diagnostic arrays, human-readable formatting, and final JSON schema stability
-  remain future work.
+  not claim final field serialization. A minimal human-readable formatter now
+  builds one newline-terminated diagnostic line in memory from an already-built
+  diagnostic. User-facing diagnostic output, diagnostic arrays, stderr wiring,
+  and final JSON schema stability remain future work.
 - The source input boundary model has started for caller-provided source text,
   path-only source entries, and explicit single-file reads. It records internal
   source inputs without recursively scanning the filesystem, discovering config
@@ -362,14 +363,14 @@ Current preparatory model skeleton files are source-only placeholders:
   placeholder JSON serializer, list-rules output row model, a known-rule output
   count builder from existing rule metadata, an internal human-readable
   list-rules formatter, and a data-only stdout/stderr output boundary model for
-  named future output sinks. It now
-  includes minimal stdout and stderr adapters that use the verified Ari
-  `std::io::print_string` and `std::io::eprint_string` APIs for
-  caller-provided `String` text and return local status data. It does not
-  format human-readable diagnostics, serialize diagnostic arrays, emit
-  user-facing JSON output, read OS argv, or run the CLI. The CLI layer now
-  calls the stdout adapter for main-facing `--list-rules` output. The stderr
-  adapter remains available but unwired.
+  named future output sinks. It now includes a minimal human-readable formatter
+  for one already-built diagnostic, plus minimal stdout and stderr adapters
+  that use the verified Ari `std::io::print_string` and
+  `std::io::eprint_string` APIs for caller-provided `String` text and return
+  local status data. It does not serialize diagnostic arrays, emit user-facing
+  JSON output, read OS argv, or run the CLI. The CLI layer now calls the stdout
+  adapter for main-facing `--list-rules` output. The human diagnostic formatter
+  and stderr adapter remain available but unwired.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description, and exposes a small constructor for
   internal rule descriptors. It also defines shared rule execution input/result
@@ -775,6 +776,10 @@ usable.
       API without wiring diagnostics, writing stdout, serializing JSON,
       invoking the compiler, executing `ari --check`, calling `tools/lint`, or
       calling process exit
+- [x] Add a minimal internal human-readable diagnostic formatter for one
+      already-built diagnostic without writing stderr, wiring CLI output,
+      serializing diagnostic arrays, invoking the compiler, executing
+      `ari --check`, calling `tools/lint`, or calling process exit
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`

@@ -406,8 +406,10 @@ require_grep "scripts/build.sh" tests/README.md
 require_grep "scripts/test.sh" tests/README.md
 require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
+require_grep "internal human diagnostic formatter added" docs/dev/roadmap.md
 require_grep "diagnostic JSON serializer is limited to placeholder internal text" docs/dev/ari-implementation-plan.md
 require_grep "JSON serializer is an internal placeholder" docs/dev/ari-implementation-plan.md
+require_grep "human-readable formatter now" docs/dev/ari-implementation-plan.md
 require_grep "User-facing diagnostic output" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
 require_grep "human-readable list-rules formatter" docs/dev/ari-implementation-plan.md
@@ -415,6 +417,7 @@ require_grep "stdout/stderr output boundary model" docs/dev/ari-implementation-p
 require_grep "internal list-rules output path added" docs/dev/roadmap.md
 require_grep "human-readable list-rules formatter added" docs/dev/roadmap.md
 require_grep "No diagnostic output tests are added yet" tests/README.md
+require_grep "No executable human diagnostic formatter tests are added yet" tests/README.md
 require_grep "No executable diagnostic JSON serializer tests are added yet" tests/README.md
 require_grep "No executable source input boundary tests are added yet" tests/README.md
 require_grep "No executable list-rules formatter tests are added yet" tests/README.md
@@ -530,6 +533,8 @@ require_grep "serialize_diagnostic_json" src/output.ari
 require_grep "append_json_string" src/output.ari
 require_grep "append_json_optional_position" src/output.ari
 require_grep "diagnostic_severity_name" src/output.ari
+require_grep "format_diagnostic_human" src/output.ari
+require_grep "append_i64_in" src/output.ari
 require_grep "filePath" src/output.ari
 require_grep "endLine" src/output.ari
 require_grep "endColumn" src/output.ari
