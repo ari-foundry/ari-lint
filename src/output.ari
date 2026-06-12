@@ -1,7 +1,7 @@
 // Diagnostic output models, internal diagnostic JSON serialization,
-// internal list-rules formatting, output boundary data, and the minimal stdout
-// adapter. This file does not emit diagnostics, read OS argv, or run the CLI;
-// stdout writes happen only when callers explicitly invoke the adapter.
+// internal list-rules formatting, output boundary data, and minimal stdout and
+// stderr adapters. This file does not emit diagnostics, read OS argv, or run
+// the CLI; stream writes happen only when callers explicitly invoke adapters.
 
 pub enum OutputModeName {
   Human,
@@ -66,6 +66,12 @@ pub struct OutputBoundaryResult {
 pub struct StdoutAdapterResult {
   attempted_stdout_write: bool,
   wrote_stdout: bool,
+  detail: Slice[u8],
+}
+
+pub struct StderrAdapterResult {
+  attempted_stderr_write: bool,
+  wrote_stderr: bool,
   detail: Slice[u8],
 }
 
@@ -166,6 +172,25 @@ pub fn write_stdout_text(zone: ref mut Zone, text: ref std::string::String) -> S
   };
 }
 
+pub fn write_stderr_text(zone: ref mut Zone, text: ref std::string::String) -> StderrAdapterResult {
+  match std::io::eprint_string(text) {
+    std::Err(_) => {
+      return StderrAdapterResult {
+        attempted_stderr_write: true,
+        wrote_stderr: false,
+        detail: "stderr write was attempted through std::io::eprint_string and failed.",
+      };
+    }
+    std::Ok(_) => {}
+  }
+
+  return StderrAdapterResult {
+    attempted_stderr_write: true,
+    wrote_stderr: true,
+    detail: "stderr write completed through std::io::eprint_string.",
+  };
+}
+
 pub fn list_rule_row_from_metadata(
   metadata: super::rules::RuleMetadataEntry
 ) -> ListRuleRow {
@@ -248,8 +273,13 @@ pub fn format_list_rules_human(
 // It does not read OS argv, inspect command results, write stderr, serialize
 // JSON, call process exit, or run the CLI.
 //
+// write_stderr_text is the minimal verified stderr adapter. It writes a caller-
+// provided std::string::String through std::io::eprint_string and returns local
+// status data. It does not read OS argv, inspect command results, write stdout,
+// serialize JSON, call process exit, or run the CLI.
+//
 // Human-readable diagnostic string construction, diagnostic arrays, stderr
-// output, and final user-facing JSON output are future work. Main-facing
-// list-rules stdout wiring is handled by the CLI layer through the explicit
-// stdout adapter. Source scanning, diagnostic output wiring, config parsing,
-// and ari --check invocation are also future work.
+// diagnostic wiring, and final user-facing JSON output are future work.
+// Main-facing list-rules stdout wiring is handled by the CLI layer through the
+// explicit stdout adapter. Source scanning, diagnostic output wiring, config
+// parsing, and ari --check invocation are also future work.

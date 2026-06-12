@@ -29,6 +29,7 @@ stdout/stderr output boundary model added /
 internal exit-code model added /
 explicit-token list-rules command wiring added /
 minimal stdout adapter added /
+minimal stderr adapter added /
 OS argv integration added /
 minimal config text parser added /
 config text known-rule validation added /
@@ -107,6 +108,12 @@ and test work.
       serializing JSON, invoking the compiler, scanning sources, executing lint
       rules, or calling process exit. Stdout-adapter tests and user-facing CLI
       output wiring remain future work.
+- [x] Add a minimal stderr adapter using the verified Ari `std::io::eprint_string`
+      API for caller-provided `String` text, returning local status data without
+      reading OS argv, wiring diagnostic output, writing stdout, serializing
+      JSON, invoking the compiler, scanning sources, executing lint rules, or
+      calling process exit. Stderr-adapter tests and diagnostic output wiring
+      remain future work.
 - [x] Add internal OS argv integration using the verified Ari `std::env::args`
       API, dropping argv[0] and reusing the existing explicit-token parser and
       stdout-free dispatcher without reading environment variables, writing

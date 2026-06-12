@@ -259,9 +259,12 @@ require_grep "stdout/stderr output boundary model added" docs/dev/roadmap.md
 require_grep "internal exit-code model added" docs/dev/roadmap.md
 require_grep "explicit-token list-rules command wiring added" docs/dev/roadmap.md
 require_grep "minimal stdout adapter added" docs/dev/roadmap.md
+require_grep "minimal stderr adapter added" docs/dev/roadmap.md
 require_grep "main-facing list-rules stdout output added" docs/dev/roadmap.md
 require_grep "run_os_argv_cli_with_list_rules_stdout" src/cli.ari
 require_grep "write_stdout_text" src/cli.ari
+require_grep "write_stderr_text" src/output.ari
+require_grep "std::io::eprint_string" src/output.ari
 require_grep "run_os_argv_cli_with_list_rules_stdout" src/main.ari
 require_grep "known rule registry lookup added" docs/dev/roadmap.md
 require_grep "registry-backed in-memory rule dispatch added" docs/dev/roadmap.md
@@ -398,6 +401,7 @@ require_grep "No executable main-entry tests are added yet" tests/README.md
 require_grep "No executable OS argv integration tests are added yet" tests/README.md
 require_grep "No executable stdout/stderr output boundary tests are added yet" tests/README.md
 require_grep "No executable stdout adapter tests are added yet" tests/README.md
+require_grep "No executable stderr adapter tests are added yet" tests/README.md
 require_grep "scripts/build.sh" tests/README.md
 require_grep "scripts/test.sh" tests/README.md
 require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
@@ -548,6 +552,9 @@ require_grep "does not call real output APIs" src/output.ari
 require_grep "StdoutAdapterResult" src/output.ari
 require_grep "write_stdout_text" src/output.ari
 require_grep "std::io::print_string" src/output.ari
+require_grep "StderrAdapterResult" src/output.ari
+require_grep "write_stderr_text" src/output.ari
+require_grep "std::io::eprint_string" src/output.ari
 require_grep "ConfigSkeleton" src/config.ari
 require_grep "ConfigSourceMetadata" src/config.ari
 require_grep "OverridePrecedenceMetadata" src/config.ari
