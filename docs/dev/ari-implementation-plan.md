@@ -14,9 +14,10 @@ It does not move `tools/lint` or change build behavior.
 - The Ari source skeleton has started with source-only files under `src/`.
 - A minimal Ari main entry shell is now present. It delegates to the existing
   OS argv CLI entry path and returns the internal command exit-code mapping.
-  It does not read environment variables, write stdout/stderr, serialize JSON,
-  discover config files, traverse directories, invoke the compiler, invoke
-  `ari --check`, call `tools/lint`, or call process exit.
+  The main-facing `--list-rules` path writes stdout through the verified stdout
+  adapter. It does not read environment variables, write stderr, serialize
+  JSON, discover config files, traverse directories, invoke the compiler,
+  invoke `ari --check`, call `tools/lint`, or call process exit.
 - The rule registry, severity, and config model skeleton has started as
   preparatory source-only declarations. The registry now constructs known
   entries for `lint/trailing-whitespace` and `lint/missing-final-newline` from
@@ -119,11 +120,13 @@ It does not move `tools/lint` or change build behavior.
   stderr sinks plus result status for future output handling. It is data-only:
   it does not call real output APIs, write stdout/stderr, connect to OS argv or
   `main`, serialize JSON, or emit user-facing CLI output.
-- A minimal stdout adapter now writes caller-provided `String` text through the
-  verified Ari `std::io::print_string` API and returns local status data. It is
-  now wired only for the main-facing OS argv `--list-rules` path. It is not
-  wired to diagnostics, stderr, JSON output, process exit, compiler invocation,
-  source scanning, or lint execution.
+- A minimal stdout adapter and a minimal stderr adapter now write
+  caller-provided `String` text through the verified Ari
+  `std::io::print_string` and `std::io::eprint_string` APIs and return local
+  status data. The stdout adapter is wired only for the main-facing OS argv
+  `--list-rules` path. The stderr adapter is not wired to diagnostics yet.
+  These adapters are not wired to JSON output, process exit, compiler
+  invocation, source scanning, or lint execution.
 - An internal OS argv entry path now reads arguments through the verified Ari
   `std::env::args` API, drops the program-name argument, and dispatches the
   remaining user tokens through the existing explicit-token parser and
@@ -360,12 +363,13 @@ Current preparatory model skeleton files are source-only placeholders:
   count builder from existing rule metadata, an internal human-readable
   list-rules formatter, and a data-only stdout/stderr output boundary model for
   named future output sinks. It now
-  includes a minimal stdout adapter that uses the verified Ari
-  `std::io::print_string` API for caller-provided `String` text and returns
-  local status data. It does not format human-readable diagnostics, serialize
-  diagnostic arrays, emit user-facing JSON output, write stderr, read OS argv,
-  or run the CLI. The CLI layer now calls this adapter for main-facing
-  `--list-rules` stdout output.
+  includes minimal stdout and stderr adapters that use the verified Ari
+  `std::io::print_string` and `std::io::eprint_string` APIs for
+  caller-provided `String` text and return local status data. It does not
+  format human-readable diagnostics, serialize diagnostic arrays, emit
+  user-facing JSON output, read OS argv, or run the CLI. The CLI layer now
+  calls the stdout adapter for main-facing `--list-rules` output. The stderr
+  adapter remains available but unwired.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description, and exposes a small constructor for
   internal rule descriptors. It also defines shared rule execution input/result
@@ -440,7 +444,7 @@ dispatcher is limited to stdout-free internal command results, the exit-code
 model is limited to internal data carried by those results, the explicit-token
 `--list-rules` command path is limited to caller-provided token construction,
 the main-facing `--list-rules` stdout path is limited to writing that formatted
-text through the stdout adapter, the stdout adapter is limited to
+text through the stdout adapter, the stdout and stderr adapters are limited to
 caller-provided `String` text, and the stdout/stderr output boundary is limited
 to status data for named future sinks.
 Compiler invocation, config discovery, config file reading, override
@@ -767,6 +771,10 @@ usable.
       verified stdout adapter without writing stderr, serializing JSON,
       printing diagnostics, invoking the compiler, executing `ari --check`,
       calling `tools/lint`, or calling process exit
+- [x] Add a minimal stderr adapter through the verified `std::io::eprint_string`
+      API without wiring diagnostics, writing stdout, serializing JSON,
+      invoking the compiler, executing `ari --check`, calling `tools/lint`, or
+      calling process exit
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`

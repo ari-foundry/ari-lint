@@ -259,6 +259,11 @@ minimal `std::io::print_string` adapter, successful write status, failed write
 status if Ari exposes a practical failure path, no stderr writes, no OS argv
 reads, and later user-facing CLI output wiring.
 
+No executable stderr adapter tests are added yet. Future tests should cover the
+minimal `std::io::eprint_string` adapter, successful write status, failed write
+status if Ari exposes a practical failure path, no stdout writes, no OS argv
+reads, and later diagnostic output wiring.
+
 No diagnostic output tests are added yet. Future diagnostic tests should
 validate human-readable output, JSON output shape, line/column fields,
 endLine/endColumn fields if supported, severity, rule code, message, path
