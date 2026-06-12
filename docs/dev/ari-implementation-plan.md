@@ -74,9 +74,10 @@ It does not move `tools/lint` or change build behavior.
   serialize JSON, invoke the compiler, execute lint rules over file sets, or
   call `tools/lint`.
 - The trailing-whitespace rule now scans caller-provided in-memory source text
-  and returns an internal diagnostic count for lines ending in spaces or tabs,
-  without reading files, scanning the filesystem, applying config, writing
-  output, serializing JSON, invoking the compiler, or calling `tools/lint`.
+  and returns an internal diagnostic count plus the first already-built
+  diagnostic for lines ending in spaces or tabs, without reading files,
+  scanning the filesystem, applying config, writing output, serializing JSON,
+  invoking the compiler, or calling `tools/lint`.
 - The missing-final-newline rule now scans caller-provided in-memory source
   text, computes final line/column metadata from those bytes, and returns an
   internal diagnostic count when non-empty content does not end with a newline,
@@ -185,8 +186,8 @@ It does not move `tools/lint` or change build behavior.
   internal diagnostic mapping skeletons have started for trailing whitespace and
   missing final newline.
   The trailing-whitespace mapping now feeds an in-memory rule execution
-  function that produces an internal diagnostic count from caller-provided
-  source text.
+  function that produces an internal diagnostic count and keeps the first
+  already-built diagnostic from caller-provided source text.
   The missing-final-newline mapping now feeds an in-memory rule execution
   function that computes final position metadata from caller-provided source
   text and produces an internal diagnostic count when the final newline is
@@ -789,6 +790,10 @@ usable.
       execution, writing stderr, wiring CLI output, serializing JSON, invoking
       the compiler, executing `ari --check`, calling `tools/lint`, or calling
       process exit
+- [x] Capture the first already-built internal diagnostic from in-memory
+      `lint/trailing-whitespace` execution without collecting full diagnostic
+      arrays, writing output, serializing JSON, invoking the compiler, executing
+      `ari --check`, calling `tools/lint`, or calling process exit
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
 - [ ] Define parity test fixtures against current `tools/lint`

@@ -1,6 +1,7 @@
 // Trailing whitespace rule helpers and in-memory execution. This file scans
-// only caller-provided source text. It does not read files, scan the
-// filesystem, print diagnostics, serialize JSON, or apply config overrides.
+// only caller-provided source text and captures the first internal diagnostic.
+// It does not read files, scan the filesystem, print diagnostics, serialize
+// JSON, or apply config overrides.
 
 pub struct TrailingWhitespaceRuleModuleMetadata {
   code: Slice[u8],
@@ -15,20 +16,28 @@ struct TrailingWhitespaceDiagnosticMapping {
   severity: super::super::severity::Severity,
 }
 
+struct TrailingWhitespaceLineResult {
+  diagnostic_count: i64,
+  first_diagnostic: super::super::diagnostic::OptionalDiagnostic,
+}
+
 pub struct TrailingWhitespaceRuleResult {
   diagnostic_count: i64,
+  first_diagnostic: super::super::diagnostic::OptionalDiagnostic,
   reads_files: bool,
   scans_filesystem: bool,
 }
 
 // The line helper is intentionally limited to one already-split line. The
 // public in-memory rule function below performs whole caller-provided source
-// text scanning by splitting on newline bytes and reusing this helper. File
-// reading, filesystem traversal, config interaction, severity override
-// application, CLI parsing, diagnostics output, JSON serialization, and ari
-// --check invocation remain future work. Rule code lint/trailing-whitespace,
-// short name trailing-whitespace, default severity warning, and message
-// trailing whitespace are confirmed by the reference implementation.
+// text scanning by splitting on newline bytes and reusing this helper. The
+// public result keeps a diagnostic count and the first already-built internal
+// diagnostic. File reading, filesystem traversal, config interaction, severity
+// override application, CLI parsing, diagnostics output, JSON serialization,
+// and ari --check invocation remain future work. Rule code
+// lint/trailing-whitespace, short name trailing-whitespace, default severity
+// warning, and message trailing whitespace are confirmed by the reference
+// implementation.
 
 fn is_trailing_space_byte(value: u8) -> bool {
   return value == 32u8 || value == 9u8;
@@ -87,6 +96,19 @@ fn trailing_whitespace_line_diagnostic_count(
   line_number: i64,
   line: Slice[u8]
 ) -> i64 {
+  let result = trailing_whitespace_line_diagnostic(
+    file_path,
+    line_number,
+    line
+  );
+  return result.diagnostic_count;
+}
+
+fn trailing_whitespace_line_diagnostic(
+  file_path: Slice[u8],
+  line_number: i64,
+  line: Slice[u8]
+) -> TrailingWhitespaceLineResult {
   let mapping = trailing_whitespace_diagnostic_mapping(
     file_path,
     line_number,
@@ -99,9 +121,15 @@ fn trailing_whitespace_line_diagnostic_count(
       "lint/trailing-whitespace",
       "trailing whitespace"
     );
-    return 1;
+    return TrailingWhitespaceLineResult {
+      diagnostic_count: 1,
+      first_diagnostic: super::super::diagnostic::some_diagnostic(diagnostic),
+    };
   }
-  return 0;
+  return TrailingWhitespaceLineResult {
+    diagnostic_count: 0,
+    first_diagnostic: super::super::diagnostic::no_diagnostic(),
+  };
 }
 
 pub fn lint_trailing_whitespace_in_memory(
@@ -110,15 +138,21 @@ pub fn lint_trailing_whitespace_in_memory(
   source_text: Slice[u8]
 ) -> TrailingWhitespaceRuleResult {
   var diagnostic_count = 0;
+  var first_diagnostic = super::super::diagnostic::no_diagnostic();
   var line_start = 0;
   var line_number = 1;
   var index = 0;
   while index < source_text.len() {
     if source_text.get(index) == 10u8 {
-      diagnostic_count = diagnostic_count + trailing_whitespace_line_diagnostic_count(
+      let current_line_result = trailing_whitespace_line_diagnostic(
         file_path,
         line_number,
         std::string::substring(source_text, line_start, index)
+      );
+      diagnostic_count = diagnostic_count + current_line_result.diagnostic_count;
+      first_diagnostic = super::super::diagnostic::first_available_diagnostic(
+        first_diagnostic,
+        current_line_result.first_diagnostic
       );
       line_start = index + 1;
       line_number = line_number + 1;
@@ -127,15 +161,21 @@ pub fn lint_trailing_whitespace_in_memory(
   }
 
   if line_start < source_text.len() {
-    diagnostic_count = diagnostic_count + trailing_whitespace_line_diagnostic_count(
+    let final_line_result = trailing_whitespace_line_diagnostic(
       file_path,
       line_number,
       std::string::substring(source_text, line_start, source_text.len())
+    );
+    diagnostic_count = diagnostic_count + final_line_result.diagnostic_count;
+    first_diagnostic = super::super::diagnostic::first_available_diagnostic(
+      first_diagnostic,
+      final_line_result.first_diagnostic
     );
   }
 
   return TrailingWhitespaceRuleResult {
     diagnostic_count: diagnostic_count,
+    first_diagnostic: first_diagnostic,
     reads_files: false,
     scans_filesystem: false,
   };
