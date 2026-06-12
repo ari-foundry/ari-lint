@@ -45,6 +45,7 @@ initial config precedence fixtures and lightweight checks added /
 shell-only config precedence fixture checks added /
 executable rule module API added /
 minimal diagnostic JSON serializer added /
+internal diagnostic JSON field serialization added /
 source input boundary model added /
 in-memory trailing-whitespace execution added /
 trailing-whitespace first diagnostic capture added /
@@ -261,6 +262,13 @@ and test work.
       sources, invoking the compiler, executing lint rules, or adding golden
       tests. JSON serializer tests and final schema stability remain future
       work.
+- [x] Replace the single-diagnostic JSON placeholder with internal field
+      serialization for filePath, line, column, nullable endLine/endColumn,
+      severity, ruleCode, and message, including common string escaping,
+      without writing stdout/stderr, wiring CLI output, serializing diagnostic
+      arrays, scanning sources, invoking the compiler, executing lint rules, or
+      adding golden tests. JSON serializer tests, user-facing JSON output, and
+      final schema stability remain future work.
 - [x] Add an internal human-readable formatter for one already-built diagnostic,
       returning newline-terminated text in memory without writing stderr,
       wiring CLI output, serializing diagnostic arrays, scanning sources,
