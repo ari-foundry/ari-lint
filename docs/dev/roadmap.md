@@ -49,6 +49,7 @@ source input boundary model added /
 in-memory trailing-whitespace execution added /
 trailing-whitespace first diagnostic capture added /
 in-memory missing-final-newline execution added /
+missing-final-newline first diagnostic capture added /
 in-memory lint run aggregation added /
 file read boundary added /
 internal CLI file lint path added /
@@ -280,9 +281,8 @@ and test work.
       `lint/trailing-whitespace` execution, while preserving diagnostic-count
       behavior and without reading files, scanning the filesystem, applying
       config, writing output, serializing JSON, invoking the compiler, executing
-      `ari --check`, or calling `tools/lint`. Missing-final-newline diagnostic
-      capture, aggregation-level diagnostic collection, stderr wiring, tests,
-      and parity checks remain future work.
+      `ari --check`, or calling `tools/lint`. Aggregation-level diagnostic
+      collection, stderr wiring, tests, and parity checks remain future work.
 - [x] Add in-memory `lint/missing-final-newline` execution over
       caller-provided source text, returning an internal diagnostic count for
       non-empty content that does not end with a newline without reading files,
@@ -290,6 +290,12 @@ and test work.
       serializing JSON, invoking the compiler, or calling `tools/lint`. Rule
       execution tests, file-backed linting, config integration, CLI wiring,
       output behavior, and parity checks remain future work.
+- [x] Capture the first already-built internal diagnostic from in-memory
+      `lint/missing-final-newline` execution, while preserving diagnostic-count
+      behavior and without reading files, scanning the filesystem, applying
+      config, writing output, serializing JSON, invoking the compiler, executing
+      `ari --check`, or calling `tools/lint`. Aggregation-level diagnostic
+      collection, stderr wiring, tests, and parity checks remain future work.
 - [x] Add in-memory lint run aggregation over caller-provided source text,
       combining diagnostic counts from the in-memory `lint/trailing-whitespace` and
       `lint/missing-final-newline` rules without reading files, scanning the

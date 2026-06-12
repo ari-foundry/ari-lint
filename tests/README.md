@@ -284,6 +284,11 @@ Future tests should validate the first captured diagnostic, count preservation,
 line/column metadata, no stderr writes, no JSON serialization, and parity
 behavior against current `tools/lint`.
 
+No executable missing-final-newline first-diagnostic capture tests are added yet.
+Future tests should validate the first captured diagnostic, count preservation,
+line/column metadata, no stderr writes, no JSON serialization, and parity
+behavior against current `tools/lint`.
+
 No executable diagnostic JSON serializer tests are added yet. Future serializer
 tests should validate single-diagnostic JSON construction, string escaping,
 optional end positions, severity names, rule codes, messages, and final schema
