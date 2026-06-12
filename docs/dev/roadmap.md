@@ -42,6 +42,7 @@ file-backed lint severity override aggregation added /
 CLI file lint rule override application added /
 CLI diagnostic severity override application added /
 CLI explicit config path capture added /
+explicit config file parse boundary added /
 config precedence fixture plan added /
 initial config precedence fixtures and lightweight checks added /
 shell-only config precedence fixture checks added /
@@ -241,6 +242,14 @@ and test work.
       calling `tools/lint`, adding tests, or calling process exit. Config-file
       reading, config application, executable tests, and parity checks remain
       future work.
+- [x] Add an explicit config file parse boundary that reads one
+      caller-provided config file path with the verified file-read API and
+      parses it into existing internal override data, without discovering
+      `ari-lint.rules`, wiring CLI config behavior, applying config to
+      diagnostics or lint execution, changing output, serializing JSON,
+      invoking the compiler, executing `ari --check`, calling `tools/lint`,
+      adding tests, or calling process exit. CLI config integration, discovered
+      config reading, executable tests, and parity checks remain future work.
 - [x] Add a config precedence fixture plan for future default, config-file,
       explicit `--config`, and command-line `--rule` precedence coverage,
       without adding fixture files, reading config files, discovering

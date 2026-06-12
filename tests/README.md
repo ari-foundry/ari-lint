@@ -31,7 +31,9 @@ the lightweight checks do not execute a parity runner.
 The config precedence fixture plan is documented.
 Shell-only executable config precedence fixture checks verify presence, exact
 line order, and expected text. Ari-backed config precedence tests are not added
-yet.
+yet. An internal explicit config file parse boundary can read one
+caller-provided config file path and parse it into override data, but these
+checks do not execute that boundary or apply config to CLI diagnostics yet.
 The shared rule module API has started for caller-provided in-memory source
 text, but the lightweight checks do not execute Ari rule API tests.
 Registry-backed in-memory rule dispatch has started for one exact known rule
@@ -368,8 +370,8 @@ behavior against current `tools/lint`.
 
 No executable config parser tests are added yet. Future config parser tests
 should validate caller-provided `RULE = SEVERITY` text, blank lines, comments,
-invalid lines, invalid severity names, known-rule validation, and parse problem
-reporting.
+invalid lines, invalid severity names, known-rule validation, explicit config
+file path parsing, read-error reporting, and parse problem reporting.
 
 No executable rule override parser tests are added yet. Future rule override
 parser tests should validate caller-provided `--rule RULE=SEVERITY` text,
