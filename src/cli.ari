@@ -12,10 +12,10 @@
 // provided. A separate collection path pushes full internal diagnostics into a
 // caller-provided vector. The main-facing path writes list-rules text to
 // stdout, source lint diagnostics to stderr, source-file JSON diagnostics to
-// stdout, and CLI parse problem summaries to stderr through verified output
-// adapters. It does not read environment state, discover config files,
-// recursively scan source trees, call tools/lint, call process exit, or invoke
-// ari --check.
+// stdout, CLI help text to stdout, and CLI parse problem summaries to stderr
+// through verified output adapters. It does not read environment state,
+// discover config files, recursively scan source trees, call tools/lint, call
+// process exit, or invoke ari --check.
 
 pub struct CliOptionMetadata {
   name: Slice[u8],
@@ -72,7 +72,7 @@ pub struct CliParseResult {
 pub enum CliCommandResultKind {
   CliListRulesText,
   CliParseProblems,
-  CliHelpFuture,
+  CliHelpText,
   CliSourceLintResult,
   CliUnsupportedFuture,
 }
@@ -350,12 +350,12 @@ pub fn dispatch_cli_command(
 
   if parse_result.args.help_requested {
     return cli_command_result(
-      CliHelpFuture,
+      CliHelpText,
       false,
       0,
       0,
       cli_success_exit_code(zone),
-      "Help command dispatch is recognized internally; user-facing output remains future work."
+      "Help command dispatch is recognized internally without writing output."
     );
   }
 
@@ -418,6 +418,19 @@ fn write_cli_parse_problem_stderr(zone: ref mut Zone) -> bool {
   return write_result.wrote_stderr;
 }
 
+fn write_cli_help_stdout(zone: ref mut Zone) -> bool {
+  var text = std::string::new(zone, 384);
+  text.append_string_in(zone, "Usage: ari-lint [options] <source-file>\n");
+  text.append_string_in(zone, "\n");
+  text.append_string_in(zone, "Options:\n");
+  text.append_string_in(zone, "  -h, --help                 Show this help text.\n");
+  text.append_string_in(zone, "  --list-rules               List known lint rules.\n");
+  text.append_string_in(zone, "  --json                     Write source-file diagnostics as JSON.\n");
+  text.append_string_in(zone, "  --rule RULE=SEVERITY       Override a known rule severity.\n");
+  let write_result = super::output::write_stdout_text(zone, ref text);
+  return write_result.wrote_stdout;
+}
+
 fn dispatch_cli_command_with_main_output(
   zone: ref mut Zone,
   parse_result: CliParseResult
@@ -441,6 +454,28 @@ fn dispatch_cli_command_with_main_output(
       0,
       cli_usage_error_exit_code(zone),
       "CLI parse problem summary was written to stderr through the verified stderr adapter."
+    );
+  }
+
+  if parse_result.args.help_requested {
+    let wrote_help_stdout = write_cli_help_stdout(zone);
+    if !wrote_help_stdout {
+      return cli_command_result(
+        CliHelpText,
+        true,
+        0,
+        0,
+        cli_unavailable_exit_code(zone),
+        "CLI help stdout write failed through the verified stdout adapter."
+      );
+    }
+    return cli_command_result(
+      CliHelpText,
+      true,
+      0,
+      0,
+      cli_success_exit_code(zone),
+      "CLI help text was written to stdout through the verified stdout adapter."
     );
   }
 
@@ -650,7 +685,7 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // run_os_argv_cli_with_main_output is the main-facing output path. It writes
 // the existing human-readable list-rules text to stdout and source-file lint
 // diagnostics to stderr, or source-file JSON diagnostics to stdout when
-// --json is requested, through verified output adapters. CLI parse problems
-// write a short summary to stderr. Help, config discovery, parse-error JSON,
-// compiler invocation, ari --check, tools/lint, and process exit remain outside
-// this path.
+// --json is requested, through verified output adapters. CLI help writes a
+// concise stdout message, and CLI parse problems write a short summary to
+// stderr. Config discovery, parse-error JSON, compiler invocation, ari --check,
+// tools/lint, and process exit remain outside this path.

@@ -72,6 +72,7 @@ main-facing first diagnostic stderr output added /
 main-facing human diagnostics stderr output added /
 main-facing source-file JSON stdout output added /
 main-facing CLI parse problem stderr output added /
+main-facing CLI help stdout output added /
 internal human diagnostic formatter added /
 internal human diagnostic array formatter added /
 no stable JSON schema or JSON output tests yet.
@@ -401,10 +402,16 @@ and test work.
       integration, and parity checks remain future work.
 - [x] Wire the main-facing CLI parse problem path to write a short usage-error
       summary to stderr through the verified stderr adapter, without
-      parse-error JSON output, help text, config discovery, reading config
+      parse-error JSON output, config discovery, reading config
       files, traversing directories, invoking the compiler, executing
       `ari --check`, calling `tools/lint`, or calling process exit. Detailed
-      parse diagnostics, help output, tests, and parity checks remain future
+      parse diagnostics, tests, and parity checks remain future
+      work.
+- [x] Wire the main-facing CLI help path to write concise help text to stdout
+      through the verified stdout adapter, without config discovery, reading
+      config files, traversing directories, invoking the compiler, executing
+      `ari --check`, calling `tools/lint`, or calling process exit. Expanded
+      option help, tests, and parity checks remain future
       work.
 - [x] Add a source-only parity runner skeleton that records the intended
       comparison boundary against current `tools/lint` without executing

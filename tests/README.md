@@ -37,9 +37,10 @@ The main entry now returns the existing OS argv CLI command exit-code mapping,
 and the main-facing `--list-rules` path writes human-readable list-rules text
 through the verified stdout adapter. The main-facing source-file `--json` path
 writes collected diagnostics as a JSON array through the verified stdout
-adapter, and CLI parse problems write a short summary through the verified
-stderr adapter, but the lightweight checks do not execute main-entry tests or
-user-facing CLI output tests.
+adapter, the main-facing help path writes concise help text through the
+verified stdout adapter, and CLI parse problems write a short summary through
+the verified stderr adapter, but the lightweight checks do not execute
+main-entry tests or user-facing CLI output tests.
 Internal single-diagnostic JSON field serialization has started, but the
 internal caller-provided diagnostic JSON array serializer has also started. The
 lightweight checks do not execute JSON serializer tests or assert a stable JSON
@@ -255,17 +256,17 @@ parity behavior against current `tools/lint` once a parity runner exists.
 No executable main-entry tests are added yet. Future tests should cover main
 entry behavior, delegation from the main shell to OS argv CLI handling, returned
 exit-code mapping, list-rules stdout output, human diagnostics stderr output
-for source-file lint results, source-file JSON stdout output, CLI parse problem
-stderr output, no process exit calls, and parity behavior against current
-`tools/lint` once a parity runner exists.
+for source-file lint results, source-file JSON stdout output, help stdout
+output, CLI parse problem stderr output, no process exit calls, and parity
+behavior against current `tools/lint` once a parity runner exists.
 
 No executable OS argv integration tests are added yet. Future tests should
 cover `std::env::args` collection, argv[0] dropping, delegation into
 explicit-token parsing, environment isolation, list-rules stdout output, human
 diagnostics stderr output for source-file lint results, stdout-free behavior
-for non-output paths, source-file JSON stdout output, CLI parse problem stderr
-output, no process exit calls, and parity behavior against current `tools/lint`
-once a parity runner exists.
+for non-output paths, source-file JSON stdout output, help stdout output, CLI
+parse problem stderr output, no process exit calls, and parity behavior against
+current `tools/lint` once a parity runner exists.
 
 No executable stdout/stderr output boundary tests are added yet. Future tests
 should cover the internal sink/result model, stdout versus stderr stream
