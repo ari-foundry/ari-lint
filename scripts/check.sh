@@ -266,10 +266,13 @@ require_grep "internal diagnostic vector collection added" docs/dev/roadmap.md
 require_grep "CLI diagnostic vector collection added" docs/dev/roadmap.md
 require_grep "main-facing human diagnostics stderr output added" docs/dev/roadmap.md
 require_grep "main-facing source-file JSON stdout output added" docs/dev/roadmap.md
+require_grep "main-facing CLI parse problem stderr output added" docs/dev/roadmap.md
 require_grep "run_os_argv_cli_with_main_output" src/cli.ari
 require_grep "write_stdout_text" src/cli.ari
 require_grep "write_diagnostics_stderr" src/cli.ari
 require_grep "write_diagnostics_json_stdout" src/cli.ari
+require_grep "write_cli_parse_problem_stderr" src/cli.ari
+require_grep "invalid command-line arguments" src/cli.ari
 require_grep "collect_cli_source_diagnostics" src/cli.ari
 require_grep "collect_explicit_cli_diagnostics" src/cli.ari
 require_grep "write_stderr_text" src/output.ari
@@ -431,6 +434,7 @@ require_grep "A minimal human-readable formatter" docs/dev/ari-implementation-pl
 require_grep "caller-provided diagnostics" docs/dev/ari-implementation-plan.md
 require_grep "first already-built" docs/dev/ari-implementation-plan.md
 require_grep "collected human diagnostics to stderr" docs/dev/ari-implementation-plan.md
+require_grep "CLI parse problems write a short summary" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
 require_grep "human-readable list-rules formatter" docs/dev/ari-implementation-plan.md
 require_grep "stdout/stderr output boundary model" docs/dev/ari-implementation-plan.md
