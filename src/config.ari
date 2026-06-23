@@ -1,7 +1,8 @@
-// Config override model, caller-provided config text parsing, explicit config
-// file parsing, and data-only severity application helpers. This file must
-// not discover or read ari-lint.rules files, inspect CLI input, or apply
-// severity overrides to lint execution.
+// Config override model, caller-provided config text parsing, caller-selected
+// config file parsing, and data-only severity application helpers. Current
+// directory ari-lint.rules discovery is decided by the CLI layer; this file
+// only parses the path a caller provides. It does not inspect CLI input or
+// apply severity overrides to lint execution.
 
 pub enum ConfigSource {
   DefaultConfig,
@@ -170,20 +171,54 @@ fn config_override_from_parts(
 fn config_file_parse_result(
   override_count: i64,
   problem_count: i64,
-  read_error_count: i64
+  read_error_count: i64,
+  discovers_config_files: bool
 ) -> ConfigFileParseResult {
   return ConfigFileParseResult {
     override_count: override_count,
     problem_count: problem_count,
     read_error_count: read_error_count,
     reads_config_files: true,
-    discovers_config_files: false,
+    discovers_config_files: discovers_config_files,
     applies_to_diagnostics: false,
     applies_to_lint_execution: false,
     writes_output: false,
     serializes_json: false,
     invokes_compiler: false,
   };
+}
+
+fn parse_config_file_from_source_into(
+  zone: ref mut Zone,
+  path: Slice[u8],
+  source: ConfigSource,
+  discovers_config_files: bool,
+  overrides: ref mut std::vec::Vec[RuleSeverityOverride]
+) -> ConfigFileParseResult {
+  match std::fs::read_detailed(zone, path) {
+    std::Ok(text) => {
+      let parse_result = parse_config_text_from_source_into(
+        zone,
+        text.as_slice(),
+        source,
+        overrides
+      );
+      return config_file_parse_result(
+        parse_result.override_count,
+        parse_result.problem_count,
+        0,
+        discovers_config_files
+      );
+    }
+    std::Err(problem) => {
+      return config_file_parse_result(
+        0,
+        0,
+        1,
+        discovers_config_files
+      );
+    }
+  }
 }
 
 fn normalized_rule_override_code(rule_code: Slice[u8]) -> Slice[u8] {
@@ -456,28 +491,13 @@ pub fn parse_explicit_config_file_into(
   path: Slice[u8],
   overrides: ref mut std::vec::Vec[RuleSeverityOverride]
 ) -> ConfigFileParseResult {
-  match std::fs::read_detailed(zone, path) {
-    std::Ok(text) => {
-      let parse_result = parse_config_text_from_source_into(
-        zone,
-        text.as_slice(),
-        ExplicitConfigFile,
-        overrides
-      );
-      return config_file_parse_result(
-        parse_result.override_count,
-        parse_result.problem_count,
-        0
-      );
-    }
-    std::Err(problem) => {
-      return config_file_parse_result(
-        0,
-        0,
-        1
-      );
-    }
-  }
+  return parse_config_file_from_source_into(
+    zone,
+    path,
+    ExplicitConfigFile,
+    false,
+    overrides
+  );
 }
 
 pub fn parse_explicit_config_file(
@@ -486,6 +506,32 @@ pub fn parse_explicit_config_file(
 ) -> ConfigFileParseResult {
   var overrides = std::vec::new<RuleSeverityOverride>(zone, 4);
   return parse_explicit_config_file_into(
+    zone,
+    path,
+    ref mut overrides
+  );
+}
+
+pub fn parse_discovered_config_file_into(
+  zone: ref mut Zone,
+  path: Slice[u8],
+  overrides: ref mut std::vec::Vec[RuleSeverityOverride]
+) -> ConfigFileParseResult {
+  return parse_config_file_from_source_into(
+    zone,
+    path,
+    AriLintRulesDiscovery,
+    true,
+    overrides
+  );
+}
+
+pub fn parse_discovered_config_file(
+  zone: ref mut Zone,
+  path: Slice[u8]
+) -> ConfigFileParseResult {
+  var overrides = std::vec::new<RuleSeverityOverride>(zone, 4);
+  return parse_discovered_config_file_into(
     zone,
     path,
     ref mut overrides
@@ -592,7 +638,7 @@ pub fn apply_rule_severity_to_diagnostic(
 // Reference docs say --config disables ari-lint.rules discovery, and command
 // line --rule overrides are applied after config-file settings. This file
 // records that precedence, parses caller-provided config text, and can parse
-// one explicit config file path when a caller provides it.
+// one caller-selected config file path.
 //
 // parse_config_text accepts text already supplied by the caller. It supports
 // blank lines, # comments, and RULE = SEVERITY entries for off, hint, note,
@@ -602,9 +648,16 @@ pub fn apply_rule_severity_to_diagnostic(
 // parse_explicit_config_file and parse_explicit_config_file_into read one
 // explicit caller-provided config file path with std::fs::read_detailed, parse
 // its text through the same config parser, and return counts plus read-error
-// data. They do not discover ari-lint.rules, inspect CLI arguments, apply
-// config to diagnostics or lint execution, write output, serialize JSON, or
-// invoke the compiler.
+// data.
+//
+// parse_discovered_config_file and parse_discovered_config_file_into read one
+// caller-selected discovered config path with std::fs::read_detailed and mark
+// overrides as ari-lint.rules discovery sourced. The CLI layer decides whether
+// ./ari-lint.rules exists and should be parsed.
+//
+// Config file parsing does not inspect CLI arguments, apply config to
+// diagnostics or lint execution, write output, serialize JSON, or invoke the
+// compiler.
 //
 // parse_rule_override_texts and parse_rule_override_text_into accept
 // caller-provided --rule values in RULE=SEVERITY form, normalize documented
@@ -626,7 +679,7 @@ pub fn apply_rule_severity_to_diagnostic(
 // run lint rules, apply config to lint execution, write output, serialize JSON,
 // or invoke the compiler.
 //
-// ari-lint.rules discovery or reading, CLI integration of --config file
-// behavior, user-facing --rule command dispatch behavior, severity override
-// application to lint execution, diagnostics output, JSON serialization, source
-// scanning, and ari --check invocation are future work.
+// Parent-directory config search, user-facing --rule command dispatch behavior,
+// severity override application inside rule execution, broader diagnostics
+// output, source scanning, and ari --check invocation remain outside this
+// module.

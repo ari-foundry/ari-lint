@@ -73,4 +73,25 @@ run_json_diagnostic_smoke "$rule_output" "$binary" --json --config "$config_file
 require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$rule_output"
 require_json_grep '"severity":"note"' "$rule_output"
 
+discovery_dir="$tmp_dir/discovery"
+mkdir "$discovery_dir"
+discovered_config_file="$discovery_dir/ari-lint.rules"
+printf '%s\n' "lint/trailing-whitespace = warning" > "$discovered_config_file"
+
+discovery_output="$tmp_dir/discovered-warning.json"
+(
+  cd "$discovery_dir"
+  run_json_diagnostic_smoke "$discovery_output" "$binary" --json "$source_file"
+)
+require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$discovery_output"
+require_json_grep '"severity":"warning"' "$discovery_output"
+
+explicit_over_discovery_output="$tmp_dir/explicit-over-discovery-error.json"
+(
+  cd "$discovery_dir"
+  run_json_diagnostic_smoke "$explicit_over_discovery_output" "$binary" --json --config "$config_file" "$source_file"
+)
+require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$explicit_over_discovery_output"
+require_json_grep '"severity":"error"' "$explicit_over_discovery_output"
+
 printf '%s\n' "smoke.sh: smoke checks passed"
