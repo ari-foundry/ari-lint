@@ -67,6 +67,7 @@ main-facing human diagnostics stderr output added /
 source-only parity runner skeleton added /
 compiler-backed CI gate documented /
 standalone build root wiring added /
+local smoke validation added /
 standalone test entrypoint added /
 release and compatibility policy documented /
 main OS argv exit-code wiring added /
@@ -670,6 +671,13 @@ and test work.
       compiler provisioning exist.
 - [x] Wire local standalone build script root handling; build execution remains
       explicit/local and is not part of CI.
+- [x] Add local smoke validation in `scripts/smoke.sh` that accepts an explicit
+      Ari compiler path or `ARI_COMPILER`, delegates the build to
+      `scripts/build.sh`, and runs the current safe `--help`, `--list-rules`,
+      and `--json --list-rules` CLI invocations without adding golden output
+      tests, parity checks, compiler-backed CI, config discovery, new lint
+      semantics, or compatibility claims. JSON list-rules output assertions
+      remain future smoke coverage.
 - [x] Wire local standalone test entrypoint; executable compiler-backed, rule,
       CLI, parity, and golden-output tests remain future work.
 - [x] Define initial release and compatibility policy in

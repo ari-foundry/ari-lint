@@ -85,6 +85,15 @@ explicit Ari compiler path, resolves the repository root, uses the compiler root
 when `lib/std.arih` is available there, and is not run by default tests or CI.
 Relative compiler paths are preserved from the caller's directory.
 
+`scripts/smoke.sh` is a local compiler-backed smoke entrypoint. It accepts an
+explicit Ari compiler path as its first argument or through `ARI_COMPILER`,
+delegates build behavior to `scripts/build.sh`, and then runs
+`./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
+`./build/ari-lint --json --list-rules`. It is not run by `scripts/test.sh` or
+CI. It does not compare golden output, run a parity runner, discover config
+files, add new lint semantics, or claim compatibility. JSON list-rules output
+assertions remain future smoke coverage.
+
 Compiler-backed tests remain future work. Current checks do not run the
 compiler. Future compiler-backed tests should use explicit compiler
 provisioning as planned in

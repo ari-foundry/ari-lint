@@ -19,6 +19,12 @@ compiler root when `lib/std.arih` is available there, creates `build/`, and
 uses the verified Ari compiler form `ari input.ari -o output` to compile
 `src/main.ari` to `build/ari-lint`.
 
+`smoke.sh` is a local smoke wrapper. It accepts an explicit Ari compiler path
+as the first argument or through `ARI_COMPILER`, delegates compilation to
+`scripts/build.sh`, and runs the current safe CLI smoke invocations:
+`./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
+`./build/ari-lint --json --list-rules`.
+
 `test.sh` does not download or build the Ari compiler. It does not execute
 `tools/lint`, run `ari --check`, install dependencies, run package manager
 commands, run parity checks, or participate in CI as a compiler-backed job yet.
@@ -26,3 +32,7 @@ commands, run parity checks, or participate in CI as a compiler-backed job yet.
 `build.sh` does not download or build the Ari compiler. It does not execute
 `tools/lint`, run `ari --check`, install dependencies, run package manager
 commands, run parity checks, or participate in CI yet.
+
+`smoke.sh` does not add golden output tests, a parity runner, compiler-backed
+CI, config discovery, new lint semantics, or compatibility claims. JSON
+list-rules output assertions remain future smoke coverage.
