@@ -98,9 +98,11 @@ succeeds, it runs these current safe CLI invocations:
 ./build/ari-lint --help
 ./build/ari-lint --list-rules
 ./build/ari-lint --json --list-rules
+./build/ari-lint --config /tmp/.../explicit.rules /tmp/.../clean.ari
 ```
 
 These checks verify only that the local binary builds and the supported smoke
 commands execute. They do not add golden output tests, parity checks,
 compiler-backed CI, config discovery, new lint semantics, or compatibility
-claims. JSON list-rules output assertions remain future smoke coverage.
+claims. The config smoke uses an explicit temporary config file only. JSON
+list-rules output assertions remain future smoke coverage.

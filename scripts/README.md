@@ -23,7 +23,8 @@ uses the verified Ari compiler form `ari input.ari -o output` to compile
 as the first argument or through `ARI_COMPILER`, delegates compilation to
 `scripts/build.sh`, and runs the current safe CLI smoke invocations:
 `./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
-`./build/ari-lint --json --list-rules`.
+`./build/ari-lint --json --list-rules`. It also runs one explicit `--config`
+smoke command against a temporary clean source file and temporary config file.
 
 `test.sh` does not download or build the Ari compiler. It does not execute
 `tools/lint`, run `ari --check`, install dependencies, run package manager

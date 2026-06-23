@@ -19,21 +19,23 @@ through the file-read boundary and in-memory lint aggregation, and it validates
 parsed `--rule` overrides when provided. It carries the first internal
 diagnostic in the command result. A separate internal CLI collection path can
 push full source-file diagnostics into a caller-provided vector. Parsed
-command-line `--rule` severity overrides are applied to collected source-file
-diagnostics before main-facing human stderr or JSON stdout output. The
-explicit `--config` path is captured in the CLI argument model, but config
-files are not read or applied by these checks yet. The
-main-facing source-file lint path writes collected human diagnostics to stderr
-through the verified stderr adapter, but the lightweight checks do not assert
-CLI output.
+explicit config file overrides are applied to collected source-file diagnostics
+before command-line `--rule` severity overrides and before main-facing human
+stderr or JSON stdout output. The explicit `--config` path is captured in the
+CLI argument model and can be read when source-file diagnostics are collected,
+but automatic `ari-lint.rules` discovery is not implemented. The main-facing
+source-file lint path writes collected human diagnostics to stderr through the
+verified stderr adapter, but the lightweight checks do not assert CLI output.
 A source-only parity runner skeleton records future comparison boundaries, but
 the lightweight checks do not execute a parity runner.
 The config precedence fixture plan is documented.
 Shell-only executable config precedence fixture checks verify presence, exact
 line order, and expected text. Ari-backed config precedence tests are not added
 yet. An internal explicit config file parse boundary can read one
-caller-provided config file path and parse it into override data, but these
-checks do not execute that boundary or apply config to CLI diagnostics yet.
+caller-provided config file path and parse it into override data. The CLI
+source-file diagnostic collection path can apply those explicit config
+overrides before CLI `--rule` overrides, but these checks do not execute that
+boundary or assert CLI config output yet.
 The shared rule module API has started for caller-provided in-memory source
 text, but the lightweight checks do not execute Ari rule API tests.
 Registry-backed in-memory rule dispatch has started for one exact known rule
@@ -89,10 +91,11 @@ Relative compiler paths are preserved from the caller's directory.
 explicit Ari compiler path as its first argument or through `ARI_COMPILER`,
 delegates build behavior to `scripts/build.sh`, and then runs
 `./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
-`./build/ari-lint --json --list-rules`. It is not run by `scripts/test.sh` or
-CI. It does not compare golden output, run a parity runner, discover config
-files, add new lint semantics, or claim compatibility. JSON list-rules output
-assertions remain future smoke coverage.
+`./build/ari-lint --json --list-rules`. It also runs one explicit `--config`
+command with a temporary clean source file and temporary config file. It is not
+run by `scripts/test.sh` or CI. It does not compare golden output, run a parity
+runner, discover config files, add new lint semantics, or claim compatibility.
+JSON list-rules output assertions remain future smoke coverage.
 
 Compiler-backed tests remain future work. Current checks do not run the
 compiler. Future compiler-backed tests should use explicit compiler
@@ -363,13 +366,14 @@ serialization, no compiler invocation, no `ari --check`, and parity behavior.
 No executable CLI file lint path tests are added yet. Future tests should cover
 explicit source-file arguments, successful file reads feeding in-memory lint
 aggregation, parsed `--rule` override validation, rule override parse
-problems, parsed `--rule` severity override application to collected
-diagnostics, file read error preservation, diagnostic counts, first diagnostic
+problems, explicit config file override application, parsed `--rule` severity
+override application after config overrides, file read error preservation,
+config read error preservation, diagnostic counts, first diagnostic
 command-result carrying, caller-provided diagnostic vector collection,
-exit-code mapping, no directory traversal, no config discovery, no config-file
-reads, no stdout/stderr output in the internal path, no JSON serialization in
-the internal path, no compiler invocation, no `ari --check`, and parity
-behavior against current `tools/lint`.
+exit-code mapping, no directory traversal, no automatic config discovery, no
+stdout/stderr output in the internal path, no JSON serialization in the
+internal path, no compiler invocation, no `ari --check`, and parity behavior
+against current `tools/lint`.
 
 No executable list-rules formatter tests are added yet. Future tests should
 cover list-rules metadata and formatting for rule code, short name, default
@@ -408,11 +412,12 @@ filesystem scanning, no output, no JSON serialization, no compiler invocation,
 no `ari --check`, and parity behavior.
 
 No config override tests are added yet. Future config override tests should
-validate `ari-lint.rules` discovery, `--config` behavior, `--rule` behavior,
-precedence, severity override resolution, single-diagnostic severity
-application, in-memory severity override aggregation, file-backed and CLI config
-application, CLI `--rule` lint dispatch, collected diagnostic severity
-rewriting, diagnostics, and parity behavior against current `tools/lint`.
+validate explicit `--config` behavior, `--rule` behavior, default < config <
+CLI `--rule` precedence, severity override resolution, single-diagnostic
+severity application, in-memory severity override aggregation, file-backed and
+CLI config application, CLI `--rule` lint dispatch, collected diagnostic
+severity rewriting, diagnostics, future `ari-lint.rules` discovery, and parity
+behavior against current `tools/lint`.
 
 The future config precedence fixture plan is documented in
 [docs/dev/config-precedence-fixtures.md](../docs/dev/config-precedence-fixtures.md).

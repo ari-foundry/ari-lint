@@ -43,6 +43,7 @@ CLI file lint rule override application added /
 CLI diagnostic severity override application added /
 CLI explicit config path capture added /
 explicit config file parse boundary added /
+explicit config override application added /
 config precedence fixture plan added /
 initial config precedence fixtures and lightweight checks added /
 shell-only config precedence fixture checks added /
@@ -251,6 +252,14 @@ and test work.
       invoking the compiler, executing `ari --check`, calling `tools/lint`,
       adding tests, or calling process exit. CLI config integration, discovered
       config reading, executable tests, and parity checks remain future work.
+- [x] Apply explicit config file overrides in CLI source-file diagnostic
+      collection by reading the caller-provided `--config` path, appending its
+      overrides before command-line `--rule` overrides, and preserving the
+      precedence default severity < config file override < command-line
+      `--rule`, without discovering `ari-lint.rules`, adding a parity runner,
+      adding compiler-backed CI, adding golden tests, invoking `ari --check`,
+      calling `tools/lint`, or claiming stable config behavior. Ari-backed
+      config precedence tests and parity checks remain future work.
 - [x] Add a config precedence fixture plan for future default, config-file,
       explicit `--config`, and command-line `--rule` precedence coverage,
       without adding fixture files, reading config files, discovering
@@ -417,10 +426,11 @@ and test work.
       wired; JSON output, tests, and parity checks remain future work.
 - [x] Wire the main-facing source-file lint path to format and write collected
       human diagnostics to stderr through the verified stderr adapter, without
-      serializing JSON, discovering config files, reading config files,
-      traversing directories, invoking the compiler, executing `ari --check`,
-      calling `tools/lint`, or calling process exit. JSON output, tests, and
-      parity checks remain future work.
+      serializing JSON, discovering config files, traversing directories,
+      invoking the compiler, executing `ari --check`, calling `tools/lint`, or
+      calling process exit. Explicit `--config` file overrides have since been
+      wired into diagnostic collection; JSON output tests and parity checks
+      remain future work.
 - [x] Wire the main-facing source-file `--json` path to serialize collected
       diagnostics as a JSON array and write it to stdout through the verified
       stdout adapter, without changing parse-error output, discovering config
