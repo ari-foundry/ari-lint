@@ -91,9 +91,10 @@ Relative compiler paths are preserved from the caller's directory.
 explicit Ari compiler path as its first argument or through `ARI_COMPILER`,
 delegates build behavior to `scripts/build.sh`, and then runs
 `./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
-`./build/ari-lint --json --list-rules`. It also runs one explicit `--config`
-command with a temporary clean source file and temporary config file. It is not
-run by `scripts/test.sh` or CI. It does not compare golden output, run a parity
+`./build/ari-lint --json --list-rules`. It also runs two explicit `--config`
+JSON smoke commands with temporary files to check config-provided severity and
+CLI `--rule` precedence for a trailing-whitespace diagnostic. It is not run by
+`scripts/test.sh` or CI. It does not compare golden output, run a parity
 runner, discover config files, add new lint semantics, or claim compatibility.
 JSON list-rules output assertions remain future smoke coverage.
 
