@@ -261,6 +261,14 @@ It does not move `tools/lint` or change build behavior.
   the verified `ari input.ari -o output` invocation form, resolves the
   repository root, uses the compiler root when `lib/std.arih` is available
   there, and is not run by CI.
+- A local smoke validation script now exists at `scripts/smoke.sh`. It accepts
+  an explicit Ari compiler path as its first argument or through
+  `ARI_COMPILER`, delegates build behavior to `scripts/build.sh`, and then runs
+  `./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
+  `./build/ari-lint --json --list-rules`. It does not add golden output tests,
+  parity checks, compiler-backed CI, config discovery, new lint semantics, or
+  compatibility claims. JSON list-rules output assertions remain future smoke
+  coverage.
 - A local standalone test entrypoint now exists at `scripts/test.sh`. It
   resolves the repository root and delegates to `scripts/check.sh`, so it
   currently runs only compiler-free repository-shape and fixture-invariant
@@ -668,6 +676,8 @@ traverse directories, invoke the compiler, call `ari --check`, call
 - run tests with explicit `--ari` compiler path
 - add compiler-backed CI only after compiler provisioning, standalone tests,
   and compiler identity recording are ready
+- keep local smoke validation scoped to build plus safe CLI invocation checks
+  until executable CLI assertions and stable output expectations exist
 
 The source-only parity runner skeleton in `src/parity.ari` records the future
 comparison boundary. It does not execute `tools/lint`, execute `ari-lint`, read
@@ -902,6 +912,10 @@ usable.
       `ari --check`, `tools/lint`, package managers, or release automation
 - [x] Wire local standalone build script root handling without running the Ari
       compiler in CI or adding package manager files
+- [x] Add local smoke validation that delegates to `scripts/build.sh` and runs
+      the current safe `--help`, `--list-rules`, and `--json --list-rules` CLI
+      invocations without adding golden tests, parity checks, compiler-backed
+      CI, config discovery, new lint semantics, or compatibility claims
 - [x] Add a local standalone test entrypoint that resolves the repository root
       and delegates to `scripts/check.sh` only; executable rule, CLI,
       compiler-backed, parity, and golden-output tests remain future work

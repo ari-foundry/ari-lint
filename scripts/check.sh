@@ -70,6 +70,7 @@ require_file examples/README.md
 require_file tests/README.md
 require_file scripts/README.md
 require_file scripts/build.sh
+require_file scripts/smoke.sh
 require_file scripts/test.sh
 require_file .github/workflows/check.yml
 
@@ -84,7 +85,19 @@ require_no_grep "cargo " .github/workflows/check.yml
 require_no_grep "arix" .github/workflows/check.yml
 
 [ -x scripts/build.sh ] || fail "scripts/build.sh is not executable"
+[ -x scripts/smoke.sh ] || fail "scripts/smoke.sh is not executable"
 [ -x scripts/test.sh ] || fail "scripts/test.sh is not executable"
+
+require_grep "build.sh" scripts/smoke.sh
+require_grep "ARI_COMPILER" scripts/smoke.sh
+require_no_grep "ari --check" scripts/smoke.sh
+require_no_grep "tools/lint" scripts/smoke.sh
+require_grep "./build/ari-lint --help" README.md
+require_grep "./build/ari-lint --list-rules" README.md
+require_grep "./build/ari-lint --json --list-rules" README.md
+require_grep "scripts/smoke.sh" docs/dev/ari-implementation-plan.md
+require_grep "local smoke validation added" docs/dev/roadmap.md
+require_grep "scripts/smoke.sh" tests/README.md
 
 require_grep "repo_root" scripts/test.sh
 require_grep "scripts/check.sh" scripts/test.sh

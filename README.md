@@ -75,3 +75,32 @@ preserves relative compiler paths from the caller's directory.
 
 CI does not run compiler-backed builds or tests yet, and this repository is not
 a standalone release.
+
+## Local Smoke Validation
+
+Run the local build plus minimal CLI smoke checks with an explicit Ari compiler
+path:
+
+```sh
+scripts/smoke.sh /path/to/ari
+```
+
+You may also set `ARI_COMPILER`:
+
+```sh
+ARI_COMPILER=/path/to/ari scripts/smoke.sh
+```
+
+The smoke script delegates build behavior to `scripts/build.sh`. After the build
+succeeds, it runs these current safe CLI invocations:
+
+```sh
+./build/ari-lint --help
+./build/ari-lint --list-rules
+./build/ari-lint --json --list-rules
+```
+
+These checks verify only that the local binary builds and the supported smoke
+commands execute. They do not add golden output tests, parity checks,
+compiler-backed CI, config discovery, new lint semantics, or compatibility
+claims. JSON list-rules output assertions remain future smoke coverage.
