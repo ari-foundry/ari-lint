@@ -95,10 +95,15 @@ require_no_grep "tools/lint" scripts/smoke.sh
 require_grep "./build/ari-lint --help" README.md
 require_grep "./build/ari-lint --list-rules" README.md
 require_grep "./build/ari-lint --json --list-rules" README.md
-require_grep "./build/ari-lint --config" README.md
+require_grep "./build/ari-lint --json --config" README.md
+require_grep "--rule trailing-whitespace=note" README.md
 require_grep "--config" scripts/smoke.sh
+require_grep "run_json_diagnostic_smoke" scripts/smoke.sh
+require_grep '"severity":"error"' scripts/smoke.sh
+require_grep '"severity":"note"' scripts/smoke.sh
 require_grep "scripts/smoke.sh" docs/dev/ari-implementation-plan.md
 require_grep "local smoke validation added" docs/dev/roadmap.md
+require_grep "minimal config override smoke coverage added" docs/dev/roadmap.md
 require_grep "scripts/smoke.sh" tests/README.md
 
 require_grep "repo_root" scripts/test.sh

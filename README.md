@@ -98,11 +98,13 @@ succeeds, it runs these current safe CLI invocations:
 ./build/ari-lint --help
 ./build/ari-lint --list-rules
 ./build/ari-lint --json --list-rules
-./build/ari-lint --config /tmp/.../explicit.rules /tmp/.../clean.ari
+./build/ari-lint --json --config /tmp/.../explicit.rules /tmp/.../trailing.ari
+./build/ari-lint --json --config /tmp/.../explicit.rules --rule trailing-whitespace=note /tmp/.../trailing.ari
 ```
 
 These checks verify only that the local binary builds and the supported smoke
 commands execute. They do not add golden output tests, parity checks,
 compiler-backed CI, config discovery, new lint semantics, or compatibility
-claims. The config smoke uses an explicit temporary config file only. JSON
-list-rules output assertions remain future smoke coverage.
+claims. The config smoke uses explicit temporary files and checks only the
+current JSON rule code and severity fields for the trailing-whitespace
+diagnostic. JSON list-rules output assertions remain future smoke coverage.

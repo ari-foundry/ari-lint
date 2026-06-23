@@ -270,10 +270,11 @@ It does not move `tools/lint` or change build behavior.
   an explicit Ari compiler path as its first argument or through
   `ARI_COMPILER`, delegates build behavior to `scripts/build.sh`, and then runs
   `./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
-  `./build/ari-lint --json --list-rules`. It does not add golden output tests,
-  parity checks, compiler-backed CI, config discovery, new lint semantics, or
-  compatibility claims. JSON list-rules output assertions remain future smoke
-  coverage.
+  `./build/ari-lint --json --list-rules`. It also uses temporary files to run
+  explicit `--config` JSON smoke checks for trailing-whitespace severity and
+  CLI `--rule` precedence. It does not add golden output tests, parity checks,
+  compiler-backed CI, config discovery, new lint semantics, or compatibility
+  claims. JSON list-rules output assertions remain future smoke coverage.
 - A local standalone test entrypoint now exists at `scripts/test.sh`. It
   resolves the repository root and delegates to `scripts/check.sh`, so it
   currently runs only compiler-free repository-shape and fixture-invariant
@@ -926,6 +927,10 @@ usable.
       the current safe `--help`, `--list-rules`, and `--json --list-rules` CLI
       invocations without adding golden tests, parity checks, compiler-backed
       CI, config discovery, new lint semantics, or compatibility claims
+- [x] Add minimal config override smoke coverage with temporary files and
+      simple JSON rule-code/severity checks for explicit `--config` severity
+      and CLI `--rule` precedence, without adding golden tests, config
+      discovery, a parity runner, compiler-backed CI, or new lint semantics
 - [x] Add a local standalone test entrypoint that resolves the repository root
       and delegates to `scripts/check.sh` only; executable rule, CLI,
       compiler-backed, parity, and golden-output tests remain future work

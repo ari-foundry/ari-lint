@@ -69,6 +69,7 @@ source-only parity runner skeleton added /
 compiler-backed CI gate documented /
 standalone build root wiring added /
 local smoke validation added /
+minimal config override smoke coverage added /
 standalone test entrypoint added /
 release and compatibility policy documented /
 main OS argv exit-code wiring added /
@@ -688,6 +689,11 @@ and test work.
       tests, parity checks, compiler-backed CI, config discovery, new lint
       semantics, or compatibility claims. JSON list-rules output assertions
       remain future smoke coverage.
+- [x] Add minimal config override smoke coverage in `scripts/smoke.sh` using
+      temporary files and simple JSON rule-code/severity checks for explicit
+      `--config` severity and CLI `--rule` precedence, without adding golden
+      fixtures, a parity runner, automatic `ari-lint.rules` discovery,
+      compiler-backed CI, or new lint semantics.
 - [x] Wire local standalone test entrypoint; executable compiler-backed, rule,
       CLI, parity, and golden-output tests remain future work.
 - [x] Define initial release and compatibility policy in
