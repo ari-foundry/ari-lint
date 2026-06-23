@@ -105,8 +105,10 @@ succeeds, it runs these current safe CLI invocations:
 
 These checks verify only that the local binary builds and the supported smoke
 commands execute. They do not add golden output tests, parity checks,
-compiler-backed CI, parent-directory config search, new lint semantics, or
+compiler-backed CI, home/global/XDG config search, new lint semantics, or
 compatibility claims. The config smoke uses explicit temporary files and a
-temporary current working directory containing `ari-lint.rules`; it checks only
+temporary nested working directory containing `ari-lint.rules`; it checks only
 the current JSON rule code and severity fields for the trailing-whitespace
-diagnostic. JSON list-rules output assertions remain future smoke coverage.
+diagnostic, including parent discovery, nearest discovered config precedence,
+and explicit `--config` precedence. JSON list-rules output assertions remain
+future smoke coverage.

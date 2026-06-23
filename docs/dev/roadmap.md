@@ -45,6 +45,7 @@ CLI explicit config path capture added /
 explicit config file parse boundary added /
 explicit config override application added /
 current-directory config discovery added /
+parent-directory config discovery added /
 config precedence fixture plan added /
 initial config precedence fixtures and lightweight checks added /
 shell-only config precedence fixture checks added /
@@ -268,6 +269,13 @@ and test work.
       `--config` ahead of discovery without parent-directory config search,
       adding a parity runner, compiler-backed CI, broad golden tests, invoking
       `ari --check`, calling `tools/lint`, or claiming stable compatibility.
+- [x] Search upward for the nearest `ari-lint.rules` when `--config` is
+      absent, starting in the current working directory and stopping at the
+      filesystem root, while preserving explicit `--config` precedence over
+      discovery and command-line `--rule` precedence over config without
+      home/global/XDG config search, parity runner, compiler-backed CI, broad
+      golden tests, invoking `ari --check`, calling `tools/lint`, or claiming
+      stable compatibility.
 - [x] Add a config precedence fixture plan for future default, config-file,
       explicit `--config`, and command-line `--rule` precedence coverage,
       without adding fixture files, reading config files, discovering
@@ -693,14 +701,19 @@ and test work.
       Ari compiler path or `ARI_COMPILER`, delegates the build to
       `scripts/build.sh`, and runs the current safe `--help`, `--list-rules`,
       and `--json --list-rules` CLI invocations without adding golden output
-      tests, parity checks, compiler-backed CI, parent-directory config search,
+      tests, parity checks, compiler-backed CI, config discovery,
       new lint semantics, or compatibility claims. JSON list-rules output
       assertions remain future smoke coverage.
 - [x] Add minimal config override smoke coverage in `scripts/smoke.sh` using
       temporary files and simple JSON rule-code/severity checks for explicit
       `--config` severity and CLI `--rule` precedence, without adding golden
-      fixtures, a parity runner, parent-directory config search,
-      compiler-backed CI, or new lint semantics.
+      fixtures, a parity runner, compiler-backed CI, or new lint semantics.
+- [x] Add parent-directory config discovery smoke coverage in
+      `scripts/smoke.sh` with temporary nested directories, checking parent
+      discovery, nearest discovered config precedence, and explicit `--config`
+      precedence over discovery without adding golden fixtures, a parity
+      runner, compiler-backed CI, home/global/XDG config search, or new lint
+      semantics.
 - [x] Wire local standalone test entrypoint; executable compiler-backed, rule,
       CLI, parity, and golden-output tests remain future work.
 - [x] Define initial release and compatibility policy in
