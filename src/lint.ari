@@ -1,12 +1,12 @@
 // Lint run aggregation over caller-provided source text and explicit file paths.
 //
 // The default paths do not apply config. The with-overrides paths accept
-// already-parsed severity overrides and preserve the same count and first
-// diagnostic shape while config-aware diagnostic rewriting remains future
-// work. Internal diagnostic collection writes into caller-provided vectors
-// only. Each file-backed path reads only explicit paths through the source
-// boundary. No path should scan the filesystem, write output, serialize JSON,
-// invoke ari --check, or call tools/lint.
+// already-parsed severity overrides, preserve diagnostic counts, and apply
+// those overrides to collected diagnostics. Internal diagnostic
+// collection writes into caller-provided vectors only. Each file-backed path
+// reads only explicit paths through the source boundary.
+// No path should scan the filesystem, write output, serialize JSON, invoke ari
+// --check, or call tools/lint.
 
 pub struct InMemoryLintRunResult {
   diagnostic_count: i64,
@@ -336,12 +336,12 @@ pub fn lint_file_source_with_overrides(
   );
 }
 
-// The with-overrides paths accept already-parsed severity override data and
-// preserve the same diagnostic count and first diagnostic result shape. They do
-// not read config files, discover ari-lint.rules, inspect CLI config arguments,
-// scan directories, write output, serialize JSON, invoke ari --check, or call
-// tools/lint. Config-aware diagnostic rewriting and CLI config integration
-// remain future work.
+// The with-overrides paths accept already-parsed severity override data,
+// preserve diagnostic counts, and apply override severity to collected
+// diagnostics. They do not read config files, discover
+// ari-lint.rules, inspect CLI config arguments, scan directories, write output,
+// serialize JSON, invoke ari --check, or call tools/lint. CLI config
+// integration remains in the CLI layer.
 //
 // collect_lint_diagnostics_in_memory and collect_file_lint_diagnostics push
 // full internal diagnostics into caller-provided vectors. Their with-overrides

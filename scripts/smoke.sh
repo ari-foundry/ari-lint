@@ -21,6 +21,8 @@ else
 fi
 
 binary="$repo_root/build/ari-lint"
+tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/ari-lint-smoke.XXXXXX")
+trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
 
 if [ ! -x "$binary" ]; then
   fail "expected built ari-lint binary to be executable: $binary"
@@ -34,5 +36,15 @@ run_smoke() {
 run_smoke "$binary" --help
 run_smoke "$binary" --list-rules
 run_smoke "$binary" --json --list-rules
+
+config_file="$tmp_dir/explicit.rules"
+source_file="$tmp_dir/clean.ari"
+printf '%s\n' "lint/trailing-whitespace = error" > "$config_file"
+{
+  printf '%s\n' "fn main() -> i64 {"
+  printf '%s\n' "  return 0;"
+  printf '%s\n' "}"
+} > "$source_file"
+run_smoke "$binary" --config "$config_file" "$source_file"
 
 printf '%s\n' "smoke.sh: smoke checks passed"

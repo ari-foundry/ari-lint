@@ -49,11 +49,13 @@ It does not move `tools/lint` or change build behavior.
   parser for positional files, planned flags/options, optional compiler/config
   paths, include paths, raw rule override values, help requests, and parse
   problems. The parser now captures the explicit `--config` path value when one
-  is provided, but still does not read config files or discover
-  `ari-lint.rules`. A semantic parser now converts caller-provided `--rule`
-  values into command-line-sourced internal severity overrides and parse
-  problems. Actual OS process argument collection now has a minimal internal entry path;
-  environment handling remains future work.
+  is provided. Source-file diagnostic collection can read that explicit config
+  file path and apply its overrides before command-line `--rule` overrides,
+  but it still does not discover `ari-lint.rules`. A semantic parser now
+  converts caller-provided `--rule` values into command-line-sourced internal
+  severity overrides and parse problems. Actual OS process argument collection
+  now has a minimal internal entry path; environment handling remains future
+  work.
 - An explicit OS argv boundary now exists in `src/cli.ari`. It reads process
   arguments through the verified Ari `std::env::args` API, drops argv[0], and
   reuses the existing explicit-token parser and stdout-free dispatcher. `main`
@@ -120,19 +122,20 @@ It does not move `tools/lint` or change build behavior.
 - The CLI source-file dispatch path now reads the first explicitly provided
   file path through the file-read boundary and returns internal diagnostic
   count, first diagnostic, and read-error count data in the command result. It
-  validates caller-provided `--rule` override values and reports parse problems
-  without reading config files. A separate internal CLI collection path accepts
-  explicit caller-provided tokens or parsed source-file input and pushes full
-  internal diagnostics into a caller-provided vector while returning existing
-  count and exit-code data. Parsed command-line `--rule` severity overrides are
-  now applied to those collected diagnostics before main-facing human stderr or
-  JSON stdout output. The main-facing OS argv path formats and writes those
+  validates caller-provided `--rule` override values and reports parse
+  problems. A separate internal CLI collection path accepts explicit
+  caller-provided tokens or parsed source-file input and pushes full internal
+  diagnostics into a caller-provided vector while returning existing count and
+  exit-code data. Explicit `--config` file overrides are applied to those
+  collected diagnostics before parsed command-line `--rule` severity overrides,
+  so the current precedence is default severity < config file override <
+  command-line `--rule`. The main-facing OS argv path formats and writes those
   collected human diagnostics to stderr, or serializes and writes those
   collected diagnostics as JSON to stdout when `--json` is requested, through
-  the verified output adapters. It does not discover config files, read config
-  files, traverse directories, invoke the compiler, call `ari --check`, or call
-  `tools/lint`. Source-file read errors write a short stderr summary and do not
-  produce read-error JSON output yet.
+  the verified output adapters. It does not discover config files, traverse
+  directories, invoke the compiler, call `ari --check`, or call `tools/lint`.
+  Source-file and config-file read errors write short stderr summaries and do
+  not produce read-error JSON output yet.
 - A source-only parity runner skeleton now records intended comparison
   boundaries against current `tools/lint`, with all execution, file IO, and
   output-comparison flags false. It does not run `tools/lint`, invoke an
@@ -218,9 +221,11 @@ It does not move `tools/lint` or change build behavior.
   reading explicitly provided source paths through the existing file-read
   boundary. An explicit config file parse boundary can now read one
   caller-provided config file path and parse its text into the existing
-  internal override model without discovering `ari-lint.rules` or wiring CLI
-  config behavior. `ari-lint.rules` discovery, CLI config integration, and
-  config application remain future work.
+  internal override model without discovering `ari-lint.rules`. The CLI
+  source-file diagnostic collection path now reads that explicit config path
+  when provided, applies its overrides to collected diagnostics, and then
+  appends command-line `--rule` overrides so `--rule` wins. `ari-lint.rules`
+  discovery and automatic config discovery remain future work.
 - The config precedence fixture plan is documented in
   `docs/dev/config-precedence-fixtures.md`. It records future default,
   config-file, explicit `--config`, and command-line `--rule` precedence
@@ -493,10 +498,11 @@ argv CLI entry path, the OS argv entry path is limited to reading
 `std::env::args`, dropping argv[0], dispatching internal tokens, and writing
 stdout only for the `--list-rules` command through the verified adapter,
 the CLI parser is limited to explicit caller-provided token lists, raw option
-values, and explicit `--config` path capture without reading that path,
+values, and explicit `--config` path capture with scoped source-file
+diagnostic collection reading when provided,
 the config parser is limited to caller-provided text, rule/severity
 pairs, blank lines, comments, known-rule validation, and one explicit
-caller-provided config file path without discovery or CLI integration, the rule override
+caller-provided config file path without discovery, the rule override
 parser is limited to caller-provided `--rule` text, internal override
 construction, and known-rule validation, the severity override resolver is
 limited to effective severity data for a caller-provided rule code and
@@ -516,9 +522,9 @@ counts plus the first diagnostic,
 the file-read boundary is limited to reading one explicitly provided path with
 the verified Ari `std::fs::read_detailed` API and preserving file read errors,
 the CLI file lint path is limited to explicit source-file arguments, the
-file-read boundary, in-memory lint aggregation, optional parsed `--rule`
-override validation, internal diagnostic counts, the first internal diagnostic,
-and internal read-error counts,
+file-read boundary, in-memory lint aggregation, explicit config override
+application, optional parsed `--rule` override validation, internal diagnostic
+counts, the first internal diagnostic, and internal read-error counts,
 the known-rule registry lookup is limited to returning internal data for exact
 full rule codes, registry-backed rule dispatch is limited to selecting one
 known in-memory rule wrapper for caller-provided source text,
@@ -532,8 +538,8 @@ concise stdout text, the stdout and stderr adapters are limited to
 caller-provided `String` text, the main-facing source-file read-error path is
 limited to a short stderr summary without read-error JSON output, and the
 stdout/stderr output boundary is limited to status data for named future sinks.
-Compiler invocation, config discovery, config file reading, override
-application to lint execution, diagnostics output, stderr writing, stdout
+Compiler invocation, config discovery, discovered config file reading,
+diagnostics output, stderr writing, stdout
 adapter wiring beyond the scoped main-facing output paths, process exit, JSON
 schema stability, environment handling, source
 filesystem scanning, directory traversal, main-entry tests, argv-boundary tests, OS-argv
@@ -619,11 +625,11 @@ Current rule module state:
   trailing-whitespace and missing-final-newline rule execution paths for one
   caller-provided source text or explicitly provided file paths, recording that
   it does not scan the filesystem, write output, serialize JSON, invoke the
-  compiler, or call `tools/lint`. Its with-overrides variants preserve the same
-  count and first-diagnostic shape for in-memory source text or explicitly
-  provided file paths without reading config files or wiring config-file
-  behavior. Diagnostic collection variants can rewrite collected diagnostic
-  severity from already-parsed overrides.
+  compiler, or call `tools/lint`. Its with-overrides variants preserve
+  diagnostic counts and apply already-parsed override severity to collected
+  diagnostics for in-memory source text or explicitly provided file paths. The
+  CLI layer can now provide explicit config-file overrides to those collection
+  paths without automatic config discovery.
 - `src/registry.ari` can dispatch one exact known rule code to the corresponding
   in-memory rule wrapper for caller-provided source text. It returns structured
   found/not-found dispatch data and does not read files, scan the filesystem,
@@ -647,15 +653,15 @@ in-memory lint aggregation for successfully read files, validates parsed
 `--rule` overrides when provided, preserves read errors, and carries counts
 plus the first internal diagnostic in `CliCommandResult`. The main-facing OS
 argv path now also collects source-file diagnostics into a caller-provided
-vector, applies parsed command-line `--rule` severity overrides to those
-collected diagnostics, formats them as human diagnostics, and writes them to
-stderr through the verified stderr adapter. It can also serialize those
-collected source-file diagnostics as JSON to stdout when `--json` is requested.
-CLI parse problems write a short summary to stderr. Source-file read errors
-write a short stderr summary and do not produce read-error JSON output. It does
-not produce parse-error JSON, discover config files, read config files,
-traverse directories, invoke the compiler, call `ari --check`, call
-`tools/lint`, or call process exit.
+vector, applies explicit `--config` file overrides first, then parsed
+command-line `--rule` severity overrides, formats collected diagnostics as
+human diagnostics, and writes them to stderr through the verified stderr
+adapter. It can also serialize those collected source-file diagnostics as JSON
+to stdout when `--json` is requested. CLI and config parse problems write a
+short summary to stderr. Source-file and config-file read errors write short
+stderr summaries and do not produce read-error JSON output. It does not produce
+parse-error JSON, discover config files, traverse directories, invoke the
+compiler, call `ari --check`, call `tools/lint`, or call process exit.
 
 ### Phase 5: compiler boundary
 
@@ -847,6 +853,10 @@ usable.
       discovering `ari-lint.rules`, wiring CLI config behavior, applying config,
       emitting output, serializing JSON, invoking the compiler, executing
       `ari --check`, or calling `tools/lint`
+- [x] Apply explicit config file overrides to CLI source-file diagnostic
+      collection before command-line `--rule` overrides without discovering
+      `ari-lint.rules`, adding a parity runner, adding compiler-backed CI,
+      adding golden tests, invoking `ari --check`, or calling `tools/lint`
 - [ ] Add Ari-backed config precedence checks before claiming stable config
       behavior
 - [x] Define executable rule module API after the initial layout and in-memory

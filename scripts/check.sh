@@ -95,6 +95,8 @@ require_no_grep "tools/lint" scripts/smoke.sh
 require_grep "./build/ari-lint --help" README.md
 require_grep "./build/ari-lint --list-rules" README.md
 require_grep "./build/ari-lint --json --list-rules" README.md
+require_grep "./build/ari-lint --config" README.md
+require_grep "--config" scripts/smoke.sh
 require_grep "scripts/smoke.sh" docs/dev/ari-implementation-plan.md
 require_grep "local smoke validation added" docs/dev/roadmap.md
 require_grep "scripts/smoke.sh" tests/README.md
@@ -291,6 +293,7 @@ require_grep "write_cli_parse_problem_stderr" src/cli.ari
 require_grep "write_cli_help_stdout" src/cli.ari
 require_grep "write_missing_source_stderr" src/cli.ari
 require_grep "write_file_read_error_stderr" src/cli.ari
+require_grep "write_config_read_error_stderr" src/cli.ari
 require_grep "Usage: ari-lint" src/cli.ari
 require_grep "invalid command-line arguments" src/cli.ari
 require_grep "missing source file" src/cli.ari
@@ -312,6 +315,7 @@ require_grep "CLI file lint rule override application added" docs/dev/roadmap.md
 require_grep "CLI diagnostic severity override application added" docs/dev/roadmap.md
 require_grep "CLI explicit config path capture added" docs/dev/roadmap.md
 require_grep "explicit config file parse boundary added" docs/dev/roadmap.md
+require_grep "explicit config override application added" docs/dev/roadmap.md
 require_grep "config precedence fixture plan added" docs/dev/roadmap.md
 require_grep "initial config precedence fixtures and lightweight checks added" docs/dev/roadmap.md
 require_grep "shell-only config precedence fixture checks added" docs/dev/roadmap.md
@@ -325,6 +329,7 @@ require_grep "override aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "file-backed override aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "captures the explicit .--config. path" docs/dev/ari-implementation-plan.md
 require_grep "explicit config file parse boundary" docs/dev/ari-implementation-plan.md
+require_grep "default severity < config file override <" docs/dev/ari-implementation-plan.md
 require_grep "Validate caller-provided .--rule. overrides in the internal CLI file lint" docs/dev/ari-implementation-plan.md
 require_grep "shared rule execution input/result API" docs/dev/ari-implementation-plan.md
 require_grep "shared rule module API" docs/dev/ari-implementation-plan.md
@@ -340,6 +345,7 @@ require_grep "No executable file-backed lint severity override aggregation tests
 require_grep 'parsed `--rule` override validation' tests/README.md
 require_grep 'explicit `--config` path is captured' tests/README.md
 require_grep "explicit config file parse boundary" tests/README.md
+require_grep 'default < config <' tests/README.md
 require_grep "Shell-only executable config precedence fixture checks" tests/README.md
 require_grep "Ari-backed config precedence tests are not added" tests/README.md
 require_grep "Initial config precedence fixtures have started" tests/README.md
@@ -467,7 +473,7 @@ require_grep "CLI parse problems write a short summary" docs/dev/ari-implementat
 require_grep "CLI help writes concise text" docs/dev/ari-implementation-plan.md
 require_grep "missing source-file input writes a short" docs/dev/ari-implementation-plan.md
 require_grep "source-file read errors write a short" docs/dev/ari-implementation-plan.md
-require_grep "Parsed command-line .--rule. severity overrides" docs/dev/ari-implementation-plan.md
+require_grep "Explicit .--config. file overrides are applied" docs/dev/ari-implementation-plan.md
 require_grep "read-error JSON output" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
 require_grep "human-readable list-rules formatter" docs/dev/ari-implementation-plan.md
@@ -486,7 +492,7 @@ require_grep "config override skeleton" docs/dev/ari-implementation-plan.md
 require_grep "config override skeleton" docs/dev/roadmap.md
 require_grep "config text parser now handles" docs/dev/ari-implementation-plan.md
 require_grep "RULE = SEVERITY" docs/dev/ari-implementation-plan.md
-require_grep "config discovery, config file reading, override" docs/dev/ari-implementation-plan.md
+require_grep "config discovery, discovered config file reading" docs/dev/ari-implementation-plan.md
 require_grep "No executable config parser tests are added yet" tests/README.md
 require_grep "semantic parser for caller-provided .--rule. values" docs/dev/roadmap.md
 require_grep "No executable rule override parser tests are added yet" tests/README.md
@@ -561,10 +567,11 @@ require_grep "parse_cli_rule_overrides" src/cli.ari
 require_grep "cli_file_lint_exit_code" src/cli.ari
 require_grep "lint_file_source" src/cli.ari
 require_grep "rule override problem count" src/cli.ari
-require_grep "applies parsed --rule severity overrides" src/cli.ari
+require_grep "applies parsed explicit config and --rule severity overrides" src/cli.ari
 require_grep "collect_cli_rule_overrides_from_tokens" src/cli.ari
 require_grep "collect_cli_source_diagnostics_from_tokens" src/cli.ari
 require_grep "parse_rule_override_text_into" src/config.ari
+require_grep "parse_explicit_config_file_into" src/cli.ari
 require_grep "collect_file_lint_diagnostics_with_overrides" src/lint.ari
 require_grep "OsArgvBoundary" src/cli.ari
 require_grep "os_argv_boundary" src/cli.ari
@@ -572,12 +579,13 @@ require_grep "std::env::args" src/cli.ari
 require_grep "reads_process_argv: true" src/cli.ari
 require_grep "CliListRulesText" src/cli.ari
 require_grep "CliSourceLintResult" src/cli.ari
+require_grep "CliConfigReadError" src/cli.ari
 require_grep "lint_file_source" src/cli.ari
 require_grep "missing_value_problem" src/cli.ari
 require_grep "unknown_argument_problem" src/cli.ari
 require_grep "raw_rule_override" src/cli.ari
 require_grep "semantic rule override parsing bridge" src/cli.ari
-require_grep "applies parsed --rule severity overrides" src/cli.ari
+require_grep "applies parsed explicit config and --rule severity overrides" src/cli.ari
 require_grep "does not read environment" src/cli.ari
 require_grep "The main-facing wrapper adds" src/cli.ari
 require_grep "write stdout/stderr" src/cli.ari

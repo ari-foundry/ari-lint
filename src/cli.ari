@@ -2,20 +2,21 @@
 // stdout-free dispatch, internal exit-code data, explicit-token list-rules
 // command wiring, explicit-token entry point, OS argv integration, a
 // main-facing output path, an internal source-file lint path, explicit config
-// path capture, and an internal caller-provided diagnostic collection path.
+// path capture, explicit config override application, and an internal
+// caller-provided diagnostic collection path.
 // The positional source file input and documented options are represented here.
 // This file reads process arguments only through the verified std::env::args
 // boundary. Main now returns the internal command exit-code mapping through
 // this path, while source-file dispatch reads explicitly provided file paths
 // through the source boundary, runs in-memory lint aggregation, carries the
-// first internal diagnostic, captures the explicit --config path without
-// reading it, and applies parsed --rule severity overrides when provided. A
-// separate collection path pushes full internal diagnostics into a
+// first internal diagnostic, reads an explicit --config path only when one is
+// provided, and applies parsed config and --rule severity overrides when
+// provided. A separate collection path pushes full internal diagnostics into a
 // caller-provided vector. The main-facing path writes list-rules text to
 // stdout, source lint diagnostics to stderr, source-file JSON diagnostics to
 // stdout, CLI help text to stdout, CLI parse problem summaries to stderr, and
-// file read errors to stderr through verified output adapters. Missing
-// source-file input writes a short stderr summary. It does not read
+// source/config file read errors to stderr through verified output adapters.
+// Missing source-file input writes a short stderr summary. It does not read
 // environment state, discover config files, recursively scan source trees, call
 // tools/lint, call process exit, or invoke ari --check.
 
@@ -77,6 +78,7 @@ pub enum CliCommandResultKind {
   CliParseProblems,
   CliHelpText,
   CliSourceLintResult,
+  CliConfigReadError,
   CliMissingSource,
 }
 
@@ -452,6 +454,15 @@ fn write_file_read_error_stderr(zone: ref mut Zone, path: Slice[u8]) -> bool {
   return write_result.wrote_stderr;
 }
 
+fn write_config_read_error_stderr(zone: ref mut Zone, path: Slice[u8]) -> bool {
+  var text = std::string::new(zone, 128);
+  text.append_string_in(zone, "ari-lint: unable to read config file: ");
+  text.append_string_in(zone, path);
+  text.append_string_in(zone, "\n");
+  let write_result = super::output::write_stderr_text(zone, ref text);
+  return write_result.wrote_stderr;
+}
+
 fn dispatch_cli_command_with_main_output(
   zone: ref mut Zone,
   tokens: ref std::vec::Vec[std::string::String],
@@ -533,6 +544,43 @@ fn dispatch_cli_command_with_main_output(
       parse_result,
       ref mut diagnostics
     );
+    match command_result.kind {
+      CliParseProblems => {
+        let wrote_collection_parse_stderr = write_cli_parse_problem_stderr(zone);
+        if !wrote_collection_parse_stderr {
+          return cli_command_result(
+            CliParseProblems,
+            false,
+            0,
+            0,
+            cli_unavailable_exit_code(zone),
+            "CLI parse problem stderr write failed through the verified stderr adapter."
+          );
+        }
+        return command_result;
+      }
+      CliConfigReadError => {
+        let wrote_config_read_error_stderr = write_config_read_error_stderr(
+          zone,
+          parse_result.args.config_file_path
+        );
+        if !wrote_config_read_error_stderr {
+          return cli_command_result(
+            CliConfigReadError,
+            false,
+            command_result.diagnostic_count,
+            command_result.read_error_count,
+            cli_unavailable_exit_code(zone),
+            "Explicit config file read error stderr write failed through the verified stderr adapter."
+          );
+        }
+        return command_result;
+      }
+      CliListRulesText => {}
+      CliHelpText => {}
+      CliSourceLintResult => {}
+      CliMissingSource => {}
+    }
     if command_result.read_error_count > 0 {
       let wrote_read_error_stderr = write_file_read_error_stderr(
         zone,
@@ -672,25 +720,55 @@ fn collect_cli_source_diagnostics_from_tokens(
     return dispatch_cli_command(zone, parse_result);
   }
 
-  if parse_result.args.has_source_file && parse_result.args.rule_override_count > 0 {
+  if parse_result.args.has_source_file &&
+    (parse_result.args.config_path_present || parse_result.args.rule_override_count > 0) {
     var rule_overrides = std::vec::new<super::config::RuleSeverityOverride>(
       zone,
-      parse_result.args.rule_override_count
+      parse_result.args.rule_override_count + 4
     );
-    let rule_override_result = collect_cli_rule_overrides_from_tokens(
-      zone,
-      tokens,
-      ref mut rule_overrides
-    );
-    if rule_override_result.problem_count > 0 {
-      return cli_command_result(
-        CliParseProblems,
-        false,
-        0,
-        0,
-        cli_usage_error_exit_code(zone),
-        "CLI rule override problems are recorded internally before source diagnostics are collected."
+    if parse_result.args.config_path_present {
+      let config_parse_result = super::config::parse_explicit_config_file_into(
+        zone,
+        parse_result.args.config_file_path,
+        ref mut rule_overrides
       );
+      if config_parse_result.read_error_count > 0 {
+        return cli_command_result(
+          CliConfigReadError,
+          false,
+          0,
+          config_parse_result.read_error_count,
+          cli_unavailable_exit_code(zone),
+          "Explicit config file read errors are recorded before source diagnostics are collected."
+        );
+      }
+      if config_parse_result.problem_count > 0 {
+        return cli_command_result(
+          CliParseProblems,
+          false,
+          0,
+          0,
+          cli_usage_error_exit_code(zone),
+          "Explicit config file parse problems are recorded before source diagnostics are collected."
+        );
+      }
+    }
+    if parse_result.args.rule_override_count > 0 {
+      let rule_override_result = collect_cli_rule_overrides_from_tokens(
+        zone,
+        tokens,
+        ref mut rule_overrides
+      );
+      if rule_override_result.problem_count > 0 {
+        return cli_command_result(
+          CliParseProblems,
+          false,
+          0,
+          0,
+          cli_usage_error_exit_code(zone),
+          "CLI rule override problems are recorded internally before source diagnostics are collected."
+        );
+      }
     }
     let collection_result = super::lint::collect_file_lint_diagnostics_with_overrides(
       zone,
@@ -709,7 +787,7 @@ fn collect_cli_source_diagnostics_from_tokens(
       collection_result.diagnostic_count,
       collection_result.read_error_count,
       exit_code,
-      "Source-file lint diagnostics were collected with parsed --rule severity overrides without writing output."
+      "Source-file lint diagnostics were collected with parsed config and --rule severity overrides without writing output."
     );
     if diagnostics.len() > 0 {
       command_result.first_diagnostic =
@@ -800,15 +878,15 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 }
 
 // parse_cli_tokens consumes a caller-provided token list and records source
-// counts, first source file path, flags/options, parsed rule override values,
-// rule override problem count, and parse problem counts in CliParseResult.
-// It intentionally leaves environment handling, path validation, config
-// file discovery, diagnostic printing, and ari --check invocation as future
-// work.
+// counts, first source file path, flags/options, explicit config path, parsed
+// rule override values, rule override problem count, and parse problem counts
+// in CliParseResult. It intentionally leaves environment handling, path
+// validation, config file discovery, diagnostic printing, and ari --check
+// invocation as future work.
 //
 // parse_cli_rule_overrides converts one raw --rule value into the internal
 // config override count model and parse problem count. Source-file collection
-// applies parsed --rule severity overrides without reading config files or
+// applies parsed explicit config and --rule severity overrides without
 // discovering ari-lint.rules.
 //
 // dispatch_cli_command maps a CliParseResult to a stdout-free internal command
@@ -817,10 +895,10 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // carries the first internal diagnostic without writing output.
 // collect_cli_source_diagnostics and collect_explicit_cli_diagnostics use the
 // same explicit source-file boundary, but push full internal diagnostics into a
-// caller-provided vector and apply already-parsed --rule severity overrides
-// when provided. They do not write output, serialize JSON, discover config
-// files, scan directories, call tools/lint, call process exit, or invoke ari
-// --check.
+// caller-provided vector and apply explicit config overrides followed by parsed
+// --rule severity overrides when provided. They do not write output, serialize
+// JSON, discover config files, scan directories, call tools/lint, call process
+// exit, or invoke ari --check.
 // run_explicit_cli_tokens composes parsing and dispatch for callers that
 // already have tokens. These entry paths do not write stdout/stderr, serialize
 // JSON, read config files, recursively scan source trees, call tools/lint, call
@@ -845,8 +923,9 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // the existing human-readable list-rules text to stdout and source-file lint
 // diagnostics to stderr, or source-file JSON diagnostics to stdout when
 // --json is requested, through verified output adapters. Source-file read
-// errors write a short stderr summary without producing read-error JSON output.
-// CLI help writes a concise stdout message, and CLI parse problems write a
-// short summary to stderr. Missing source-file input also writes a short stderr
-// summary. Config discovery, parse-error JSON, compiler invocation, ari
-// --check, tools/lint, and process exit remain outside this path.
+// errors and explicit config-file read errors write short stderr summaries
+// without producing read-error JSON output. CLI help writes a concise stdout
+// message, and CLI/config parse problems write a short summary to stderr.
+// Missing source-file input also writes a short stderr summary. Config
+// discovery, parse-error JSON, compiler invocation, ari --check, tools/lint,
+// and process exit remain outside this path.
