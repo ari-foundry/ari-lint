@@ -101,9 +101,13 @@ require_grep "--config" scripts/smoke.sh
 require_grep "run_json_diagnostic_smoke" scripts/smoke.sh
 require_grep '"severity":"error"' scripts/smoke.sh
 require_grep '"severity":"note"' scripts/smoke.sh
+require_grep '"severity":"warning"' scripts/smoke.sh
+require_grep "discovery_dir" scripts/smoke.sh
+require_grep "ari-lint.rules" scripts/smoke.sh
 require_grep "scripts/smoke.sh" docs/dev/ari-implementation-plan.md
 require_grep "local smoke validation added" docs/dev/roadmap.md
 require_grep "minimal config override smoke coverage added" docs/dev/roadmap.md
+require_grep "current-directory config discovery added" docs/dev/roadmap.md
 require_grep "scripts/smoke.sh" tests/README.md
 
 require_grep "repo_root" scripts/test.sh
@@ -497,7 +501,7 @@ require_grep "config override skeleton" docs/dev/ari-implementation-plan.md
 require_grep "config override skeleton" docs/dev/roadmap.md
 require_grep "config text parser now handles" docs/dev/ari-implementation-plan.md
 require_grep "RULE = SEVERITY" docs/dev/ari-implementation-plan.md
-require_grep "config discovery, discovered config file reading" docs/dev/ari-implementation-plan.md
+require_grep "parent-directory config search" docs/dev/ari-implementation-plan.md
 require_grep "No executable config parser tests are added yet" tests/README.md
 require_grep "semantic parser for caller-provided .--rule. values" docs/dev/roadmap.md
 require_grep "No executable rule override parser tests are added yet" tests/README.md
@@ -572,11 +576,14 @@ require_grep "parse_cli_rule_overrides" src/cli.ari
 require_grep "cli_file_lint_exit_code" src/cli.ari
 require_grep "lint_file_source" src/cli.ari
 require_grep "rule override problem count" src/cli.ari
-require_grep "applies parsed explicit config and --rule severity overrides" src/cli.ari
+require_grep "applies discovered or explicit config and --rule severity overrides" src/cli.ari
 require_grep "collect_cli_rule_overrides_from_tokens" src/cli.ari
 require_grep "collect_cli_source_diagnostics_from_tokens" src/cli.ari
 require_grep "parse_rule_override_text_into" src/config.ari
 require_grep "parse_explicit_config_file_into" src/cli.ari
+require_grep "parse_discovered_config_file_into" src/cli.ari
+require_grep "discovered_config_file_path" src/cli.ari
+require_grep "std::fs::exists" src/cli.ari
 require_grep "collect_file_lint_diagnostics_with_overrides" src/lint.ari
 require_grep "OsArgvBoundary" src/cli.ari
 require_grep "os_argv_boundary" src/cli.ari
@@ -590,7 +597,7 @@ require_grep "missing_value_problem" src/cli.ari
 require_grep "unknown_argument_problem" src/cli.ari
 require_grep "raw_rule_override" src/cli.ari
 require_grep "semantic rule override parsing bridge" src/cli.ari
-require_grep "applies parsed explicit config and --rule severity overrides" src/cli.ari
+require_grep "applies discovered or explicit config and --rule severity overrides" src/cli.ari
 require_grep "does not read environment" src/cli.ari
 require_grep "The main-facing wrapper adds" src/cli.ari
 require_grep "write stdout/stderr" src/cli.ari
@@ -663,6 +670,8 @@ require_grep "parse_config_text" src/config.ari
 require_grep "parse_config_text_into" src/config.ari
 require_grep "parse_explicit_config_file" src/config.ari
 require_grep "parse_explicit_config_file_into" src/config.ari
+require_grep "parse_discovered_config_file" src/config.ari
+require_grep "parse_discovered_config_file_into" src/config.ari
 require_grep "parse_config_severity" src/config.ari
 require_grep "parse_rule_override_texts" src/config.ari
 require_grep "parse_rule_override_value" src/config.ari
@@ -674,7 +683,7 @@ require_grep "applies_to_diagnostics: false" src/config.ari
 require_grep "applies_to_diagnostics: true" src/config.ari
 require_grep "applies_to_lint_execution: false" src/config.ari
 require_grep "reads_config_files: true" src/config.ari
-require_grep "discovers_config_files: false" src/config.ari
+require_grep "discovers_config_files: discovers_config_files" src/config.ari
 require_grep "writes_output: false" src/config.ari
 require_grep "serializes_json: false" src/config.ari
 require_grep "normalized_rule_override_code" src/config.ari
@@ -688,11 +697,12 @@ require_grep "CommandLineRuleOverride" src/config.ari
 require_grep "ari-lint.rules" src/config.ari
 require_grep "--config" src/config.ari
 require_grep "--rule" src/config.ari
-require_grep "not discover or read ari-lint.rules" src/config.ari
+require_grep "directory ari-lint.rules discovery is decided by the CLI layer" src/config.ari
+require_grep "Parent-directory config search" src/config.ari
 require_grep "RULE = SEVERITY" src/config.ari
 require_grep "RULE=SEVERITY" src/config.ari
 require_grep "CommandLineRuleOverride" src/config.ari
-require_grep "future work" src/config.ari
+require_grep "remain outside this" src/config.ari
 require_grep "SourceInput" src/source.ari
 require_grep "SourceInputSet" src/source.ari
 require_grep "SourceInputOrigin" src/source.ari
