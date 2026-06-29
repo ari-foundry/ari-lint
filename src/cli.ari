@@ -7,9 +7,9 @@
 // The positional source file input and documented options are represented here.
 // This file reads process arguments only through the verified std::env::args
 // boundary. Main now returns the internal command exit-code mapping through
-// this path, while source-file dispatch reads explicitly provided file paths
-// through the source boundary, runs in-memory lint aggregation, carries the
-// first internal diagnostic, reads an explicit --config path when one is
+// this path, while source-file dispatch reads all explicitly provided file
+// paths through the source boundary, runs in-memory lint aggregation, carries
+// the first internal diagnostic, reads an explicit --config path when one is
 // provided, otherwise searches upward from the current working directory for
 // ari-lint.rules, and applies parsed config and --rule severity overrides when
 // provided. A separate collection path pushes full internal diagnostics into a
@@ -58,6 +58,7 @@ pub struct CliArgumentProblem {
 pub struct CliArgs {
   source_count: i64,
   first_source_file: Slice[u8],
+  source_files: std::vec::Vec[std::string::String],
   has_source_file: bool,
   json_requested: bool,
   list_rules_requested: bool,
@@ -221,8 +222,13 @@ pub fn parse_cli_tokens(
   zone: ref mut Zone,
   tokens: ref std::vec::Vec[std::string::String]
 ) -> CliParseResult {
+  let token_allocator = std::allocator::of(tokens);
   var source_count = 0;
   var first_source_file: Slice[u8] = "";
+  var source_files = std::vec::new_with_allocator<std::string::String>(
+    ref token_allocator,
+    tokens.len()
+  );
   var has_source_file = false;
   var json_requested = false;
   var list_rules_requested = false;
@@ -297,6 +303,10 @@ pub fn parse_cli_tokens(
         first_source_file = token_text;
         has_source_file = true;
       }
+      source_files.push(std::string::copy_with_allocator(
+        ref token_allocator,
+        token_text
+      ));
       source_count = source_count + 1;
       index = index + 1;
     }
@@ -305,6 +315,7 @@ pub fn parse_cli_tokens(
   let args = CliArgs {
     source_count: source_count,
     first_source_file: first_source_file,
+    source_files: source_files,
     has_source_file: has_source_file,
     json_requested: json_requested,
     list_rules_requested: list_rules_requested,
@@ -370,24 +381,35 @@ pub fn dispatch_cli_command(
   }
 
   if parse_result.args.has_source_file {
-    let lint_result = super::lint::lint_file_source(
-      zone,
-      parse_result.args.first_source_file
-    );
+    var diagnostic_count = 0;
+    var read_error_count = 0;
+    var first_diagnostic = super::diagnostic::no_diagnostic();
+    for source_file in parse_result.args.source_files {
+      let lint_result = super::lint::lint_file_source(
+        zone,
+        source_file.as_slice()
+      );
+      diagnostic_count = diagnostic_count + lint_result.diagnostic_count;
+      read_error_count = read_error_count + lint_result.read_error_count;
+      first_diagnostic = super::diagnostic::first_available_diagnostic(
+        first_diagnostic,
+        lint_result.first_diagnostic
+      );
+    }
     let exit_code = cli_file_lint_exit_code(
       zone,
-      lint_result.diagnostic_count,
-      lint_result.read_error_count
+      diagnostic_count,
+      read_error_count
     );
     var command_result = cli_command_result(
       CliSourceLintResult,
       false,
-      lint_result.diagnostic_count,
-      lint_result.read_error_count,
+      diagnostic_count,
+      read_error_count,
       exit_code,
       "Source-file lint diagnostics are available internally without writing output."
     );
-    command_result.first_diagnostic = lint_result.first_diagnostic;
+    command_result.first_diagnostic = first_diagnostic;
     return command_result;
   }
 
@@ -430,7 +452,7 @@ fn write_cli_parse_problem_stderr(zone: ref mut Zone) -> bool {
 
 fn write_cli_help_stdout(zone: ref mut Zone) -> bool {
   var text = std::string::new(zone, 384);
-  text.append_string_in(zone, "Usage: ari-lint [options] <source-file>\n");
+  text.append_string_in(zone, "Usage: ari-lint [options] <source-file>...\n");
   text.append_string_in(zone, "\n");
   text.append_string_in(zone, "Options:\n");
   text.append_string_in(zone, "  -h, --help                 Show this help text.\n");
@@ -447,10 +469,18 @@ fn write_missing_source_stderr(zone: ref mut Zone) -> bool {
   return write_result.wrote_stderr;
 }
 
-fn write_file_read_error_stderr(zone: ref mut Zone, path: Slice[u8]) -> bool {
+fn write_file_read_error_stderr(
+  zone: ref mut Zone,
+  source_count: i64,
+  path: Slice[u8]
+) -> bool {
   var text = std::string::new(zone, 128);
-  text.append_string_in(zone, "ari-lint: unable to read source file: ");
-  text.append_string_in(zone, path);
+  if source_count <= 1 {
+    text.append_string_in(zone, "ari-lint: unable to read source file: ");
+    text.append_string_in(zone, path);
+  } else {
+    text.append_string_in(zone, "ari-lint: unable to read one or more source files");
+  }
   text.append_string_in(zone, "\n");
   let write_result = super::output::write_stderr_text(zone, ref text);
   return write_result.wrote_stderr;
@@ -630,6 +660,7 @@ fn dispatch_cli_command_with_main_output(
     if command_result.read_error_count > 0 {
       let wrote_read_error_stderr = write_file_read_error_stderr(
         zone,
+        parse_result.args.source_count,
         parse_result.args.first_source_file
       );
       if !wrote_read_error_stderr {
@@ -852,22 +883,24 @@ fn collect_cli_source_diagnostics_from_tokens(
         );
       }
     }
-    let collection_result = super::lint::collect_file_lint_diagnostics_with_overrides(
-      zone,
-      parse_result.args.first_source_file,
-      rule_overrides,
-      diagnostics
-    );
-    let exit_code = cli_file_lint_exit_code(
-      zone,
-      collection_result.diagnostic_count,
-      collection_result.read_error_count
-    );
+    var diagnostic_count = 0;
+    var read_error_count = 0;
+    for source_file in parse_result.args.source_files {
+      let collection_result = super::lint::collect_file_lint_diagnostics_with_override_refs(
+        zone,
+        source_file.as_slice(),
+        ref rule_overrides,
+        diagnostics
+      );
+      diagnostic_count = diagnostic_count + collection_result.diagnostic_count;
+      read_error_count = read_error_count + collection_result.read_error_count;
+    }
+    let exit_code = cli_file_lint_exit_code(zone, diagnostic_count, read_error_count);
     var command_result = cli_command_result(
       CliSourceLintResult,
       false,
-      collection_result.diagnostic_count,
-      collection_result.read_error_count,
+      diagnostic_count,
+      read_error_count,
       exit_code,
       "Source-file lint diagnostics were collected with parsed config and --rule severity overrides without writing output."
     );
@@ -891,21 +924,23 @@ pub fn collect_cli_source_diagnostics(
   }
 
   if parse_result.args.has_source_file {
-    let collection_result = super::lint::collect_file_lint_diagnostics(
-      zone,
-      parse_result.args.first_source_file,
-      diagnostics
-    );
-    let exit_code = cli_file_lint_exit_code(
-      zone,
-      collection_result.diagnostic_count,
-      collection_result.read_error_count
-    );
+    var diagnostic_count = 0;
+    var read_error_count = 0;
+    for source_file in parse_result.args.source_files {
+      let collection_result = super::lint::collect_file_lint_diagnostics(
+        zone,
+        source_file.as_slice(),
+        diagnostics
+      );
+      diagnostic_count = diagnostic_count + collection_result.diagnostic_count;
+      read_error_count = read_error_count + collection_result.read_error_count;
+    }
+    let exit_code = cli_file_lint_exit_code(zone, diagnostic_count, read_error_count);
     var command_result = cli_command_result(
       CliSourceLintResult,
       false,
-      collection_result.diagnostic_count,
-      collection_result.read_error_count,
+      diagnostic_count,
+      read_error_count,
       exit_code,
       "Source-file lint diagnostics were collected internally into a caller-provided vector without writing output."
     );
@@ -960,11 +995,11 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 }
 
 // parse_cli_tokens consumes a caller-provided token list and records source
-// counts, first source file path, flags/options, explicit config path, parsed
-// rule override values, rule override problem count, and parse problem counts
-// in CliParseResult. It intentionally leaves environment handling, path
-// validation, home/global/XDG config discovery, diagnostic printing, and ari
-// --check invocation as future work.
+// counts, first source file path, retained source file paths, flags/options,
+// explicit config path, parsed rule override values, rule override problem
+// count, and parse problem counts in CliParseResult. It intentionally leaves
+// environment handling, path validation, home/global/XDG config discovery,
+// diagnostic printing, and ari --check invocation as future work.
 //
 // parse_cli_rule_overrides converts one raw --rule value into the internal
 // config override count model and parse problem count. Source-file collection
@@ -973,9 +1008,9 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // --config is absent.
 //
 // dispatch_cli_command maps a CliParseResult to a stdout-free internal command
-// result with internal exit-code data. For source-file arguments it reads only
-// the first explicitly provided file path, runs in-memory lint aggregation, and
-// carries the first internal diagnostic without writing output.
+// result with internal exit-code data. For source-file arguments it reads each
+// explicitly provided file path, runs in-memory lint aggregation, and carries
+// the first internal diagnostic without writing output.
 // collect_cli_source_diagnostics and collect_explicit_cli_diagnostics use the
 // same explicit source-file boundary, but push full internal diagnostics into a
 // caller-provided vector and apply discovered or explicit config overrides

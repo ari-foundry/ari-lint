@@ -16,20 +16,20 @@ diagnostic vector collection APIs now push rule and lint diagnostics into
 caller-provided vectors, but these paths are not executed by these checks yet.
 A file-read boundary for one caller-provided path has started in source, but
 the lightweight checks do not execute file IO.
-The internal CLI file lint path routes the first explicit source-file argument
-through the file-read boundary and in-memory lint aggregation, and it validates
-parsed `--rule` overrides when provided. It carries the first internal
-diagnostic in the command result. A separate internal CLI collection path can
-push full source-file diagnostics into a caller-provided vector. Parsed
+The internal CLI file lint path retains all explicit source-file arguments,
+iterates them through the file-read boundary and in-memory lint aggregation,
+and validates parsed `--rule` overrides when provided. It carries aggregate
+diagnostic/read-error counts and the first internal diagnostic in the command
+result. A separate internal CLI collection path can push full source-file
+diagnostics for all explicit source files into a caller-provided vector. Parsed
 explicit config file overrides are applied to collected source-file diagnostics
 before command-line `--rule` severity overrides and before main-facing human
 stderr or JSON stdout output. The explicit `--config` path is captured in the
 CLI argument model and can be read when source-file diagnostics are collected.
 When `--config` is absent, the CLI source-file path searches upward from the
 current working directory for the nearest `ari-lint.rules`. The main-facing
-source-file lint path writes
-collected human diagnostics to stderr through the verified stderr adapter, but
-the lightweight checks do not assert CLI output.
+source-file lint path writes collected human diagnostics to stderr through the
+verified stderr adapter, but the lightweight checks do not assert CLI output.
 A source-only parity runner skeleton records future comparison boundaries, but
 the lightweight checks do not execute a parity runner.
 The config precedence fixture plan is documented.
@@ -100,14 +100,16 @@ delegates build behavior to `scripts/build.sh`, and then runs
 temporary files and a temporary nested working directory containing
 `ari-lint.rules` to check parent discovered config severity, nearest discovered
 config precedence, explicit `--config` precedence, and CLI `--rule` precedence
-for a trailing-whitespace diagnostic.
+for a trailing-whitespace diagnostic. It also checks JSON diagnostics for two
+dirty source files, a clean plus dirty multi-file invocation, and a clean plus
+clean multi-file invocation.
 It is not run by `scripts/test.sh` or CI, but it is the current local validation
 path for build, supported CLI commands, source-file JSON diagnostics, explicit
 config, discovered `ari-lint.rules`, nearest discovered config precedence, and
-CLI severity override precedence. It does not compare golden output, run a
-parity runner, search home/global/XDG config locations, add new lint semantics,
-or claim compatibility. JSON list-rules output assertions remain future smoke
-coverage.
+CLI severity override precedence across explicit source files. It does not
+compare golden output, run a parity runner, search home/global/XDG config
+locations, add new lint semantics, or claim compatibility. JSON list-rules
+output assertions remain future smoke coverage.
 
 Compiler-backed tests remain future work. Current checks do not run the
 compiler. Future compiler-backed tests should use explicit compiler

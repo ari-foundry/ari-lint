@@ -48,7 +48,8 @@ here.
   path or `ARI_COMPILER`.
 - CLI `--help` output.
 - CLI `--list-rules` output.
-- Source-file lint for the currently implemented rules:
+- Source-file lint for all explicitly provided positional source files, using
+  the currently implemented rules:
   `lint/trailing-whitespace` and `lint/missing-final-newline`.
 - `--json` diagnostics for source-file lint results.
 - Explicit config file loading with `--config`.
@@ -66,7 +67,8 @@ here.
 - There is no parity runner or golden parity suite yet.
 - CI is not compiler-backed yet.
 - The implemented rule set is limited.
-- Multi-file behavior must be checked before claiming full source-set linting.
+- Directory traversal and recursive source-tree scanning are not implemented;
+  pass source files explicitly.
 - Home, global, XDG, and environment-provided config locations are not part of
   the current config behavior.
 
@@ -131,6 +133,7 @@ succeeds, it runs these current safe CLI invocations:
 ./build/ari-lint --json --config /tmp/.../explicit.rules /tmp/.../trailing.ari
 ./build/ari-lint --json --config /tmp/.../explicit.rules --rule trailing-whitespace=note /tmp/.../trailing.ari
 ./build/ari-lint --json /tmp/.../trailing.ari
+./build/ari-lint --json /tmp/.../one.ari /tmp/.../two.ari
 ```
 
 These checks verify only that the local binary builds and the supported smoke
@@ -140,5 +143,6 @@ compatibility claims. The config smoke uses explicit temporary files and a
 temporary nested working directory containing `ari-lint.rules`; it checks only
 the current JSON rule code and severity fields for the trailing-whitespace
 diagnostic, including parent discovery, nearest discovered config precedence,
-and explicit `--config` precedence. JSON list-rules output assertions remain
-future smoke coverage.
+explicit `--config` precedence, multi-file JSON diagnostics, a clean plus dirty
+invocation, and a clean plus clean invocation. JSON list-rules output
+assertions remain future smoke coverage.

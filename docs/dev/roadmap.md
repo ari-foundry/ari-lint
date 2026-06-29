@@ -2,8 +2,8 @@
 
 Current status: active standalone split implementation with Ari source, local
 build and smoke validation, compiler-free checks, supported CLI help and
-list-rules output, source-file linting for the current rule set, JSON
-diagnostics, explicit and discovered config, and CLI severity overrides.
+list-rules output, multi-file source-file linting for the current rule set,
+JSON diagnostics, explicit and discovered config, and CLI severity overrides.
 Historical milestones include: skeleton initialized / Ari source skeleton
 started / internal model skeleton started / registry-severity-config skeleton
 started /
@@ -90,6 +90,7 @@ main-facing missing source stderr output added /
 main-facing file read error stderr output added /
 internal human diagnostic formatter added /
 internal human diagnostic array formatter added /
+multi-file source linting added /
 no stable JSON schema or JSON output tests yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -448,6 +449,12 @@ and test work.
       invoking the compiler, executing `ari --check`, calling `tools/lint`, or
       calling process exit. Main-facing human diagnostic output has since been
       wired; JSON output, tests, and parity checks remain future work.
+- [x] Retain all positional source file paths in the CLI argument model and
+      iterate all explicit source-file arguments for lint execution, JSON
+      output, human diagnostic output, aggregate diagnostic/read-error counts,
+      and existing config precedence without directory traversal, recursive
+      source-tree scanning, parity runner behavior, compiler-backed CI,
+      compatibility claims, `ari --check`, or `tools/lint`.
 - [x] Wire the main-facing source-file lint path to format and write collected
       human diagnostics to stderr through the verified stderr adapter, without
       serializing JSON, discovering config files, traversing directories,

@@ -96,21 +96,30 @@ require_grep "./build/ari-lint --help" README.md
 require_grep "./build/ari-lint --list-rules" README.md
 require_grep "./build/ari-lint --json --list-rules" README.md
 require_grep "./build/ari-lint --json --config" README.md
+require_grep "./build/ari-lint --json /tmp/.../one.ari /tmp/.../two.ari" README.md
 require_grep "--rule trailing-whitespace=note" README.md
 require_grep "--config" scripts/smoke.sh
 require_grep "run_json_diagnostic_smoke" scripts/smoke.sh
+require_grep "run_json_success_smoke" scripts/smoke.sh
 require_grep '"severity":"error"' scripts/smoke.sh
 require_grep '"severity":"note"' scripts/smoke.sh
 require_grep '"severity":"warning"' scripts/smoke.sh
 require_grep "discovery_parent" scripts/smoke.sh
 require_grep "discovery_child" scripts/smoke.sh
 require_grep "nearest_discovery_output" scripts/smoke.sh
+require_grep "multi_dirty_one" scripts/smoke.sh
+require_grep "multi_dirty_two" scripts/smoke.sh
+require_grep "clean_source_two" scripts/smoke.sh
+require_grep "clean_output" scripts/smoke.sh
+require_grep "mixed_output" scripts/smoke.sh
+require_grep "require_json_no_grep" scripts/smoke.sh
 require_grep "ari-lint.rules" scripts/smoke.sh
 require_grep "scripts/smoke.sh" docs/dev/ari-implementation-plan.md
 require_grep "local smoke validation added" docs/dev/roadmap.md
 require_grep "minimal config override smoke coverage added" docs/dev/roadmap.md
 require_grep "current-directory config discovery added" docs/dev/roadmap.md
 require_grep "parent-directory config discovery added" docs/dev/roadmap.md
+require_grep "multi-file source linting added" docs/dev/roadmap.md
 require_grep "scripts/smoke.sh" tests/README.md
 
 require_grep "repo_root" scripts/test.sh
@@ -200,6 +209,7 @@ require_grep "not a full test suite yet" README.md
 require_grep "explicit Ari compiler path" README.md
 require_grep "Local build via" README.md
 require_grep "Local smoke validation via" README.md
+require_grep "all explicitly provided positional source files" README.md
 require_grep "local standalone test entrypoint" README.md
 require_grep "relative compiler paths" README.md
 require_grep "docs/migration.md" docs/README.md
@@ -343,9 +353,9 @@ require_grep "severity override resolver" docs/dev/ari-implementation-plan.md
 require_grep "single-diagnostic application helper" docs/dev/ari-implementation-plan.md
 require_grep "override aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "file-backed override aggregation path" docs/dev/ari-implementation-plan.md
-require_grep "captures the explicit .--config. path" docs/dev/ari-implementation-plan.md
+require_grep "retains all positional source file paths" docs/dev/ari-implementation-plan.md
 require_grep "explicit config file parse boundary" docs/dev/ari-implementation-plan.md
-require_grep "default severity < config file override <" docs/dev/ari-implementation-plan.md
+require_grep "default severity < discovered config < explicit" docs/dev/ari-implementation-plan.md
 require_grep "Validate caller-provided .--rule. overrides in the internal CLI file lint" docs/dev/ari-implementation-plan.md
 require_grep "shared rule execution input/result API" docs/dev/ari-implementation-plan.md
 require_grep "shared rule module API" docs/dev/ari-implementation-plan.md
@@ -484,12 +494,12 @@ require_grep "internal diagnostic JSON array serialization added" docs/dev/roadm
 require_grep "A minimal human-readable formatter" docs/dev/ari-implementation-plan.md
 require_grep "caller-provided diagnostics" docs/dev/ari-implementation-plan.md
 require_grep "first already-built" docs/dev/ari-implementation-plan.md
-require_grep "collected human diagnostics to stderr" docs/dev/ari-implementation-plan.md
+require_grep "collected human diagnostics for all explicit source files" docs/dev/ari-implementation-plan.md
 require_grep "CLI parse problems write a short summary" docs/dev/ari-implementation-plan.md
-require_grep "CLI help writes concise text" docs/dev/ari-implementation-plan.md
+require_grep "concise text to stdout" docs/dev/ari-implementation-plan.md
 require_grep "missing source-file input writes a short" docs/dev/ari-implementation-plan.md
 require_grep "source-file read errors write a short" docs/dev/ari-implementation-plan.md
-require_grep "Explicit .--config. file overrides are applied" docs/dev/ari-implementation-plan.md
+require_grep "overrides are applied to those collected diagnostics" docs/dev/ari-implementation-plan.md
 require_grep "read-error JSON output" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
 require_grep "human-readable list-rules formatter" docs/dev/ari-implementation-plan.md
@@ -557,6 +567,8 @@ require_grep "calls_process_exit: false" src/cli.ari
 require_grep "positional source file input" src/cli.ari
 require_grep "source_count" src/cli.ari
 require_grep "first_source_file" src/cli.ari
+require_grep "source_files" src/cli.ari
+require_grep "std::allocator::of" src/cli.ari
 require_grep "--json" src/cli.ari
 require_grep "json_requested" src/cli.ari
 require_grep "--ari" src/cli.ari
@@ -582,7 +594,7 @@ require_grep "run_os_argv_cli" src/cli.ari
 require_grep "parse_cli_rule_overrides" src/cli.ari
 require_grep "cli_file_lint_exit_code" src/cli.ari
 require_grep "lint_file_source" src/cli.ari
-require_grep "rule override problem count" src/cli.ari
+require_grep "rule override problem" src/cli.ari
 require_grep "applies discovered or explicit config and --rule severity overrides" src/cli.ari
 require_grep "collect_cli_rule_overrides_from_tokens" src/cli.ari
 require_grep "collect_cli_source_diagnostics_from_tokens" src/cli.ari
@@ -595,6 +607,7 @@ require_grep "std::path::parent" src/cli.ari
 require_grep "std::path::join_in" src/cli.ari
 require_grep "std::env::current_dir_or_default" src/cli.ari
 require_grep "collect_file_lint_diagnostics_with_overrides" src/lint.ari
+require_grep "collect_file_lint_diagnostics_with_override_refs" src/lint.ari
 require_grep "OsArgvBoundary" src/cli.ari
 require_grep "os_argv_boundary" src/cli.ari
 require_grep "std::env::args" src/cli.ari
@@ -614,7 +627,7 @@ require_grep "write stdout/stderr" src/cli.ari
 require_grep "call process exit" src/cli.ari
 require_grep "recursively scan source trees" src/cli.ari
 require_grep "Source-file lint diagnostics are available internally" src/cli.ari
-require_grep "carries the first internal diagnostic" src/cli.ari
+require_grep "first internal diagnostic without writing output" src/cli.ari
 require_grep "future work" src/cli.ari
 require_grep "OptionalDiagnostic" src/diagnostic.ari
 require_grep "first_available_diagnostic" src/diagnostic.ari
