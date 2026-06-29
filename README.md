@@ -2,16 +2,15 @@
 
 `ari-lint` is lint tooling for the Ari language.
 
-This repository is being initialized as part of the `ari-lint` split from
-`ari-foundry/ari`. It is a skeleton only at this stage:
-
-- source extraction from ari-foundry/ari has not happened yet
-- docs migration from ari-foundry/ari has not happened yet
-- local standalone build wiring has started with an explicit compiler path
-- local standalone test entrypoint wiring has started with compiler-free checks
+This repository is the active standalone split implementation of `ari-lint`.
+It now carries Ari-language source, local build and smoke scripts, lint rule
+metadata, config handling, diagnostic output wiring, and focused development
+documentation for the split.
 
 The near-term dependency model is invoking `ari --check` for compiler-backed
-checking. Compiler behavior remains owned by the Ari compiler project.
+checking when that boundary is added. Compiler behavior remains owned by the
+Ari compiler project. The current `tools/lint` implementation in
+`ari-foundry/ari` remains the reference implementation for now.
 
 The long-term implementation direction is to develop `ari-lint` in Ari when
 the language and toolchain are ready.
@@ -25,9 +24,9 @@ the language and toolchain are ready.
 
 ## Current Scope
 
-This repository will eventually hold `ari-lint` source, CLI documentation, rule
-documentation, diagnostic documentation, configuration docs, tests, and release
-notes.
+This repository owns `ari-lint` tooling, lint rule source, CLI behavior,
+diagnostic behavior, configuration behavior, local validation scripts, focused
+developer documentation, and future release notes.
 
 Contributors should use `ari-foundry/ari` docs, examples, and tests as the
 source of truth for current Ari language usage.
@@ -36,10 +35,40 @@ Future `ari-lint` compatibility policy should be based on real Ari releases and
 tags. Do not claim compatibility with any Ari version unless it is verified from
 an actual Ari release or tag.
 
-Do not treat this skeleton as a stable release or a fully standalone tool. No
-install command, package registry entry, release artifact, or compatibility
-guarantee is available from this repository yet. Do not add unverified Ari code
-examples here.
+Do not treat the current implementation as a stable release. No install
+command, package registry entry, release artifact, or compatibility guarantee
+is available from this repository yet. Do not add unverified Ari code examples
+here.
+
+## Current Capabilities
+
+- Local build via `scripts/build.sh` with an explicit Ari compiler path or
+  `ARI_COMPILER`.
+- Local smoke validation via `scripts/smoke.sh` with an explicit Ari compiler
+  path or `ARI_COMPILER`.
+- CLI `--help` output.
+- CLI `--list-rules` output.
+- Source-file lint for the currently implemented rules:
+  `lint/trailing-whitespace` and `lint/missing-final-newline`.
+- `--json` diagnostics for source-file lint results.
+- Explicit config file loading with `--config`.
+- Discovered `ari-lint.rules` config when `--config` is absent, searching from
+  the current working directory upward and using the nearest file.
+- `--rule` severity overrides. Current precedence is default severity <
+  discovered config < explicit `--config` < CLI `--rule`.
+
+## Current Limitations
+
+- `tools/lint` in `ari-foundry/ari` remains the reference implementation for
+  now.
+- This repository has no stable `ari-lint` release yet.
+- No Ari version compatibility claim is established yet.
+- There is no parity runner or golden parity suite yet.
+- CI is not compiler-backed yet.
+- The implemented rule set is limited.
+- Multi-file behavior must be checked before claiming full source-set linting.
+- Home, global, XDG, and environment-provided config locations are not part of
+  the current config behavior.
 
 ## Local Checks
 
@@ -56,8 +85,9 @@ scripts/test.sh
 ```
 
 This is not a full test suite yet. The standalone test entrypoint delegates to
-the lightweight check script, which checks skeleton files and fixture
-invariants only.
+the lightweight check script, which checks repository-shape, source, script,
+documentation, and fixture invariants only. Use `scripts/smoke.sh` for local
+compiler-backed build and CLI smoke validation.
 
 ## Local Build Scaffold
 

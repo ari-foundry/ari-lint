@@ -1,12 +1,14 @@
 # ari-lint Tests
 
-Behavior tests will be added after executable test wiring begins.
+Compiler-free repository checks and local compiler-backed smoke validation both
+exist now. Broader executable rule, CLI, parity, and golden-output tests remain
+future work.
 
-Current checks verify skeleton files, lightweight documentation/source guards,
-the first trailing-whitespace fixture shape, and the first
-missing-final-newline fixture shape. In-memory trailing-whitespace execution
-and in-memory missing-final-newline execution have started in source. In-memory
-lint run aggregation has also started for caller-provided source text,
+Current compiler-free checks verify repository shape, lightweight
+documentation/source guards, the first trailing-whitespace fixture shape, and
+the first missing-final-newline fixture shape. In-memory trailing-whitespace
+execution and in-memory missing-final-newline execution have started in source.
+In-memory lint run aggregation has also started for caller-provided source text,
 including first-diagnostic capture and with-overrides variants that preserve
 the same count and first-diagnostic shape for already-parsed severity override
 inputs over in-memory source and explicitly provided file paths. Internal
@@ -72,10 +74,11 @@ scripts/test.sh
 ```
 
 The standalone test entrypoint resolves the repository root and delegates to
-`scripts/check.sh`. These scripts check repository shape and fixture invariants
-only. They do not run the Ari compiler, execute `tools/lint`, invoke
-`ari --check`, run a parity runner, run CLI tests, or compare golden tests.
-The standalone test entrypoint does not run compiler-backed tests yet.
+`scripts/check.sh`. These scripts check repository shape, source guards,
+documentation guards, script guards, and fixture invariants only. They do not
+run the Ari compiler, execute `tools/lint`, invoke `ari --check`, run a parity
+runner, run CLI tests, or compare golden tests. The standalone test entrypoint
+does not run compiler-backed tests yet.
 
 The GitHub Actions workflow is intentionally compiler-free. It runs only
 `scripts/check.sh` and must not run `scripts/build.sh`, invoke the Ari
@@ -89,7 +92,7 @@ explicit Ari compiler path, resolves the repository root, uses the compiler root
 when `lib/std.arih` is available there, and is not run by default tests or CI.
 Relative compiler paths are preserved from the caller's directory.
 
-`scripts/smoke.sh` is a local compiler-backed smoke entrypoint. It accepts an
+`scripts/smoke.sh` is the local compiler-backed smoke entrypoint. It accepts an
 explicit Ari compiler path as its first argument or through `ARI_COMPILER`,
 delegates build behavior to `scripts/build.sh`, and then runs
 `./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
@@ -98,10 +101,13 @@ temporary files and a temporary nested working directory containing
 `ari-lint.rules` to check parent discovered config severity, nearest discovered
 config precedence, explicit `--config` precedence, and CLI `--rule` precedence
 for a trailing-whitespace diagnostic.
-It is not run by `scripts/test.sh` or CI. It does not compare golden output,
-run a parity runner, search home/global/XDG config locations, add new lint
-semantics, or claim compatibility. JSON list-rules output assertions remain
-future smoke coverage.
+It is not run by `scripts/test.sh` or CI, but it is the current local validation
+path for build, supported CLI commands, source-file JSON diagnostics, explicit
+config, discovered `ari-lint.rules`, nearest discovered config precedence, and
+CLI severity override precedence. It does not compare golden output, run a
+parity runner, search home/global/XDG config locations, add new lint semantics,
+or claim compatibility. JSON list-rules output assertions remain future smoke
+coverage.
 
 Compiler-backed tests remain future work. Current checks do not run the
 compiler. Future compiler-backed tests should use explicit compiler
