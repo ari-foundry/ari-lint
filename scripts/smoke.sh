@@ -44,10 +44,29 @@ run_json_diagnostic_smoke() {
   [ "$status" -eq 2 ] || fail "expected diagnostic exit code 2, got $status"
 }
 
+run_json_success_smoke() {
+  output_file="$1"
+  shift
+  printf '%s\n' "smoke.sh: running $*"
+  set +e
+  "$@" > "$output_file"
+  status=$?
+  set -e
+  [ "$status" -eq 0 ] || fail "expected success exit code 0, got $status"
+}
+
 require_json_grep() {
   pattern="$1"
   file="$2"
-  grep -q -- "$pattern" "$file" || fail "missing expected JSON text in $file: $pattern"
+  grep -F -q -- "$pattern" "$file" || fail "missing expected JSON text in $file: $pattern"
+}
+
+require_json_no_grep() {
+  pattern="$1"
+  file="$2"
+  if grep -F -q -- "$pattern" "$file"; then
+    fail "unexpected JSON text in $file: $pattern"
+  fi
 }
 
 run_smoke "$binary" --help
@@ -104,5 +123,42 @@ explicit_over_discovery_output="$tmp_dir/explicit-over-discovery-error.json"
 )
 require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$explicit_over_discovery_output"
 require_json_grep '"severity":"error"' "$explicit_over_discovery_output"
+
+multi_dirty_one="$tmp_dir/multi-dirty-one.ari"
+multi_dirty_two="$tmp_dir/multi-dirty-two.ari"
+{
+  printf '%s  \n' "fn dirty_one() -> i64 {"
+  printf '%s\n' "  return 1;"
+  printf '%s\n' "}"
+} > "$multi_dirty_one"
+printf '%s' "fn dirty_two() -> i64 { return 2; }" > "$multi_dirty_two"
+
+multi_output="$tmp_dir/multi-dirty.json"
+run_json_diagnostic_smoke "$multi_output" "$binary" --json "$multi_dirty_one" "$multi_dirty_two"
+require_json_grep "\"filePath\":\"$multi_dirty_one\"" "$multi_output"
+require_json_grep "\"filePath\":\"$multi_dirty_two\"" "$multi_output"
+
+clean_source="$tmp_dir/clean.ari"
+{
+  printf '%s\n' "fn clean() -> i64 {"
+  printf '%s\n' "  return 0;"
+  printf '%s\n' "}"
+} > "$clean_source"
+
+clean_source_two="$tmp_dir/clean-two.ari"
+{
+  printf '%s\n' "fn clean_two() -> i64 {"
+  printf '%s\n' "  return 0;"
+  printf '%s\n' "}"
+} > "$clean_source_two"
+
+clean_output="$tmp_dir/multi-clean.json"
+run_json_success_smoke "$clean_output" "$binary" --json "$clean_source" "$clean_source_two"
+require_json_grep "[]" "$clean_output"
+
+mixed_output="$tmp_dir/mixed-clean-dirty.json"
+run_json_diagnostic_smoke "$mixed_output" "$binary" --json "$clean_source" "$multi_dirty_one"
+require_json_grep "\"filePath\":\"$multi_dirty_one\"" "$mixed_output"
+require_json_no_grep "\"filePath\":\"$clean_source\"" "$mixed_output"
 
 printf '%s\n' "smoke.sh: smoke checks passed"

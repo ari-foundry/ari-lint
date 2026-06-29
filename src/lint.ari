@@ -276,13 +276,27 @@ pub fn collect_file_lint_diagnostics_with_overrides(
   overrides: std::vec::Vec[super::config::RuleSeverityOverride],
   diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
 ) -> FileDiagnosticCollectionResult {
+  return collect_file_lint_diagnostics_with_override_refs(
+    zone,
+    path,
+    ref overrides,
+    diagnostics
+  );
+}
+
+pub fn collect_file_lint_diagnostics_with_override_refs(
+  zone: ref mut Zone,
+  path: Slice[u8],
+  overrides: ref std::vec::Vec[super::config::RuleSeverityOverride],
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> FileDiagnosticCollectionResult {
   match super::source::source_input_from_file(zone, path) {
     std::Ok(text) => {
       let diagnostic_count = collect_lint_diagnostics_in_memory_with_overrides(
         zone,
         path,
         text.as_slice(),
-        ref overrides,
+        overrides,
         diagnostics
       );
       return file_diagnostic_collection_result(diagnostic_count, 1, 0);
