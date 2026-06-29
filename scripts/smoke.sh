@@ -124,6 +124,36 @@ explicit_over_discovery_output="$tmp_dir/explicit-over-discovery-error.json"
 require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$explicit_over_discovery_output"
 require_json_grep '"severity":"error"' "$explicit_over_discovery_output"
 
+field_config_file="$tmp_dir/diagnostic-fields.rules"
+{
+  printf '%s\n' "lint/trailing-whitespace = warning"
+  printf '%s\n' "lint/missing-final-newline = warning"
+} > "$field_config_file"
+
+trailing_field_source="$tmp_dir/trailing-field.ari"
+printf '%s  \n' "x" > "$trailing_field_source"
+
+trailing_field_output="$tmp_dir/trailing-field.json"
+run_json_diagnostic_smoke "$trailing_field_output" "$binary" --json --config "$field_config_file" "$trailing_field_source"
+require_json_grep "\"filePath\":\"$trailing_field_source\"" "$trailing_field_output"
+require_json_grep '"line":1' "$trailing_field_output"
+require_json_grep '"column":2' "$trailing_field_output"
+require_json_grep '"severity":"warning"' "$trailing_field_output"
+require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$trailing_field_output"
+require_json_grep '"message":"trailing whitespace"' "$trailing_field_output"
+
+missing_final_newline_field_source="$tmp_dir/missing-final-newline-field.ari"
+printf '%s' "x" > "$missing_final_newline_field_source"
+
+missing_final_newline_field_output="$tmp_dir/missing-final-newline-field.json"
+run_json_diagnostic_smoke "$missing_final_newline_field_output" "$binary" --json --config "$field_config_file" "$missing_final_newline_field_source"
+require_json_grep "\"filePath\":\"$missing_final_newline_field_source\"" "$missing_final_newline_field_output"
+require_json_grep '"line":1' "$missing_final_newline_field_output"
+require_json_grep '"column":2' "$missing_final_newline_field_output"
+require_json_grep '"severity":"warning"' "$missing_final_newline_field_output"
+require_json_grep '"ruleCode":"lint/missing-final-newline"' "$missing_final_newline_field_output"
+require_json_grep '"message":"missing final newline"' "$missing_final_newline_field_output"
+
 multi_dirty_one="$tmp_dir/multi-dirty-one.ari"
 multi_dirty_two="$tmp_dir/multi-dirty-two.ari"
 {
@@ -137,6 +167,8 @@ multi_output="$tmp_dir/multi-dirty.json"
 run_json_diagnostic_smoke "$multi_output" "$binary" --json "$multi_dirty_one" "$multi_dirty_two"
 require_json_grep "\"filePath\":\"$multi_dirty_one\"" "$multi_output"
 require_json_grep "\"filePath\":\"$multi_dirty_two\"" "$multi_output"
+require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$multi_output"
+require_json_grep '"ruleCode":"lint/missing-final-newline"' "$multi_output"
 
 clean_source="$tmp_dir/clean.ari"
 {
