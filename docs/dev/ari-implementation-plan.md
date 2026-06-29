@@ -21,9 +21,10 @@ It does not move `tools/lint` or change build behavior.
   help writes concise text to stdout. CLI parse problems write a short summary
   to stderr, missing source-file input writes a short summary to stderr, and
   source-file read errors write a short summary to stderr. It does not read
-  environment variables, produce parse-error JSON, produce read-error JSON,
-  search parent directories for config files, traverse directories, invoke the
-  compiler, invoke `ari --check`, call `tools/lint`, or call process exit.
+  environment variables beyond the current working directory, produce
+  parse-error JSON, produce read-error JSON, search home/global/XDG config
+  locations, traverse source directories, invoke the compiler, invoke
+  `ari --check`, call `tools/lint`, or call process exit.
 - The rule registry, severity, and config model skeleton has started as
   preparatory source-only declarations. The registry now constructs known
   entries for `lint/trailing-whitespace` and `lint/missing-final-newline` from
@@ -132,10 +133,11 @@ It does not move `tools/lint` or change build behavior.
   command-line `--rule`. The main-facing OS argv path formats and writes those
   collected human diagnostics to stderr, or serializes and writes those
   collected diagnostics as JSON to stdout when `--json` is requested, through
-  the verified output adapters. It can discover only `./ari-lint.rules` in the
-  current working directory when `--config` is absent. It does not search
-  parent directories, traverse directories, invoke the compiler, call
-  `ari --check`, or call `tools/lint`. Source-file and config-file read errors
+  the verified output adapters. When `--config` is absent, it searches from the
+  current working directory upward for the nearest `ari-lint.rules` and stops
+  at the filesystem root. It does not search home/global/XDG config locations,
+  traverse source directories, invoke the compiler, call `ari --check`, or call
+  `tools/lint`. Source-file and config-file read errors
   write short stderr summaries and do not produce read-error JSON output yet.
 - A source-only parity runner skeleton now records intended comparison
   boundaries against current `tools/lint`, with all execution, file IO, and
@@ -224,10 +226,9 @@ It does not move `tools/lint` or change build behavior.
   caller-provided config file path and parse its text into the existing
   internal override model without deciding discovery. The CLI source-file
   diagnostic collection path now reads an explicit config path when provided,
-  otherwise discovers only `./ari-lint.rules` in the current working directory,
-  applies config overrides to collected diagnostics, and then appends
-  command-line `--rule` overrides so `--rule` wins. Parent-directory config
-  search remains future work.
+  otherwise searches upward from the current working directory for the nearest
+  `ari-lint.rules`, applies config overrides to collected diagnostics, and then
+  appends command-line `--rule` overrides so `--rule` wins.
 - The config precedence fixture plan is documented in
   `docs/dev/config-precedence-fixtures.md`. It records future default,
   config-file, explicit `--config`, and command-line `--rule` precedence
@@ -274,9 +275,10 @@ It does not move `tools/lint` or change build behavior.
   `./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
   `./build/ari-lint --json --list-rules`. It also uses temporary files to run
   explicit `--config` JSON smoke checks for trailing-whitespace severity, CLI
-  `--rule` precedence, and current-directory `ari-lint.rules` discovery
-  precedence. It does not add golden output tests, parity checks,
-  compiler-backed CI, parent-directory config search, new lint semantics, or
+  `--rule` precedence, parent-directory config discovery for `ari-lint.rules`,
+  nearest discovered config precedence, and explicit `--config` precedence over
+  discovery. It does not add golden output tests, parity checks,
+  compiler-backed CI, home/global/XDG config search, new lint semantics, or
   compatibility claims. JSON list-rules output assertions remain future smoke
   coverage.
 - A local standalone test entrypoint now exists at `scripts/test.sh`. It
@@ -425,9 +427,9 @@ Current preparatory model skeleton files are source-only placeholders:
   argv integration path that reads process arguments through verified
   `std::env::args`, drops argv[0], and dispatches through the existing
   explicit-token path. The source-file collection path can read explicit config
-  files or discover only `./ari-lint.rules` in the current working directory
-  when `--config` is absent. It does not read environment variables, search
-  parent directories for config files, or call process exit.
+  files or search upward from the current working directory for the nearest
+  `ari-lint.rules` when `--config` is absent. It does not read environment
+  variables, search home/global/XDG config locations, or call process exit.
   `main` returns the internal exit-code mapping from that path, and the scoped
   main-facing paths
   write list-rules/help/JSON text to stdout plus diagnostics, parse problems,
@@ -547,7 +549,7 @@ limited to a short stderr summary without read-error JSON output, the
 main-facing config-file read-error path is limited to a short stderr summary
 without read-error JSON output, and the
 stdout/stderr output boundary is limited to status data for named future sinks.
-Compiler invocation, parent-directory config search, diagnostics output,
+Compiler invocation, home/global/XDG config search, diagnostics output,
 stderr writing, stdout
 adapter wiring beyond the scoped main-facing output paths, process exit, JSON
 schema stability, environment handling, source
@@ -588,8 +590,9 @@ compatibility.
 Config precedence is recorded from the current Ari lint reference docs. The
 minimal parser only handles caller-provided text. Initial config precedence
 fixture files and shell-only executable checks now exist, but standalone config
-discovery and Ari-backed config precedence checks remain needs follow-up before
-this repository claims stable config behavior. The fixture plan is documented in
+discovery checks beyond local parent traversal and Ari-backed config precedence
+checks remain needs follow-up before this repository claims stable config
+behavior. The fixture plan is documented in
 `docs/dev/config-precedence-fixtures.md`.
 
 The exact JSON schema and human-readable diagnostic text remain unstable and
@@ -638,7 +641,7 @@ Current rule module state:
   diagnostic counts and apply already-parsed override severity to collected
   diagnostics for in-memory source text or explicitly provided file paths. The
   CLI layer can now provide discovered or explicit config-file overrides to
-  those collection paths without parent-directory config search.
+  those collection paths.
 - `src/registry.ari` can dispatch one exact known rule code to the corresponding
   in-memory rule wrapper for caller-provided source text. It returns structured
   found/not-found dispatch data and does not read files, scan the filesystem,
@@ -649,7 +652,7 @@ The rule implementations only handle caller-provided bytes in memory. These
 rule module files do not implement file reading, filesystem scanning, config
 parsing, CLI parsing, diagnostics output, JSON serialization, compiler
 invocation, tests, or CI. File-backed aggregation beyond explicit source paths,
-parent-directory config search, user-facing output, JSON diagnostic arrays,
+home/global/XDG config search, user-facing output, JSON diagnostic arrays,
 tests, and parity checks remain future work.
 
 The source input file-read boundary reads one explicitly provided path into a
@@ -669,7 +672,7 @@ adapter. It can also serialize those collected source-file diagnostics as JSON
 to stdout when `--json` is requested. CLI and config parse problems write a
 short summary to stderr. Source-file and config-file read errors write short
 stderr summaries and do not produce read-error JSON output. It does not produce
-parse-error JSON, search parent directories for config files, traverse
+parse-error JSON, search home/global/XDG config locations, traverse source
 directories, invoke the compiler, call `ari --check`, call `tools/lint`, or
 call process exit.
 
@@ -945,6 +948,11 @@ usable.
       `--config` is absent, apply it before explicit command-line `--rule`
       overrides, and keep explicit `--config` ahead of discovery without parent
       search, parity runner, compiler-backed CI, broad golden tests,
+      compatibility claims, `ari --check`, or `tools/lint`
+- [x] Extend discovery upward through parent directories when `--config` is
+      absent, stop at the filesystem root, use the nearest `ari-lint.rules`,
+      and keep explicit `--config` ahead of discovery without home/global/XDG
+      config search, parity runner, compiler-backed CI, broad golden tests,
       compatibility claims, `ari --check`, or `tools/lint`
 - [x] Add a local standalone test entrypoint that resolves the repository root
       and delegates to `scripts/check.sh` only; executable rule, CLI,

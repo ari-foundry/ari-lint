@@ -23,9 +23,9 @@ explicit config file overrides are applied to collected source-file diagnostics
 before command-line `--rule` severity overrides and before main-facing human
 stderr or JSON stdout output. The explicit `--config` path is captured in the
 CLI argument model and can be read when source-file diagnostics are collected.
-When `--config` is absent, the CLI source-file path can discover only
-`./ari-lint.rules` in the current working directory. Parent-directory config
-search is not implemented. The main-facing source-file lint path writes
+When `--config` is absent, the CLI source-file path searches upward from the
+current working directory for the nearest `ari-lint.rules`. The main-facing
+source-file lint path writes
 collected human diagnostics to stderr through the verified stderr adapter, but
 the lightweight checks do not assert CLI output.
 A source-only parity runner skeleton records future comparison boundaries, but
@@ -94,11 +94,12 @@ explicit Ari compiler path as its first argument or through `ARI_COMPILER`,
 delegates build behavior to `scripts/build.sh`, and then runs
 `./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
 `./build/ari-lint --json --list-rules`. It also runs JSON smoke commands with
-temporary files and a temporary current working directory containing
-`ari-lint.rules` to check discovered config severity, explicit `--config`
-precedence, and CLI `--rule` precedence for a trailing-whitespace diagnostic.
+temporary files and a temporary nested working directory containing
+`ari-lint.rules` to check parent discovered config severity, nearest discovered
+config precedence, explicit `--config` precedence, and CLI `--rule` precedence
+for a trailing-whitespace diagnostic.
 It is not run by `scripts/test.sh` or CI. It does not compare golden output,
-run a parity runner, search parent directories for config files, add new lint
+run a parity runner, search home/global/XDG config locations, add new lint
 semantics, or claim compatibility. JSON list-rules output assertions remain
 future smoke coverage.
 
@@ -375,8 +376,8 @@ problems, explicit config file override application, current-directory
 `ari-lint.rules` discovery, parsed `--rule` severity override application after
 config overrides, file read error preservation, config read error preservation,
 diagnostic counts, first diagnostic command-result carrying, caller-provided
-diagnostic vector collection, exit-code mapping, no directory traversal, no
-parent-directory config search, no stdout/stderr output in the internal path,
+diagnostic vector collection, exit-code mapping, no source directory traversal,
+no home/global/XDG config search, no stdout/stderr output in the internal path,
 no JSON serialization in the internal path, no compiler invocation, no
 `ari --check`, and parity behavior against current `tools/lint`.
 
@@ -421,9 +422,8 @@ validate explicit `--config` behavior, `--rule` behavior, default < config <
 CLI `--rule` precedence, severity override resolution, single-diagnostic
 severity application, in-memory severity override aggregation, file-backed and
 CLI config application, CLI `--rule` lint dispatch, collected diagnostic
-severity rewriting, diagnostics, current-directory `ari-lint.rules` discovery,
-future parent-directory discovery, and parity behavior against current
-`tools/lint`.
+severity rewriting, diagnostics, parent-directory `ari-lint.rules` discovery,
+and parity behavior against current `tools/lint`.
 
 The future config precedence fixture plan is documented in
 [docs/dev/config-precedence-fixtures.md](../docs/dev/config-precedence-fixtures.md).

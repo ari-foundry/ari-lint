@@ -24,9 +24,10 @@ as the first argument or through `ARI_COMPILER`, delegates compilation to
 `scripts/build.sh`, and runs the current safe CLI smoke invocations:
 `./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
 `./build/ari-lint --json --list-rules`. It also runs JSON smoke commands
-against temporary files and a temporary current working directory containing
-`ari-lint.rules` to check discovered config severity, explicit `--config`
-precedence, and CLI `--rule` precedence.
+against temporary files and a temporary nested working directory containing
+`ari-lint.rules` to check parent discovered config severity, nearest discovered
+config precedence, explicit `--config` precedence, and CLI `--rule`
+precedence.
 
 `test.sh` does not download or build the Ari compiler. It does not execute
 `tools/lint`, run `ari --check`, install dependencies, run package manager
@@ -37,7 +38,7 @@ commands, run parity checks, or participate in CI as a compiler-backed job yet.
 commands, run parity checks, or participate in CI yet.
 
 `smoke.sh` does not add golden output tests, a parity runner, compiler-backed
-CI, parent-directory config search, new lint semantics, or compatibility
-claims. It checks only the current JSON rule code and severity fields for the
-temporary trailing-whitespace diagnostic. JSON list-rules output assertions
-remain future smoke coverage.
+CI, home/global/XDG config search, new lint semantics, or compatibility claims.
+It checks only the current JSON rule code and severity fields for the temporary
+trailing-whitespace diagnostic. JSON list-rules output assertions remain future
+smoke coverage.

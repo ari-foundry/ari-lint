@@ -2,7 +2,7 @@
 // stdout-free dispatch, internal exit-code data, explicit-token list-rules
 // command wiring, explicit-token entry point, OS argv integration, a
 // main-facing output path, an internal source-file lint path, explicit config
-// path capture, current-directory config discovery, explicit config override
+// path capture, parent-directory config discovery, explicit config override
 // application, and an internal caller-provided diagnostic collection path.
 // The positional source file input and documented options are represented here.
 // This file reads process arguments only through the verified std::env::args
@@ -10,16 +10,17 @@
 // this path, while source-file dispatch reads explicitly provided file paths
 // through the source boundary, runs in-memory lint aggregation, carries the
 // first internal diagnostic, reads an explicit --config path when one is
-// provided, otherwise checks only ./ari-lint.rules in the current working
-// directory, and applies parsed config and --rule severity overrides when
+// provided, otherwise searches upward from the current working directory for
+// ari-lint.rules, and applies parsed config and --rule severity overrides when
 // provided. A separate collection path pushes full internal diagnostics into a
 // caller-provided vector. The main-facing path writes list-rules text to
 // stdout, source lint diagnostics to stderr, source-file JSON diagnostics to
 // stdout, CLI help text to stdout, CLI parse problem summaries to stderr, and
 // source/config file read errors to stderr through verified output adapters.
 // Missing source-file input writes a short stderr summary. It does not read
-// environment state, search parent directories for config files, recursively
-// scan source trees, call tools/lint, call process exit, or invoke ari --check.
+// environment variables beyond the current working directory, home/global/XDG
+// config locations, recursively scan source trees, call tools/lint, call
+// process exit, or invoke ari --check.
 
 pub struct CliOptionMetadata {
   name: Slice[u8],
@@ -464,15 +465,47 @@ fn write_config_read_error_stderr(zone: ref mut Zone, path: Slice[u8]) -> bool {
   return write_result.wrote_stderr;
 }
 
-fn discovered_config_file_path() -> Slice[u8] {
-  return "./ari-lint.rules";
+fn discovered_config_file_name() -> Slice[u8] {
+  return "ari-lint.rules";
 }
 
-fn selected_config_file_path(parse_result: CliParseResult) -> Slice[u8] {
-  if parse_result.args.config_path_present {
-    return parse_result.args.config_file_path;
+fn discovered_config_file_path(zone: ref mut Zone) -> std::string::String {
+  var directory = std::env::current_dir_or_default(zone);
+  if directory.len() == 0 {
+    return std::string::new(zone, 0);
   }
-  return discovered_config_file_path();
+
+  while true {
+    let candidate = std::path::join_in(
+      zone,
+      directory.as_slice(),
+      discovered_config_file_name()
+    );
+    if std::fs::exists(candidate.as_slice()) {
+      return candidate;
+    }
+
+    match std::path::parent(directory.as_slice()) {
+      std::Some(parent) => {
+        directory = std::string::from_slice_in(zone, parent);
+      }
+      std::None => {
+        break;
+      }
+    }
+  }
+
+  return std::string::new(zone, 0);
+}
+
+fn selected_config_file_path(
+  zone: ref mut Zone,
+  parse_result: CliParseResult
+) -> std::string::String {
+  if parse_result.args.config_path_present {
+    return std::string::from_slice_in(zone, parse_result.args.config_file_path);
+  }
+  return discovered_config_file_path(zone);
 }
 
 fn dispatch_cli_command_with_main_output(
@@ -572,9 +605,10 @@ fn dispatch_cli_command_with_main_output(
         return command_result;
       }
       CliConfigReadError => {
+        let selected_config_path = selected_config_file_path(zone, parse_result);
         let wrote_config_read_error_stderr = write_config_read_error_stderr(
           zone,
-          selected_config_file_path(parse_result)
+          selected_config_path.as_slice()
         );
         if !wrote_config_read_error_stderr {
           return cli_command_result(
@@ -732,9 +766,11 @@ fn collect_cli_source_diagnostics_from_tokens(
     return dispatch_cli_command(zone, parse_result);
   }
 
-  let discovered_config_present = parse_result.args.has_source_file &&
-    !parse_result.args.config_path_present &&
-    std::fs::exists(discovered_config_file_path());
+  var discovered_config_path = std::string::new(zone, 0);
+  if parse_result.args.has_source_file && !parse_result.args.config_path_present {
+    discovered_config_path = discovered_config_file_path(zone);
+  }
+  let discovered_config_present = discovered_config_path.len() > 0;
 
   if parse_result.args.has_source_file &&
     (
@@ -775,7 +811,7 @@ fn collect_cli_source_diagnostics_from_tokens(
     } else if discovered_config_present {
       let discovered_config_parse_result = super::config::parse_discovered_config_file_into(
         zone,
-        discovered_config_file_path(),
+        discovered_config_path.as_slice(),
         ref mut rule_overrides
       );
       if discovered_config_parse_result.read_error_count > 0 {
@@ -927,13 +963,14 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // counts, first source file path, flags/options, explicit config path, parsed
 // rule override values, rule override problem count, and parse problem counts
 // in CliParseResult. It intentionally leaves environment handling, path
-// validation, parent-directory config discovery, diagnostic printing, and ari
+// validation, home/global/XDG config discovery, diagnostic printing, and ari
 // --check invocation as future work.
 //
 // parse_cli_rule_overrides converts one raw --rule value into the internal
 // config override count model and parse problem count. Source-file collection
 // applies discovered or explicit config and --rule severity overrides. It
-// checks only ./ari-lint.rules for discovery when --config is absent.
+// searches from the current working directory upward for ari-lint.rules when
+// --config is absent.
 //
 // dispatch_cli_command maps a CliParseResult to a stdout-free internal command
 // result with internal exit-code data. For source-file arguments it reads only
@@ -943,8 +980,9 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // same explicit source-file boundary, but push full internal diagnostics into a
 // caller-provided vector and apply discovered or explicit config overrides
 // followed by parsed --rule severity overrides when provided. They do not
-// write output, serialize JSON, search parent directories for config files,
-// scan directories, call tools/lint, call process exit, or invoke ari --check.
+// write output, serialize JSON, search home/global/XDG config locations, scan
+// source directories, call tools/lint, call process exit, or invoke ari
+// --check.
 // run_explicit_cli_tokens composes parsing and dispatch for callers that
 // already have tokens. These entry paths do not write stdout/stderr, serialize
 // JSON, recursively scan source trees, call tools/lint, call process exit, or
@@ -972,6 +1010,6 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // errors and explicit config-file read errors write short stderr summaries
 // without producing read-error JSON output. CLI help writes a concise stdout
 // message, and CLI/config parse problems write a short summary to stderr.
-// Missing source-file input also writes a short stderr summary. Parent-directory
-// config discovery, parse-error JSON, compiler invocation, ari --check,
-// tools/lint, and process exit remain outside this path.
+// Missing source-file input also writes a short stderr summary. Home, global,
+// and XDG config discovery, parse-error JSON, compiler invocation,
+// ari --check, tools/lint, and process exit remain outside this path.

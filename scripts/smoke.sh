@@ -73,22 +73,33 @@ run_json_diagnostic_smoke "$rule_output" "$binary" --json --config "$config_file
 require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$rule_output"
 require_json_grep '"severity":"note"' "$rule_output"
 
-discovery_dir="$tmp_dir/discovery"
-mkdir "$discovery_dir"
-discovered_config_file="$discovery_dir/ari-lint.rules"
-printf '%s\n' "lint/trailing-whitespace = warning" > "$discovered_config_file"
+discovery_parent="$tmp_dir/discovery"
+discovery_child="$discovery_parent/child"
+mkdir -p "$discovery_child"
+parent_config_file="$discovery_parent/ari-lint.rules"
+child_config_file="$discovery_child/ari-lint.rules"
+printf '%s\n' "lint/trailing-whitespace = warning" > "$parent_config_file"
 
-discovery_output="$tmp_dir/discovered-warning.json"
+parent_discovery_output="$tmp_dir/parent-discovered-warning.json"
 (
-  cd "$discovery_dir"
-  run_json_diagnostic_smoke "$discovery_output" "$binary" --json "$source_file"
+  cd "$discovery_child"
+  run_json_diagnostic_smoke "$parent_discovery_output" "$binary" --json "$source_file"
 )
-require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$discovery_output"
-require_json_grep '"severity":"warning"' "$discovery_output"
+require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$parent_discovery_output"
+require_json_grep '"severity":"warning"' "$parent_discovery_output"
+
+printf '%s\n' "lint/trailing-whitespace = note" > "$child_config_file"
+nearest_discovery_output="$tmp_dir/nearest-discovered-note.json"
+(
+  cd "$discovery_child"
+  run_json_diagnostic_smoke "$nearest_discovery_output" "$binary" --json "$source_file"
+)
+require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$nearest_discovery_output"
+require_json_grep '"severity":"note"' "$nearest_discovery_output"
 
 explicit_over_discovery_output="$tmp_dir/explicit-over-discovery-error.json"
 (
-  cd "$discovery_dir"
+  cd "$discovery_child"
   run_json_diagnostic_smoke "$explicit_over_discovery_output" "$binary" --json --config "$config_file" "$source_file"
 )
 require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$explicit_over_discovery_output"

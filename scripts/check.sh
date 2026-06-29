@@ -102,12 +102,15 @@ require_grep "run_json_diagnostic_smoke" scripts/smoke.sh
 require_grep '"severity":"error"' scripts/smoke.sh
 require_grep '"severity":"note"' scripts/smoke.sh
 require_grep '"severity":"warning"' scripts/smoke.sh
-require_grep "discovery_dir" scripts/smoke.sh
+require_grep "discovery_parent" scripts/smoke.sh
+require_grep "discovery_child" scripts/smoke.sh
+require_grep "nearest_discovery_output" scripts/smoke.sh
 require_grep "ari-lint.rules" scripts/smoke.sh
 require_grep "scripts/smoke.sh" docs/dev/ari-implementation-plan.md
 require_grep "local smoke validation added" docs/dev/roadmap.md
 require_grep "minimal config override smoke coverage added" docs/dev/roadmap.md
 require_grep "current-directory config discovery added" docs/dev/roadmap.md
+require_grep "parent-directory config discovery added" docs/dev/roadmap.md
 require_grep "scripts/smoke.sh" tests/README.md
 
 require_grep "repo_root" scripts/test.sh
@@ -501,7 +504,7 @@ require_grep "config override skeleton" docs/dev/ari-implementation-plan.md
 require_grep "config override skeleton" docs/dev/roadmap.md
 require_grep "config text parser now handles" docs/dev/ari-implementation-plan.md
 require_grep "RULE = SEVERITY" docs/dev/ari-implementation-plan.md
-require_grep "parent-directory config search" docs/dev/ari-implementation-plan.md
+require_grep "parent-directory config discovery" docs/dev/ari-implementation-plan.md
 require_grep "No executable config parser tests are added yet" tests/README.md
 require_grep "semantic parser for caller-provided .--rule. values" docs/dev/roadmap.md
 require_grep "No executable rule override parser tests are added yet" tests/README.md
@@ -584,6 +587,9 @@ require_grep "parse_explicit_config_file_into" src/cli.ari
 require_grep "parse_discovered_config_file_into" src/cli.ari
 require_grep "discovered_config_file_path" src/cli.ari
 require_grep "std::fs::exists" src/cli.ari
+require_grep "std::path::parent" src/cli.ari
+require_grep "std::path::join_in" src/cli.ari
+require_grep "std::env::current_dir_or_default" src/cli.ari
 require_grep "collect_file_lint_diagnostics_with_overrides" src/lint.ari
 require_grep "OsArgvBoundary" src/cli.ari
 require_grep "os_argv_boundary" src/cli.ari
@@ -697,8 +703,8 @@ require_grep "CommandLineRuleOverride" src/config.ari
 require_grep "ari-lint.rules" src/config.ari
 require_grep "--config" src/config.ari
 require_grep "--rule" src/config.ari
-require_grep "directory ari-lint.rules discovery is decided by the CLI layer" src/config.ari
-require_grep "Parent-directory config search" src/config.ari
+require_grep "ari-lint.rules discovery is decided by the CLI layer" src/config.ari
+require_grep "Config-file discovery" src/config.ari
 require_grep "RULE = SEVERITY" src/config.ari
 require_grep "RULE=SEVERITY" src/config.ari
 require_grep "CommandLineRuleOverride" src/config.ari

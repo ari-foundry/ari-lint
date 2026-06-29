@@ -1,8 +1,8 @@
 // Config override model, caller-provided config text parsing, caller-selected
-// config file parsing, and data-only severity application helpers. Current
-// directory ari-lint.rules discovery is decided by the CLI layer; this file
-// only parses the path a caller provides. It does not inspect CLI input or
-// apply severity overrides to lint execution.
+// config file parsing, and data-only severity application helpers.
+// ari-lint.rules discovery is decided by the CLI layer; this file only parses
+// the path a caller provides. It does not inspect CLI input or apply severity
+// overrides to lint execution.
 
 pub enum ConfigSource {
   DefaultConfig,
@@ -679,7 +679,7 @@ pub fn apply_rule_severity_to_diagnostic(
 // run lint rules, apply config to lint execution, write output, serialize JSON,
 // or invoke the compiler.
 //
-// Parent-directory config search, user-facing --rule command dispatch behavior,
+// Config-file discovery, user-facing --rule command dispatch behavior,
 // severity override application inside rule execution, broader diagnostics
 // output, source scanning, and ari --check invocation remain outside this
 // module.
