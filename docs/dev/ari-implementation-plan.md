@@ -273,7 +273,9 @@ It does not move `tools/lint` or change build behavior.
   `lint/trailing-whitespace` behavior, and
   `docs/rules/missing-final-newline.md` records the current in-memory
   `lint/missing-final-newline` behavior. File-backed linting, CLI integration,
-  config integration, output behavior, and tests remain future work.
+  config integration, and output behavior have since been wired for the
+  supported source-file path. Dedicated rule tests, parity tests, and broad
+  golden output coverage remain future work.
 - Source directories should contain Ari source files only; source-layout
   documentation belongs in `docs/dev/` or other documentation directories.
 - A local build scaffold now exists at `scripts/build.sh`. It requires an
@@ -289,10 +291,13 @@ It does not move `tools/lint` or change build behavior.
   explicit `--config` JSON smoke checks for trailing-whitespace severity, CLI
   `--rule` precedence, parent-directory config discovery for `ari-lint.rules`,
   nearest discovered config precedence, and explicit `--config` precedence over
-  discovery. It does not add golden output tests, parity checks,
-  compiler-backed CI, home/global/XDG config search, new lint semantics, or
-  compatibility claims. JSON list-rules output assertions remain future smoke
-  coverage.
+  discovery. Focused JSON diagnostic field smoke checks assert current
+  `ruleCode`, `severity`, `message`, `filePath`, `line`, and `column` fields
+  for `lint/trailing-whitespace` and `lint/missing-final-newline`, and the
+  smoke path also checks multi-file JSON diagnostics. It does not add golden
+  output tests, parity checks, compiler-backed CI, home/global/XDG config
+  search, new lint semantics, or compatibility claims. JSON list-rules output
+  assertions and broader golden output coverage remain future smoke coverage.
 - A local standalone test entrypoint now exists at `scripts/test.sh`. It
   resolves the repository root and delegates to `scripts/check.sh`, so it
   currently runs only compiler-free repository-shape and fixture-invariant
@@ -962,6 +967,11 @@ usable.
       and CLI `--rule` precedence, without adding golden tests,
       parent-directory config search, a parity runner, compiler-backed CI, or
       new lint semantics
+- [x] Add focused diagnostic field smoke coverage with temporary files for
+      `lint/trailing-whitespace` and `lint/missing-final-newline`, checking
+      current JSON `ruleCode`, `severity`, `message`, `filePath`, `line`, and
+      `column` fields without adding broad golden fixtures, a parity runner,
+      compiler-backed CI, or new lint semantics
 - [x] Discover only `./ari-lint.rules` in the current working directory when
       `--config` is absent, apply it before explicit command-line `--rule`
       overrides, and keep explicit `--config` ahead of discovery without parent
