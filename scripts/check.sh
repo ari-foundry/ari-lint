@@ -183,7 +183,10 @@ require_line_equals tests/fixtures/config-precedence/command-line-overrides.txt 
 require_line_equals tests/fixtures/config-precedence/invalid.rules 2 "lint/unknown-rule = warning"
 require_line_equals tests/fixtures/config-precedence/invalid.rules 3 "lint/trailing-whitespace = loud"
 
-require_grep "source extraction from ari-foundry/ari has not happened yet" README.md
+require_grep "active standalone split implementation" README.md
+require_grep "Current Capabilities" README.md
+require_grep "Current Limitations" README.md
+require_grep "remains the reference implementation" README.md
 require_grep "https://github.com/ari-foundry/ari" README.md
 require_grep "https://github.com/ari-foundry/ari/releases" README.md
 require_grep "https://github.com/ari-foundry/ari/tags" README.md
@@ -195,7 +198,8 @@ require_grep "scripts/test.sh" README.md
 require_grep "scripts/build.sh" README.md
 require_grep "not a full test suite yet" README.md
 require_grep "explicit Ari compiler path" README.md
-require_grep "local standalone build wiring has started" README.md
+require_grep "Local build via" README.md
+require_grep "Local smoke validation via" README.md
 require_grep "local standalone test entrypoint" README.md
 require_grep "relative compiler paths" README.md
 require_grep "docs/migration.md" docs/README.md

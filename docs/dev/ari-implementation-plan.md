@@ -2,16 +2,22 @@
 
 ## Purpose
 
-This document plans a future Ari-language implementation of `ari-lint`.
+This document tracks the current and planned Ari-language implementation of
+`ari-lint`.
 
 This document records the implementation direction and source-layout policy.
 It does not move `tools/lint` or change build behavior.
 
 ## Current Status
 
-- `ari-lint` is currently in skeleton/planning state.
-- Source extraction has not happened.
-- The Ari source skeleton has started with source-only files under `src/`.
+- `ari-lint` is now an active standalone split implementation with
+  Ari-language source under `src/`.
+- The implementation remains pre-release and compatibility is not claimed yet.
+  Current `tools/lint` in `ari-foundry/ari` remains the reference
+  implementation while parity work is still planned.
+- Local standalone build wiring exists through `scripts/build.sh`, local smoke
+  validation exists through `scripts/smoke.sh`, and the compiler-free local
+  test entrypoint exists through `scripts/test.sh`.
 - A minimal Ari main entry shell is now present. It delegates to the existing
   OS argv CLI entry path and returns the internal command exit-code mapping.
   The main-facing `--list-rules` path writes stdout through the verified stdout
@@ -51,12 +57,13 @@ It does not move `tools/lint` or change build behavior.
   paths, include paths, raw rule override values, help requests, and parse
   problems. The parser now captures the explicit `--config` path value when one
   is provided. Source-file diagnostic collection can read that explicit config
-  file path, or when `--config` is absent discover only `./ari-lint.rules` in
-  the current working directory, and apply those overrides before command-line
-  `--rule` overrides. A semantic parser now converts caller-provided `--rule`
-  values into command-line-sourced internal severity overrides and parse
-  problems. Actual OS process argument collection now has a minimal internal entry path;
-  environment handling remains future work.
+  file path, or when `--config` is absent search upward from the current
+  working directory for the nearest `ari-lint.rules`, and apply those
+  overrides before command-line `--rule` overrides. A semantic parser now
+  converts caller-provided `--rule` values into command-line-sourced internal
+  severity overrides and parse problems. Actual OS process argument collection
+  now has a minimal internal entry path; environment handling remains future
+  work.
 - An explicit OS argv boundary now exists in `src/cli.ari`. It reads process
   arguments through the verified Ari `std::env::args` API, drops argv[0], and
   reuses the existing explicit-token parser and stdout-free dispatcher. `main`
@@ -297,7 +304,7 @@ It does not move `tools/lint` or change build behavior.
   ready.
 - The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
   current bundled/reference implementation.
-- The future direction is Ari-language reimplementation in `ari-lint`.
+- The implementation direction remains Ari-language development in `ari-lint`.
 - Behavior parity with current `tools/lint` is the intended transition path.
 - The near-term dependency model remains invoking `ari --check`.
 - Future Ari compiler provisioning for compiler-backed behavior is planned in

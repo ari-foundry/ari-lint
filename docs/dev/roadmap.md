@@ -1,7 +1,12 @@
 # ari-lint Roadmap
 
-Current status: skeleton initialized / Ari source skeleton started / internal
-model skeleton started / registry-severity-config skeleton started /
+Current status: active standalone split implementation with Ari source, local
+build and smoke validation, compiler-free checks, supported CLI help and
+list-rules output, source-file linting for the current rule set, JSON
+diagnostics, explicit and discovered config, and CLI severity overrides.
+Historical milestones include: skeleton initialized / Ari source skeleton
+started / internal model skeleton started / registry-severity-config skeleton
+started /
 known rule registry construction added / known rule registry lookup added /
 registry-backed in-memory rule dispatch added /
 first rule metadata entries added /
@@ -100,9 +105,11 @@ and test work.
 - [ ] Plan Ari-language reimplementation with behavior parity against current
       `tools/lint`; `docs/dev/ari-implementation-plan.md` tracks the staged
       implementation plan.
-- [x] Start Ari source skeleton as the first step toward Ari-language
-      implementation; real rule implementation, CLI parsing, diagnostics,
-      compiler invocation, and tests remain future work.
+- [x] Start Ari source as the first step toward Ari-language implementation;
+      the current implementation now includes rule execution, CLI parsing,
+      diagnostics, local build and smoke validation, and focused documentation,
+      while compiler invocation, parity tests, golden output tests, and release
+      compatibility claims remain future work.
 - [x] Add a minimal main entry shell that delegates through a local internal
       shell function and returns success. Main wiring to the OS argv integration
       entry path, stdout/stderr output, JSON output, config parsing, compiler
@@ -153,8 +160,8 @@ and test work.
       without writing stdout/stderr, serializing JSON, discovering config files,
       traversing directories, invoking the compiler, executing `ari --check`,
       calling `tools/lint`, or calling process exit. Main-entry tests,
-      user-facing output, config-file discovery, and parity checks remain future
-      work.
+      broader process behavior tests, and parity checks remain future work;
+      supported user-facing output and config discovery have since been wired.
 - [x] Wire the main-facing OS argv `--list-rules` path to write the existing
       human-readable list-rules text through the verified stdout adapter,
       without writing stderr, serializing JSON, printing diagnostics,
@@ -213,8 +220,9 @@ and test work.
       files, discovering config paths, integrating with command dispatch,
       reading files, scanning the filesystem, writing output, serializing JSON,
       invoking the compiler, executing `ari --check`, or calling `tools/lint`.
-      In-memory override aggregation tests, file-backed config integration,
-      CLI config integration, and config discovery remain future work.
+      In-memory override aggregation tests and broader file-backed config
+      integration remain future work; CLI config integration and config
+      discovery have since been wired for the supported source-file path.
 - [x] Add file-backed lint aggregation with already-parsed severity overrides
       for explicitly provided source paths, reusing the existing single-file
       read boundary and applying overrides only to diagnostics returned by the
@@ -701,9 +709,10 @@ and test work.
       Ari compiler path or `ARI_COMPILER`, delegates the build to
       `scripts/build.sh`, and runs the current safe `--help`, `--list-rules`,
       and `--json --list-rules` CLI invocations without adding golden output
-      tests, parity checks, compiler-backed CI, config discovery,
-      new lint semantics, or compatibility claims. JSON list-rules output
-      assertions remain future smoke coverage.
+      tests, parity checks, compiler-backed CI, new lint semantics, or
+      compatibility claims. Later smoke coverage added config override and
+      parent discovery checks. JSON list-rules output assertions remain future
+      smoke coverage.
 - [x] Add minimal config override smoke coverage in `scripts/smoke.sh` using
       temporary files and simple JSON rule-code/severity checks for explicit
       `--config` severity and CLI `--rule` precedence, without adding golden
