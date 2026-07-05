@@ -92,7 +92,9 @@ require_no_grep "arix" .github/workflows/check.yml
 [ -x scripts/test.sh ] || fail "scripts/test.sh is not executable"
 
 require_grep "explicit-config" scripts/parity.sh
+require_grep "config-short-name" scripts/parity.sh
 require_grep "config-off" scripts/parity.sh
+require_grep "short_config_file" scripts/parity.sh
 require_grep "off_config_file" scripts/parity.sh
 require_grep "case: help" scripts/parity.sh
 require_grep "case: short-help" scripts/parity.sh
@@ -183,6 +185,7 @@ require_grep "unknown rule override" scripts/README.md
 require_grep "missing rule value usage" scripts/README.md
 require_grep "missing ari value usage" scripts/README.md
 require_grep "missing include value usage" scripts/README.md
+require_grep "config-short-name" scripts/README.md
 require_grep "config-off" scripts/README.md
 require_grep "rule-off" scripts/README.md
 require_grep "include-path" scripts/README.md
@@ -199,6 +202,7 @@ require_grep "./build/ari-lint --json --list-rules" README.md
 require_grep "./build/ari-lint --json --config" README.md
 require_grep "./build/ari-lint --json /tmp/.../one.ari /tmp/.../two.ari" README.md
 require_grep "--rule trailing-whitespace=note" README.md
+require_grep "short rule names in explicit config" README.md
 require_grep "disabled rules from explicit config" README.md
 require_grep "and CLI .--rule." README.md
 require_grep "--config" scripts/smoke.sh
@@ -375,9 +379,11 @@ require_grep "Do not claim support for any Ari release" docs/dev/release-compati
 require_grep "release and compatibility policy documented" docs/dev/roadmap.md
 require_grep "release-compatibility-policy.md" tests/README.md
 require_grep "ari-lint Parity Test Plan" docs/dev/parity-test-plan.md
+require_grep "short-name config" docs/dev/parity-test-plan.md
 require_grep "disabled explicit config" docs/dev/parity-test-plan.md
 require_grep "disabled command-line .--rule." docs/dev/parity-test-plan.md
 require_grep "disabled explicit config and" docs/dev/parity-differences.md
+require_grep "short-name" docs/dev/parity-differences.md
 require_grep "tools/lint" docs/dev/parity-test-plan.md
 require_grep "docs/dev/compiler-invocation.md" docs/dev/parity-test-plan.md
 require_grep "docs/dev/compiler-provisioning.md" docs/dev/parity-test-plan.md
