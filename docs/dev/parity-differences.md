@@ -156,6 +156,30 @@ Follow-up:
 - decide whether compatibility requires preserving the original shape or
   documenting a new stable standalone shape
 
+### Clean And Disabled File Path Accounting
+
+For clean inputs and disabled-rule cases such as `config-off` and `rule-off`,
+current standalone `ari-lint` emits no diagnostic file path entries in the
+local report. Original `tools/lint` still emits a per-file JSON entry with
+empty diagnostics for the same source path.
+
+Classification: original `tools/lint` behavior difference and `ari-lint`
+diagnostic schema follow-up.
+
+Impact:
+
+- exact clean JSON output parity is not expected yet
+- file-path hit counts differ for clean and disabled-rule cases even when both
+  implementations agree that no lint diagnostic should be reported
+- strict clean/off golden checks should wait until the output schema contract
+  is documented
+
+Follow-up:
+
+- decide whether standalone clean output should preserve original per-file
+  entries or keep the current empty diagnostic output shape
+- define clean and disabled-rule JSON shape before strict parity fixtures
+
 ### Diagnostic Exit Status
 
 For lint diagnostics, the current standalone `ari-lint` path currently reports

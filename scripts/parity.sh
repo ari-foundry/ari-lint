@@ -1256,6 +1256,7 @@ report_case "multi-file" "$original_pwd" "$multi_dirty_one|$multi_dirty_two" "$m
 printf '%s\n' "known differences:"
 printf '%s\n' "- current Ari-language ari-lint does not invoke ari --check yet; original tools/lint does."
 printf '%s\n' "- current JSON diagnostics are a flat array with filePath/ruleCode fields; original tools/lint emits a files array with path/diagnostics and code/source fields."
+printf '%s\n' "- current clean and disabled-rule JSON outputs omit file path entries; original tools/lint keeps per-file entries with empty diagnostics."
 printf '%s\n' "- diagnostic exit codes may differ while this repository has no stable exit-code compatibility claim."
 printf '%s\n' "- current help output is multi-line stdout text; original tools/lint help is a one-line stderr usage."
 printf '%s\n' "- current no-source-file usage output reports a missing source file; original tools/lint prints generic usage."
