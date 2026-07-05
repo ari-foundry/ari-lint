@@ -14,10 +14,10 @@ matrix, not a parity claim, and not a release policy.
 
 The local parity report currently compares report-only `--help` and
 no-source-file usage, unknown-option usage, missing config value usage, missing
-rule value usage, missing Ari value usage, `--list-rules`, and JSON list-rules
-CLI cases plus temporary clean, trailing-whitespace, missing-final-newline,
-explicit-config, invalid-config, rule-override, discovered-config, and
-multi-file cases.
+rule value usage, missing Ari value usage, malformed `--rule` usage,
+`--list-rules`, and JSON list-rules CLI cases plus temporary clean,
+trailing-whitespace, missing-final-newline, explicit-config, invalid-config,
+invalid-rule-override, rule-override, discovered-config, and multi-file cases.
 
 It reports signals only:
 
@@ -28,6 +28,7 @@ It reports signals only:
 - unknown-option usage and unknown-argument text sightings
 - missing config value usage and missing-option text sightings
 - invalid config output and config-path text sightings
+- invalid rule override usage and expected-shape text sightings
 - missing rule value usage and missing-option text sightings
 - missing Ari value usage and missing-option text sightings
 - list-rules and JSON list-rules rule-code, default-severity, and
@@ -219,6 +220,31 @@ Follow-up:
 - decide whether standalone invalid-config text should preserve the original
   file/line shape or define a new stable standalone diagnostic contract
 - add strict invalid-config output checks only after that contract is documented
+
+### Invalid Rule Override Usage Text
+
+Current standalone `ari-lint` reports a malformed `--rule` value as
+`invalid --rule override; expected --rule RULE=SEVERITY`. Original
+`tools/lint` reports `invalid rule setting` and the same expected
+`RULE=SEVERITY` shape.
+
+Classification: original `tools/lint` behavior difference and `ari-lint`
+diagnostic/CLI contract follow-up.
+
+Impact:
+
+- exact malformed-rule text equality is not expected yet
+- release compatibility claims must not be made from the current report
+- strict malformed-rule golden checks should wait until the CLI contract is
+  documented
+
+Follow-up:
+
+- decide whether standalone malformed-rule text should preserve the original
+  `invalid rule setting` wording or define a new stable standalone diagnostic
+  contract
+- add strict malformed-rule output checks only after that contract is
+  documented
 
 ### Missing Rule Value Usage Text
 
