@@ -133,6 +133,10 @@ run_stderr_usage_smoke "$invalid_rule_output" "$binary" --rule trailing-whitespa
 require_text_grep "invalid --rule override" "$invalid_rule_output"
 require_text_grep "--rule RULE=SEVERITY" "$invalid_rule_output"
 
+missing_config_output="$tmp_dir/missing-config.stderr"
+run_stderr_usage_smoke "$missing_config_output" "$binary" --config
+require_text_grep "missing option value for --config" "$missing_config_output"
+
 discovery_parent="$tmp_dir/discovery"
 discovery_child="$discovery_parent/child"
 mkdir -p "$discovery_child"

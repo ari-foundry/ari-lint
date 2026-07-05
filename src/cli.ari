@@ -74,6 +74,8 @@ pub struct CliArgs {
 pub struct CliParseResult {
   args: CliArgs,
   problem_count: i64,
+  missing_value_count: i64,
+  first_missing_value_option: Slice[u8],
 }
 
 pub enum CliCommandResultKind {
@@ -240,6 +242,8 @@ pub fn parse_cli_tokens(
   var rule_override_count = 0;
   var rule_override_problem_count = 0;
   var problem_count = 0;
+  var missing_value_count = 0;
+  var first_missing_value_option: Slice[u8] = "";
 
   var index = 0;
   while index < tokens.len() {
@@ -260,6 +264,10 @@ pub fn parse_cli_tokens(
         ari_compiler_path_present = true;
         index = index + 2;
       } else {
+        if missing_value_count == 0 {
+          first_missing_value_option = token_text;
+        }
+        missing_value_count = missing_value_count + 1;
         problem_count = problem_count + 1;
         index = index + 1;
       }
@@ -268,6 +276,10 @@ pub fn parse_cli_tokens(
         include_path_count = include_path_count + 1;
         index = index + 2;
       } else {
+        if missing_value_count == 0 {
+          first_missing_value_option = token_text;
+        }
+        missing_value_count = missing_value_count + 1;
         problem_count = problem_count + 1;
         index = index + 1;
       }
@@ -277,6 +289,10 @@ pub fn parse_cli_tokens(
         config_file_path = tokens.get(index + 1).as_slice();
         index = index + 2;
       } else {
+        if missing_value_count == 0 {
+          first_missing_value_option = token_text;
+        }
+        missing_value_count = missing_value_count + 1;
         problem_count = problem_count + 1;
         index = index + 1;
       }
@@ -292,6 +308,10 @@ pub fn parse_cli_tokens(
           rule_override_problem_count + rule_override_result.problem_count;
         index = index + 2;
       } else {
+        if missing_value_count == 0 {
+          first_missing_value_option = token_text;
+        }
+        missing_value_count = missing_value_count + 1;
         problem_count = problem_count + 1;
         index = index + 1;
       }
@@ -331,6 +351,8 @@ pub fn parse_cli_tokens(
   return CliParseResult {
     args: args,
     problem_count: problem_count,
+    missing_value_count: missing_value_count,
+    first_missing_value_option: first_missing_value_option,
   };
 }
 
@@ -446,7 +468,9 @@ fn write_diagnostics_json_stdout(
 
 fn write_cli_parse_problem_stderr(
   zone: ref mut Zone,
-  rule_override_problem_count: i64
+  rule_override_problem_count: i64,
+  missing_value_count: i64,
+  first_missing_value_option: Slice[u8]
 ) -> bool {
   var text = std::string::from(zone, "ari-lint: invalid command-line arguments\n");
   if rule_override_problem_count > 0 {
@@ -454,6 +478,10 @@ fn write_cli_parse_problem_stderr(
       zone,
       "ari-lint: invalid --rule override; expected --rule RULE=SEVERITY\n"
     );
+  } else if missing_value_count > 0 {
+    text = std::string::from(zone, "ari-lint: missing option value for ");
+    text.append_string_in(zone, first_missing_value_option);
+    text.append_string_in(zone, "\n");
   }
   let write_result = super::output::write_stderr_text(zone, ref text);
   return write_result.wrote_stderr;
@@ -556,7 +584,9 @@ fn dispatch_cli_command_with_main_output(
   if parse_result.problem_count > 0 || parse_result.args.rule_override_problem_count > 0 {
     let wrote_parse_stderr = write_cli_parse_problem_stderr(
       zone,
-      parse_result.args.rule_override_problem_count
+      parse_result.args.rule_override_problem_count,
+      parse_result.missing_value_count,
+      parse_result.first_missing_value_option
     );
     if !wrote_parse_stderr {
       return cli_command_result(
@@ -636,7 +666,9 @@ fn dispatch_cli_command_with_main_output(
       CliParseProblems => {
         let wrote_collection_parse_stderr = write_cli_parse_problem_stderr(
           zone,
-          parse_result.args.rule_override_problem_count
+          parse_result.args.rule_override_problem_count,
+          parse_result.missing_value_count,
+          parse_result.first_missing_value_option
         );
         if !wrote_collection_parse_stderr {
           return cli_command_result(
@@ -1013,9 +1045,10 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // parse_cli_tokens consumes a caller-provided token list and records source
 // counts, first source file path, retained source file paths, flags/options,
 // explicit config path, parsed rule override values, rule override problem
-// count, and parse problem counts in CliParseResult. It intentionally leaves
-// environment handling, path validation, home/global/XDG config discovery,
-// diagnostic printing, and ari --check invocation as future work.
+// count, missing option value details, and parse problem counts in
+// CliParseResult. It intentionally leaves environment handling, path
+// validation, home/global/XDG config discovery, diagnostic printing, and
+// ari --check invocation as future work.
 //
 // parse_cli_rule_overrides converts one raw --rule value into the internal
 // config override count model and parse problem count. Source-file collection
