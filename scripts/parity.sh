@@ -1281,7 +1281,7 @@ printf '%s\n' "- current missing-ari-value usage output reports the missing opti
 printf '%s\n' "- current missing-include-value usage output reports the missing option value; original tools/lint prints generic usage."
 printf '%s\n' "- current list-rules output includes short rule name fields; original tools/lint list-rules output does not."
 printf '%s\n' "- current JSON list-rules output includes short rule name fields; original tools/lint JSON list-rules output does not."
-printf '%s\n' "- current invalid-config output reports invalid command-line arguments; original tools/lint reports the config file line and unknown rule or severity."
+printf '%s\n' "- current invalid-config output reports invalid config file details; original tools/lint reports unknown rule or severity wording."
 printf '%s\n' "- current invalid-rule-override output reports invalid --rule override; original tools/lint reports invalid rule setting."
 printf '%s\n' "- current invalid-rule-severity output reports invalid --rule override; original tools/lint reports invalid rule setting and unknown rule or severity."
 printf '%s\n' "- current unknown-rule-override output reports invalid --rule override; original tools/lint reports invalid rule setting and unknown rule or severity."

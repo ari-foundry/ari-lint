@@ -52,11 +52,17 @@ pub struct ConfigParseProblem {
 pub struct ConfigParseResult {
   override_count: i64,
   problem_count: i64,
+  first_problem_line: i64,
+  first_problem_text: Slice[u8],
+  first_problem_detail: Slice[u8],
 }
 
 pub struct ConfigFileParseResult {
   override_count: i64,
   problem_count: i64,
+  first_problem_line: i64,
+  first_problem_text: Slice[u8],
+  first_problem_detail: Slice[u8],
   read_error_count: i64,
   reads_config_files: bool,
   discovers_config_files: bool,
@@ -171,12 +177,18 @@ fn config_override_from_parts(
 fn config_file_parse_result(
   override_count: i64,
   problem_count: i64,
+  first_problem_line: i64,
+  first_problem_text: Slice[u8],
+  first_problem_detail: Slice[u8],
   read_error_count: i64,
   discovers_config_files: bool
 ) -> ConfigFileParseResult {
   return ConfigFileParseResult {
     override_count: override_count,
     problem_count: problem_count,
+    first_problem_line: first_problem_line,
+    first_problem_text: first_problem_text,
+    first_problem_detail: first_problem_detail,
     read_error_count: read_error_count,
     reads_config_files: true,
     discovers_config_files: discovers_config_files,
@@ -206,6 +218,9 @@ fn parse_config_file_from_source_into(
       return config_file_parse_result(
         parse_result.override_count,
         parse_result.problem_count,
+        parse_result.first_problem_line,
+        parse_result.first_problem_text,
+        parse_result.first_problem_detail,
         0,
         discovers_config_files
       );
@@ -214,6 +229,9 @@ fn parse_config_file_from_source_into(
       return config_file_parse_result(
         0,
         0,
+        0,
+        "",
+        "",
         1,
         discovers_config_files
       );
@@ -456,9 +474,22 @@ fn parse_config_text_from_source_into(
     }
   }
 
+  var first_problem_line = 0;
+  var first_problem_text: Slice[u8] = "";
+  var first_problem_detail: Slice[u8] = "";
+  if problems.len() > 0 {
+    let first_problem = problems.get(0);
+    first_problem_line = first_problem.line;
+    first_problem_text = first_problem.text;
+    first_problem_detail = first_problem.detail;
+  }
+
   return ConfigParseResult {
     override_count: overrides.len() - before_count,
     problem_count: problems.len(),
+    first_problem_line: first_problem_line,
+    first_problem_text: first_problem_text,
+    first_problem_detail: first_problem_detail,
   };
 }
 

@@ -462,6 +462,8 @@ require_grep "write_stdout_text" src/cli.ari
 require_grep "write_diagnostics_stderr" src/cli.ari
 require_grep "write_diagnostics_json_stdout" src/cli.ari
 require_grep "write_cli_parse_problem_stderr" src/cli.ari
+require_grep "write_cli_parse_detail_stderr" src/cli.ari
+require_grep "format_config_parse_problem_stderr" src/cli.ari
 require_grep "write_cli_help_stdout" src/cli.ari
 require_grep "write_missing_source_stderr" src/cli.ari
 require_grep "write_file_read_error_stderr" src/cli.ari
@@ -470,6 +472,7 @@ require_grep "Usage: ari-lint" src/cli.ari
 require_grep "invalid command-line arguments" src/cli.ari
 require_grep "missing source file" src/cli.ari
 require_grep "unable to read source file" src/cli.ari
+require_grep "invalid config file" src/cli.ari
 require_grep "collect_cli_source_diagnostics" src/cli.ari
 require_grep "collect_explicit_cli_diagnostics" src/cli.ari
 require_grep "write_stderr_text" src/output.ari
@@ -834,6 +837,9 @@ require_grep "ConfigSourceMetadata" src/config.ari
 require_grep "OverridePrecedenceMetadata" src/config.ari
 require_grep "ConfigParseResult" src/config.ari
 require_grep "ConfigFileParseResult" src/config.ari
+require_grep "first_problem_line" src/config.ari
+require_grep "first_problem_text" src/config.ari
+require_grep "first_problem_detail" src/config.ari
 require_grep "RuleOverrideParseResult" src/config.ari
 require_grep "RuleSeverityResolution" src/config.ari
 require_grep "DiagnosticSeverityApplication" src/config.ari
