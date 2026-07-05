@@ -103,6 +103,7 @@ require_grep "case: json-list-rules" scripts/parity.sh
 require_grep "case: invalid-config" scripts/parity.sh
 require_grep "case: invalid-rule-override" scripts/parity.sh
 require_grep "case: invalid-rule-severity" scripts/parity.sh
+require_grep "case: unknown-rule-override" scripts/parity.sh
 require_grep "rule-override" scripts/parity.sh
 require_grep "discovered-config" scripts/parity.sh
 require_grep "multi-file" scripts/parity.sh
@@ -116,6 +117,7 @@ require_grep "config_path_in_stderr" scripts/parity.sh
 require_grep "invalid_rule_override_text_in_stderr" scripts/parity.sh
 require_grep "invalid_rule_setting_text_in_stderr" scripts/parity.sh
 require_grep "trailing-whitespace=loud" scripts/parity.sh
+require_grep "unknown-rule=warning" scripts/parity.sh
 require_grep "rule_option_in_stderr" scripts/parity.sh
 require_grep "ari_option_in_stderr" scripts/parity.sh
 require_grep "severity_note_present" scripts/parity.sh
@@ -130,6 +132,7 @@ require_grep "Missing Config Value Usage Text" docs/dev/parity-differences.md
 require_grep "Invalid Config Output Text" docs/dev/parity-differences.md
 require_grep "Invalid Rule Override Usage Text" docs/dev/parity-differences.md
 require_grep "Invalid Rule Severity Usage Text" docs/dev/parity-differences.md
+require_grep "Unknown Rule Override Usage Text" docs/dev/parity-differences.md
 require_grep "Missing Rule Value Usage Text" docs/dev/parity-differences.md
 require_grep "Missing Ari Value Usage Text" docs/dev/parity-differences.md
 require_grep "List Rules Output Detail" docs/dev/parity-differences.md
@@ -144,6 +147,7 @@ require_grep "missing config value usage" scripts/README.md
 require_grep "invalid config" scripts/README.md
 require_grep "invalid rule override" scripts/README.md
 require_grep "invalid rule severity" scripts/README.md
+require_grep "unknown rule override" scripts/README.md
 require_grep "missing rule value usage" scripts/README.md
 require_grep "missing ari value usage" scripts/README.md
 require_grep "JSON list-rules" scripts/README.md
