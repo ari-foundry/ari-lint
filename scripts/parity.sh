@@ -495,7 +495,13 @@ print_list_rules_summary() {
   trailing=$(has_fixed_text "lint/trailing-whitespace" "$stdout_path")
   missing=$(has_fixed_text "lint/missing-final-newline" "$stdout_path")
   default_warning=$(has_fixed_text "default=warning" "$stdout_path")
+  if [ "$default_warning" = "no" ]; then
+    default_warning=$(has_fixed_text '"defaultSeverity":"warning"' "$stdout_path")
+  fi
   short_name_field=$(has_fixed_text "name=trailing-whitespace" "$stdout_path")
+  if [ "$short_name_field" = "no" ]; then
+    short_name_field=$(has_fixed_text '"name":"trailing-whitespace"' "$stdout_path")
+  fi
 
   printf '%s\n' "  $tool_name:"
   printf '%s\n' "    exit_code: $status"
