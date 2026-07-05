@@ -126,16 +126,16 @@ path is not provided, the script verifies the Ari repo `Makefile` lint target
 and `tools/lint/main.cpp`, then uses the existing `build/ari-lint` binary if it
 is executable.
 
-The parity smoke builds this repository with `scripts/build.sh`, creates tiny
-temporary trailing-whitespace, missing-final-newline, clean, config, and
-multi-file fixtures, runs both tools with `--json --ari`, and prints
-stdout/stderr presence, exit codes, basic rule sightings, severity sightings,
-file-path hit counts, and line/column presence. It includes report-only
-coverage for explicit `--config`, CLI `--rule`, discovered `ari-lint.rules`,
-and multi-file invocations. Differences are reported but do not fail the
-script. The script fails only for infrastructure errors such as a missing
-compiler, missing Ari repo, missing original lint command, or local build
-failure.
+The parity smoke builds this repository with `scripts/build.sh`, reports a
+`--list-rules` comparison signal, creates tiny temporary trailing-whitespace,
+missing-final-newline, clean, config, and multi-file fixtures, runs both tools
+with `--json --ari`, and prints stdout/stderr presence, exit codes, basic rule
+sightings, severity sightings, file-path hit counts, and line/column presence.
+It includes report-only coverage for `--list-rules`, explicit `--config`, CLI
+`--rule`, discovered `ari-lint.rules`, and multi-file invocations. Differences
+are reported but do not fail the script. The script fails only for
+infrastructure errors such as a missing compiler, missing Ari repo, missing
+original lint command, or local build failure.
 
 Known differences from the current report-only parity smoke are tracked in
 [docs/dev/parity-differences.md](docs/dev/parity-differences.md). That document

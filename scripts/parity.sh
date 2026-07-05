@@ -112,6 +112,23 @@ run_case_in_dir() {
   printf '%s\n' "$status" > "$status_path"
 }
 
+run_list_rules_in_dir() {
+  work_dir="$1"
+  tool_path="$2"
+  stdout_path="$3"
+  stderr_path="$4"
+  status_path="$5"
+
+  set +e
+  (
+    CDPATH= cd "$work_dir" &&
+      "$tool_path" --list-rules > "$stdout_path" 2> "$stderr_path"
+  )
+  status=$?
+  set -e
+  printf '%s\n' "$status" > "$status_path"
+}
+
 print_case_summary() {
   tool_name="$1"
   case_name="$2"
@@ -155,6 +172,45 @@ print_case_summary() {
   printf '%s\n' "    file_paths_present: $expected_path_hit_count/$expected_path_count"
   printf '%s\n' "    line_present: $line_present"
   printf '%s\n' "    column_present: $column_present"
+}
+
+print_list_rules_summary() {
+  tool_name="$1"
+  stdout_path="$2"
+  stderr_path="$3"
+  status_path="$4"
+
+  status=$(cat "$status_path")
+  trailing=$(has_fixed_text "lint/trailing-whitespace" "$stdout_path")
+  missing=$(has_fixed_text "lint/missing-final-newline" "$stdout_path")
+  default_warning=$(has_fixed_text "default=warning" "$stdout_path")
+  short_name_field=$(has_fixed_text "name=trailing-whitespace" "$stdout_path")
+
+  printf '%s\n' "  $tool_name:"
+  printf '%s\n' "    exit_code: $status"
+  printf '%s\n' "    stdout_non_empty: $(has_text "$stdout_path")"
+  printf '%s\n' "    stderr_non_empty: $(has_text "$stderr_path")"
+  printf '%s\n' "    trailing_whitespace_listed: $trailing"
+  printf '%s\n' "    missing_final_newline_listed: $missing"
+  printf '%s\n' "    default_warning_present: $default_warning"
+  printf '%s\n' "    short_rule_name_field_present: $short_name_field"
+}
+
+report_list_rules_case() {
+  current_stdout="$tmp_dir/current-list-rules.stdout"
+  current_stderr="$tmp_dir/current-list-rules.stderr"
+  current_status="$tmp_dir/current-list-rules.status"
+  original_stdout="$tmp_dir/original-list-rules.stdout"
+  original_stderr="$tmp_dir/original-list-rules.stderr"
+  original_status="$tmp_dir/original-list-rules.status"
+
+  run_list_rules_in_dir "$original_pwd" "$current_lint" "$current_stdout" "$current_stderr" "$current_status"
+  run_list_rules_in_dir "$original_pwd" "$original_lint" "$original_stdout" "$original_stderr" "$original_status"
+
+  printf '%s\n' "case: list-rules"
+  print_list_rules_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status"
+  print_list_rules_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status"
+  printf '%s\n' ""
 }
 
 report_case() {
@@ -262,6 +318,8 @@ printf '%s\n' "ari repo: $ari_repo"
 printf '%s\n' "original entrypoint evidence: Makefile LINT_TARGET plus tools/lint/main.cpp usage"
 printf '%s\n' ""
 
+report_list_rules_case
+
 for case_name in trailing-whitespace missing-final-newline clean; do
   case "$case_name" in
     trailing-whitespace) source_path="$trailing_source" ;;
@@ -282,5 +340,6 @@ printf '%s\n' "known differences:"
 printf '%s\n' "- current Ari-language ari-lint does not invoke ari --check yet; original tools/lint does."
 printf '%s\n' "- current JSON diagnostics are a flat array with filePath/ruleCode fields; original tools/lint emits a files array with path/diagnostics and code/source fields."
 printf '%s\n' "- diagnostic exit codes may differ while this repository has no stable exit-code compatibility claim."
+printf '%s\n' "- current list-rules output includes short rule name fields; original tools/lint list-rules output does not."
 printf '%s\n' ""
 printf '%s\n' "parity result: report-only; differences above do not fail this script."
