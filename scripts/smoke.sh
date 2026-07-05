@@ -165,6 +165,15 @@ require_text_grep "invalid --rule override" "$invalid_rule_output"
 require_text_grep "trailing-whitespace" "$invalid_rule_output"
 require_text_grep "--rule RULE=SEVERITY" "$invalid_rule_output"
 
+invalid_config_file="$tmp_dir/invalid.rules"
+invalid_config_output="$tmp_dir/invalid-config.stderr"
+printf '%s\n' "trailing-whitespace = loud" > "$invalid_config_file"
+run_stderr_usage_smoke "$invalid_config_output" "$binary" --json --config "$invalid_config_file" "$source_file"
+require_text_grep "invalid config file" "$invalid_config_output"
+require_text_grep "$invalid_config_file:1" "$invalid_config_output"
+require_text_grep "trailing-whitespace = loud" "$invalid_config_output"
+require_text_grep "Severity must be off, hint, note, warning, or error." "$invalid_config_output"
+
 missing_config_output="$tmp_dir/missing-config.stderr"
 run_stderr_usage_smoke "$missing_config_output" "$binary" --config
 require_text_grep "missing option value for --config" "$missing_config_output"

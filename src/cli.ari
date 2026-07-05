@@ -525,6 +525,12 @@ fn write_cli_parse_problem_stderr(
   return write_result.wrote_stderr;
 }
 
+fn write_cli_parse_detail_stderr(zone: ref mut Zone, detail: Slice[u8]) -> bool {
+  var text = std::string::from_slice_in(zone, detail);
+  let write_result = super::output::write_stderr_text(zone, ref text);
+  return write_result.wrote_stderr;
+}
+
 fn write_cli_help_stdout(zone: ref mut Zone) -> bool {
   var text = std::string::new(zone, 384);
   text.append_string_in(zone, "Usage: ari-lint [options] <source-file>...\n");
@@ -569,6 +575,30 @@ fn write_config_read_error_stderr(zone: ref mut Zone, path: Slice[u8]) -> bool {
   text.append_string_in(zone, "\n");
   let write_result = super::output::write_stderr_text(zone, ref text);
   return write_result.wrote_stderr;
+}
+
+fn format_config_parse_problem_stderr(
+  zone: ref mut Zone,
+  path: Slice[u8],
+  result: super::config::ConfigFileParseResult
+) -> std::string::String {
+  var text = std::string::new(zone, 192);
+  text.append_string_in(zone, "ari-lint: invalid config file: ");
+  text.append_string_in(zone, path);
+  if result.first_problem_line > 0 {
+    text.append_string_in(zone, ":");
+    text.append_i64_in(zone, result.first_problem_line);
+  }
+  if result.first_problem_text.len() > 0 {
+    text.append_string_in(zone, ": ");
+    text.append_string_in(zone, result.first_problem_text);
+  }
+  if result.first_problem_detail.len() > 0 {
+    text.append_string_in(zone, "; ");
+    text.append_string_in(zone, result.first_problem_detail);
+  }
+  text.append_string_in(zone, "\n");
+  return text;
 }
 
 fn discovered_config_file_name() -> Slice[u8] {
@@ -727,15 +757,23 @@ fn dispatch_cli_command_with_main_output(
     );
     match command_result.kind {
       CliParseProblems => {
-        let wrote_collection_parse_stderr = write_cli_parse_problem_stderr(
-          zone,
-          parse_result.args.rule_override_problem_count,
-          parse_result.args.first_rule_override_problem,
-          parse_result.missing_value_count,
-          parse_result.first_missing_value_option,
-          parse_result.unknown_argument_count,
-          parse_result.first_unknown_argument
-        );
+        var wrote_collection_parse_stderr = false;
+        if command_result.text_available {
+          wrote_collection_parse_stderr = write_cli_parse_detail_stderr(
+            zone,
+            command_result.detail
+          );
+        } else {
+          wrote_collection_parse_stderr = write_cli_parse_problem_stderr(
+            zone,
+            parse_result.args.rule_override_problem_count,
+            parse_result.args.first_rule_override_problem,
+            parse_result.missing_value_count,
+            parse_result.first_missing_value_option,
+            parse_result.unknown_argument_count,
+            parse_result.first_unknown_argument
+          );
+        }
         if !wrote_collection_parse_stderr {
           return cli_command_result(
             CliParseProblems,
@@ -945,13 +983,18 @@ fn collect_cli_source_diagnostics_from_tokens(
         );
       }
       if config_parse_result.problem_count > 0 {
+        let config_problem_text = format_config_parse_problem_stderr(
+          zone,
+          parse_result.args.config_file_path,
+          config_parse_result
+        );
         return cli_command_result(
           CliParseProblems,
-          false,
+          true,
           0,
           0,
           cli_usage_error_exit_code(zone),
-          "Explicit config file parse problems are recorded before source diagnostics are collected."
+          config_problem_text.as_slice()
         );
       }
     } else if discovered_config_present {
@@ -971,13 +1014,18 @@ fn collect_cli_source_diagnostics_from_tokens(
         );
       }
       if discovered_config_parse_result.problem_count > 0 {
+        let discovered_config_problem_text = format_config_parse_problem_stderr(
+          zone,
+          discovered_config_path.as_slice(),
+          discovered_config_parse_result
+        );
         return cli_command_result(
           CliParseProblems,
-          false,
+          true,
           0,
           0,
           cli_usage_error_exit_code(zone),
-          "Discovered config file parse problems are recorded before source diagnostics are collected."
+          discovered_config_problem_text.as_slice()
         );
       }
     }
