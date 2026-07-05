@@ -141,6 +141,10 @@ missing_rule_output="$tmp_dir/missing-rule.stderr"
 run_stderr_usage_smoke "$missing_rule_output" "$binary" --rule
 require_text_grep "missing option value for --rule" "$missing_rule_output"
 
+missing_ari_output="$tmp_dir/missing-ari.stderr"
+run_stderr_usage_smoke "$missing_ari_output" "$binary" --ari
+require_text_grep "missing option value for --ari" "$missing_ari_output"
+
 unknown_argument_output="$tmp_dir/unknown-argument.stderr"
 run_stderr_usage_smoke "$unknown_argument_output" "$binary" --definitely-unknown
 require_text_grep "unknown argument: --definitely-unknown" "$unknown_argument_output"
