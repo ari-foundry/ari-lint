@@ -13,10 +13,9 @@ source.
 
 A first local non-gating parity smoke/report now exists at `scripts/parity.sh`.
 It builds this repository with `scripts/build.sh`, runs both implementations on
-a `--help` CLI case, a `--list-rules` CLI case, and temporary clean,
-trailing-whitespace,
-missing-final-newline, config, and multi-file cases, and prints a concise
-report without failing on behavior differences.
+usage, list-rules, temporary clean, trailing-whitespace, missing-final-newline,
+config, and multi-file cases, and prints a concise report without failing on
+behavior differences.
 
 ## Current Status
 
@@ -200,12 +199,14 @@ Current local report-only flow in `scripts/parity.sh`:
    missing-option text, stdout/stderr, and exit-code signals.
 11. Run a report-only `--list-rules` case and report rule-code,
    default-severity, stdout/stderr, exit-code, and short-name-field signals.
-12. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
+12. Run a report-only `--json --list-rules` case and report rule-code,
+   default-severity, stdout/stderr, exit-code, and short-name-field signals.
+13. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
    explicit-config, discovered-config, and multi-file fixtures.
-13. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
+14. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
    baseline rule, explicit `--config`, command-line `--rule`, discovered
    `ari-lint.rules`, and multi-file cases.
-14. Report exit code, stdout/stderr presence, rule sightings, severity
+15. Report exit code, stdout/stderr presence, rule sightings, severity
    sightings, file-path hit counts, and line/column presence.
 
 The report intentionally does not require exact text equality or exact JSON
@@ -286,6 +287,8 @@ from the other repo if needed.
       smoke/report
 - [x] Add `--list-rules` report-only CLI signals to the local non-gating parity
       smoke/report
+- [x] Add JSON list-rules report-only CLI signals to the local non-gating
+      parity smoke/report
 - [x] Document known report-only parity differences
 - [ ] Add first source-controlled CLI smoke parity fixture
 - [ ] Add first source-controlled rule parity fixture for trailing whitespace
