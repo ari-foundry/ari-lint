@@ -125,7 +125,9 @@ require_grep "./build/ari-lint --json /tmp/.../one.ari /tmp/.../two.ari" README.
 require_grep "--rule trailing-whitespace=note" README.md
 require_grep "--config" scripts/smoke.sh
 require_grep "run_stdout_success_smoke" scripts/smoke.sh
+require_grep "run_stderr_usage_smoke" scripts/smoke.sh
 require_grep "require_text_grep" scripts/smoke.sh
+require_grep "invalid --rule override" src/cli.ari
 require_grep "--rule RULE=SEVERITY" scripts/smoke.sh
 require_grep "--config PATH" src/cli.ari
 require_grep "run_json_diagnostic_smoke" scripts/smoke.sh
@@ -249,7 +251,7 @@ require_grep "explicit Ari compiler path" README.md
 require_grep "Local build via" README.md
 require_grep "Local smoke validation via" README.md
 require_grep "all explicitly provided positional source files" README.md
-require_grep "diagnostic smoke checks assert current" README.md
+require_grep "Focused diagnostic" README.md
 require_grep "local standalone test entrypoint" README.md
 require_grep "relative compiler paths" README.md
 require_grep "docs/migration.md" docs/README.md

@@ -66,6 +66,17 @@ run_json_success_smoke() {
   [ "$status" -eq 0 ] || fail "expected success exit code 0, got $status"
 }
 
+run_stderr_usage_smoke() {
+  output_file="$1"
+  shift
+  printf '%s\n' "smoke.sh: running $*"
+  set +e
+  "$@" > "$tmp_dir/usage.stdout" 2> "$output_file"
+  status=$?
+  set -e
+  [ "$status" -eq 2 ] || fail "expected usage exit code 2, got $status"
+}
+
 require_text_grep() {
   pattern="$1"
   file="$2"
@@ -116,6 +127,11 @@ require_json_grep '"severity":"error"' "$config_output"
 run_json_diagnostic_smoke "$rule_output" "$binary" --json --config "$config_file" --rule trailing-whitespace=note "$source_file"
 require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$rule_output"
 require_json_grep '"severity":"note"' "$rule_output"
+
+invalid_rule_output="$tmp_dir/invalid-rule.stderr"
+run_stderr_usage_smoke "$invalid_rule_output" "$binary" --rule trailing-whitespace "$source_file"
+require_text_grep "invalid --rule override" "$invalid_rule_output"
+require_text_grep "--rule RULE=SEVERITY" "$invalid_rule_output"
 
 discovery_parent="$tmp_dir/discovery"
 discovery_child="$discovery_parent/child"
