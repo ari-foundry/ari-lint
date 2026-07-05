@@ -210,10 +210,13 @@ Current local report-only flow in `scripts/parity.sh`:
 16. Run a report-only invalid `--rule` severity case and report
    invalid-override, invalid-rule-setting, unknown-rule-or-severity,
    stdout/stderr, and exit-code signals.
-17. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
+17. Run a report-only unknown `--rule` rule case and report invalid-override,
+   invalid-rule-setting, unknown-rule-or-severity, stdout/stderr, and
+   exit-code signals.
+18. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
    baseline rule, explicit `--config`, command-line `--rule`, discovered
    `ari-lint.rules`, and multi-file cases.
-18. Report exit code, stdout/stderr presence, rule sightings, severity
+19. Report exit code, stdout/stderr presence, rule sightings, severity
    sightings, file-path hit counts, and line/column presence.
 
 The report intentionally does not require exact text equality or exact JSON

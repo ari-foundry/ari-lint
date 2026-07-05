@@ -15,10 +15,10 @@ matrix, not a parity claim, and not a release policy.
 The local parity report currently compares report-only `--help` and
 no-source-file usage, unknown-option usage, missing config value usage, missing
 rule value usage, missing Ari value usage, malformed `--rule` usage, invalid
-`--rule` severity usage, `--list-rules`, and JSON list-rules CLI cases plus temporary clean,
+`--rule` severity usage, unknown `--rule` rule usage, `--list-rules`, and JSON list-rules CLI cases plus temporary clean,
 trailing-whitespace, missing-final-newline, explicit-config, invalid-config,
-invalid-rule-override, invalid-rule-severity, rule-override,
-discovered-config, and multi-file cases.
+invalid-rule-override, invalid-rule-severity, unknown-rule-override,
+rule-override, discovered-config, and multi-file cases.
 
 It reports signals only:
 
@@ -31,6 +31,7 @@ It reports signals only:
 - invalid config output and config-path text sightings
 - invalid rule override usage and expected-shape text sightings
 - invalid rule severity usage and unknown-rule-or-severity text sightings
+- unknown rule override usage and unknown-rule-or-severity text sightings
 - missing rule value usage and missing-option text sightings
 - missing Ari value usage and missing-option text sightings
 - list-rules and JSON list-rules rule-code, default-severity, and
@@ -270,6 +271,30 @@ Follow-up:
   `unknown rule or severity` wording or define a new stable standalone
   diagnostic contract
 - add strict invalid-severity output checks only after that contract is
+  documented
+
+### Unknown Rule Override Usage Text
+
+Current standalone `ari-lint` reports an unknown `--rule` rule name as
+`invalid --rule override; expected --rule RULE=SEVERITY`. Original
+`tools/lint` reports `invalid rule setting` with `unknown rule or severity`.
+
+Classification: original `tools/lint` behavior difference and `ari-lint`
+diagnostic/CLI contract follow-up.
+
+Impact:
+
+- exact unknown-rule override text equality is not expected yet
+- release compatibility claims must not be made from the current report
+- strict unknown-rule override golden checks should wait until the CLI contract
+  is documented
+
+Follow-up:
+
+- decide whether standalone unknown-rule override text should preserve the
+  original `unknown rule or severity` wording or define a new stable
+  standalone diagnostic contract
+- add strict unknown-rule override output checks only after that contract is
   documented
 
 ### Missing Rule Value Usage Text
