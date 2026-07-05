@@ -40,13 +40,13 @@ and optionally an already-built original lint command path as the third
 argument or through `ORIGINAL_LINT`. It verifies the original lint entrypoint
 from the Ari repo `Makefile` and `tools/lint/main.cpp`, builds this repository
 with `scripts/build.sh`, runs report-only `--help`, unknown-argument usage,
-missing config value usage, missing rule value usage, and `--list-rules` cases,
-runs both tools with `--json --ari` on temporary trailing-whitespace,
-missing-final-newline, clean, explicit-config, rule-override,
-discovered-config, and multi-file cases, and prints a concise report of exit
-codes, stdout/stderr presence, help/usage/list-rules signals, rule sightings,
-severity sightings, file-path hit counts, and line/column presence. Parity
-differences do not fail the script.
+missing config value usage, missing rule value usage, missing ari value usage,
+and `--list-rules` cases, runs both tools with `--json --ari` on temporary
+trailing-whitespace, missing-final-newline, clean, explicit-config,
+rule-override, discovered-config, and multi-file cases, and prints a concise
+report of exit codes, stdout/stderr presence, help/usage/list-rules signals,
+rule sightings, severity sightings, file-path hit counts, and line/column
+presence. Parity differences do not fail the script.
 
 `test.sh` does not download or build the Ari compiler. It does not execute
 `tools/lint`, run `ari --check`, install dependencies, run package manager
