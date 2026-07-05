@@ -16,7 +16,8 @@ The local parity report currently compares report-only `--help` and
 no-source-file usage, unknown-option usage, missing config value usage, missing
 rule value usage, missing Ari value usage, `--list-rules`, and JSON list-rules
 CLI cases plus temporary clean, trailing-whitespace, missing-final-newline,
-explicit-config, rule-override, discovered-config, and multi-file cases.
+explicit-config, invalid-config, rule-override, discovered-config, and
+multi-file cases.
 
 It reports signals only:
 
@@ -26,6 +27,7 @@ It reports signals only:
 - no-source-file usage and missing-source-file text sightings
 - unknown-option usage and unknown-argument text sightings
 - missing config value usage and missing-option text sightings
+- invalid config output and config-path text sightings
 - missing rule value usage and missing-option text sightings
 - missing Ari value usage and missing-option text sightings
 - list-rules and JSON list-rules rule-code, default-severity, and
@@ -195,6 +197,28 @@ Follow-up:
 - decide whether standalone missing-option text should preserve the original
   generic usage shape or define a new stable standalone diagnostic contract
 - add strict usage-error output checks only after that contract is documented
+
+### Invalid Config Output Text
+
+Current standalone `ari-lint` reports an invalid config file as
+`invalid command-line arguments`. Original `tools/lint` reports the config file
+path and line with `unknown rule or severity`.
+
+Classification: original `tools/lint` behavior difference and `ari-lint`
+diagnostic/CLI contract follow-up.
+
+Impact:
+
+- exact invalid-config text equality is not expected yet
+- release compatibility claims must not be made from the current report
+- strict invalid-config golden checks should wait until the CLI contract is
+  documented
+
+Follow-up:
+
+- decide whether standalone invalid-config text should preserve the original
+  file/line shape or define a new stable standalone diagnostic contract
+- add strict invalid-config output checks only after that contract is documented
 
 ### Missing Rule Value Usage Text
 

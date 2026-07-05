@@ -293,6 +293,39 @@ print_case_summary() {
   printf '%s\n' "    column_present: $column_present"
 }
 
+print_invalid_config_summary() {
+  tool_name="$1"
+  stdout_path="$2"
+  stderr_path="$3"
+  status_path="$4"
+  config_path="$5"
+
+  status=$(cat "$status_path")
+  config_diagnostic_stdout=$(has_fixed_text "lint/config" "$stdout_path")
+  invalid_arguments_stdout=$(has_fixed_text "invalid command-line arguments" "$stdout_path")
+  invalid_arguments_stderr=$(has_fixed_text "invalid command-line arguments" "$stderr_path")
+  unknown_rule_or_severity_stdout=$(has_fixed_text "unknown rule or severity" "$stdout_path")
+  unknown_rule_or_severity_stderr=$(has_fixed_text "unknown rule or severity" "$stderr_path")
+  config_path_stdout=$(has_fixed_text "$config_path" "$stdout_path")
+  config_path_stderr=$(has_fixed_text "$config_path" "$stderr_path")
+  config_line_one_stdout=$(has_fixed_text ":1:" "$stdout_path")
+  config_line_one_stderr=$(has_fixed_text ":1:" "$stderr_path")
+
+  printf '%s\n' "  $tool_name:"
+  printf '%s\n' "    exit_code: $status"
+  printf '%s\n' "    stdout_non_empty: $(has_text "$stdout_path")"
+  printf '%s\n' "    stderr_non_empty: $(has_text "$stderr_path")"
+  printf '%s\n' "    config_diagnostic_in_stdout: $config_diagnostic_stdout"
+  printf '%s\n' "    invalid_arguments_text_in_stdout: $invalid_arguments_stdout"
+  printf '%s\n' "    invalid_arguments_text_in_stderr: $invalid_arguments_stderr"
+  printf '%s\n' "    unknown_rule_or_severity_text_in_stdout: $unknown_rule_or_severity_stdout"
+  printf '%s\n' "    unknown_rule_or_severity_text_in_stderr: $unknown_rule_or_severity_stderr"
+  printf '%s\n' "    config_path_in_stdout: $config_path_stdout"
+  printf '%s\n' "    config_path_in_stderr: $config_path_stderr"
+  printf '%s\n' "    config_line_one_in_stdout: $config_line_one_stdout"
+  printf '%s\n' "    config_line_one_in_stderr: $config_line_one_stderr"
+}
+
 print_list_rules_summary() {
   tool_name="$1"
   stdout_path="$2"
@@ -633,6 +666,23 @@ report_case() {
   printf '%s\n' ""
 }
 
+report_invalid_config_case() {
+  current_stdout="$tmp_dir/current-invalid-config.stdout"
+  current_stderr="$tmp_dir/current-invalid-config.stderr"
+  current_status="$tmp_dir/current-invalid-config.status"
+  original_stdout="$tmp_dir/original-invalid-config.stdout"
+  original_stderr="$tmp_dir/original-invalid-config.stderr"
+  original_status="$tmp_dir/original-invalid-config.status"
+
+  run_case_in_dir "$original_pwd" "current ari-lint" "$current_lint" "invalid-config" "$current_stdout" "$current_stderr" "$current_status" --config "$invalid_config_file" "$trailing_source"
+  run_case_in_dir "$original_pwd" "original tools/lint" "$original_lint" "invalid-config" "$original_stdout" "$original_stderr" "$original_status" --config "$invalid_config_file" "$trailing_source"
+
+  printf '%s\n' "case: invalid-config"
+  print_invalid_config_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status" "$invalid_config_file"
+  print_invalid_config_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status" "$invalid_config_file"
+  printf '%s\n' ""
+}
+
 if [ "$#" -gt 3 ]; then
   usage
   exit 1
@@ -670,6 +720,7 @@ trailing_source="$tmp_dir/trailing-whitespace.ari"
 missing_source="$tmp_dir/missing-final-newline.ari"
 clean_source="$tmp_dir/clean.ari"
 explicit_config_file="$tmp_dir/explicit.rules"
+invalid_config_file="$tmp_dir/invalid.rules"
 discovery_parent="$tmp_dir/discovery"
 discovery_child="$discovery_parent/child"
 discovered_source="$discovery_child/discovered.ari"
@@ -691,6 +742,7 @@ printf '%s' "fn main() -> i64 { return 0; }" > "$missing_source"
 } > "$clean_source"
 
 printf '%s\n' "lint/trailing-whitespace = error" > "$explicit_config_file"
+printf '%s\n' "lint/unknown-rule = warning" > "$invalid_config_file"
 
 mkdir -p "$discovery_child"
 printf '%s\n' "lint/trailing-whitespace = note" > "$discovery_parent/ari-lint.rules"
@@ -737,6 +789,7 @@ for case_name in trailing-whitespace missing-final-newline clean; do
 done
 
 report_case "explicit-config" "$original_pwd" "$trailing_source" --config "$explicit_config_file" "$trailing_source"
+report_invalid_config_case
 report_case "rule-override" "$original_pwd" "$trailing_source" --config "$explicit_config_file" --rule trailing-whitespace=note "$trailing_source"
 report_case "discovered-config" "$discovery_parent" "child/discovered.ari" "child/discovered.ari"
 report_case "multi-file" "$original_pwd" "$multi_dirty_one|$multi_dirty_two" "$multi_dirty_one" "$multi_dirty_two"
@@ -753,5 +806,6 @@ printf '%s\n' "- current missing-rule-value usage output reports the missing opt
 printf '%s\n' "- current missing-ari-value usage output reports the missing option value; original tools/lint prints generic usage."
 printf '%s\n' "- current list-rules output includes short rule name fields; original tools/lint list-rules output does not."
 printf '%s\n' "- current JSON list-rules output includes short rule name fields; original tools/lint JSON list-rules output does not."
+printf '%s\n' "- current invalid-config output reports invalid command-line arguments; original tools/lint reports the config file line and unknown rule or severity."
 printf '%s\n' ""
 printf '%s\n' "parity result: report-only; differences above do not fail this script."
