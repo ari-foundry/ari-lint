@@ -735,6 +735,7 @@ require_grep "parse_cli_tokens" src/cli.ari
 require_grep "dispatch_cli_command" src/cli.ari
 require_grep "run_explicit_cli_tokens" src/cli.ari
 require_grep "run_explicit_list_rules_command" src/cli.ari
+require_grep "run_explicit_json_list_rules_command" src/cli.ari
 require_grep "read_os_argv_tokens" src/cli.ari
 require_grep "run_os_argv_cli" src/cli.ari
 require_grep "parse_cli_rule_overrides" src/cli.ari
