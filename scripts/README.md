@@ -39,18 +39,20 @@ Ari compiler path as the first argument or through `ARI_COMPILER`, an
 and optionally an already-built original lint command path as the third
 argument or through `ORIGINAL_LINT`. It verifies the original lint entrypoint
 from the Ari repo `Makefile` and `tools/lint/main.cpp`, builds this repository
-with `scripts/build.sh`, runs report-only `--help`, short-help, no-source-file usage,
-source read-error behavior, unknown-argument usage, missing config value usage,
+with `scripts/build.sh`, runs report-only `--help`, short-help,
+no-source-file usage, source read-error behavior, missing compiler path behavior
+passed through `--ari`, unknown-argument usage, missing config value usage,
 missing rule value usage, missing ari value usage, missing include value usage,
-malformed `--rule` usage, invalid `--rule` severity usage, unknown `--rule`
-rule usage, `--list-rules`, and JSON list-rules cases, runs both tools with
-`--json --ari` on temporary trailing-whitespace, missing-final-newline, clean,
-explicit-config,
+malformed `--rule` usage, invalid `--rule` severity usage, unknown
+`--rule` rule usage, `--list-rules`, and JSON list-rules cases, runs both
+tools with `--json --ari` on temporary trailing-whitespace,
+missing-final-newline, clean, missing-compiler, explicit-config,
 config-read-error, invalid config, invalid rule override, invalid rule severity,
-unknown rule override, rule-override, include-path, discovered-config, and multi-file cases, and prints a concise report of exit
-codes, stdout/stderr presence, help/usage/list-rules signals, rule sightings,
-severity sightings, file-path hit counts, and line/column presence. Parity
-differences do not fail the script.
+unknown rule override, rule-override, include-path, discovered-config, and multi-file cases,
+and prints a concise report of exit codes, stdout/stderr
+presence, help/usage/list-rules signals, compiler-check-failed and missing
+compiler path sightings, rule sightings, severity sightings, file-path hit
+counts, and line/column presence. Parity differences do not fail the script.
 
 `test.sh` does not download or build the Ari compiler. It does not execute
 `tools/lint`, run `ari --check`, install dependencies, run package manager
@@ -72,5 +74,5 @@ and broad golden output coverage remain future smoke coverage.
 `parity.sh` does not add CI wiring, a strict parity gate, golden files,
 source-controlled parity fixtures, new lint semantics, release compatibility
 claims, or copies of `tools/lint`. It fails only for infrastructure errors such
-as a missing compiler, missing Ari repo, missing original lint command, or
-local `ari-lint` build failure.
+as a missing build compiler, missing Ari repo, missing original lint command,
+or local `ari-lint` build failure.

@@ -127,7 +127,8 @@ and `tools/lint/main.cpp`, then uses the existing `build/ari-lint` binary if it
 is executable.
 
 The parity smoke builds this repository with `scripts/build.sh`, reports
-`--help`, `-h`, no-source-file usage, source read-error behavior,
+`--help`, `-h`, no-source-file usage, source read-error behavior, missing
+compiler path behavior passed through `--ari`,
 unknown-option usage, missing config value usage, missing rule value usage,
 missing Ari value usage, missing include value usage, malformed `--rule` usage,
 invalid `--rule` severity usage, unknown `--rule` rule usage, and
@@ -137,7 +138,8 @@ fixtures, runs both tools with `--json --ari`, and prints stdout/stderr
 presence, exit codes, basic rule sightings, severity sightings, file-path hit
 counts, and line/column presence. It includes report-only coverage for `--help`,
 `-h`, no source file, missing source read errors, an unknown option, missing
-`--config` value, missing `--rule` value, missing `--ari` value, missing `-I`
+compiler path behavior passed through `--ari`, missing `--config` value,
+missing `--rule` value, missing `--ari` value, missing `-I`
 value, `--list-rules`, `--json --list-rules`, explicit `--config`, invalid
 `--config`, missing config file read errors, malformed `--rule`, invalid
 `--rule` severity, unknown `--rule` rule, CLI `--rule`, include-path `-I`,

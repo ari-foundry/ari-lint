@@ -13,14 +13,15 @@ matrix, not a parity claim, and not a release policy.
 ## Current Report Scope
 
 The local parity report currently compares report-only `--help`, `-h`, and
-no-source-file usage, source read-error behavior, unknown-option usage, missing
-config value usage, missing rule value usage, missing Ari value usage, missing
-include value usage, malformed `--rule` usage, invalid `--rule` severity usage,
-unknown `--rule` rule usage, `--list-rules`, and JSON list-rules CLI cases plus
-temporary clean, trailing-whitespace, missing-final-newline, explicit-config,
-config-read-error, invalid-config, invalid-rule-override, invalid-rule-severity,
-unknown-rule-override, rule-override, include-path, discovered-config, and
-multi-file cases.
+no-source-file usage, source read-error behavior, missing compiler path
+behavior passed through `--ari`, unknown-option usage, missing config value
+usage, missing rule value usage, missing Ari value usage, missing include value
+usage, malformed `--rule` usage, invalid `--rule` severity usage, unknown
+`--rule` rule usage, `--list-rules`, and JSON list-rules CLI cases plus
+temporary clean, trailing-whitespace, missing-final-newline, missing-compiler,
+explicit-config, config-read-error, invalid-config, invalid-rule-override,
+invalid-rule-severity, unknown-rule-override, rule-override, include-path,
+discovered-config, and multi-file cases.
 
 It reports signals only:
 
@@ -29,6 +30,8 @@ It reports signals only:
 - help and short-help usage-option sightings
 - no-source-file usage and missing-source-file text sightings
 - source read-error text, compiler-diagnostic, JSON-shape, and path sightings
+- missing compiler compiler-check-failed, JSON-shape, source-path, and
+  compiler-path sightings
 - unknown-option usage and unknown-argument text sightings
 - missing config value usage and missing-option text sightings
 - config read-error text and config-path sightings
@@ -73,6 +76,31 @@ Follow-up:
 - add compiler invocation only after the documented provisioning and invocation
   policy is ready
 - do not hide compiler, standard library, or toolchain bugs in `ari-lint`
+
+### Missing Compiler Invocation Output
+
+Current standalone `ari-lint`, when run with `--json --ari` pointing at a
+missing compiler and a clean source file, reports clean lint results because
+compiler-backed `ari --check` invocation is not implemented yet. Original
+`tools/lint` invokes that compiler boundary and emits
+`ari/compiler-check-failed` JSON on stdout with the missing compiler path.
+
+Classification: expected known difference and `ari-lint` compiler-boundary
+implementation/design follow-up. No Ari language/compiler/stdlib/toolchain bug
+is identified by this report-only case.
+
+Impact:
+
+- exact missing-compiler output and exit-code parity are not expected yet
+- current standalone missing-compiler JSON output is not defined
+- release compatibility claims must not be made from the current report
+
+Follow-up:
+
+- decide the standalone compiler invocation contract before strict parity
+  fixtures
+- add strict missing-compiler checks only after compiler provisioning and
+  invocation behavior are documented and implemented
 
 ### JSON Diagnostic Shape
 
