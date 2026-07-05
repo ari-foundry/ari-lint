@@ -33,6 +33,17 @@ run_smoke() {
   "$@"
 }
 
+run_stdout_success_smoke() {
+  output_file="$1"
+  shift
+  printf '%s\n' "smoke.sh: running $*"
+  set +e
+  "$@" > "$output_file"
+  status=$?
+  set -e
+  [ "$status" -eq 0 ] || fail "expected success exit code 0, got $status"
+}
+
 run_json_diagnostic_smoke() {
   output_file="$1"
   shift
@@ -55,6 +66,12 @@ run_json_success_smoke() {
   [ "$status" -eq 0 ] || fail "expected success exit code 0, got $status"
 }
 
+require_text_grep() {
+  pattern="$1"
+  file="$2"
+  grep -F -q -- "$pattern" "$file" || fail "missing expected text in $file: $pattern"
+}
+
 require_json_grep() {
   pattern="$1"
   file="$2"
@@ -69,7 +86,15 @@ require_json_no_grep() {
   fi
 }
 
-run_smoke "$binary" --help
+help_output="$tmp_dir/help.out"
+run_stdout_success_smoke "$help_output" "$binary" --help
+require_text_grep "Usage: ari-lint" "$help_output"
+require_text_grep "--help" "$help_output"
+require_text_grep "--list-rules" "$help_output"
+require_text_grep "--json" "$help_output"
+require_text_grep "--config PATH" "$help_output"
+require_text_grep "--rule RULE=SEVERITY" "$help_output"
+
 run_smoke "$binary" --list-rules
 run_smoke "$binary" --json --list-rules
 

@@ -170,8 +170,9 @@ succeeds, it runs these current safe CLI invocations:
 ./build/ari-lint --json /tmp/.../one.ari /tmp/.../two.ari
 ```
 
-These checks verify only that the local binary builds and the supported smoke
-commands execute. They do not add golden output tests, parity checks,
+These checks verify only that the local binary builds, that the supported smoke
+commands execute, and that `--help` names the current supported option set. They
+do not add golden output tests, parity checks,
 compiler-backed CI, home/global/XDG config search, new lint semantics, or
 compatibility claims. The config smoke uses explicit temporary files and a
 temporary nested working directory containing `ari-lint.rules`; it checks only
