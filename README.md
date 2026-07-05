@@ -189,8 +189,10 @@ succeeds, it runs these current safe CLI invocations:
 ```
 
 These checks verify only that the local binary builds, that the supported smoke
-commands execute, and that `--help` names the current supported option set. They
-do not add golden output tests, parity checks,
+commands execute, that `--help` names the current supported option set, and that
+`--list-rules` and `--json --list-rules` include the current rule-code,
+short-name, and default-severity signals. They do not add golden output tests,
+parity checks,
 compiler-backed CI, home/global/XDG config search, new lint semantics, or
 compatibility claims. The config smoke uses explicit temporary files and a
 temporary nested working directory containing `ari-lint.rules`; it checks only
@@ -203,5 +205,5 @@ smoke checks assert current `ruleCode`, `severity`, `message`, `filePath`,
 `line`, and `column` fields for `lint/trailing-whitespace` and
 `lint/missing-final-newline`, plus
 multi-file JSON diagnostics, a clean plus
-dirty invocation, and a clean plus clean invocation. JSON list-rules output
-assertions and broader golden output coverage remain future smoke coverage.
+dirty invocation, and a clean plus clean invocation. Broader golden output
+coverage remains future smoke coverage.

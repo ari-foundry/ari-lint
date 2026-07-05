@@ -745,8 +745,9 @@ and test work.
       tests, parity checks, compiler-backed CI, new lint semantics, or
       compatibility claims. Later smoke coverage added config override,
       parent discovery, multi-file JSON, and focused diagnostic field checks.
-      JSON list-rules output assertions and broader golden output coverage
-      remain future smoke coverage.
+      Later smoke coverage also added focused list-rules output assertions for
+      rule-code, short-name, and default-severity signals;
+      broader golden output coverage remains future smoke coverage.
 - [x] Add minimal config override smoke coverage in `scripts/smoke.sh` using
       temporary files and simple JSON rule-code/severity checks for explicit
       `--config` severity and CLI `--rule` precedence, without adding golden

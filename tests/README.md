@@ -115,9 +115,9 @@ path for build, supported CLI commands, source-file JSON diagnostics, explicit
 config, discovered `ari-lint.rules`, nearest discovered config precedence, and
 CLI severity override precedence across explicit source files. It does not
 compare golden output, run a parity runner, search home/global/XDG config
-locations, add new lint semantics, or claim compatibility. JSON list-rules
-output assertions and broader golden output coverage remain future smoke
-coverage.
+locations, add new lint semantics, or claim compatibility. It now checks
+focused JSON list-rules rule-code, short-name, and default-severity output
+signals; broader golden output coverage remains future smoke coverage.
 
 `scripts/parity.sh` is the local report-only parity smoke/report. It accepts an
 explicit Ari compiler path or `ARI_COMPILER`, an Ari repo path or `ARI_REPO`,

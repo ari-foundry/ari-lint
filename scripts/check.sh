@@ -214,6 +214,8 @@ require_grep "--config" scripts/smoke.sh
 require_grep "run_stdout_success_smoke" scripts/smoke.sh
 require_grep "run_stderr_usage_smoke" scripts/smoke.sh
 require_grep "require_text_grep" scripts/smoke.sh
+require_grep "list_rules_output" scripts/smoke.sh
+require_grep "json_list_rules_output" scripts/smoke.sh
 require_grep "invalid --rule override" src/cli.ari
 require_grep "missing option value for" src/cli.ari
 require_grep "unknown argument:" src/cli.ari
@@ -258,6 +260,7 @@ require_grep "current-directory config discovery added" docs/dev/roadmap.md
 require_grep "parent-directory config discovery added" docs/dev/roadmap.md
 require_grep "multi-file source linting added" docs/dev/roadmap.md
 require_grep "focused diagnostic field smoke coverage added" docs/dev/roadmap.md
+require_grep "focused list-rules output assertions" docs/dev/roadmap.md
 require_grep "scripts/smoke.sh" tests/README.md
 
 require_grep "repo_root" scripts/test.sh

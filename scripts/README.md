@@ -68,12 +68,14 @@ commands, run parity checks, or participate in CI yet.
 `smoke.sh` does not add golden output tests, a parity runner, compiler-backed
 CI, home/global/XDG config search, new lint semantics, or compatibility claims.
 It checks that `--help` names the current supported option set, checks focused
+`--list-rules` and `--json --list-rules` rule-code, short-name, and
+default-severity output signals, checks focused
 usage-error summaries for malformed `--rule` text and missing `--config` or
 `--rule` values, parser-only missing `--ari` values, plus one unknown option,
 checks that explicit config and CLI `--rule` `off` suppress diagnostics, and
 checks only the current JSON rule code, severity, message, file path, line, and
-column fields for temporary diagnostics. JSON list-rules output assertions and
-broad golden output coverage remain future smoke coverage.
+column fields for temporary diagnostics. Broad golden output coverage remains
+future smoke coverage.
 
 `parity.sh` does not add CI wiring, a strict parity gate, golden files,
 source-controlled parity fixtures, new lint semantics, release compatibility
