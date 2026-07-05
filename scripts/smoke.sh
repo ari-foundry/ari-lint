@@ -106,8 +106,21 @@ require_text_grep "--json" "$help_output"
 require_text_grep "--config PATH" "$help_output"
 require_text_grep "--rule RULE=SEVERITY" "$help_output"
 
-run_smoke "$binary" --list-rules
-run_smoke "$binary" --json --list-rules
+list_rules_output="$tmp_dir/list-rules.out"
+run_stdout_success_smoke "$list_rules_output" "$binary" --list-rules
+require_text_grep "lint/trailing-whitespace" "$list_rules_output"
+require_text_grep "name=trailing-whitespace" "$list_rules_output"
+require_text_grep "lint/missing-final-newline" "$list_rules_output"
+require_text_grep "name=missing-final-newline" "$list_rules_output"
+require_text_grep "default=warning" "$list_rules_output"
+
+json_list_rules_output="$tmp_dir/json-list-rules.out"
+run_stdout_success_smoke "$json_list_rules_output" "$binary" --json --list-rules
+require_text_grep "lint/trailing-whitespace" "$json_list_rules_output"
+require_text_grep "name=trailing-whitespace" "$json_list_rules_output"
+require_text_grep "lint/missing-final-newline" "$json_list_rules_output"
+require_text_grep "name=missing-final-newline" "$json_list_rules_output"
+require_text_grep "default=warning" "$json_list_rules_output"
 
 config_file="$tmp_dir/explicit.rules"
 source_file="$tmp_dir/trailing.ari"

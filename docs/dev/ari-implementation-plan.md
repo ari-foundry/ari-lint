@@ -295,6 +295,8 @@ It does not move `tools/lint` or change build behavior.
   `ARI_COMPILER`, delegates build behavior to `scripts/build.sh`, and then runs
   `./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
   `./build/ari-lint --json --list-rules`. It also uses temporary files to run
+  focused list-rules output assertions for rule-code, short-name, and
+  default-severity signals, plus
   explicit `--config` JSON smoke checks for trailing-whitespace severity, CLI
   `--rule` precedence, parent-directory config discovery for `ari-lint.rules`,
   nearest discovered config precedence, and explicit `--config` precedence over
@@ -303,8 +305,8 @@ It does not move `tools/lint` or change build behavior.
   for `lint/trailing-whitespace` and `lint/missing-final-newline`, and the
   smoke path also checks multi-file JSON diagnostics. It does not add golden
   output tests, parity checks, compiler-backed CI, home/global/XDG config
-  search, new lint semantics, or compatibility claims. JSON list-rules output
-  assertions and broader golden output coverage remain future smoke coverage.
+  search, new lint semantics, or compatibility claims. Broader golden output
+  coverage remains future smoke coverage.
 - A local parity smoke/report script now exists at `scripts/parity.sh`. It
   accepts an explicit Ari compiler path or `ARI_COMPILER`, an Ari repository
   path or `ARI_REPO`, and optionally an existing original lint command path or
