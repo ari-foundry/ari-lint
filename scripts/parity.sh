@@ -180,6 +180,23 @@ run_missing_config_value_in_dir() {
   printf '%s\n' "$status" > "$status_path"
 }
 
+run_missing_rule_value_in_dir() {
+  work_dir="$1"
+  tool_path="$2"
+  stdout_path="$3"
+  stderr_path="$4"
+  status_path="$5"
+
+  set +e
+  (
+    CDPATH= cd "$work_dir" &&
+      "$tool_path" --rule > "$stdout_path" 2> "$stderr_path"
+  )
+  status=$?
+  set -e
+  printf '%s\n' "$status" > "$status_path"
+}
+
 print_case_summary() {
   tool_name="$1"
   case_name="$2"
@@ -329,6 +346,32 @@ print_missing_config_value_summary() {
   printf '%s\n' "    config_option_in_stderr: $config_option_stderr"
 }
 
+print_missing_rule_value_summary() {
+  tool_name="$1"
+  stdout_path="$2"
+  stderr_path="$3"
+  status_path="$4"
+
+  status=$(cat "$status_path")
+  usage_stdout=$(has_fixed_text "ari-lint" "$stdout_path")
+  usage_stderr=$(has_fixed_text "ari-lint" "$stderr_path")
+  missing_text_stdout=$(has_fixed_text "missing option value" "$stdout_path")
+  missing_text_stderr=$(has_fixed_text "missing option value" "$stderr_path")
+  rule_option_stdout=$(has_fixed_text "--rule" "$stdout_path")
+  rule_option_stderr=$(has_fixed_text "--rule" "$stderr_path")
+
+  printf '%s\n' "  $tool_name:"
+  printf '%s\n' "    exit_code: $status"
+  printf '%s\n' "    stdout_non_empty: $(has_text "$stdout_path")"
+  printf '%s\n' "    stderr_non_empty: $(has_text "$stderr_path")"
+  printf '%s\n' "    usage_in_stdout: $usage_stdout"
+  printf '%s\n' "    usage_in_stderr: $usage_stderr"
+  printf '%s\n' "    missing_option_value_text_in_stdout: $missing_text_stdout"
+  printf '%s\n' "    missing_option_value_text_in_stderr: $missing_text_stderr"
+  printf '%s\n' "    rule_option_in_stdout: $rule_option_stdout"
+  printf '%s\n' "    rule_option_in_stderr: $rule_option_stderr"
+}
+
 report_help_case() {
   current_stdout="$tmp_dir/current-help.stdout"
   current_stderr="$tmp_dir/current-help.stderr"
@@ -377,6 +420,23 @@ report_missing_config_value_case() {
   printf '%s\n' "case: missing-config-value"
   print_missing_config_value_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status"
   print_missing_config_value_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status"
+  printf '%s\n' ""
+}
+
+report_missing_rule_value_case() {
+  current_stdout="$tmp_dir/current-missing-rule-value.stdout"
+  current_stderr="$tmp_dir/current-missing-rule-value.stderr"
+  current_status="$tmp_dir/current-missing-rule-value.status"
+  original_stdout="$tmp_dir/original-missing-rule-value.stdout"
+  original_stderr="$tmp_dir/original-missing-rule-value.stderr"
+  original_status="$tmp_dir/original-missing-rule-value.status"
+
+  run_missing_rule_value_in_dir "$original_pwd" "$current_lint" "$current_stdout" "$current_stderr" "$current_status"
+  run_missing_rule_value_in_dir "$original_pwd" "$original_lint" "$original_stdout" "$original_stderr" "$original_status"
+
+  printf '%s\n' "case: missing-rule-value"
+  print_missing_rule_value_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status"
+  print_missing_rule_value_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status"
   printf '%s\n' ""
 }
 
@@ -505,6 +565,7 @@ printf '%s\n' ""
 report_help_case
 report_unknown_argument_case
 report_missing_config_value_case
+report_missing_rule_value_case
 report_list_rules_case
 
 for case_name in trailing-whitespace missing-final-newline clean; do
@@ -530,6 +591,7 @@ printf '%s\n' "- diagnostic exit codes may differ while this repository has no s
 printf '%s\n' "- current help output is multi-line stdout text; original tools/lint help is a one-line stderr usage."
 printf '%s\n' "- current unknown-option usage output reports the first unknown argument; original tools/lint prints generic usage."
 printf '%s\n' "- current missing-config-value usage output reports the missing option value; original tools/lint prints generic usage."
+printf '%s\n' "- current missing-rule-value usage output reports the missing option value; original tools/lint prints generic usage."
 printf '%s\n' "- current list-rules output includes short rule name fields; original tools/lint list-rules output does not."
 printf '%s\n' ""
 printf '%s\n' "parity result: report-only; differences above do not fail this script."
