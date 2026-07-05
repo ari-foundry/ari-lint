@@ -93,6 +93,7 @@ require_no_grep "arix" .github/workflows/check.yml
 
 require_grep "explicit-config" scripts/parity.sh
 require_grep "case: help" scripts/parity.sh
+require_grep "case: no-source-file" scripts/parity.sh
 require_grep "case: unknown-argument" scripts/parity.sh
 require_grep "case: missing-config-value" scripts/parity.sh
 require_grep "case: missing-rule-value" scripts/parity.sh
@@ -102,6 +103,8 @@ require_grep "rule-override" scripts/parity.sh
 require_grep "discovered-config" scripts/parity.sh
 require_grep "multi-file" scripts/parity.sh
 require_grep "file_paths_present" scripts/parity.sh
+require_grep "source_file_text_in_stderr" scripts/parity.sh
+require_grep "file_operand_in_stderr" scripts/parity.sh
 require_grep "unknown_argument_text_in_stderr" scripts/parity.sh
 require_grep "missing_option_value_text_in_stderr" scripts/parity.sh
 require_grep "rule_option_in_stderr" scripts/parity.sh
@@ -112,6 +115,7 @@ require_grep "Compiler Check Boundary" docs/dev/parity-differences.md
 require_grep "JSON Diagnostic Shape" docs/dev/parity-differences.md
 require_grep "Diagnostic Exit Status" docs/dev/parity-differences.md
 require_grep "Help Output Stream And Shape" docs/dev/parity-differences.md
+require_grep "No Source File Usage Text" docs/dev/parity-differences.md
 require_grep "Unknown Option Usage Text" docs/dev/parity-differences.md
 require_grep "Missing Config Value Usage Text" docs/dev/parity-differences.md
 require_grep "Missing Rule Value Usage Text" docs/dev/parity-differences.md
@@ -122,6 +126,7 @@ require_grep "docs/dev/parity-differences.md" docs/dev/parity-test-plan.md
 require_grep "docs/dev/parity-differences.md" tests/README.md
 require_grep "report-only config, .--rule., discovered config" docs/dev/ari-implementation-plan.md
 require_grep "explicit .--config." docs/dev/parity-test-plan.md
+require_grep "no-source-file usage" scripts/README.md
 require_grep "unknown-argument usage" scripts/README.md
 require_grep "missing config value usage" scripts/README.md
 require_grep "missing rule value usage" scripts/README.md

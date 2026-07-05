@@ -188,22 +188,24 @@ Current local report-only flow in `scripts/parity.sh`:
 4. Build this repository's current `ari-lint` with `scripts/build.sh`.
 5. Run a report-only `--help` case and report usage-option, stdout/stderr, and
    exit-code signals.
-6. Run a report-only unknown-option usage case and report usage text,
+6. Run a report-only no-source-file usage case and report usage text,
+   missing-source-file text, stdout/stderr, and exit-code signals.
+7. Run a report-only unknown-option usage case and report usage text,
    unknown-argument text, stdout/stderr, and exit-code signals.
-7. Run a report-only missing `--config` value case and report usage text,
+8. Run a report-only missing `--config` value case and report usage text,
    missing-option text, stdout/stderr, and exit-code signals.
-8. Run a report-only missing `--rule` value case and report usage text,
+9. Run a report-only missing `--rule` value case and report usage text,
    missing-option text, stdout/stderr, and exit-code signals.
-9. Run a report-only missing `--ari` value case and report usage text,
+10. Run a report-only missing `--ari` value case and report usage text,
    missing-option text, stdout/stderr, and exit-code signals.
-10. Run a report-only `--list-rules` case and report rule-code,
+11. Run a report-only `--list-rules` case and report rule-code,
    default-severity, stdout/stderr, exit-code, and short-name-field signals.
-11. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
+12. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
    explicit-config, discovered-config, and multi-file fixtures.
-12. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
+13. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
    baseline rule, explicit `--config`, command-line `--rule`, discovered
    `ari-lint.rules`, and multi-file cases.
-13. Report exit code, stdout/stderr presence, rule sightings, severity
+14. Report exit code, stdout/stderr presence, rule sightings, severity
    sightings, file-path hit counts, and line/column presence.
 
 The report intentionally does not require exact text equality or exact JSON
