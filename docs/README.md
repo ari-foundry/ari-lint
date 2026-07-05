@@ -27,6 +27,8 @@ Future parity testing against the current bundled/reference `tools/lint`
 behavior is planned in
 [docs/dev/parity-test-plan.md](dev/parity-test-plan.md). Parity tests do not
 exist in this repository yet.
+Known parity differences from the current report-only local smoke are tracked
+in [docs/dev/parity-differences.md](dev/parity-differences.md).
 
 Future Ari compiler provisioning for compiler-backed tests and boundary
 behavior is planned in

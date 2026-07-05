@@ -137,6 +137,10 @@ script. The script fails only for infrastructure errors such as a missing
 compiler, missing Ari repo, missing original lint command, or local build
 failure.
 
+Known differences from the current report-only parity smoke are tracked in
+[docs/dev/parity-differences.md](docs/dev/parity-differences.md). That document
+does not establish stable parity or release compatibility.
+
 ## Local Smoke Validation
 
 Run the local build plus minimal CLI smoke checks with an explicit Ari compiler

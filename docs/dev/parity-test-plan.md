@@ -39,6 +39,8 @@ differences.
 - `scripts/parity.sh` is local-only and report-only. It is not wired into
   `scripts/test.sh` or CI, does not add source-controlled fixtures or golden
   files, and does not claim parity.
+- Known differences from the current report-only smoke are tracked in
+  `docs/dev/parity-differences.md`.
 
 ## Reference Implementation
 
@@ -194,6 +196,10 @@ Current local report-only flow in `scripts/parity.sh`:
 The report intentionally does not require exact text equality or exact JSON
 equality yet.
 
+Known current differences are documented in
+`docs/dev/parity-differences.md`. That document records report-only differences
+without making them gating, stable, or release-compatible behavior.
+
 Future comparison flow:
 
 1. Run current reference `tools/lint` or built `ari-lint` from
@@ -261,6 +267,7 @@ from the other repo if needed.
       trailing-whitespace, and missing-final-newline fixtures
 - [x] Expand the local non-gating parity smoke/report with explicit `--config`,
       command-line `--rule`, discovered `ari-lint.rules`, and multi-file cases
+- [x] Document known report-only parity differences
 - [ ] Add first source-controlled CLI smoke parity fixture
 - [ ] Add first source-controlled rule parity fixture for trailing whitespace
 - [ ] Add first source-controlled rule parity fixture for missing final newline

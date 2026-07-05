@@ -95,6 +95,7 @@ multi-file source linting added /
 focused diagnostic field smoke coverage added /
 local parity smoke/report added /
 local parity smoke/report config and multi-file cases added /
+known parity differences documented /
 no stable JSON schema or broad JSON output suite yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -727,6 +728,10 @@ and test work.
       `Makefile` and `tools/lint/main.cpp`, compares temporary rule, config,
       and multi-file cases, and keeps differences non-gating without adding CI
       parity jobs or compatibility claims.
+- [x] Document known report-only parity differences in
+      `docs/dev/parity-differences.md`, including the compiler-check boundary,
+      JSON shape, and diagnostic exit-code differences, without making a stable
+      parity or compatibility claim.
 - [x] Record compiler-backed CI gate; `.github/workflows/check.yml` remains
       lightweight and compiler-free until standalone tests and explicit Ari
       compiler provisioning exist.
