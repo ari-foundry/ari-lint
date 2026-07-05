@@ -41,10 +41,11 @@ argument or through `ORIGINAL_LINT`. It verifies the original lint entrypoint
 from the Ari repo `Makefile` and `tools/lint/main.cpp`, builds this repository
 with `scripts/build.sh`, runs report-only `--help`, no-source-file usage,
 unknown-argument usage, missing config value usage, missing rule value usage,
-missing ari value usage, `--list-rules`, and JSON list-rules cases, runs both
-tools with `--json --ari` on temporary trailing-whitespace,
-missing-final-newline, clean, explicit-config, invalid config, rule-override,
-discovered-config, and multi-file cases, and prints a concise report of exit
+missing ari value usage, malformed `--rule` usage, `--list-rules`, and JSON
+list-rules cases, runs both tools with `--json --ari` on temporary
+trailing-whitespace, missing-final-newline, clean, explicit-config,
+invalid config, invalid rule override, rule-override, discovered-config, and multi-file cases,
+and prints a concise report of exit
 codes, stdout/stderr presence, help/usage/list-rules signals, rule sightings,
 severity sightings, file-path hit counts, and line/column presence. Parity
 differences do not fail the script.
