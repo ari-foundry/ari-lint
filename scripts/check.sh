@@ -124,6 +124,9 @@ require_grep "./build/ari-lint --json --config" README.md
 require_grep "./build/ari-lint --json /tmp/.../one.ari /tmp/.../two.ari" README.md
 require_grep "--rule trailing-whitespace=note" README.md
 require_grep "--config" scripts/smoke.sh
+require_grep "run_stdout_success_smoke" scripts/smoke.sh
+require_grep "require_text_grep" scripts/smoke.sh
+require_grep "--rule RULE=SEVERITY" scripts/smoke.sh
 require_grep "--config PATH" src/cli.ari
 require_grep "run_json_diagnostic_smoke" scripts/smoke.sh
 require_grep "run_json_success_smoke" scripts/smoke.sh
