@@ -129,9 +129,11 @@ require_grep "run_stderr_usage_smoke" scripts/smoke.sh
 require_grep "require_text_grep" scripts/smoke.sh
 require_grep "invalid --rule override" src/cli.ari
 require_grep "missing option value for" src/cli.ari
+require_grep "unknown argument:" src/cli.ari
 require_grep "--rule RULE=SEVERITY" scripts/smoke.sh
 require_grep "missing option value for --config" scripts/smoke.sh
 require_grep "missing option value for --rule" scripts/smoke.sh
+require_grep "unknown argument: --definitely-unknown" scripts/smoke.sh
 require_grep "--config PATH" src/cli.ari
 require_grep "run_json_diagnostic_smoke" scripts/smoke.sh
 require_grep "run_json_success_smoke" scripts/smoke.sh
