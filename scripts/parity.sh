@@ -163,6 +163,23 @@ run_help_in_dir() {
   printf '%s\n' "$status" > "$status_path"
 }
 
+run_short_help_in_dir() {
+  work_dir="$1"
+  tool_path="$2"
+  stdout_path="$3"
+  stderr_path="$4"
+  status_path="$5"
+
+  set +e
+  (
+    CDPATH= cd "$work_dir" &&
+      "$tool_path" -h > "$stdout_path" 2> "$stderr_path"
+  )
+  status=$?
+  set -e
+  printf '%s\n' "$status" > "$status_path"
+}
+
 run_no_source_file_in_dir() {
   work_dir="$1"
   tool_path="$2"
@@ -666,6 +683,23 @@ report_help_case() {
   printf '%s\n' ""
 }
 
+report_short_help_case() {
+  current_stdout="$tmp_dir/current-short-help.stdout"
+  current_stderr="$tmp_dir/current-short-help.stderr"
+  current_status="$tmp_dir/current-short-help.status"
+  original_stdout="$tmp_dir/original-short-help.stdout"
+  original_stderr="$tmp_dir/original-short-help.stderr"
+  original_status="$tmp_dir/original-short-help.status"
+
+  run_short_help_in_dir "$original_pwd" "$current_lint" "$current_stdout" "$current_stderr" "$current_status"
+  run_short_help_in_dir "$original_pwd" "$original_lint" "$original_stdout" "$original_stderr" "$original_status"
+
+  printf '%s\n' "case: short-help"
+  print_help_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status"
+  print_help_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status"
+  printf '%s\n' ""
+}
+
 report_no_source_file_case() {
   current_stdout="$tmp_dir/current-no-source-file.stdout"
   current_stderr="$tmp_dir/current-no-source-file.stderr"
@@ -978,6 +1012,7 @@ printf '%s\n' "original entrypoint evidence: Makefile LINT_TARGET plus tools/lin
 printf '%s\n' ""
 
 report_help_case
+report_short_help_case
 report_no_source_file_case
 report_unknown_argument_case
 report_missing_config_value_case

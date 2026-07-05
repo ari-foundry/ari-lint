@@ -12,7 +12,7 @@ matrix, not a parity claim, and not a release policy.
 
 ## Current Report Scope
 
-The local parity report currently compares report-only `--help` and
+The local parity report currently compares report-only `--help`, `-h`, and
 no-source-file usage, unknown-option usage, missing config value usage, missing
 rule value usage, missing Ari value usage, missing include value usage,
 malformed `--rule` usage, invalid `--rule` severity usage, unknown `--rule`
@@ -25,7 +25,7 @@ It reports signals only:
 
 - exit code
 - stdout and stderr presence
-- help usage-option sightings
+- help and short-help usage-option sightings
 - no-source-file usage and missing-source-file text sightings
 - unknown-option usage and unknown-argument text sightings
 - missing config value usage and missing-option text sightings
@@ -120,8 +120,9 @@ Follow-up:
 
 ### Help Output Stream And Shape
 
-Current standalone `ari-lint --help` emits multi-line help text on stdout.
-Original `tools/lint --help` emits a one-line usage message on stderr.
+Current standalone `ari-lint --help` and `ari-lint -h` emit multi-line help
+text on stdout. Original `tools/lint --help` and `tools/lint -h` emit a
+one-line usage message on stderr.
 
 Classification: original `tools/lint` behavior difference and `ari-lint`
 implementation/design follow-up.

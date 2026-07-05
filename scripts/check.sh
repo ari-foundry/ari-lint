@@ -93,6 +93,7 @@ require_no_grep "arix" .github/workflows/check.yml
 
 require_grep "explicit-config" scripts/parity.sh
 require_grep "case: help" scripts/parity.sh
+require_grep "case: short-help" scripts/parity.sh
 require_grep "case: no-source-file" scripts/parity.sh
 require_grep "case: unknown-argument" scripts/parity.sh
 require_grep "case: missing-config-value" scripts/parity.sh
@@ -146,6 +147,7 @@ require_grep "docs/dev/parity-differences.md" tests/README.md
 require_grep "report-only config, .--rule., discovered config" docs/dev/ari-implementation-plan.md
 require_grep "explicit .--config." docs/dev/parity-test-plan.md
 require_grep "no-source-file usage" scripts/README.md
+require_grep "short-help" scripts/README.md
 require_grep "unknown-argument usage" scripts/README.md
 require_grep "missing config value usage" scripts/README.md
 require_grep "invalid config" scripts/README.md
