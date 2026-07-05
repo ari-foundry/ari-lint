@@ -21,8 +21,8 @@ severity usage, unknown `--rule` rule usage, `--list-rules`, and JSON
 list-rules CLI cases plus temporary clean, trailing-whitespace,
 missing-final-newline, missing-compiler, compiler-error, explicit-config,
 config-off, config-read-error, invalid-config, invalid-rule-override,
-invalid-rule-severity, unknown-rule-override, rule-override, include-path,
-discovered-config, and multi-file cases.
+invalid-rule-severity, unknown-rule-override, rule-off, rule-override,
+include-path, discovered-config, and multi-file cases.
 
 It reports signals only:
 
@@ -506,9 +506,9 @@ Follow-up:
 The current local report shows useful matching signals for the smoke-sized
 cases: both implementations report the expected lint rule names, severity names,
 line/column presence, and dirty file paths for the covered rule/config/multi-file
-cases. The current local report also includes a disabled explicit config case
-where the standalone implementation and original `tools/lint` suppress the
-configured rule diagnostic.
+cases. The current local report also includes disabled explicit config and
+command-line `--rule` cases where the standalone implementation and original
+`tools/lint` suppress the configured rule diagnostic.
 
 These are smoke signals only. They do not replace source-controlled fixtures,
 golden output, compiler-backed parity, or CI parity jobs.

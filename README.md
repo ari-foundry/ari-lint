@@ -142,9 +142,9 @@ compiler path behavior passed through `--ari`, compiler-error behavior,
 missing `--config` value, missing `--rule` value, missing `--ari` value, missing `-I`
 value, `--list-rules`, `--json --list-rules`, explicit `--config`, invalid
 `--config`, missing config file read errors, malformed `--rule`, invalid
-`--rule` severity, unknown `--rule` rule, disabled rules from explicit config,
-CLI `--rule`, include-path `-I`, discovered `ari-lint.rules`, and multi-file
-invocations.
+`--rule` severity, unknown `--rule` rule, disabled rules from explicit config
+and CLI `--rule`, severity-changing CLI `--rule`, include-path `-I`,
+discovered `ari-lint.rules`, and multi-file invocations.
 Differences are reported but do not fail the script. The script fails only for
 infrastructure errors such as a missing compiler, missing Ari repo, missing
 original lint command, or local build failure.

@@ -48,7 +48,7 @@ missing include value usage, malformed `--rule` usage, invalid `--rule` severity
 tools with `--json --ari` on temporary trailing-whitespace,
 missing-final-newline, clean, missing-compiler, compiler-error, explicit-config,
 config-read-error, invalid config, invalid rule override, invalid rule severity,
-unknown rule override, config-off, rule-override, include-path,
+unknown rule override, config-off, rule-off, rule-override, include-path,
 discovered-config, and multi-file cases,
 and prints a concise report of exit codes, stdout/stderr
 presence, help/usage/list-rules signals, compiler-check-failed and missing

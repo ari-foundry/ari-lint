@@ -113,6 +113,7 @@ require_grep "case: invalid-rule-override" scripts/parity.sh
 require_grep "case: invalid-rule-severity" scripts/parity.sh
 require_grep "case: unknown-rule-override" scripts/parity.sh
 require_grep "rule-override" scripts/parity.sh
+require_grep "rule-off" scripts/parity.sh
 require_grep "include-path" scripts/parity.sh
 require_grep "discovered-config" scripts/parity.sh
 require_grep "multi-file" scripts/parity.sh
@@ -181,6 +182,7 @@ require_grep "missing rule value usage" scripts/README.md
 require_grep "missing ari value usage" scripts/README.md
 require_grep "missing include value usage" scripts/README.md
 require_grep "config-off" scripts/README.md
+require_grep "rule-off" scripts/README.md
 require_grep "include-path" scripts/README.md
 require_grep "JSON list-rules" scripts/README.md
 require_grep "discovered-config, and multi-file cases" scripts/README.md
@@ -196,6 +198,7 @@ require_grep "./build/ari-lint --json --config" README.md
 require_grep "./build/ari-lint --json /tmp/.../one.ari /tmp/.../two.ari" README.md
 require_grep "--rule trailing-whitespace=note" README.md
 require_grep "disabled rules from explicit config" README.md
+require_grep "and CLI .--rule." README.md
 require_grep "--config" scripts/smoke.sh
 require_grep "run_stdout_success_smoke" scripts/smoke.sh
 require_grep "run_stderr_usage_smoke" scripts/smoke.sh
@@ -371,7 +374,8 @@ require_grep "release and compatibility policy documented" docs/dev/roadmap.md
 require_grep "release-compatibility-policy.md" tests/README.md
 require_grep "ari-lint Parity Test Plan" docs/dev/parity-test-plan.md
 require_grep "disabled explicit config" docs/dev/parity-test-plan.md
-require_grep "disabled explicit config case" docs/dev/parity-differences.md
+require_grep "disabled command-line .--rule." docs/dev/parity-test-plan.md
+require_grep "disabled explicit config and" docs/dev/parity-differences.md
 require_grep "tools/lint" docs/dev/parity-test-plan.md
 require_grep "docs/dev/compiler-invocation.md" docs/dev/parity-test-plan.md
 require_grep "docs/dev/compiler-provisioning.md" docs/dev/parity-test-plan.md
