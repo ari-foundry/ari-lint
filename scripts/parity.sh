@@ -1255,6 +1255,7 @@ report_case "rule-override" "$original_pwd" "$trailing_source" --config "$explic
 report_case "include-path" "$original_pwd" "$trailing_source" -I "$tmp_dir" "$trailing_source"
 report_case "discovered-config" "$discovery_parent" "child/discovered.ari" "child/discovered.ari"
 report_case "multi-file" "$original_pwd" "$multi_dirty_one|$multi_dirty_two" "$multi_dirty_one" "$multi_dirty_two"
+report_case "multi-file-mixed" "$original_pwd" "$clean_source|$multi_dirty_one" "$clean_source" "$multi_dirty_one"
 
 printf '%s\n' "known differences:"
 printf '%s\n' "- current Ari-language ari-lint does not invoke ari --check yet; original tools/lint does."

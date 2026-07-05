@@ -119,6 +119,7 @@ require_grep "rule-off" scripts/parity.sh
 require_grep "include-path" scripts/parity.sh
 require_grep "discovered-config" scripts/parity.sh
 require_grep "multi-file" scripts/parity.sh
+require_grep "multi-file-mixed" scripts/parity.sh
 require_grep "file_paths_present" scripts/parity.sh
 require_grep "source_file_text_in_stderr" scripts/parity.sh
 require_grep "file_operand_in_stderr" scripts/parity.sh
@@ -189,8 +190,11 @@ require_grep "config-short-name" scripts/README.md
 require_grep "config-off" scripts/README.md
 require_grep "rule-off" scripts/README.md
 require_grep "include-path" scripts/README.md
+require_grep "multi-file-mixed" scripts/README.md
 require_grep "JSON list-rules" scripts/README.md
-require_grep "discovered-config, and multi-file cases" scripts/README.md
+require_grep "discovered-config, multi-file, and" scripts/README.md
+require_grep "multi-file-mixed" docs/dev/parity-test-plan.md
+require_grep "multi-file-mixed" docs/dev/parity-differences.md
 
 require_grep "build.sh" scripts/smoke.sh
 require_grep "ARI_COMPILER" scripts/smoke.sh

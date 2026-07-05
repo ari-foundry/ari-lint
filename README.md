@@ -132,11 +132,12 @@ compiler path behavior passed through `--ari`, compiler-error behavior,
 unknown-option usage, missing config value usage, missing rule value usage,
 missing Ari value usage, missing include value usage, malformed `--rule` usage,
 invalid `--rule` severity usage, unknown `--rule` rule usage, and
-`--list-rules` and JSON list-rules comparison signals, then creates tiny temporary
-trailing-whitespace, missing-final-newline, clean, config, and multi-file
-fixtures, runs both tools with `--json --ari`, and prints stdout/stderr
-presence, exit codes, basic rule sightings, severity sightings, file-path hit
-counts, and line/column presence. It includes report-only coverage for `--help`,
+`--list-rules` and JSON list-rules comparison signals, then creates tiny
+temporary trailing-whitespace, missing-final-newline, clean, config, dirty
+multi-file, and mixed clean/dirty multi-file fixtures, runs both tools with
+`--json --ari`, and prints stdout/stderr presence, exit codes, basic rule
+sightings, severity sightings, file-path hit counts, and line/column presence.
+It includes report-only coverage for `--help`,
 `-h`, no source file, missing source read errors, an unknown option, missing
 compiler path behavior passed through `--ari`, compiler-error behavior,
 missing `--config` value, missing `--rule` value, missing `--ari` value, missing `-I`
@@ -144,8 +145,8 @@ value, `--list-rules`, `--json --list-rules`, explicit `--config`, invalid
 `--config`, missing config file read errors, malformed `--rule`, invalid
 `--rule` severity, unknown `--rule` rule, short rule names in explicit config,
 disabled rules from explicit config and CLI `--rule`, severity-changing CLI
-`--rule`, include-path `-I`, discovered `ari-lint.rules`, and multi-file
-invocations.
+`--rule`, include-path `-I`, discovered `ari-lint.rules`, dirty multi-file
+invocations, and mixed clean/dirty multi-file invocations.
 Differences are reported but do not fail the script. The script fails only for
 infrastructure errors such as a missing compiler, missing Ari repo, missing
 original lint command, or local build failure.
