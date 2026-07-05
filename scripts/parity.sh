@@ -598,6 +598,42 @@ print_read_error_summary() {
   printf '%s\n' "    source_path_in_stderr: $source_path_stderr"
 }
 
+print_missing_compiler_summary() {
+  tool_name="$1"
+  stdout_path="$2"
+  stderr_path="$3"
+  status_path="$4"
+  source_path="$5"
+  compiler_path="$6"
+
+  status=$(cat "$status_path")
+  compiler_failed_stdout=$(has_fixed_text "ari/compiler-check-failed" "$stdout_path")
+  compiler_failed_stderr=$(has_fixed_text "ari/compiler-check-failed" "$stderr_path")
+  exec_failed_stdout=$(has_fixed_text "exec failed" "$stdout_path")
+  exec_failed_stderr=$(has_fixed_text "exec failed" "$stderr_path")
+  json_files_stdout=$(has_fixed_text "\"files\"" "$stdout_path")
+  json_files_stderr=$(has_fixed_text "\"files\"" "$stderr_path")
+  source_path_stdout=$(has_fixed_text "$source_path" "$stdout_path")
+  source_path_stderr=$(has_fixed_text "$source_path" "$stderr_path")
+  compiler_path_stdout=$(has_fixed_text "$compiler_path" "$stdout_path")
+  compiler_path_stderr=$(has_fixed_text "$compiler_path" "$stderr_path")
+
+  printf '%s\n' "  $tool_name:"
+  printf '%s\n' "    exit_code: $status"
+  printf '%s\n' "    stdout_non_empty: $(has_text "$stdout_path")"
+  printf '%s\n' "    stderr_non_empty: $(has_text "$stderr_path")"
+  printf '%s\n' "    compiler_check_failed_code_in_stdout: $compiler_failed_stdout"
+  printf '%s\n' "    compiler_check_failed_code_in_stderr: $compiler_failed_stderr"
+  printf '%s\n' "    exec_failed_text_in_stdout: $exec_failed_stdout"
+  printf '%s\n' "    exec_failed_text_in_stderr: $exec_failed_stderr"
+  printf '%s\n' "    json_files_shape_in_stdout: $json_files_stdout"
+  printf '%s\n' "    json_files_shape_in_stderr: $json_files_stderr"
+  printf '%s\n' "    source_path_in_stdout: $source_path_stdout"
+  printf '%s\n' "    source_path_in_stderr: $source_path_stderr"
+  printf '%s\n' "    missing_compiler_path_in_stdout: $compiler_path_stdout"
+  printf '%s\n' "    missing_compiler_path_in_stderr: $compiler_path_stderr"
+}
+
 print_unknown_argument_summary() {
   tool_name="$1"
   stdout_path="$2"
@@ -793,6 +829,23 @@ report_read_error_case() {
   printf '%s\n' "case: read-error"
   print_read_error_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status" "$read_error_source"
   print_read_error_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status" "$read_error_source"
+  printf '%s\n' ""
+}
+
+report_missing_compiler_case() {
+  current_stdout="$tmp_dir/current-missing-compiler.stdout"
+  current_stderr="$tmp_dir/current-missing-compiler.stderr"
+  current_status="$tmp_dir/current-missing-compiler.status"
+  original_stdout="$tmp_dir/original-missing-compiler.stdout"
+  original_stderr="$tmp_dir/original-missing-compiler.stderr"
+  original_status="$tmp_dir/original-missing-compiler.status"
+
+  run_case_in_dir "$original_pwd" "current ari-lint" "$current_lint" "missing-compiler" "$current_stdout" "$current_stderr" "$current_status" --ari "$missing_compiler_path" "$clean_source"
+  run_case_in_dir "$original_pwd" "original tools/lint" "$original_lint" "missing-compiler" "$original_stdout" "$original_stderr" "$original_status" --ari "$missing_compiler_path" "$clean_source"
+
+  printf '%s\n' "case: missing-compiler"
+  print_missing_compiler_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status" "$clean_source" "$missing_compiler_path"
+  print_missing_compiler_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status" "$clean_source" "$missing_compiler_path"
   printf '%s\n' ""
 }
 
@@ -1059,6 +1112,7 @@ trailing_source="$tmp_dir/trailing-whitespace.ari"
 missing_source="$tmp_dir/missing-final-newline.ari"
 clean_source="$tmp_dir/clean.ari"
 read_error_source="$tmp_dir/read-error-missing.ari"
+missing_compiler_path="$tmp_dir/missing-ari-compiler"
 explicit_config_file="$tmp_dir/explicit.rules"
 config_read_error_file="$tmp_dir/missing-config.rules"
 invalid_config_file="$tmp_dir/invalid.rules"
@@ -1113,6 +1167,7 @@ report_help_case
 report_short_help_case
 report_no_source_file_case
 report_read_error_case
+report_missing_compiler_case
 report_unknown_argument_case
 report_missing_config_value_case
 report_missing_rule_value_case
@@ -1150,6 +1205,7 @@ printf '%s\n' "- diagnostic exit codes may differ while this repository has no s
 printf '%s\n' "- current help output is multi-line stdout text; original tools/lint help is a one-line stderr usage."
 printf '%s\n' "- current no-source-file usage output reports a missing source file; original tools/lint prints generic usage."
 printf '%s\n' "- current read-error output reports a short stderr message; original tools/lint emits compiler-shaped JSON diagnostics on stdout."
+printf '%s\n' "- current missing-compiler output reports clean lint results; original tools/lint emits compiler-check-failed JSON diagnostics."
 printf '%s\n' "- current unknown-option usage output reports the first unknown argument; original tools/lint prints generic usage."
 printf '%s\n' "- current missing-config-value usage output reports the missing option value; original tools/lint prints generic usage."
 printf '%s\n' "- current config-read-error output reports a short unable-to-read message; original tools/lint reports cannot open lint config."
