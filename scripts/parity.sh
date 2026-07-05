@@ -129,6 +129,23 @@ run_list_rules_in_dir() {
   printf '%s\n' "$status" > "$status_path"
 }
 
+run_json_list_rules_in_dir() {
+  work_dir="$1"
+  tool_path="$2"
+  stdout_path="$3"
+  stderr_path="$4"
+  status_path="$5"
+
+  set +e
+  (
+    CDPATH= cd "$work_dir" &&
+      "$tool_path" --json --list-rules > "$stdout_path" 2> "$stderr_path"
+  )
+  status=$?
+  set -e
+  printf '%s\n' "$status" > "$status_path"
+}
+
 run_help_in_dir() {
   work_dir="$1"
   tool_path="$2"
@@ -577,6 +594,23 @@ report_list_rules_case() {
   printf '%s\n' ""
 }
 
+report_json_list_rules_case() {
+  current_stdout="$tmp_dir/current-json-list-rules.stdout"
+  current_stderr="$tmp_dir/current-json-list-rules.stderr"
+  current_status="$tmp_dir/current-json-list-rules.status"
+  original_stdout="$tmp_dir/original-json-list-rules.stdout"
+  original_stderr="$tmp_dir/original-json-list-rules.stderr"
+  original_status="$tmp_dir/original-json-list-rules.status"
+
+  run_json_list_rules_in_dir "$original_pwd" "$current_lint" "$current_stdout" "$current_stderr" "$current_status"
+  run_json_list_rules_in_dir "$original_pwd" "$original_lint" "$original_stdout" "$original_stderr" "$original_status"
+
+  printf '%s\n' "case: json-list-rules"
+  print_list_rules_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status"
+  print_list_rules_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status"
+  printf '%s\n' ""
+}
+
 report_case() {
   case_name="$1"
   work_dir="$2"
@@ -689,6 +723,7 @@ report_missing_config_value_case
 report_missing_rule_value_case
 report_missing_ari_value_case
 report_list_rules_case
+report_json_list_rules_case
 
 for case_name in trailing-whitespace missing-final-newline clean; do
   case "$case_name" in
@@ -717,5 +752,6 @@ printf '%s\n' "- current missing-config-value usage output reports the missing o
 printf '%s\n' "- current missing-rule-value usage output reports the missing option value; original tools/lint prints generic usage."
 printf '%s\n' "- current missing-ari-value usage output reports the missing option value; original tools/lint prints generic usage."
 printf '%s\n' "- current list-rules output includes short rule name fields; original tools/lint list-rules output does not."
+printf '%s\n' "- current JSON list-rules output includes short rule name fields; original tools/lint JSON list-rules output does not."
 printf '%s\n' ""
 printf '%s\n' "parity result: report-only; differences above do not fail this script."

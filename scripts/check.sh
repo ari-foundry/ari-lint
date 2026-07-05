@@ -99,6 +99,7 @@ require_grep "case: missing-config-value" scripts/parity.sh
 require_grep "case: missing-rule-value" scripts/parity.sh
 require_grep "case: missing-ari-value" scripts/parity.sh
 require_grep "list-rules" scripts/parity.sh
+require_grep "case: json-list-rules" scripts/parity.sh
 require_grep "rule-override" scripts/parity.sh
 require_grep "discovered-config" scripts/parity.sh
 require_grep "multi-file" scripts/parity.sh
@@ -131,6 +132,7 @@ require_grep "unknown-argument usage" scripts/README.md
 require_grep "missing config value usage" scripts/README.md
 require_grep "missing rule value usage" scripts/README.md
 require_grep "missing ari value usage" scripts/README.md
+require_grep "JSON list-rules" scripts/README.md
 require_grep "discovered-config, and multi-file cases" scripts/README.md
 
 require_grep "build.sh" scripts/smoke.sh
