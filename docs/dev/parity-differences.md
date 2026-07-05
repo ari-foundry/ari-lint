@@ -18,7 +18,7 @@ config value usage, missing rule value usage, missing Ari value usage, missing
 include value usage, malformed `--rule` usage, invalid `--rule` severity usage,
 unknown `--rule` rule usage, `--list-rules`, and JSON list-rules CLI cases plus
 temporary clean, trailing-whitespace, missing-final-newline, explicit-config,
-invalid-config, invalid-rule-override, invalid-rule-severity,
+config-read-error, invalid-config, invalid-rule-override, invalid-rule-severity,
 unknown-rule-override, rule-override, include-path, discovered-config, and
 multi-file cases.
 
@@ -31,6 +31,7 @@ It reports signals only:
 - source read-error text, compiler-diagnostic, JSON-shape, and path sightings
 - unknown-option usage and unknown-argument text sightings
 - missing config value usage and missing-option text sightings
+- config read-error text and config-path sightings
 - invalid config output and config-path text sightings
 - invalid rule override usage and expected-shape text sightings
 - invalid rule severity usage and unknown-rule-or-severity text sightings
@@ -231,6 +232,31 @@ Follow-up:
 - decide whether standalone missing-option text should preserve the original
   generic usage shape or define a new stable standalone diagnostic contract
 - add strict usage-error output checks only after that contract is documented
+
+### Config Read Error Output
+
+Current standalone `ari-lint` reports an unreadable explicit config path as a
+short stderr message such as `unable to read config file`. Original
+`tools/lint`, when run with the same missing `--config` path, reports
+`cannot open lint config` on stderr and uses a different exit status.
+
+Classification: expected known difference and `ari-lint` diagnostic/CLI
+contract follow-up. No Ari language/compiler/stdlib/toolchain bug is identified
+by this report-only case.
+
+Impact:
+
+- exact config read-error output and exit-code parity are not expected yet
+- release compatibility claims must not be made from the current report
+- strict config read-error golden checks should wait until the CLI contract is
+  documented
+
+Follow-up:
+
+- decide whether standalone config read-error text should preserve the original
+  wording or define a new stable standalone diagnostic contract
+- add strict config read-error output checks only after that contract is
+  documented
 
 ### Invalid Config Output Text
 

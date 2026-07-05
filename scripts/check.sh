@@ -103,6 +103,7 @@ require_grep "case: missing-ari-value" scripts/parity.sh
 require_grep "case: missing-include-value" scripts/parity.sh
 require_grep "list-rules" scripts/parity.sh
 require_grep "case: json-list-rules" scripts/parity.sh
+require_grep "case: config-read-error" scripts/parity.sh
 require_grep "case: invalid-config" scripts/parity.sh
 require_grep "case: invalid-rule-override" scripts/parity.sh
 require_grep "case: invalid-rule-severity" scripts/parity.sh
@@ -117,6 +118,8 @@ require_grep "file_operand_in_stderr" scripts/parity.sh
 require_grep "unable_to_read_source_text_in_stderr" scripts/parity.sh
 require_grep "cannot_open_input_file_text_in_stdout" scripts/parity.sh
 require_grep "ari_compiler_code_in_stdout" scripts/parity.sh
+require_grep "unable_to_read_config_text_in_stderr" scripts/parity.sh
+require_grep "cannot_open_lint_config_text_in_stderr" scripts/parity.sh
 require_grep "unknown_argument_text_in_stderr" scripts/parity.sh
 require_grep "missing_option_value_text_in_stderr" scripts/parity.sh
 require_grep "unknown_rule_or_severity_text_in_stderr" scripts/parity.sh
@@ -138,6 +141,7 @@ require_grep "No Source File Usage Text" docs/dev/parity-differences.md
 require_grep "Source Read Error Output" docs/dev/parity-differences.md
 require_grep "Unknown Option Usage Text" docs/dev/parity-differences.md
 require_grep "Missing Config Value Usage Text" docs/dev/parity-differences.md
+require_grep "Config Read Error Output" docs/dev/parity-differences.md
 require_grep "Invalid Config Output Text" docs/dev/parity-differences.md
 require_grep "Invalid Rule Override Usage Text" docs/dev/parity-differences.md
 require_grep "Invalid Rule Severity Usage Text" docs/dev/parity-differences.md
@@ -153,6 +157,7 @@ require_grep "report-only config, .--rule., discovered config" docs/dev/ari-impl
 require_grep "explicit .--config." docs/dev/parity-test-plan.md
 require_grep "no-source-file usage" scripts/README.md
 require_grep "source read-error behavior" scripts/README.md
+require_grep "config-read-error" scripts/README.md
 require_grep "short-help" scripts/README.md
 require_grep "unknown-argument usage" scripts/README.md
 require_grep "missing config value usage" scripts/README.md

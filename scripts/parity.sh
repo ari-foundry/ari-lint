@@ -360,6 +360,33 @@ print_invalid_config_summary() {
   printf '%s\n' "    config_line_one_in_stderr: $config_line_one_stderr"
 }
 
+print_config_read_error_summary() {
+  tool_name="$1"
+  stdout_path="$2"
+  stderr_path="$3"
+  status_path="$4"
+  config_path="$5"
+
+  status=$(cat "$status_path")
+  unable_read_stdout=$(has_fixed_text "unable to read config file" "$stdout_path")
+  unable_read_stderr=$(has_fixed_text "unable to read config file" "$stderr_path")
+  cannot_open_stdout=$(has_fixed_text "cannot open lint config" "$stdout_path")
+  cannot_open_stderr=$(has_fixed_text "cannot open lint config" "$stderr_path")
+  config_path_stdout=$(has_fixed_text "$config_path" "$stdout_path")
+  config_path_stderr=$(has_fixed_text "$config_path" "$stderr_path")
+
+  printf '%s\n' "  $tool_name:"
+  printf '%s\n' "    exit_code: $status"
+  printf '%s\n' "    stdout_non_empty: $(has_text "$stdout_path")"
+  printf '%s\n' "    stderr_non_empty: $(has_text "$stderr_path")"
+  printf '%s\n' "    unable_to_read_config_text_in_stdout: $unable_read_stdout"
+  printf '%s\n' "    unable_to_read_config_text_in_stderr: $unable_read_stderr"
+  printf '%s\n' "    cannot_open_lint_config_text_in_stdout: $cannot_open_stdout"
+  printf '%s\n' "    cannot_open_lint_config_text_in_stderr: $cannot_open_stderr"
+  printf '%s\n' "    config_path_in_stdout: $config_path_stdout"
+  printf '%s\n' "    config_path_in_stderr: $config_path_stderr"
+}
+
 print_invalid_rule_override_summary() {
   tool_name="$1"
   stdout_path="$2"
@@ -927,6 +954,23 @@ report_invalid_config_case() {
   printf '%s\n' ""
 }
 
+report_config_read_error_case() {
+  current_stdout="$tmp_dir/current-config-read-error.stdout"
+  current_stderr="$tmp_dir/current-config-read-error.stderr"
+  current_status="$tmp_dir/current-config-read-error.status"
+  original_stdout="$tmp_dir/original-config-read-error.stdout"
+  original_stderr="$tmp_dir/original-config-read-error.stderr"
+  original_status="$tmp_dir/original-config-read-error.status"
+
+  run_case_in_dir "$original_pwd" "current ari-lint" "$current_lint" "config-read-error" "$current_stdout" "$current_stderr" "$current_status" --config "$config_read_error_file" "$trailing_source"
+  run_case_in_dir "$original_pwd" "original tools/lint" "$original_lint" "config-read-error" "$original_stdout" "$original_stderr" "$original_status" --config "$config_read_error_file" "$trailing_source"
+
+  printf '%s\n' "case: config-read-error"
+  print_config_read_error_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status" "$config_read_error_file"
+  print_config_read_error_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status" "$config_read_error_file"
+  printf '%s\n' ""
+}
+
 report_invalid_rule_override_case() {
   current_stdout="$tmp_dir/current-invalid-rule-override.stdout"
   current_stderr="$tmp_dir/current-invalid-rule-override.stderr"
@@ -1016,6 +1060,7 @@ missing_source="$tmp_dir/missing-final-newline.ari"
 clean_source="$tmp_dir/clean.ari"
 read_error_source="$tmp_dir/read-error-missing.ari"
 explicit_config_file="$tmp_dir/explicit.rules"
+config_read_error_file="$tmp_dir/missing-config.rules"
 invalid_config_file="$tmp_dir/invalid.rules"
 discovery_parent="$tmp_dir/discovery"
 discovery_child="$discovery_parent/child"
@@ -1088,6 +1133,7 @@ for case_name in trailing-whitespace missing-final-newline clean; do
 done
 
 report_case "explicit-config" "$original_pwd" "$trailing_source" --config "$explicit_config_file" "$trailing_source"
+report_config_read_error_case
 report_invalid_config_case
 report_invalid_rule_override_case
 report_invalid_rule_severity_case
@@ -1106,6 +1152,7 @@ printf '%s\n' "- current no-source-file usage output reports a missing source fi
 printf '%s\n' "- current read-error output reports a short stderr message; original tools/lint emits compiler-shaped JSON diagnostics on stdout."
 printf '%s\n' "- current unknown-option usage output reports the first unknown argument; original tools/lint prints generic usage."
 printf '%s\n' "- current missing-config-value usage output reports the missing option value; original tools/lint prints generic usage."
+printf '%s\n' "- current config-read-error output reports a short unable-to-read message; original tools/lint reports cannot open lint config."
 printf '%s\n' "- current missing-rule-value usage output reports the missing option value; original tools/lint prints generic usage."
 printf '%s\n' "- current missing-ari-value usage output reports the missing option value; original tools/lint prints generic usage."
 printf '%s\n' "- current missing-include-value usage output reports the missing option value; original tools/lint prints generic usage."
