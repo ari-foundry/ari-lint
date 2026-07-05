@@ -26,6 +26,8 @@ explicit config file overrides are applied to collected source-file diagnostics
 before command-line `--rule` severity overrides and before main-facing human
 stderr or JSON stdout output. The explicit `--config` path is captured in the
 CLI argument model and can be read when source-file diagnostics are collected.
+Documented short rule names in config files are normalized to full lint rule
+codes before known-rule validation.
 When `--config` is absent, the CLI source-file path searches upward from the
 current working directory for the nearest `ari-lint.rules`. The main-facing
 source-file lint path writes collected human diagnostics to stderr through the
@@ -101,8 +103,10 @@ delegates build behavior to `scripts/build.sh`, and then runs
 temporary files and a temporary nested working directory containing
 `ari-lint.rules` to check parent discovered config severity, nearest discovered
 config precedence, explicit `--config` precedence, and CLI `--rule` precedence
-for a trailing-whitespace diagnostic. It also checks current JSON diagnostic
-`ruleCode`, `severity`, `message`, `filePath`, `line`, and `column` fields for
+for a trailing-whitespace diagnostic. The temporary config files use documented
+short rule names to cover config-file normalization. It also checks current JSON
+diagnostic `ruleCode`, `severity`, `message`, `filePath`, `line`, and `column`
+fields for
 `lint/trailing-whitespace` and `lint/missing-final-newline`, JSON diagnostics
 for two dirty source files, a clean plus dirty multi-file invocation, and a
 clean plus clean multi-file invocation.
@@ -416,8 +420,9 @@ behavior against current `tools/lint`.
 
 No executable config parser tests are added yet. Future config parser tests
 should validate caller-provided `RULE = SEVERITY` text, blank lines, comments,
-invalid lines, invalid severity names, known-rule validation, explicit config
-file path parsing, read-error reporting, and parse problem reporting.
+documented short-name normalization, invalid lines, invalid severity names,
+known-rule validation, explicit config file path parsing, read-error reporting,
+and parse problem reporting.
 
 No executable rule override parser tests are added yet. Future rule override
 parser tests should validate caller-provided `--rule RULE=SEVERITY` text,

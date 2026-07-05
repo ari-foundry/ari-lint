@@ -174,9 +174,10 @@ commands execute. They do not add golden output tests, parity checks,
 compiler-backed CI, home/global/XDG config search, new lint semantics, or
 compatibility claims. The config smoke uses explicit temporary files and a
 temporary nested working directory containing `ari-lint.rules`; it checks only
-the current JSON rule code and severity fields for config precedence. Focused
-diagnostic smoke checks assert current `ruleCode`, `severity`, `message`,
-`filePath`, `line`, and `column` fields for `lint/trailing-whitespace` and
-`lint/missing-final-newline`, plus multi-file JSON diagnostics, a clean plus
+the current JSON rule code and severity fields for config precedence, including
+short rule names in config files. Focused diagnostic smoke checks assert current
+`ruleCode`, `severity`, `message`, `filePath`, `line`, and `column` fields for
+`lint/trailing-whitespace` and `lint/missing-final-newline`, plus multi-file
+JSON diagnostics, a clean plus
 dirty invocation, and a clean plus clean invocation. JSON list-rules output
 assertions and broader golden output coverage remain future smoke coverage.

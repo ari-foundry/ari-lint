@@ -178,6 +178,7 @@ and test work.
       stdout; broader output tests and parity checks remain future work.
 - [x] Add a minimal config text parser for caller-provided text using the
       documented `RULE = SEVERITY` shape, blank lines, and `#` comments,
+      normalizing documented short rule names to full lint rule codes, and
       returning internal overrides and parse problems without reading
       `ari-lint.rules`, discovering config files, applying overrides, inspecting
       CLI input, emitting diagnostics, serializing JSON, scanning sources,

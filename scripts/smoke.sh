@@ -75,7 +75,7 @@ run_smoke "$binary" --json --list-rules
 
 config_file="$tmp_dir/explicit.rules"
 source_file="$tmp_dir/trailing.ari"
-printf '%s\n' "lint/trailing-whitespace = error" > "$config_file"
+printf '%s\n' "trailing-whitespace = error" > "$config_file"
 {
   printf '%s  \n' "fn main() -> i64 {"
   printf '%s\n' "  return 0;"
@@ -97,7 +97,7 @@ discovery_child="$discovery_parent/child"
 mkdir -p "$discovery_child"
 parent_config_file="$discovery_parent/ari-lint.rules"
 child_config_file="$discovery_child/ari-lint.rules"
-printf '%s\n' "lint/trailing-whitespace = warning" > "$parent_config_file"
+printf '%s\n' "trailing-whitespace = warning" > "$parent_config_file"
 
 parent_discovery_output="$tmp_dir/parent-discovered-warning.json"
 (
@@ -107,7 +107,7 @@ parent_discovery_output="$tmp_dir/parent-discovered-warning.json"
 require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$parent_discovery_output"
 require_json_grep '"severity":"warning"' "$parent_discovery_output"
 
-printf '%s\n' "lint/trailing-whitespace = note" > "$child_config_file"
+printf '%s\n' "trailing-whitespace = note" > "$child_config_file"
 nearest_discovery_output="$tmp_dir/nearest-discovered-note.json"
 (
   cd "$discovery_child"
@@ -126,8 +126,8 @@ require_json_grep '"severity":"error"' "$explicit_over_discovery_output"
 
 field_config_file="$tmp_dir/diagnostic-fields.rules"
 {
-  printf '%s\n' "lint/trailing-whitespace = warning"
-  printf '%s\n' "lint/missing-final-newline = warning"
+  printf '%s\n' "trailing-whitespace = warning"
+  printf '%s\n' "missing-final-newline = warning"
 } > "$field_config_file"
 
 trailing_field_source="$tmp_dir/trailing-field.ari"

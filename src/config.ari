@@ -221,7 +221,7 @@ fn parse_config_file_from_source_into(
   }
 }
 
-fn normalized_rule_override_code(rule_code: Slice[u8]) -> Slice[u8] {
+fn normalized_lint_rule_code(rule_code: Slice[u8]) -> Slice[u8] {
   if rule_code.equals("trailing-whitespace") {
     return "lint/trailing-whitespace";
   }
@@ -279,7 +279,7 @@ fn parse_rule_override_value(
           ));
         }
         Some(severity) => {
-          let normalized_rule_code = normalized_rule_override_code(rule_code);
+          let normalized_rule_code = normalized_lint_rule_code(rule_code);
           if known_rule_code(zone, normalized_rule_code) {
             overrides.push(config_override_from_parts(
               normalized_rule_code,
@@ -405,9 +405,10 @@ fn parse_config_line(
           ));
         }
         Some(severity) => {
-          if known_rule_code(zone, rule_code) {
+          let normalized_rule_code = normalized_lint_rule_code(rule_code);
+          if known_rule_code(zone, normalized_rule_code) {
             overrides.push(config_override_from_parts(
-              rule_code,
+              normalized_rule_code,
               severity,
               source
             ));
@@ -642,8 +643,9 @@ pub fn apply_rule_severity_to_diagnostic(
 //
 // parse_config_text accepts text already supplied by the caller. It supports
 // blank lines, # comments, and RULE = SEVERITY entries for off, hint, note,
-// warning, and error. It validates rule codes against the known rule registry
-// and returns internal overrides plus parse problems without applying them.
+// warning, and error. It normalizes documented short rule names to full lint
+// rule codes, validates those codes against the known rule registry, and
+// returns internal overrides plus parse problems without applying them.
 //
 // parse_explicit_config_file and parse_explicit_config_file_into read one
 // explicit caller-provided config file path with std::fs::read_detailed, parse

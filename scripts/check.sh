@@ -124,6 +124,8 @@ require_grep "run_json_success_smoke" scripts/smoke.sh
 require_grep '"severity":"error"' scripts/smoke.sh
 require_grep '"severity":"note"' scripts/smoke.sh
 require_grep '"severity":"warning"' scripts/smoke.sh
+require_grep "trailing-whitespace = error" scripts/smoke.sh
+require_grep "missing-final-newline = warning" scripts/smoke.sh
 require_grep "discovery_parent" scripts/smoke.sh
 require_grep "discovery_child" scripts/smoke.sh
 require_grep "nearest_discovery_output" scripts/smoke.sh
@@ -735,7 +737,7 @@ require_grep "reads_config_files: true" src/config.ari
 require_grep "discovers_config_files: discovers_config_files" src/config.ari
 require_grep "writes_output: false" src/config.ari
 require_grep "serializes_json: false" src/config.ari
-require_grep "normalized_rule_override_code" src/config.ari
+require_grep "normalized_lint_rule_code" src/config.ari
 require_grep "known_rule_code" src/config.ari
 require_grep "lookup_known_rule" src/config.ari
 require_grep "Unknown rule" src/config.ari
