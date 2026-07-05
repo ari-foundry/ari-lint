@@ -356,6 +356,40 @@ print_invalid_rule_override_summary() {
   printf '%s\n' "    rule_value_in_stderr: $rule_value_stderr"
 }
 
+print_invalid_rule_severity_summary() {
+  tool_name="$1"
+  stdout_path="$2"
+  stderr_path="$3"
+  status_path="$4"
+
+  status=$(cat "$status_path")
+  invalid_override_stdout=$(has_fixed_text "invalid --rule override" "$stdout_path")
+  invalid_override_stderr=$(has_fixed_text "invalid --rule override" "$stderr_path")
+  invalid_rule_setting_stdout=$(has_fixed_text "invalid rule setting" "$stdout_path")
+  invalid_rule_setting_stderr=$(has_fixed_text "invalid rule setting" "$stderr_path")
+  unknown_rule_or_severity_stdout=$(has_fixed_text "unknown rule or severity" "$stdout_path")
+  unknown_rule_or_severity_stderr=$(has_fixed_text "unknown rule or severity" "$stderr_path")
+  expected_shape_stdout=$(has_fixed_text "RULE=SEVERITY" "$stdout_path")
+  expected_shape_stderr=$(has_fixed_text "RULE=SEVERITY" "$stderr_path")
+  rule_value_stdout=$(has_fixed_text "trailing-whitespace=loud" "$stdout_path")
+  rule_value_stderr=$(has_fixed_text "trailing-whitespace=loud" "$stderr_path")
+
+  printf '%s\n' "  $tool_name:"
+  printf '%s\n' "    exit_code: $status"
+  printf '%s\n' "    stdout_non_empty: $(has_text "$stdout_path")"
+  printf '%s\n' "    stderr_non_empty: $(has_text "$stderr_path")"
+  printf '%s\n' "    invalid_rule_override_text_in_stdout: $invalid_override_stdout"
+  printf '%s\n' "    invalid_rule_override_text_in_stderr: $invalid_override_stderr"
+  printf '%s\n' "    invalid_rule_setting_text_in_stdout: $invalid_rule_setting_stdout"
+  printf '%s\n' "    invalid_rule_setting_text_in_stderr: $invalid_rule_setting_stderr"
+  printf '%s\n' "    unknown_rule_or_severity_text_in_stdout: $unknown_rule_or_severity_stdout"
+  printf '%s\n' "    unknown_rule_or_severity_text_in_stderr: $unknown_rule_or_severity_stderr"
+  printf '%s\n' "    expected_rule_severity_text_in_stdout: $expected_shape_stdout"
+  printf '%s\n' "    expected_rule_severity_text_in_stderr: $expected_shape_stderr"
+  printf '%s\n' "    rule_value_in_stdout: $rule_value_stdout"
+  printf '%s\n' "    rule_value_in_stderr: $rule_value_stderr"
+}
+
 print_list_rules_summary() {
   tool_name="$1"
   stdout_path="$2"
@@ -730,6 +764,23 @@ report_invalid_rule_override_case() {
   printf '%s\n' ""
 }
 
+report_invalid_rule_severity_case() {
+  current_stdout="$tmp_dir/current-invalid-rule-severity.stdout"
+  current_stderr="$tmp_dir/current-invalid-rule-severity.stderr"
+  current_status="$tmp_dir/current-invalid-rule-severity.status"
+  original_stdout="$tmp_dir/original-invalid-rule-severity.stdout"
+  original_stderr="$tmp_dir/original-invalid-rule-severity.stderr"
+  original_status="$tmp_dir/original-invalid-rule-severity.status"
+
+  run_case_in_dir "$original_pwd" "current ari-lint" "$current_lint" "invalid-rule-severity" "$current_stdout" "$current_stderr" "$current_status" --rule trailing-whitespace=loud "$trailing_source"
+  run_case_in_dir "$original_pwd" "original tools/lint" "$original_lint" "invalid-rule-severity" "$original_stdout" "$original_stderr" "$original_status" --rule trailing-whitespace=loud "$trailing_source"
+
+  printf '%s\n' "case: invalid-rule-severity"
+  print_invalid_rule_severity_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status"
+  print_invalid_rule_severity_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status"
+  printf '%s\n' ""
+}
+
 if [ "$#" -gt 3 ]; then
   usage
   exit 1
@@ -838,6 +889,7 @@ done
 report_case "explicit-config" "$original_pwd" "$trailing_source" --config "$explicit_config_file" "$trailing_source"
 report_invalid_config_case
 report_invalid_rule_override_case
+report_invalid_rule_severity_case
 report_case "rule-override" "$original_pwd" "$trailing_source" --config "$explicit_config_file" --rule trailing-whitespace=note "$trailing_source"
 report_case "discovered-config" "$discovery_parent" "child/discovered.ari" "child/discovered.ari"
 report_case "multi-file" "$original_pwd" "$multi_dirty_one|$multi_dirty_two" "$multi_dirty_one" "$multi_dirty_two"
@@ -856,5 +908,6 @@ printf '%s\n' "- current list-rules output includes short rule name fields; orig
 printf '%s\n' "- current JSON list-rules output includes short rule name fields; original tools/lint JSON list-rules output does not."
 printf '%s\n' "- current invalid-config output reports invalid command-line arguments; original tools/lint reports the config file line and unknown rule or severity."
 printf '%s\n' "- current invalid-rule-override output reports invalid --rule override; original tools/lint reports invalid rule setting."
+printf '%s\n' "- current invalid-rule-severity output reports invalid --rule override; original tools/lint reports invalid rule setting and unknown rule or severity."
 printf '%s\n' ""
 printf '%s\n' "parity result: report-only; differences above do not fail this script."
