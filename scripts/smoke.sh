@@ -162,6 +162,7 @@ require_json_no_grep '"severity":"off"' "$rule_off_output"
 invalid_rule_output="$tmp_dir/invalid-rule.stderr"
 run_stderr_usage_smoke "$invalid_rule_output" "$binary" --rule trailing-whitespace "$source_file"
 require_text_grep "invalid --rule override" "$invalid_rule_output"
+require_text_grep "trailing-whitespace" "$invalid_rule_output"
 require_text_grep "--rule RULE=SEVERITY" "$invalid_rule_output"
 
 missing_config_output="$tmp_dir/missing-config.stderr"

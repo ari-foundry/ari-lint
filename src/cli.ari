@@ -70,6 +70,7 @@ pub struct CliArgs {
   config_file_path: Slice[u8],
   rule_override_count: i64,
   rule_override_problem_count: i64,
+  first_rule_override_problem: Slice[u8],
 }
 
 pub struct CliParseResult {
@@ -245,6 +246,7 @@ pub fn parse_cli_tokens(
   var config_file_path: Slice[u8] = "";
   var rule_override_count = 0;
   var rule_override_problem_count = 0;
+  var first_rule_override_problem: Slice[u8] = "";
   var problem_count = 0;
   var missing_value_count = 0;
   var first_missing_value_option: Slice[u8] = "";
@@ -309,6 +311,9 @@ pub fn parse_cli_tokens(
           zone,
           rule_override.raw_text
         );
+        if rule_override_result.problem_count > 0 && rule_override_problem_count == 0 {
+          first_rule_override_problem = rule_override.raw_text;
+        }
         rule_override_count = rule_override_count + rule_override_result.override_count;
         rule_override_problem_count =
           rule_override_problem_count + rule_override_result.problem_count;
@@ -356,6 +361,7 @@ pub fn parse_cli_tokens(
     config_file_path: config_file_path,
     rule_override_count: rule_override_count,
     rule_override_problem_count: rule_override_problem_count,
+    first_rule_override_problem: first_rule_override_problem,
   };
 
   return CliParseResult {
@@ -492,6 +498,7 @@ fn write_diagnostics_json_stdout(
 fn write_cli_parse_problem_stderr(
   zone: ref mut Zone,
   rule_override_problem_count: i64,
+  first_rule_override_problem: Slice[u8],
   missing_value_count: i64,
   first_missing_value_option: Slice[u8],
   unknown_argument_count: i64,
@@ -499,10 +506,12 @@ fn write_cli_parse_problem_stderr(
 ) -> bool {
   var text = std::string::from(zone, "ari-lint: invalid command-line arguments\n");
   if rule_override_problem_count > 0 {
-    text = std::string::from(
-      zone,
-      "ari-lint: invalid --rule override; expected --rule RULE=SEVERITY\n"
-    );
+    text = std::string::from(zone, "ari-lint: invalid --rule override");
+    if first_rule_override_problem.len() > 0 {
+      text.append_string_in(zone, ": ");
+      text.append_string_in(zone, first_rule_override_problem);
+    }
+    text.append_string_in(zone, "; expected --rule RULE=SEVERITY\n");
   } else if missing_value_count > 0 {
     text = std::string::from(zone, "ari-lint: missing option value for ");
     text.append_string_in(zone, first_missing_value_option);
@@ -614,6 +623,7 @@ fn dispatch_cli_command_with_main_output(
     let wrote_parse_stderr = write_cli_parse_problem_stderr(
       zone,
       parse_result.args.rule_override_problem_count,
+      parse_result.args.first_rule_override_problem,
       parse_result.missing_value_count,
       parse_result.first_missing_value_option,
       parse_result.unknown_argument_count,
@@ -720,6 +730,7 @@ fn dispatch_cli_command_with_main_output(
         let wrote_collection_parse_stderr = write_cli_parse_problem_stderr(
           zone,
           parse_result.args.rule_override_problem_count,
+          parse_result.args.first_rule_override_problem,
           parse_result.missing_value_count,
           parse_result.first_missing_value_option,
           parse_result.unknown_argument_count,
@@ -1107,9 +1118,9 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 
 // parse_cli_tokens consumes a caller-provided token list and records source
 // counts, first source file path, retained source file paths, flags/options,
-// explicit config path, parsed rule override values, rule override problem
-// count, missing option value details, unknown argument details, and parse
-// problem counts in
+// explicit config path, parsed rule override values, first invalid rule
+// override value, rule override problem count, missing option value details,
+// unknown argument details, and parse problem counts in
 // CliParseResult. It intentionally leaves environment handling, path
 // validation, home/global/XDG config discovery, diagnostic printing, and
 // ari --check invocation as future work.
