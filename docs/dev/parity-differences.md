@@ -508,9 +508,10 @@ Follow-up:
 ### List Rules Output Detail
 
 Current standalone `ari-lint` emits short rule name fields in `--list-rules`
-and `--json --list-rules` output, such as `name=trailing-whitespace`. Original
-`tools/lint` lists the same rule codes and default severities for both
-invocations but does not emit those short name fields.
+and `--json --list-rules` output, such as `name=trailing-whitespace` in human
+output and `"name":"trailing-whitespace"` in JSON output. Original `tools/lint`
+lists the same rule codes and default severities for both invocations but does
+not emit those short name fields.
 
 Classification: original `tools/lint` behavior difference and expected known
 difference while standalone rule metadata remains implementation-owned by

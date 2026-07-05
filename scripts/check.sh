@@ -757,6 +757,7 @@ require_grep "os_argv_boundary" src/cli.ari
 require_grep "std::env::args" src/cli.ari
 require_grep "reads_process_argv: true" src/cli.ari
 require_grep "CliListRulesText" src/cli.ari
+require_grep "CliListRulesJson" src/cli.ari
 require_grep "CliSourceLintResult" src/cli.ari
 require_grep "CliConfigReadError" src/cli.ari
 require_grep "lint_file_source" src/cli.ari
@@ -806,7 +807,9 @@ require_grep "list_rule_row_from_metadata" src/output.ari
 require_grep "known_list_rules_output" src/output.ari
 require_grep "format_list_rule_row_human" src/output.ari
 require_grep "format_list_rules_human" src/output.ari
-require_grep "Final user-facing JSON output" src/output.ari
+require_grep "format_list_rule_row_json" src/output.ari
+require_grep "format_list_rules_json" src/output.ari
+require_grep "Source diagnostic JSON schema stability" src/output.ari
 require_grep "list-rules stdout wiring" src/output.ari
 require_grep "OutputSinkName" src/output.ari
 require_grep "OutputSinkBoundary" src/output.ari
