@@ -14,8 +14,9 @@ matrix, not a parity claim, and not a release policy.
 
 The local parity report currently compares report-only `--help` and
 no-source-file usage, unknown-option usage, missing config value usage, missing
-rule value usage, missing Ari value usage, malformed `--rule` usage, invalid
-`--rule` severity usage, unknown `--rule` rule usage, `--list-rules`, and JSON list-rules CLI cases plus temporary clean,
+rule value usage, missing Ari value usage, missing include value usage,
+malformed `--rule` usage, invalid `--rule` severity usage, unknown `--rule`
+rule usage, `--list-rules`, and JSON list-rules CLI cases plus temporary clean,
 trailing-whitespace, missing-final-newline, explicit-config, invalid-config,
 invalid-rule-override, invalid-rule-severity, unknown-rule-override,
 rule-override, discovered-config, and multi-file cases.
@@ -34,6 +35,7 @@ It reports signals only:
 - unknown rule override usage and unknown-rule-or-severity text sightings
 - missing rule value usage and missing-option text sightings
 - missing Ari value usage and missing-option text sightings
+- missing include value usage and missing-option text sightings
 - list-rules and JSON list-rules rule-code, default-severity, and
   short-name-field sightings
 - rule sightings
@@ -339,6 +341,31 @@ Follow-up:
 
 - decide whether standalone missing-option text should preserve the original
   generic usage shape or define a new stable standalone diagnostic contract
+- add strict usage-error output checks only after that contract is documented
+
+### Missing Include Value Usage Text
+
+Current standalone `ari-lint` reports a missing `-I` value as
+`missing option value for -I`. Original `tools/lint` exits with a usage error
+but prints generic usage text instead.
+
+Classification: original `tools/lint` behavior difference and `ari-lint`
+diagnostic/CLI contract follow-up.
+
+Impact:
+
+- exact missing-option-value text equality is not expected yet
+- include-path behavior remains non-gating until the compiler boundary is
+  specified
+- release compatibility claims must not be made from the current report
+- strict usage-error golden checks should wait until the CLI contract is
+  documented
+
+Follow-up:
+
+- decide whether standalone missing-option text should preserve the original
+  generic usage shape or define a new stable standalone diagnostic contract
+- define include-path behavior together with future compiler invocation work
 - add strict usage-error output checks only after that contract is documented
 
 ### List Rules Output Detail

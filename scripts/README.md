@@ -41,9 +41,9 @@ argument or through `ORIGINAL_LINT`. It verifies the original lint entrypoint
 from the Ari repo `Makefile` and `tools/lint/main.cpp`, builds this repository
 with `scripts/build.sh`, runs report-only `--help`, no-source-file usage,
 unknown-argument usage, missing config value usage, missing rule value usage,
-missing ari value usage, malformed `--rule` usage, invalid `--rule` severity
-usage, unknown `--rule` rule usage, `--list-rules`, and JSON list-rules cases,
-runs both tools with `--json --ari` on temporary
+missing ari value usage, missing include value usage, malformed `--rule` usage,
+invalid `--rule` severity usage, unknown `--rule` rule usage, `--list-rules`,
+and JSON list-rules cases, runs both tools with `--json --ari` on temporary
 trailing-whitespace, missing-final-newline, clean, explicit-config,
 invalid config, invalid rule override, invalid rule severity,
 unknown rule override, rule-override, discovered-config, and multi-file cases,

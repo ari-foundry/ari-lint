@@ -98,6 +98,7 @@ require_grep "case: unknown-argument" scripts/parity.sh
 require_grep "case: missing-config-value" scripts/parity.sh
 require_grep "case: missing-rule-value" scripts/parity.sh
 require_grep "case: missing-ari-value" scripts/parity.sh
+require_grep "case: missing-include-value" scripts/parity.sh
 require_grep "list-rules" scripts/parity.sh
 require_grep "case: json-list-rules" scripts/parity.sh
 require_grep "case: invalid-config" scripts/parity.sh
@@ -120,6 +121,7 @@ require_grep "trailing-whitespace=loud" scripts/parity.sh
 require_grep "unknown-rule=warning" scripts/parity.sh
 require_grep "rule_option_in_stderr" scripts/parity.sh
 require_grep "ari_option_in_stderr" scripts/parity.sh
+require_grep "include_option_in_stderr" scripts/parity.sh
 require_grep "severity_note_present" scripts/parity.sh
 require_grep "ari-lint Known Parity Differences" docs/dev/parity-differences.md
 require_grep "Compiler Check Boundary" docs/dev/parity-differences.md
@@ -135,6 +137,7 @@ require_grep "Invalid Rule Severity Usage Text" docs/dev/parity-differences.md
 require_grep "Unknown Rule Override Usage Text" docs/dev/parity-differences.md
 require_grep "Missing Rule Value Usage Text" docs/dev/parity-differences.md
 require_grep "Missing Ari Value Usage Text" docs/dev/parity-differences.md
+require_grep "Missing Include Value Usage Text" docs/dev/parity-differences.md
 require_grep "List Rules Output Detail" docs/dev/parity-differences.md
 require_grep "No Ari language/compiler/stdlib/toolchain bug" docs/dev/parity-differences.md
 require_grep "docs/dev/parity-differences.md" docs/dev/parity-test-plan.md
@@ -150,6 +153,7 @@ require_grep "invalid rule severity" scripts/README.md
 require_grep "unknown rule override" scripts/README.md
 require_grep "missing rule value usage" scripts/README.md
 require_grep "missing ari value usage" scripts/README.md
+require_grep "missing include value usage" scripts/README.md
 require_grep "JSON list-rules" scripts/README.md
 require_grep "discovered-config, and multi-file cases" scripts/README.md
 
