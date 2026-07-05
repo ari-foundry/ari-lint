@@ -141,6 +141,10 @@ missing_rule_output="$tmp_dir/missing-rule.stderr"
 run_stderr_usage_smoke "$missing_rule_output" "$binary" --rule
 require_text_grep "missing option value for --rule" "$missing_rule_output"
 
+unknown_argument_output="$tmp_dir/unknown-argument.stderr"
+run_stderr_usage_smoke "$unknown_argument_output" "$binary" --definitely-unknown
+require_text_grep "unknown argument: --definitely-unknown" "$unknown_argument_output"
+
 discovery_parent="$tmp_dir/discovery"
 discovery_child="$discovery_parent/child"
 mkdir -p "$discovery_child"
