@@ -13,9 +13,9 @@ source.
 
 A first local non-gating parity smoke/report now exists at `scripts/parity.sh`.
 It builds this repository with `scripts/build.sh`, runs both implementations on
-usage, list-rules, temporary clean, trailing-whitespace, missing-final-newline,
-config, and multi-file cases, and prints a concise report without failing on
-behavior differences.
+usage, list-rules, source read-error, temporary clean, trailing-whitespace,
+missing-final-newline, config, and multi-file cases, and prints a concise report
+without failing on behavior differences.
 
 ## Current Status
 

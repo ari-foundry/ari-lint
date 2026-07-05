@@ -536,6 +536,41 @@ print_no_source_file_summary() {
   printf '%s\n' "    file_operand_in_stderr: $file_operand_stderr"
 }
 
+print_read_error_summary() {
+  tool_name="$1"
+  stdout_path="$2"
+  stderr_path="$3"
+  status_path="$4"
+  source_path="$5"
+
+  status=$(cat "$status_path")
+  unable_read_stdout=$(has_fixed_text "unable to read source file" "$stdout_path")
+  unable_read_stderr=$(has_fixed_text "unable to read source file" "$stderr_path")
+  cannot_open_stdout=$(has_fixed_text "cannot open input file" "$stdout_path")
+  cannot_open_stderr=$(has_fixed_text "cannot open input file" "$stderr_path")
+  ari_compiler_stdout=$(has_fixed_text "ari/compiler" "$stdout_path")
+  ari_compiler_stderr=$(has_fixed_text "ari/compiler" "$stderr_path")
+  json_files_stdout=$(has_fixed_text "\"files\"" "$stdout_path")
+  json_files_stderr=$(has_fixed_text "\"files\"" "$stderr_path")
+  source_path_stdout=$(has_fixed_text "$source_path" "$stdout_path")
+  source_path_stderr=$(has_fixed_text "$source_path" "$stderr_path")
+
+  printf '%s\n' "  $tool_name:"
+  printf '%s\n' "    exit_code: $status"
+  printf '%s\n' "    stdout_non_empty: $(has_text "$stdout_path")"
+  printf '%s\n' "    stderr_non_empty: $(has_text "$stderr_path")"
+  printf '%s\n' "    unable_to_read_source_text_in_stdout: $unable_read_stdout"
+  printf '%s\n' "    unable_to_read_source_text_in_stderr: $unable_read_stderr"
+  printf '%s\n' "    cannot_open_input_file_text_in_stdout: $cannot_open_stdout"
+  printf '%s\n' "    cannot_open_input_file_text_in_stderr: $cannot_open_stderr"
+  printf '%s\n' "    ari_compiler_code_in_stdout: $ari_compiler_stdout"
+  printf '%s\n' "    ari_compiler_code_in_stderr: $ari_compiler_stderr"
+  printf '%s\n' "    json_files_shape_in_stdout: $json_files_stdout"
+  printf '%s\n' "    json_files_shape_in_stderr: $json_files_stderr"
+  printf '%s\n' "    source_path_in_stdout: $source_path_stdout"
+  printf '%s\n' "    source_path_in_stderr: $source_path_stderr"
+}
+
 print_unknown_argument_summary() {
   tool_name="$1"
   stdout_path="$2"
@@ -714,6 +749,23 @@ report_no_source_file_case() {
   printf '%s\n' "case: no-source-file"
   print_no_source_file_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status"
   print_no_source_file_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status"
+  printf '%s\n' ""
+}
+
+report_read_error_case() {
+  current_stdout="$tmp_dir/current-read-error.stdout"
+  current_stderr="$tmp_dir/current-read-error.stderr"
+  current_status="$tmp_dir/current-read-error.status"
+  original_stdout="$tmp_dir/original-read-error.stdout"
+  original_stderr="$tmp_dir/original-read-error.stderr"
+  original_status="$tmp_dir/original-read-error.status"
+
+  run_case_in_dir "$original_pwd" "current ari-lint" "$current_lint" "read-error" "$current_stdout" "$current_stderr" "$current_status" "$read_error_source"
+  run_case_in_dir "$original_pwd" "original tools/lint" "$original_lint" "read-error" "$original_stdout" "$original_stderr" "$original_status" "$read_error_source"
+
+  printf '%s\n' "case: read-error"
+  print_read_error_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status" "$read_error_source"
+  print_read_error_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status" "$read_error_source"
   printf '%s\n' ""
 }
 
@@ -962,6 +1014,7 @@ trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
 trailing_source="$tmp_dir/trailing-whitespace.ari"
 missing_source="$tmp_dir/missing-final-newline.ari"
 clean_source="$tmp_dir/clean.ari"
+read_error_source="$tmp_dir/read-error-missing.ari"
 explicit_config_file="$tmp_dir/explicit.rules"
 invalid_config_file="$tmp_dir/invalid.rules"
 discovery_parent="$tmp_dir/discovery"
@@ -1014,6 +1067,7 @@ printf '%s\n' ""
 report_help_case
 report_short_help_case
 report_no_source_file_case
+report_read_error_case
 report_unknown_argument_case
 report_missing_config_value_case
 report_missing_rule_value_case
@@ -1049,6 +1103,7 @@ printf '%s\n' "- current JSON diagnostics are a flat array with filePath/ruleCod
 printf '%s\n' "- diagnostic exit codes may differ while this repository has no stable exit-code compatibility claim."
 printf '%s\n' "- current help output is multi-line stdout text; original tools/lint help is a one-line stderr usage."
 printf '%s\n' "- current no-source-file usage output reports a missing source file; original tools/lint prints generic usage."
+printf '%s\n' "- current read-error output reports a short stderr message; original tools/lint emits compiler-shaped JSON diagnostics on stdout."
 printf '%s\n' "- current unknown-option usage output reports the first unknown argument; original tools/lint prints generic usage."
 printf '%s\n' "- current missing-config-value usage output reports the missing option value; original tools/lint prints generic usage."
 printf '%s\n' "- current missing-rule-value usage output reports the missing option value; original tools/lint prints generic usage."
