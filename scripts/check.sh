@@ -100,6 +100,7 @@ require_grep "case: help" scripts/parity.sh
 require_grep "case: short-help" scripts/parity.sh
 require_grep "case: no-source-file" scripts/parity.sh
 require_grep "case: read-error" scripts/parity.sh
+require_grep "case: multi-file-read-error" scripts/parity.sh
 require_grep "case: missing-compiler" scripts/parity.sh
 require_grep "case: compiler-error" scripts/parity.sh
 require_grep "case: unknown-argument" scripts/parity.sh
@@ -124,6 +125,7 @@ require_grep "file_paths_present" scripts/parity.sh
 require_grep "source_file_text_in_stderr" scripts/parity.sh
 require_grep "file_operand_in_stderr" scripts/parity.sh
 require_grep "unable_to_read_source_text_in_stderr" scripts/parity.sh
+require_grep "unable_to_read_multiple_sources_text_in_stderr" scripts/parity.sh
 require_grep "cannot_open_input_file_text_in_stdout" scripts/parity.sh
 require_grep "ari_compiler_code_in_stdout" scripts/parity.sh
 require_grep "compiler_check_failed_code_in_stdout" scripts/parity.sh
