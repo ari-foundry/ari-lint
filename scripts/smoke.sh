@@ -116,11 +116,15 @@ require_text_grep "default=warning" "$list_rules_output"
 
 json_list_rules_output="$tmp_dir/json-list-rules.out"
 run_stdout_success_smoke "$json_list_rules_output" "$binary" --json --list-rules
+require_json_grep '[{"ruleCode":"lint/trailing-whitespace"' "$json_list_rules_output"
 require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$json_list_rules_output"
 require_json_grep '"name":"trailing-whitespace"' "$json_list_rules_output"
+require_json_grep '"description":"Reports spaces or tabs at the end of a source line."' "$json_list_rules_output"
 require_json_grep '"ruleCode":"lint/missing-final-newline"' "$json_list_rules_output"
 require_json_grep '"name":"missing-final-newline"' "$json_list_rules_output"
+require_json_grep '"description":"Reports non-empty source files that do not end with a newline."' "$json_list_rules_output"
 require_json_grep '"defaultSeverity":"warning"' "$json_list_rules_output"
+require_json_grep '}]' "$json_list_rules_output"
 require_json_no_grep "name=trailing-whitespace" "$json_list_rules_output"
 require_json_no_grep "default=warning" "$json_list_rules_output"
 

@@ -216,6 +216,8 @@ require_grep "run_stderr_usage_smoke" scripts/smoke.sh
 require_grep "require_text_grep" scripts/smoke.sh
 require_grep "list_rules_output" scripts/smoke.sh
 require_grep "json_list_rules_output" scripts/smoke.sh
+require_grep "Reports spaces or tabs at the end of a source line." scripts/smoke.sh
+require_grep "Reports non-empty source files that do not end with a newline." scripts/smoke.sh
 require_grep "invalid --rule override" src/cli.ari
 require_grep "missing option value for" src/cli.ari
 require_grep "unknown argument:" src/cli.ari
