@@ -197,26 +197,28 @@ Current local report-only flow in `scripts/parity.sh`:
    missing-option text, stdout/stderr, and exit-code signals.
 10. Run a report-only missing `--ari` value case and report usage text,
    missing-option text, stdout/stderr, and exit-code signals.
-11. Run a report-only `--list-rules` case and report rule-code,
+11. Run a report-only missing `-I` value case and report usage text,
+   missing-option text, stdout/stderr, and exit-code signals.
+12. Run a report-only `--list-rules` case and report rule-code,
    default-severity, stdout/stderr, exit-code, and short-name-field signals.
-12. Run a report-only `--json --list-rules` case and report rule-code,
+13. Run a report-only `--json --list-rules` case and report rule-code,
    default-severity, stdout/stderr, exit-code, and short-name-field signals.
-13. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
+14. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
    explicit-config, discovered-config, and multi-file fixtures.
-14. Run a report-only invalid `--config` case and report stderr text,
+15. Run a report-only invalid `--config` case and report stderr text,
    config-path, config-line, stdout/stderr, and exit-code signals.
-15. Run a report-only malformed `--rule` case and report invalid-override,
+16. Run a report-only malformed `--rule` case and report invalid-override,
    invalid-rule-setting, expected-shape, stdout/stderr, and exit-code signals.
-16. Run a report-only invalid `--rule` severity case and report
+17. Run a report-only invalid `--rule` severity case and report
    invalid-override, invalid-rule-setting, unknown-rule-or-severity,
    stdout/stderr, and exit-code signals.
-17. Run a report-only unknown `--rule` rule case and report invalid-override,
+18. Run a report-only unknown `--rule` rule case and report invalid-override,
    invalid-rule-setting, unknown-rule-or-severity, stdout/stderr, and
    exit-code signals.
-18. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
+19. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
    baseline rule, explicit `--config`, command-line `--rule`, discovered
    `ari-lint.rules`, and multi-file cases.
-19. Report exit code, stdout/stderr presence, rule sightings, severity
+20. Report exit code, stdout/stderr presence, rule sightings, severity
    sightings, file-path hit counts, and line/column presence.
 
 The report intentionally does not require exact text equality or exact JSON
