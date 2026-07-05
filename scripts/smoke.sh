@@ -137,6 +137,10 @@ missing_config_output="$tmp_dir/missing-config.stderr"
 run_stderr_usage_smoke "$missing_config_output" "$binary" --config
 require_text_grep "missing option value for --config" "$missing_config_output"
 
+missing_rule_output="$tmp_dir/missing-rule.stderr"
+run_stderr_usage_smoke "$missing_rule_output" "$binary" --rule
+require_text_grep "missing option value for --rule" "$missing_rule_output"
+
 discovery_parent="$tmp_dir/discovery"
 discovery_child="$discovery_parent/child"
 mkdir -p "$discovery_child"
