@@ -92,17 +92,21 @@ locate_original_lint() {
   fail "unable to locate executable original lint command; verified tools/lint/main.cpp and Makefile lint target, but build/ari-lint is not executable"
 }
 
-run_case() {
-  tool_name="$1"
-  tool_path="$2"
-  case_name="$3"
-  source_path="$4"
+run_case_in_dir() {
+  work_dir="$1"
+  tool_name="$2"
+  tool_path="$3"
+  case_name="$4"
   stdout_path="$5"
   stderr_path="$6"
   status_path="$7"
+  shift 7
 
   set +e
-  "$tool_path" --json --ari "$compiler" "$source_path" > "$stdout_path" 2> "$stderr_path"
+  (
+    CDPATH= cd "$work_dir" &&
+      "$tool_path" --json --ari "$compiler" "$@" > "$stdout_path" 2> "$stderr_path"
+  )
   status=$?
   set -e
   printf '%s\n' "$status" > "$status_path"
@@ -111,17 +115,32 @@ run_case() {
 print_case_summary() {
   tool_name="$1"
   case_name="$2"
-  source_path="$3"
-  stdout_path="$4"
-  stderr_path="$5"
-  status_path="$6"
+  stdout_path="$3"
+  stderr_path="$4"
+  status_path="$5"
+  expected_paths="$6"
 
   status=$(cat "$status_path")
   trailing=$(has_fixed_text "lint/trailing-whitespace" "$stdout_path")
   missing=$(has_fixed_text "lint/missing-final-newline" "$stdout_path")
-  path_present=$(has_fixed_text "$source_path" "$stdout_path")
+  config=$(has_fixed_text "lint/config" "$stdout_path")
+  severity_error=$(has_fixed_text '"severity":"error"' "$stdout_path")
+  severity_note=$(has_fixed_text '"severity":"note"' "$stdout_path")
+  severity_warning=$(has_fixed_text '"severity":"warning"' "$stdout_path")
   line_present=$(has_json_position "line" "$stdout_path")
   column_present=$(has_json_position "column" "$stdout_path")
+  expected_path_count=0
+  expected_path_hit_count=0
+  old_ifs="$IFS"
+  IFS='|'
+  set -- $expected_paths
+  IFS="$old_ifs"
+  for expected_path do
+    expected_path_count=$((expected_path_count + 1))
+    if grep -F -q -- "$expected_path" "$stdout_path"; then
+      expected_path_hit_count=$((expected_path_hit_count + 1))
+    fi
+  done
 
   printf '%s\n' "  $tool_name:"
   printf '%s\n' "    exit_code: $status"
@@ -129,9 +148,35 @@ print_case_summary() {
   printf '%s\n' "    stderr_non_empty: $(has_text "$stderr_path")"
   printf '%s\n' "    trailing_whitespace_reported: $trailing"
   printf '%s\n' "    missing_final_newline_reported: $missing"
-  printf '%s\n' "    file_path_present: $path_present"
+  printf '%s\n' "    config_diagnostic_reported: $config"
+  printf '%s\n' "    severity_error_present: $severity_error"
+  printf '%s\n' "    severity_note_present: $severity_note"
+  printf '%s\n' "    severity_warning_present: $severity_warning"
+  printf '%s\n' "    file_paths_present: $expected_path_hit_count/$expected_path_count"
   printf '%s\n' "    line_present: $line_present"
   printf '%s\n' "    column_present: $column_present"
+}
+
+report_case() {
+  case_name="$1"
+  work_dir="$2"
+  expected_paths="$3"
+  shift 3
+
+  current_stdout="$tmp_dir/current-$case_name.stdout"
+  current_stderr="$tmp_dir/current-$case_name.stderr"
+  current_status="$tmp_dir/current-$case_name.status"
+  original_stdout="$tmp_dir/original-$case_name.stdout"
+  original_stderr="$tmp_dir/original-$case_name.stderr"
+  original_status="$tmp_dir/original-$case_name.status"
+
+  run_case_in_dir "$work_dir" "current ari-lint" "$current_lint" "$case_name" "$current_stdout" "$current_stderr" "$current_status" "$@"
+  run_case_in_dir "$work_dir" "original tools/lint" "$original_lint" "$case_name" "$original_stdout" "$original_stderr" "$original_status" "$@"
+
+  printf '%s\n' "case: $case_name"
+  print_case_summary "current ari-lint" "$case_name" "$current_stdout" "$current_stderr" "$current_status" "$expected_paths"
+  print_case_summary "original tools/lint" "$case_name" "$original_stdout" "$original_stderr" "$original_status" "$expected_paths"
+  printf '%s\n' ""
 }
 
 if [ "$#" -gt 3 ]; then
@@ -170,6 +215,12 @@ trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
 trailing_source="$tmp_dir/trailing-whitespace.ari"
 missing_source="$tmp_dir/missing-final-newline.ari"
 clean_source="$tmp_dir/clean.ari"
+explicit_config_file="$tmp_dir/explicit.rules"
+discovery_parent="$tmp_dir/discovery"
+discovery_child="$discovery_parent/child"
+discovered_source="$discovery_child/discovered.ari"
+multi_dirty_one="$tmp_dir/multi-dirty-one.ari"
+multi_dirty_two="$tmp_dir/multi-dirty-two.ari"
 
 {
   printf '%s  \n' "fn main() -> i64 {"
@@ -184,6 +235,24 @@ printf '%s' "fn main() -> i64 { return 0; }" > "$missing_source"
   printf '%s\n' "  return 0;"
   printf '%s\n' "}"
 } > "$clean_source"
+
+printf '%s\n' "lint/trailing-whitespace = error" > "$explicit_config_file"
+
+mkdir -p "$discovery_child"
+printf '%s\n' "lint/trailing-whitespace = note" > "$discovery_parent/ari-lint.rules"
+{
+  printf '%s  \n' "fn main() -> i64 {"
+  printf '%s\n' "  return 0;"
+  printf '%s\n' "}"
+} > "$discovered_source"
+
+{
+  printf '%s  \n' "fn main() -> i64 {"
+  printf '%s\n' "  return 1;"
+  printf '%s\n' "}"
+} > "$multi_dirty_one"
+
+printf '%s' "fn main() -> i64 { return 2; }" > "$multi_dirty_two"
 
 printf '%s\n' "ari-lint local parity smoke report"
 printf '%s\n' "current ari-lint: $current_lint"
@@ -201,21 +270,13 @@ for case_name in trailing-whitespace missing-final-newline clean; do
     *) fail "unknown parity case: $case_name" ;;
   esac
 
-  current_stdout="$tmp_dir/current-$case_name.stdout"
-  current_stderr="$tmp_dir/current-$case_name.stderr"
-  current_status="$tmp_dir/current-$case_name.status"
-  original_stdout="$tmp_dir/original-$case_name.stdout"
-  original_stderr="$tmp_dir/original-$case_name.stderr"
-  original_status="$tmp_dir/original-$case_name.status"
-
-  run_case "current ari-lint" "$current_lint" "$case_name" "$source_path" "$current_stdout" "$current_stderr" "$current_status"
-  run_case "original tools/lint" "$original_lint" "$case_name" "$source_path" "$original_stdout" "$original_stderr" "$original_status"
-
-  printf '%s\n' "case: $case_name"
-  print_case_summary "current ari-lint" "$case_name" "$source_path" "$current_stdout" "$current_stderr" "$current_status"
-  print_case_summary "original tools/lint" "$case_name" "$source_path" "$original_stdout" "$original_stderr" "$original_status"
-  printf '%s\n' ""
+  report_case "$case_name" "$original_pwd" "$source_path" "$source_path"
 done
+
+report_case "explicit-config" "$original_pwd" "$trailing_source" --config "$explicit_config_file" "$trailing_source"
+report_case "rule-override" "$original_pwd" "$trailing_source" --config "$explicit_config_file" --rule trailing-whitespace=note "$trailing_source"
+report_case "discovered-config" "$discovery_parent" "child/discovered.ari" "child/discovered.ari"
+report_case "multi-file" "$original_pwd" "$multi_dirty_one|$multi_dirty_two" "$multi_dirty_one" "$multi_dirty_two"
 
 printf '%s\n' "known differences:"
 printf '%s\n' "- current Ari-language ari-lint does not invoke ari --check yet; original tools/lint does."

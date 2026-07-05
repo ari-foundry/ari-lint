@@ -90,6 +90,16 @@ require_no_grep "arix" .github/workflows/check.yml
 [ -x scripts/parity.sh ] || fail "scripts/parity.sh is not executable"
 [ -x scripts/test.sh ] || fail "scripts/test.sh is not executable"
 
+require_grep "explicit-config" scripts/parity.sh
+require_grep "rule-override" scripts/parity.sh
+require_grep "discovered-config" scripts/parity.sh
+require_grep "multi-file" scripts/parity.sh
+require_grep "file_paths_present" scripts/parity.sh
+require_grep "severity_note_present" scripts/parity.sh
+require_grep "report-only config, .--rule., discovered config" docs/dev/ari-implementation-plan.md
+require_grep "explicit .--config." docs/dev/parity-test-plan.md
+require_grep "rule-override, discovered-config, and multi-file cases" scripts/README.md
+
 require_grep "build.sh" scripts/smoke.sh
 require_grep "ARI_COMPILER" scripts/smoke.sh
 require_no_grep "ari --check" scripts/smoke.sh

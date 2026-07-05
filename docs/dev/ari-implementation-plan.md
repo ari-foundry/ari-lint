@@ -160,8 +160,9 @@ It does not move `tools/lint` or change build behavior.
   `scripts/parity.sh`. It verifies the original Ari `tools/lint` entrypoint
   from the Ari repo `Makefile` and `tools/lint/main.cpp`, builds this
   repository through `scripts/build.sh`, runs both tools on temporary clean,
-  trailing-whitespace, and missing-final-newline fixtures, and reports
-  differences without failing on parity mismatches or claiming parity.
+  trailing-whitespace, missing-final-newline, explicit-config, rule-override,
+  discovered-config, and multi-file cases, and reports differences without
+  failing on parity mismatches or claiming parity.
 - An internal list-rules output path now records the known rule count for
   `lint/trailing-whitespace` and `lint/missing-final-newline`, and an internal
   human-readable list-rules formatter builds text from the same metadata.
@@ -307,7 +308,8 @@ It does not move `tools/lint` or change build behavior.
 - A local parity smoke/report script now exists at `scripts/parity.sh`. It
   accepts an explicit Ari compiler path or `ARI_COMPILER`, an Ari repository
   path or `ARI_REPO`, and optionally an existing original lint command path or
-  `ORIGINAL_LINT`. It is not run by `scripts/test.sh` or CI and is not a
+  `ORIGINAL_LINT`. It includes report-only config, `--rule`, discovered config,
+  and multi-file cases, but is not run by `scripts/test.sh` or CI and is not a
   strict parity gate.
 - A local standalone test entrypoint now exists at `scripts/test.sh`. It
   resolves the repository root and delegates to `scripts/check.sh`, so it
@@ -750,8 +752,9 @@ does not compare output.
 does not replace the source-only skeleton, does not add source-controlled
 fixtures or golden files, and does not make differences fail. It currently
 compares exit code, stdout/stderr presence, whether each rule is reported,
-basic path presence, and basic line/column presence for trailing-whitespace,
-missing-final-newline, and clean temporary fixtures.
+severity sightings, basic path hit counts, and basic line/column presence for
+baseline rule, explicit config, command-line rule override, discovered config,
+and multi-file temporary cases.
 
 Parity dimensions:
 
@@ -983,6 +986,8 @@ usable.
       repository, locates the original Ari `tools/lint` entrypoint from the
       Ari repo, compares temporary clean/trailing-whitespace/missing-final-newline
       fixtures, and keeps differences non-gating
+- [x] Expand the local report-only parity smoke script with explicit config,
+      command-line rule override, discovered config, and multi-file cases
 - [x] Record compiler-backed CI gate without running the Ari compiler,
       `ari --check`, `tools/lint`, package managers, or release automation
 - [x] Wire local standalone build script root handling without running the Ari
