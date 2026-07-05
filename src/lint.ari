@@ -1,8 +1,8 @@
 // Lint run aggregation over caller-provided source text and explicit file paths.
 //
 // The default paths do not apply config. The with-overrides paths accept
-// already-parsed severity overrides, preserve diagnostic counts, and apply
-// those overrides to collected diagnostics. Internal diagnostic
+// already-parsed severity overrides, apply them to collected diagnostics, and
+// suppress diagnostics configured to Off. Internal diagnostic
 // collection writes into caller-provided vectors only. Each file-backed path
 // reads only explicit paths through the source boundary.
 // No path should scan the filesystem, write output, serialize JSON, invoke ari
@@ -89,6 +89,26 @@ fn file_diagnostic_collection_result(
   };
 }
 
+fn severity_is_enabled(severity: super::severity::Severity) -> bool {
+  match severity {
+    super::severity::Off => {
+      return false;
+    }
+    super::severity::Hint => {
+      return true;
+    }
+    super::severity::Note => {
+      return true;
+    }
+    super::severity::Warning => {
+      return true;
+    }
+    super::severity::Error => {
+      return true;
+    }
+  }
+}
+
 pub fn lint_in_memory_source(
   zone: ref mut Zone,
   file_path: Slice[u8],
@@ -154,22 +174,26 @@ pub fn collect_lint_diagnostics_in_memory_with_overrides(
   diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
 ) -> i64 {
   var raw_diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 8);
-  let diagnostic_count = collect_lint_diagnostics_in_memory(
+  collect_lint_diagnostics_in_memory(
     zone,
     file_path,
     source_text,
     ref mut raw_diagnostics
   );
 
+  var enabled_diagnostic_count = 0;
   for diagnostic in raw_diagnostics {
     let application = super::config::apply_rule_severity_to_diagnostic_from_overrides(
       zone,
       diagnostic,
       overrides
     );
-    diagnostics.push(application.diagnostic);
+    if severity_is_enabled(application.diagnostic.severity) {
+      diagnostics.push(application.diagnostic);
+      enabled_diagnostic_count = enabled_diagnostic_count + 1;
+    }
   }
-  return diagnostic_count;
+  return enabled_diagnostic_count;
 }
 
 fn lint_in_memory_source_from_overrides(
@@ -178,24 +202,22 @@ fn lint_in_memory_source_from_overrides(
   source_text: Slice[u8],
   overrides: ref std::vec::Vec[super::config::RuleSeverityOverride]
 ) -> InMemoryLintRunResult {
-  let trailing = super::rules::trailing_whitespace::lint_trailing_whitespace_in_memory(
+  var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 8);
+  let diagnostic_count = collect_lint_diagnostics_in_memory_with_overrides(
     zone,
     file_path,
-    source_text
+    source_text,
+    overrides,
+    ref mut diagnostics
   );
 
-  let missing_final = super::rules::missing_final_newline::lint_missing_final_newline_in_memory(
-    zone,
-    file_path,
-    source_text
-  );
-  let first_diagnostic = super::diagnostic::first_available_diagnostic(
-    trailing.first_diagnostic,
-    missing_final.first_diagnostic
-  );
+  var first_diagnostic = super::diagnostic::no_diagnostic();
+  if diagnostics.len() > 0 {
+    first_diagnostic = super::diagnostic::some_diagnostic(diagnostics.get(0));
+  }
 
   return InMemoryLintRunResult {
-    diagnostic_count: trailing.diagnostic_count + missing_final.diagnostic_count,
+    diagnostic_count: diagnostic_count,
     first_diagnostic: first_diagnostic,
     source_count: 1,
     reads_files: false,
@@ -351,8 +373,8 @@ pub fn lint_file_source_with_overrides(
 }
 
 // The with-overrides paths accept already-parsed severity override data,
-// preserve diagnostic counts, and apply override severity to collected
-// diagnostics. They do not read config files, discover
+// apply override severity to collected diagnostics, and suppress diagnostics
+// configured to Off. They do not read config files, discover
 // ari-lint.rules, inspect CLI config arguments, scan directories, write output,
 // serialize JSON, invoke ari --check, or call tools/lint. CLI config
 // integration remains in the CLI layer.

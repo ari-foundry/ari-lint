@@ -48,7 +48,8 @@ missing include value usage, malformed `--rule` usage, invalid `--rule` severity
 tools with `--json --ari` on temporary trailing-whitespace,
 missing-final-newline, clean, missing-compiler, compiler-error, explicit-config,
 config-read-error, invalid config, invalid rule override, invalid rule severity,
-unknown rule override, rule-override, include-path, discovered-config, and multi-file cases,
+unknown rule override, config-off, rule-override, include-path,
+discovered-config, and multi-file cases,
 and prints a concise report of exit codes, stdout/stderr
 presence, help/usage/list-rules signals, compiler-check-failed and missing
 compiler path sightings, compiler-error JSON-shape and diagnostic-code
@@ -68,9 +69,10 @@ CI, home/global/XDG config search, new lint semantics, or compatibility claims.
 It checks that `--help` names the current supported option set, checks focused
 usage-error summaries for malformed `--rule` text and missing `--config` or
 `--rule` values, parser-only missing `--ari` values, plus one unknown option,
-and checks only the current JSON rule code, severity, message, file path, line,
-and column fields for temporary diagnostics. JSON list-rules output assertions
-and broad golden output coverage remain future smoke coverage.
+checks that explicit config and CLI `--rule` `off` suppress diagnostics, and
+checks only the current JSON rule code, severity, message, file path, line, and
+column fields for temporary diagnostics. JSON list-rules output assertions and
+broad golden output coverage remain future smoke coverage.
 
 `parity.sh` does not add CI wiring, a strict parity gate, golden files,
 source-controlled parity fixtures, new lint semantics, release compatibility
