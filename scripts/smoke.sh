@@ -77,6 +77,17 @@ run_stderr_usage_smoke() {
   [ "$status" -eq 2 ] || fail "expected usage exit code 2, got $status"
 }
 
+run_stderr_unavailable_smoke() {
+  output_file="$1"
+  shift
+  printf '%s\n' "smoke.sh: running $*"
+  set +e
+  "$@" > "$tmp_dir/unavailable.stdout" 2> "$output_file"
+  status=$?
+  set -e
+  [ "$status" -eq 1 ] || fail "expected unavailable exit code 1, got $status"
+}
+
 require_text_grep() {
   pattern="$1"
   file="$2"
@@ -290,5 +301,11 @@ mixed_output="$tmp_dir/mixed-clean-dirty.json"
 run_json_diagnostic_smoke "$mixed_output" "$binary" --json "$clean_source" "$multi_dirty_one"
 require_json_grep "\"filePath\":\"$multi_dirty_one\"" "$mixed_output"
 require_json_no_grep "\"filePath\":\"$clean_source\"" "$mixed_output"
+
+missing_source_file="$tmp_dir/missing-source.ari"
+multi_read_error_output="$tmp_dir/multi-read-error.stderr"
+run_stderr_unavailable_smoke "$multi_read_error_output" "$binary" --json "$clean_source" "$missing_source_file"
+require_text_grep "unable to read one or more source files" "$multi_read_error_output"
+require_text_grep "$missing_source_file" "$multi_read_error_output"
 
 printf '%s\n' "smoke.sh: smoke checks passed"
