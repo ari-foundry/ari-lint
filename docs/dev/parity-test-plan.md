@@ -194,14 +194,16 @@ Current local report-only flow in `scripts/parity.sh`:
    missing-option text, stdout/stderr, and exit-code signals.
 8. Run a report-only missing `--rule` value case and report usage text,
    missing-option text, stdout/stderr, and exit-code signals.
-9. Run a report-only `--list-rules` case and report rule-code,
+9. Run a report-only missing `--ari` value case and report usage text,
+   missing-option text, stdout/stderr, and exit-code signals.
+10. Run a report-only `--list-rules` case and report rule-code,
    default-severity, stdout/stderr, exit-code, and short-name-field signals.
-10. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
+11. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
    explicit-config, discovered-config, and multi-file fixtures.
-11. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
+12. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
    baseline rule, explicit `--config`, command-line `--rule`, discovered
    `ari-lint.rules`, and multi-file cases.
-12. Report exit code, stdout/stderr presence, rule sightings, severity
+13. Report exit code, stdout/stderr presence, rule sightings, severity
    sightings, file-path hit counts, and line/column presence.
 
 The report intentionally does not require exact text equality or exact JSON
