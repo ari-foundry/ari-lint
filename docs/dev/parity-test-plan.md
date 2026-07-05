@@ -216,8 +216,8 @@ Current local report-only flow in `scripts/parity.sh`:
    invalid-rule-setting, unknown-rule-or-severity, stdout/stderr, and
    exit-code signals.
 19. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
-   baseline rule, explicit `--config`, command-line `--rule`, discovered
-   `ari-lint.rules`, and multi-file cases.
+   baseline rule, explicit `--config`, command-line `--rule`, include-path
+   `-I`, discovered `ari-lint.rules`, and multi-file cases.
 20. Report exit code, stdout/stderr presence, rule sightings, severity
    sightings, file-path hit counts, and line/column presence.
 

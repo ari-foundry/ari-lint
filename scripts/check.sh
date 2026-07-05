@@ -106,6 +106,7 @@ require_grep "case: invalid-rule-override" scripts/parity.sh
 require_grep "case: invalid-rule-severity" scripts/parity.sh
 require_grep "case: unknown-rule-override" scripts/parity.sh
 require_grep "rule-override" scripts/parity.sh
+require_grep "include-path" scripts/parity.sh
 require_grep "discovered-config" scripts/parity.sh
 require_grep "multi-file" scripts/parity.sh
 require_grep "file_paths_present" scripts/parity.sh
@@ -154,6 +155,7 @@ require_grep "unknown rule override" scripts/README.md
 require_grep "missing rule value usage" scripts/README.md
 require_grep "missing ari value usage" scripts/README.md
 require_grep "missing include value usage" scripts/README.md
+require_grep "include-path" scripts/README.md
 require_grep "JSON list-rules" scripts/README.md
 require_grep "discovered-config, and multi-file cases" scripts/README.md
 
