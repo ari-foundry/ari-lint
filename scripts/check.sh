@@ -71,6 +71,7 @@ require_file tests/README.md
 require_file scripts/README.md
 require_file scripts/build.sh
 require_file scripts/smoke.sh
+require_file scripts/parity.sh
 require_file scripts/test.sh
 require_file .github/workflows/check.yml
 
@@ -86,6 +87,7 @@ require_no_grep "arix" .github/workflows/check.yml
 
 [ -x scripts/build.sh ] || fail "scripts/build.sh is not executable"
 [ -x scripts/smoke.sh ] || fail "scripts/smoke.sh is not executable"
+[ -x scripts/parity.sh ] || fail "scripts/parity.sh is not executable"
 [ -x scripts/test.sh ] || fail "scripts/test.sh is not executable"
 
 require_grep "build.sh" scripts/smoke.sh
@@ -257,7 +259,7 @@ require_grep "ari-lint Parity Test Plan" docs/dev/parity-test-plan.md
 require_grep "tools/lint" docs/dev/parity-test-plan.md
 require_grep "docs/dev/compiler-invocation.md" docs/dev/parity-test-plan.md
 require_grep "docs/dev/compiler-provisioning.md" docs/dev/parity-test-plan.md
-require_grep "Do not add test fixtures in this step" docs/dev/parity-test-plan.md
+require_grep "Do not add source-controlled test fixtures in this step" docs/dev/parity-test-plan.md
 require_grep "# lint/trailing-whitespace" docs/rules/trailing-whitespace.md
 require_grep "Do not read files in this step" docs/rules/trailing-whitespace.md
 require_grep "in-memory behavior" docs/rules/trailing-whitespace.md
@@ -279,15 +281,12 @@ require_grep "Do not add broad fixture coverage in this step" docs/rules/missing
 require_grep "docs/rules/missing-final-newline-parity.md" docs/rules/missing-final-newline.md
 require_grep "docs/rules/missing-final-newline-parity.md" docs/rules/missing-final-newline-fixtures.md
 require_grep "docs/rules/missing-final-newline-parity.md" tests/README.md
-require_grep "Do not add a parity runner in this step" docs/rules/missing-final-newline-parity.md
+require_grep "Do not add a strict parity gate in this step" docs/rules/missing-final-newline-parity.md
 require_grep "docs/rules/trailing-whitespace-parity.md" docs/rules/trailing-whitespace.md
 require_grep "docs/rules/trailing-whitespace-parity.md" docs/rules/trailing-whitespace-fixtures.md
 require_grep "docs/rules/trailing-whitespace-parity.md" docs/dev/parity-test-plan.md
 require_grep "docs/rules/trailing-whitespace-parity.md" tests/README.md
-require_grep "Do not add a parity runner in this step" docs/rules/trailing-whitespace-parity.md
-require_grep "parity plan exists but runner is not implemented" docs/rules/trailing-whitespace.md
-require_grep "Fixture comparison is planned but not automated yet" docs/rules/trailing-whitespace-fixtures.md
-require_grep "No executable parity runner exists yet" tests/README.md
+require_grep "Do not add a strict parity gate in this step" docs/rules/trailing-whitespace-parity.md
 require_grep "first minimal fixture coverage has started" docs/rules/trailing-whitespace-fixtures.md
 require_grep "initial clean and trailing-spaces fixtures are started" docs/rules/trailing-whitespace.md
 require_grep "trailing-whitespace design note" docs/dev/roadmap.md

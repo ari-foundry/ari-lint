@@ -124,9 +124,10 @@ Cross-boundary issues should link both repos if needed.
 
 - Do not implement `--ari` parsing in this step.
 - Do not implement `ARI_COMPILER` handling in this step.
-- Do not run the compiler in this step.
-- Do not invoke `ari --check` in this step.
+- Do not add compiler execution to CI in this step.
+- Do not add direct `ari --check` invocation to this repository or CI in this
+  step.
 - Do not add compiler download or build automation in this step.
-- Do not run tools/lint in this step.
-- Do not add parity runner behavior in this step.
+- Do not add `tools/lint` execution to CI in this step.
+- Do not add a strict parity gate in this step.
 - Do not add compatibility claims in this step.

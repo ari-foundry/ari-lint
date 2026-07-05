@@ -33,6 +33,17 @@ precedence. It also checks current JSON diagnostic `ruleCode`, `severity`,
 for two dirty source files, a clean plus dirty multi-file invocation, and a
 clean plus clean multi-file invocation.
 
+`parity.sh` is a local report-only parity smoke wrapper. It accepts an explicit
+Ari compiler path as the first argument or through `ARI_COMPILER`, an
+`ari-foundry/ari` checkout path as the second argument or through `ARI_REPO`,
+and optionally an already-built original lint command path as the third
+argument or through `ORIGINAL_LINT`. It verifies the original lint entrypoint
+from the Ari repo `Makefile` and `tools/lint/main.cpp`, builds this repository
+with `scripts/build.sh`, runs both tools with `--json --ari` on temporary
+trailing-whitespace, missing-final-newline, and clean fixtures, and prints a
+concise report of exit codes, stdout/stderr presence, rule sightings, file
+paths, and line/column presence. Parity differences do not fail the script.
+
 `test.sh` does not download or build the Ari compiler. It does not execute
 `tools/lint`, run `ari --check`, install dependencies, run package manager
 commands, run parity checks, or participate in CI as a compiler-backed job yet.
@@ -46,3 +57,9 @@ CI, home/global/XDG config search, new lint semantics, or compatibility claims.
 It checks only the current JSON rule code, severity, message, file path, line,
 and column fields for temporary diagnostics. JSON list-rules output assertions
 and broad golden output coverage remain future smoke coverage.
+
+`parity.sh` does not add CI wiring, a strict parity gate, golden files,
+source-controlled parity fixtures, new lint semantics, release compatibility
+claims, or copies of `tools/lint`. It fails only for infrastructure errors such
+as a missing compiler, missing Ari repo, missing original lint command, or
+local `ari-lint` build failure.

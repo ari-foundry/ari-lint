@@ -25,7 +25,8 @@ behavior for `lint/missing-final-newline`.
   fixture coverage and behavior tests remain future work.
 - Rule-specific parity planning is tracked in
   [docs/rules/missing-final-newline-parity.md](missing-final-newline-parity.md);
-  the parity plan exists but runner is not implemented.
+  a first local parity smoke/report exists in `scripts/parity.sh`, while strict
+  rule-specific parity tests and golden comparisons remain future work.
 
 ## Rule Identity
 
@@ -95,7 +96,8 @@ The future implementation should compare behavior against the current bundled
 
 The detailed missing-final-newline parity plan is documented in
 [docs/rules/missing-final-newline-parity.md](missing-final-newline-parity.md).
-The parity plan exists but runner is not implemented.
+A first local parity smoke/report exists in `scripts/parity.sh`, while strict
+rule-specific parity tests and golden comparisons remain future work.
 
 Parity dimensions:
 
