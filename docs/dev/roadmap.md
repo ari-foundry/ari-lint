@@ -94,6 +94,7 @@ internal human diagnostic array formatter added /
 multi-file source linting added /
 focused diagnostic field smoke coverage added /
 local parity smoke/report added /
+local parity smoke/report config and multi-file cases added /
 no stable JSON schema or broad JSON output suite yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -713,8 +714,9 @@ and test work.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the fixture and golden output
       strategy. A first local report-only `scripts/parity.sh` smoke now
-      compares temporary clean, trailing-whitespace, and missing-final-newline
-      fixtures against the original bundled lint tool, but strict parity tests,
+      compares temporary clean, trailing-whitespace, missing-final-newline,
+      explicit-config, rule-override, discovered-config, and multi-file cases
+      against the original bundled lint tool, but strict parity tests,
       source-controlled parity fixtures, golden files, and CI parity jobs are
       not implemented.
 - [x] Add source-only parity runner skeleton in `src/parity.ari`; Ari-source
@@ -722,9 +724,9 @@ and test work.
       compiler execution, and CI parity jobs remain future work.
 - [x] Add local parity smoke/report in `scripts/parity.sh` that builds this
       repository, verifies the original lint entrypoint from the Ari repo
-      `Makefile` and `tools/lint/main.cpp`, compares three temporary fixtures,
-      and keeps differences non-gating without adding CI parity jobs or
-      compatibility claims.
+      `Makefile` and `tools/lint/main.cpp`, compares temporary rule, config,
+      and multi-file cases, and keeps differences non-gating without adding CI
+      parity jobs or compatibility claims.
 - [x] Record compiler-backed CI gate; `.github/workflows/check.yml` remains
       lightweight and compiler-free until standalone tests and explicit Ari
       compiler provisioning exist.

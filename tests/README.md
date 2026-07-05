@@ -120,9 +120,10 @@ explicit Ari compiler path or `ARI_COMPILER`, an Ari repo path or `ARI_REPO`,
 and optionally an original lint command path or `ORIGINAL_LINT`. It verifies
 the original lint entrypoint from the Ari repo `Makefile` and
 `tools/lint/main.cpp`, builds this repository through `scripts/build.sh`, runs
-both tools with `--json --ari` on temporary clean, trailing-whitespace, and
-missing-final-newline fixtures, and reports exit codes, stdout/stderr
-presence, rule sightings, file-path presence, and line/column presence.
+both tools with `--json --ari` on temporary clean, trailing-whitespace,
+missing-final-newline, explicit-config, rule-override, discovered-config, and
+multi-file cases, and reports exit codes, stdout/stderr presence, rule
+sightings, severity sightings, file-path hit counts, and line/column presence.
 Differences do not fail the script. It is not run by `scripts/test.sh` or CI,
 does not add golden files or source-controlled parity fixtures, and does not
 claim compatibility or parity.

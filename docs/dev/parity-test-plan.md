@@ -13,8 +13,9 @@ source.
 
 A first local non-gating parity smoke/report now exists at `scripts/parity.sh`.
 It builds this repository with `scripts/build.sh`, runs both implementations on
-temporary clean, trailing-whitespace, and missing-final-newline fixtures, and
-prints a concise report without failing on behavior differences.
+temporary clean, trailing-whitespace, missing-final-newline, config, and
+multi-file cases, and prints a concise report without failing on behavior
+differences.
 
 ## Current Status
 
@@ -182,12 +183,13 @@ Current local report-only flow in `scripts/parity.sh`:
 3. Verify the original lint entrypoint from the Ari repo `Makefile` and
    `tools/lint/main.cpp`.
 4. Build this repository's current `ari-lint` with `scripts/build.sh`.
-5. Create tiny temporary trailing-whitespace, missing-final-newline, and clean
-   fixtures.
-6. Run current `ari-lint` and original `tools/lint` with `--json --ari` on each
-   fixture.
-7. Report exit code, stdout/stderr presence, rule sightings, file-path
-   presence, and line/column presence.
+5. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
+   explicit-config, discovered-config, and multi-file fixtures.
+6. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
+   baseline rule, explicit `--config`, command-line `--rule`, discovered
+   `ari-lint.rules`, and multi-file cases.
+7. Report exit code, stdout/stderr presence, rule sightings, severity
+   sightings, file-path hit counts, and line/column presence.
 
 The report intentionally does not require exact text equality or exact JSON
 equality yet.
@@ -257,6 +259,8 @@ from the other repo if needed.
       implementation
 - [x] Add first local non-gating parity smoke/report with temporary clean,
       trailing-whitespace, and missing-final-newline fixtures
+- [x] Expand the local non-gating parity smoke/report with explicit `--config`,
+      command-line `--rule`, discovered `ari-lint.rules`, and multi-file cases
 - [ ] Add first source-controlled CLI smoke parity fixture
 - [ ] Add first source-controlled rule parity fixture for trailing whitespace
 - [ ] Add first source-controlled rule parity fixture for missing final newline

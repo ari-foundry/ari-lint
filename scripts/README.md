@@ -40,9 +40,11 @@ and optionally an already-built original lint command path as the third
 argument or through `ORIGINAL_LINT`. It verifies the original lint entrypoint
 from the Ari repo `Makefile` and `tools/lint/main.cpp`, builds this repository
 with `scripts/build.sh`, runs both tools with `--json --ari` on temporary
-trailing-whitespace, missing-final-newline, and clean fixtures, and prints a
-concise report of exit codes, stdout/stderr presence, rule sightings, file
-paths, and line/column presence. Parity differences do not fail the script.
+trailing-whitespace, missing-final-newline, clean, explicit-config,
+rule-override, discovered-config, and multi-file cases, and prints a concise
+report of exit codes, stdout/stderr presence, rule sightings, severity
+sightings, file-path hit counts, and line/column presence. Parity differences
+do not fail the script.
 
 `test.sh` does not download or build the Ari compiler. It does not execute
 `tools/lint`, run `ari --check`, install dependencies, run package manager
