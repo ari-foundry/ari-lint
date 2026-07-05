@@ -729,6 +729,7 @@ require_grep "config_file_path" src/cli.ari
 require_grep "--rule" src/cli.ari
 require_grep "rule_override_count" src/cli.ari
 require_grep "rule_override_problem_count" src/cli.ari
+require_grep "first_rule_override_problem" src/cli.ari
 require_grep "help_requested" src/cli.ari
 require_grep "problem_count" src/cli.ari
 require_grep "parse_cli_tokens" src/cli.ari
