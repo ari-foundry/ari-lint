@@ -12,14 +12,16 @@ matrix, not a parity claim, and not a release policy.
 
 ## Current Report Scope
 
-The local parity report currently compares a report-only `--list-rules` CLI
-case plus temporary clean, trailing-whitespace, missing-final-newline,
-explicit-config, rule-override, discovered-config, and multi-file cases.
+The local parity report currently compares report-only `--help` and
+`--list-rules` CLI cases plus temporary clean, trailing-whitespace,
+missing-final-newline, explicit-config, rule-override, discovered-config, and
+multi-file cases.
 
 It reports signals only:
 
 - exit code
 - stdout and stderr presence
+- help usage-option sightings
 - list-rules rule-code, default-severity, and short-name-field sightings
 - rule sightings
 - severity sightings
@@ -100,6 +102,26 @@ Follow-up:
 
 - decide the standalone lint diagnostic exit-code contract before releases
 - add strict exit-code parity only after the contract is documented
+
+### Help Output Stream And Shape
+
+Current standalone `ari-lint --help` emits multi-line help text on stdout.
+Original `tools/lint --help` emits a one-line usage message on stderr.
+
+Classification: original `tools/lint` behavior difference and `ari-lint`
+implementation/design follow-up.
+
+Impact:
+
+- exact help text equality is not expected yet
+- stdout/stderr stream parity for help is not established
+- release compatibility claims must not be made from the current report
+
+Follow-up:
+
+- decide whether standalone help text and stream behavior should preserve the
+  original shape or define a new stable standalone contract
+- add strict help golden checks only after the help contract is documented
 
 ### List Rules Output Detail
 

@@ -458,6 +458,7 @@ fn write_cli_help_stdout(zone: ref mut Zone) -> bool {
   text.append_string_in(zone, "  -h, --help                 Show this help text.\n");
   text.append_string_in(zone, "  --list-rules               List known lint rules.\n");
   text.append_string_in(zone, "  --json                     Write source-file diagnostics as JSON.\n");
+  text.append_string_in(zone, "  --config PATH              Load rule severities from a config file.\n");
   text.append_string_in(zone, "  --rule RULE=SEVERITY       Override a known rule severity.\n");
   let write_result = super::output::write_stdout_text(zone, ref text);
   return write_result.wrote_stdout;
