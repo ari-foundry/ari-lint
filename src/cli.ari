@@ -562,6 +562,10 @@ fn write_file_read_error_stderr(
     text.append_string_in(zone, path);
   } else {
     text.append_string_in(zone, "ari-lint: unable to read one or more source files");
+    if path.len() > 0 {
+      text.append_string_in(zone, ": ");
+      text.append_string_in(zone, path);
+    }
   }
   text.append_string_in(zone, "\n");
   let write_result = super::output::write_stderr_text(zone, ref text);
@@ -811,10 +815,14 @@ fn dispatch_cli_command_with_main_output(
       CliMissingSource => {}
     }
     if command_result.read_error_count > 0 {
+      var read_error_path = command_result.detail;
+      if read_error_path.len() == 0 {
+        read_error_path = parse_result.args.first_source_file;
+      }
       let wrote_read_error_stderr = write_file_read_error_stderr(
         zone,
         parse_result.args.source_count,
-        parse_result.args.first_source_file
+        read_error_path
       );
       if !wrote_read_error_stderr {
         var failed_read_result = cli_command_result(
@@ -1048,6 +1056,7 @@ fn collect_cli_source_diagnostics_from_tokens(
     }
     var diagnostic_count = 0;
     var read_error_count = 0;
+    var first_read_error_path = std::string::new(zone, 0);
     for source_file in parse_result.args.source_files {
       let collection_result = super::lint::collect_file_lint_diagnostics_with_override_refs(
         zone,
@@ -1056,16 +1065,27 @@ fn collect_cli_source_diagnostics_from_tokens(
         diagnostics
       );
       diagnostic_count = diagnostic_count + collection_result.diagnostic_count;
+      if collection_result.read_error_count > 0 && first_read_error_path.len() == 0 {
+        first_read_error_path = std::string::from_slice_in(
+          zone,
+          source_file.as_slice()
+        );
+      }
       read_error_count = read_error_count + collection_result.read_error_count;
     }
     let exit_code = cli_file_lint_exit_code(zone, diagnostic_count, read_error_count);
+    var result_detail: Slice[u8] =
+      "Source-file lint diagnostics were collected with parsed config and --rule severity overrides without writing output.";
+    if read_error_count > 0 {
+      result_detail = first_read_error_path.as_slice();
+    }
     var command_result = cli_command_result(
       CliSourceLintResult,
       false,
       diagnostic_count,
       read_error_count,
       exit_code,
-      "Source-file lint diagnostics were collected with parsed config and --rule severity overrides without writing output."
+      result_detail
     );
     if diagnostics.len() > 0 {
       command_result.first_diagnostic =
@@ -1089,6 +1109,7 @@ pub fn collect_cli_source_diagnostics(
   if parse_result.args.has_source_file {
     var diagnostic_count = 0;
     var read_error_count = 0;
+    var first_read_error_path = std::string::new(zone, 0);
     for source_file in parse_result.args.source_files {
       let collection_result = super::lint::collect_file_lint_diagnostics(
         zone,
@@ -1096,16 +1117,27 @@ pub fn collect_cli_source_diagnostics(
         diagnostics
       );
       diagnostic_count = diagnostic_count + collection_result.diagnostic_count;
+      if collection_result.read_error_count > 0 && first_read_error_path.len() == 0 {
+        first_read_error_path = std::string::from_slice_in(
+          zone,
+          source_file.as_slice()
+        );
+      }
       read_error_count = read_error_count + collection_result.read_error_count;
     }
     let exit_code = cli_file_lint_exit_code(zone, diagnostic_count, read_error_count);
+    var result_detail: Slice[u8] =
+      "Source-file lint diagnostics were collected internally into a caller-provided vector without writing output.";
+    if read_error_count > 0 {
+      result_detail = first_read_error_path.as_slice();
+    }
     var command_result = cli_command_result(
       CliSourceLintResult,
       false,
       diagnostic_count,
       read_error_count,
       exit_code,
-      "Source-file lint diagnostics were collected internally into a caller-provided vector without writing output."
+      result_detail
     );
     if diagnostics.len() > 0 {
       command_result.first_diagnostic =

@@ -472,6 +472,7 @@ require_grep "Usage: ari-lint" src/cli.ari
 require_grep "invalid command-line arguments" src/cli.ari
 require_grep "missing source file" src/cli.ari
 require_grep "unable to read source file" src/cli.ari
+require_grep "unable to read one or more source files" src/cli.ari
 require_grep "invalid config file" src/cli.ari
 require_grep "collect_cli_source_diagnostics" src/cli.ari
 require_grep "collect_explicit_cli_diagnostics" src/cli.ari
@@ -733,6 +734,7 @@ require_grep "--rule" src/cli.ari
 require_grep "rule_override_count" src/cli.ari
 require_grep "rule_override_problem_count" src/cli.ari
 require_grep "first_rule_override_problem" src/cli.ari
+require_grep "first_read_error_path" src/cli.ari
 require_grep "help_requested" src/cli.ari
 require_grep "problem_count" src/cli.ari
 require_grep "parse_cli_tokens" src/cli.ari
