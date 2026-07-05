@@ -156,6 +156,12 @@ It does not move `tools/lint` or change build behavior.
   output-comparison flags false. It does not run `tools/lint`, invoke an
   `ari-lint` binary, read fixtures, write files, compare output, invoke the
   compiler, call `ari --check`, or add CI parity behavior.
+- A first local report-only parity smoke script now exists at
+  `scripts/parity.sh`. It verifies the original Ari `tools/lint` entrypoint
+  from the Ari repo `Makefile` and `tools/lint/main.cpp`, builds this
+  repository through `scripts/build.sh`, runs both tools on temporary clean,
+  trailing-whitespace, and missing-final-newline fixtures, and reports
+  differences without failing on parity mismatches or claiming parity.
 - An internal list-rules output path now records the known rule count for
   `lint/trailing-whitespace` and `lint/missing-final-newline`, and an internal
   human-readable list-rules formatter builds text from the same metadata.
@@ -298,6 +304,11 @@ It does not move `tools/lint` or change build behavior.
   output tests, parity checks, compiler-backed CI, home/global/XDG config
   search, new lint semantics, or compatibility claims. JSON list-rules output
   assertions and broader golden output coverage remain future smoke coverage.
+- A local parity smoke/report script now exists at `scripts/parity.sh`. It
+  accepts an explicit Ari compiler path or `ARI_COMPILER`, an Ari repository
+  path or `ARI_REPO`, and optionally an existing original lint command path or
+  `ORIGINAL_LINT`. It is not run by `scripts/test.sh` or CI and is not a
+  strict parity gate.
 - A local standalone test entrypoint now exists at `scripts/test.sh`. It
   resolves the repository root and delegates to `scripts/check.sh`, so it
   currently runs only compiler-free repository-shape and fixture-invariant
@@ -720,6 +731,11 @@ The source-only parity runner skeleton in `src/parity.ari` records the future
 comparison boundary. It does not execute `tools/lint`, execute `ari-lint`, read
 fixtures, compare outputs, invoke the compiler, or run in CI.
 
+The local `scripts/parity.sh` smoke/report executes outside Ari source as a
+developer helper only. It compares current output signals with the original
+bundled lint binary on three temporary fixtures and keeps differences
+non-gating.
+
 ## Parity Strategy
 
 Parity should be checked against the current bundled `tools/lint`
@@ -729,6 +745,13 @@ A source-only parity runner skeleton names current `tools/lint` as the
 reference implementation and the Ari-language `ari-lint` implementation as the
 future implementation under test. It is not an executable parity runner and
 does not compare output.
+
+`scripts/parity.sh` provides the first executable local parity smoke/report. It
+does not replace the source-only skeleton, does not add source-controlled
+fixtures or golden files, and does not make differences fail. It currently
+compares exit code, stdout/stderr presence, whether each rule is reported,
+basic path presence, and basic line/column presence for trailing-whitespace,
+missing-final-newline, and clean temporary fixtures.
 
 Parity dimensions:
 
@@ -800,9 +823,11 @@ usable.
   implementation.
 - Source directories may accidentally collect README-style documentation unless
   docs stay under `docs/`.
-- The source-only parity runner skeleton may be mistaken for an executable
-  runner unless docs and checks continue to state that execution remains future
-  work.
+- The source-only parity runner skeleton may be mistaken for the local shell
+  parity helper unless docs and checks continue to distinguish the Ari-source
+  skeleton from `scripts/parity.sh`.
+- The report-only parity smoke may be mistaken for a strict parity gate unless
+  docs and checks continue to state that differences remain non-gating.
 - Compiler-backed CI may be added too early unless the lightweight workflow
   continues to guard against implicit compiler execution.
 
@@ -954,6 +979,10 @@ usable.
       `ari --check`, `tools/lint`, or process exit
 - [x] Add source-only parity runner skeleton without executing `tools/lint`,
       `ari-lint`, the Ari compiler, shell commands, file IO, or comparisons
+- [x] Add a first local report-only parity smoke script that builds this
+      repository, locates the original Ari `tools/lint` entrypoint from the
+      Ari repo, compares temporary clean/trailing-whitespace/missing-final-newline
+      fixtures, and keeps differences non-gating
 - [x] Record compiler-backed CI gate without running the Ari compiler,
       `ari --check`, `tools/lint`, package managers, or release automation
 - [x] Wire local standalone build script root handling without running the Ari

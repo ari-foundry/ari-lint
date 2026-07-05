@@ -1,8 +1,8 @@
 # ari-lint Tests
 
-Compiler-free repository checks and local compiler-backed smoke validation both
-exist now. Broader executable rule, CLI, parity, and golden-output tests remain
-future work.
+Compiler-free repository checks, local compiler-backed smoke validation, and a
+local report-only parity smoke/report all exist now. Broader executable rule,
+CLI, strict parity, and golden-output tests remain future work.
 
 Current compiler-free checks verify repository shape, lightweight
 documentation/source guards, the first trailing-whitespace fixture shape, and
@@ -30,8 +30,9 @@ When `--config` is absent, the CLI source-file path searches upward from the
 current working directory for the nearest `ari-lint.rules`. The main-facing
 source-file lint path writes collected human diagnostics to stderr through the
 verified stderr adapter, but the lightweight checks do not assert CLI output.
-A source-only parity runner skeleton records future comparison boundaries, but
-the lightweight checks do not execute a parity runner.
+A source-only parity runner skeleton records future comparison boundaries, and
+`scripts/parity.sh` provides a local report-only parity smoke/report. The
+lightweight checks do not execute that parity script.
 The config precedence fixture plan is documented.
 Shell-only executable config precedence fixture checks verify presence, exact
 line order, and expected text. Ari-backed config precedence tests are not added
@@ -114,6 +115,18 @@ locations, add new lint semantics, or claim compatibility. JSON list-rules
 output assertions and broader golden output coverage remain future smoke
 coverage.
 
+`scripts/parity.sh` is the local report-only parity smoke/report. It accepts an
+explicit Ari compiler path or `ARI_COMPILER`, an Ari repo path or `ARI_REPO`,
+and optionally an original lint command path or `ORIGINAL_LINT`. It verifies
+the original lint entrypoint from the Ari repo `Makefile` and
+`tools/lint/main.cpp`, builds this repository through `scripts/build.sh`, runs
+both tools with `--json --ari` on temporary clean, trailing-whitespace, and
+missing-final-newline fixtures, and reports exit codes, stdout/stderr
+presence, rule sightings, file-path presence, and line/column presence.
+Differences do not fail the script. It is not run by `scripts/test.sh` or CI,
+does not add golden files or source-controlled parity fixtures, and does not
+claim compatibility or parity.
+
 Compiler-backed tests remain future work. Current checks do not run the
 compiler. Future compiler-backed tests should use explicit compiler
 provisioning as planned in
@@ -190,8 +203,8 @@ not added yet.
 
 The rule-specific trailing-whitespace parity plan is documented in
 [docs/rules/trailing-whitespace-parity.md](../docs/rules/trailing-whitespace-parity.md).
-No executable parity runner exists yet; the source-only skeleton records future
-runner boundaries only.
+A first local parity smoke/report exists, and the source-only skeleton records
+future Ari-source runner boundaries. No strict parity gate exists yet.
 
 No executable trailing-whitespace rule execution tests are added yet. Future
 tests should cover no trailing whitespace, trailing spaces, trailing tabs,
@@ -225,8 +238,8 @@ are not added yet.
 
 The rule-specific missing-final-newline parity plan is documented in
 [docs/rules/missing-final-newline-parity.md](../docs/rules/missing-final-newline-parity.md).
-No executable parity runner exists yet; the source-only skeleton records future
-runner boundaries only.
+A first local parity smoke/report exists, and the source-only skeleton records
+future Ari-source runner boundaries. No strict parity gate exists yet.
 
 Future missing-final-newline fixtures should cover an empty file, a single-line
 file without a final newline, a multi-line file without a final newline, CRLF

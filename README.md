@@ -46,6 +46,8 @@ here.
   `ARI_COMPILER`.
 - Local smoke validation via `scripts/smoke.sh` with an explicit Ari compiler
   path or `ARI_COMPILER`.
+- Local parity smoke/report via `scripts/parity.sh` with an explicit Ari
+  compiler path or `ARI_COMPILER`, plus an Ari repository path or `ARI_REPO`.
 - CLI `--help` output.
 - CLI `--list-rules` output.
 - Source-file lint for all explicitly provided positional source files, using
@@ -64,7 +66,8 @@ here.
   now.
 - This repository has no stable `ari-lint` release yet.
 - No Ari version compatibility claim is established yet.
-- There is no parity runner or golden parity suite yet.
+- There is no strict parity gate or golden parity suite yet. The local
+  parity smoke/report is report-only and does not claim parity.
 - CI is not compiler-backed yet.
 - The implemented rule set is limited.
 - Directory traversal and recursive source-tree scanning are not implemented;
@@ -107,6 +110,29 @@ preserves relative compiler paths from the caller's directory.
 
 CI does not run compiler-backed builds or tests yet, and this repository is not
 a standalone release.
+
+## Local Parity Smoke/Report
+
+Run the first local report-only parity smoke against the bundled reference
+implementation in an `ari-foundry/ari` checkout with:
+
+```sh
+scripts/parity.sh /path/to/ari /path/to/ari-repo
+```
+
+You may also set `ARI_COMPILER` and `ARI_REPO`. A third positional argument or
+`ORIGINAL_LINT` can point at an already-built original lint binary. When that
+path is not provided, the script verifies the Ari repo `Makefile` lint target
+and `tools/lint/main.cpp`, then uses the existing `build/ari-lint` binary if it
+is executable.
+
+The parity smoke builds this repository with `scripts/build.sh`, creates tiny
+temporary trailing-whitespace, missing-final-newline, and clean fixtures, runs
+both tools with `--json --ari`, and prints stdout/stderr presence, exit codes,
+basic rule sightings, file-path presence, and line/column presence. Differences
+are reported but do not fail the script. The script fails only for
+infrastructure errors such as a missing compiler, missing Ari repo, missing
+original lint command, or local build failure.
 
 ## Local Smoke Validation
 

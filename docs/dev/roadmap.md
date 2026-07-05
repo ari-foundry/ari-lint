@@ -3,7 +3,8 @@
 Current status: active standalone split implementation with Ari source, local
 build and smoke validation, compiler-free checks, supported CLI help and
 list-rules output, multi-file source-file linting for the current rule set,
-JSON diagnostics, explicit and discovered config, and CLI severity overrides.
+JSON diagnostics, explicit and discovered config, CLI severity overrides, and a
+local report-only parity smoke/report against the original bundled lint tool.
 Historical milestones include: skeleton initialized / Ari source skeleton
 started / internal model skeleton started / registry-severity-config skeleton
 started /
@@ -92,6 +93,7 @@ internal human diagnostic formatter added /
 internal human diagnostic array formatter added /
 multi-file source linting added /
 focused diagnostic field smoke coverage added /
+local parity smoke/report added /
 no stable JSON schema or broad JSON output suite yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
@@ -504,8 +506,9 @@ and test work.
       comparison boundary against current `tools/lint` without executing
       `tools/lint`, invoking an `ari-lint` binary, reading fixtures, writing
       files, comparing output, invoking the compiler, calling `ari --check`, or
-      adding CI parity behavior. Executable parity runner behavior, fixtures,
-      golden output, source execution, and CI parity jobs remain future work.
+      adding CI parity behavior. Ari-source parity runner execution, strict
+      fixture comparison, golden output, source execution, and CI parity jobs
+      remain future work.
 - [x] Record the compiler-backed CI gate by documenting that the GitHub Actions
       workflow remains compiler-free and runs only `scripts/check.sh` until
       explicit compiler provisioning, standalone tests, and compiler identity
@@ -708,11 +711,20 @@ and test work.
       `ARI_COMPILER` handling, compiler execution, compiler-backed tests,
       parity runner behavior, and a compatibility matrix remain future work.
 - [ ] Plan parity testing against current `tools/lint`;
-      `docs/dev/parity-test-plan.md` tracks the future fixture and golden
-      output strategy, but parity tests and CI parity jobs are not implemented.
-- [x] Add source-only parity runner skeleton in `src/parity.ari`; executable
-      parity runner behavior, fixture comparison, golden output, `tools/lint`
-      execution, Ari compiler execution, and CI parity jobs remain future work.
+      `docs/dev/parity-test-plan.md` tracks the fixture and golden output
+      strategy. A first local report-only `scripts/parity.sh` smoke now
+      compares temporary clean, trailing-whitespace, and missing-final-newline
+      fixtures against the original bundled lint tool, but strict parity tests,
+      source-controlled parity fixtures, golden files, and CI parity jobs are
+      not implemented.
+- [x] Add source-only parity runner skeleton in `src/parity.ari`; Ari-source
+      parity runner execution, strict fixture comparison, golden output, Ari
+      compiler execution, and CI parity jobs remain future work.
+- [x] Add local parity smoke/report in `scripts/parity.sh` that builds this
+      repository, verifies the original lint entrypoint from the Ari repo
+      `Makefile` and `tools/lint/main.cpp`, compares three temporary fixtures,
+      and keeps differences non-gating without adding CI parity jobs or
+      compatibility claims.
 - [x] Record compiler-backed CI gate; `.github/workflows/check.yml` remains
       lightweight and compiler-free until standalone tests and explicit Ari
       compiler provisioning exist.

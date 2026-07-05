@@ -106,7 +106,9 @@ with the current bundled/reference `tools/lint` implementation in
 
 The rule-specific parity plan is documented in
 [docs/rules/trailing-whitespace-parity.md](trailing-whitespace-parity.md).
-Fixture comparison is planned but not automated yet.
+Fixture comparison has first local smoke/report coverage through
+`scripts/parity.sh`, but strict source-controlled fixture parity and golden
+comparisons remain future work.
 
 Parity dimensions should include:
 

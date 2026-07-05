@@ -8,12 +8,18 @@ implementation in `ari-foundry/ari`.
 
 The original parity planning step did not add tests, fixtures, golden files,
 source code, or build behavior. The current source-only parity runner skeleton
-records boundaries only and still does not execute a parity flow.
+records boundaries only and still does not execute a parity flow from Ari
+source.
+
+A first local non-gating parity smoke/report now exists at `scripts/parity.sh`.
+It builds this repository with `scripts/build.sh`, runs both implementations on
+temporary clean, trailing-whitespace, and missing-final-newline fixtures, and
+prints a concise report without failing on behavior differences.
 
 ## Current Status
 
-- `ari-lint` has an initial Ari source skeleton.
-- Real lint rules are not implemented yet.
+- `ari-lint` has an initial Ari source implementation with the current
+  source-file lint path and two implemented rules.
 - The current reference implementation remains `tools/lint` in
   `ari-foundry/ari`.
 - The future implementation direction is Ari-language reimplementation with
@@ -29,6 +35,9 @@ records boundaries only and still does not execute a parity flow.
   the intended comparison boundary but does not run `tools/lint`, invoke an
   `ari-lint` binary, read fixtures, compare output, invoke the compiler, or run
   in CI.
+- `scripts/parity.sh` is local-only and report-only. It is not wired into
+  `scripts/test.sh` or CI, does not add source-controlled fixtures or golden
+  files, and does not claim parity.
 
 ## Reference Implementation
 
@@ -38,6 +47,13 @@ It should be used to compare CLI behavior, rule behavior, config behavior,
 diagnostics, JSON output, and exit behavior.
 
 It remains owned by `ari-foundry/ari` during transition.
+
+The current original lint entrypoint was located by inspecting
+`ari-foundry/ari`: `tools/lint/main.cpp` contains the `ari-lint` CLI entrypoint
+and usage string, and the Ari repo `Makefile` defines `LINT_TARGET` as
+`build/ari-lint` built from `tools/lint/*.cpp` plus shared tooling helpers.
+`scripts/parity.sh` verifies those files before using an existing executable
+`build/ari-lint` or an explicitly provided `ORIGINAL_LINT` path.
 
 Bugs in compiler behavior or standard library behavior should be filed in
 `ari-foundry/ari`.
@@ -158,6 +174,24 @@ Golden files must identify the Ari compiler version or commit when relevant.
 
 ## Comparison Strategy
 
+Current local report-only flow in `scripts/parity.sh`:
+
+1. Validate the explicit Ari compiler path from the first argument or
+   `ARI_COMPILER`.
+2. Validate the Ari repo path from the second argument or `ARI_REPO`.
+3. Verify the original lint entrypoint from the Ari repo `Makefile` and
+   `tools/lint/main.cpp`.
+4. Build this repository's current `ari-lint` with `scripts/build.sh`.
+5. Create tiny temporary trailing-whitespace, missing-final-newline, and clean
+   fixtures.
+6. Run current `ari-lint` and original `tools/lint` with `--json --ari` on each
+   fixture.
+7. Report exit code, stdout/stderr presence, rule sightings, file-path
+   presence, and line/column presence.
+
+The report intentionally does not require exact text equality or exact JSON
+equality yet.
+
 Future comparison flow:
 
 1. Run current reference `tools/lint` or built `ari-lint` from
@@ -209,7 +243,8 @@ from the other repo if needed.
 
 ## Follow-up Checklist
 
-- [ ] Inventory exact reference commands for current `tools/lint`
+- [x] Inventory the current `tools/lint` entrypoint from `tools/lint/main.cpp`
+      and the Ari repo `Makefile`
 - [ ] Define fixture directory layout
 - [ ] Define golden JSON format
 - [ ] Define path normalization policy
@@ -220,9 +255,11 @@ from the other repo if needed.
       `docs/dev/compiler-invocation.md`
 - [x] Add source-only parity runner skeleton without executing either
       implementation
-- [ ] Add first CLI smoke parity fixture
-- [ ] Add first rule parity fixture for trailing whitespace
-- [ ] Add first rule parity fixture for missing final newline
+- [x] Add first local non-gating parity smoke/report with temporary clean,
+      trailing-whitespace, and missing-final-newline fixtures
+- [ ] Add first source-controlled CLI smoke parity fixture
+- [ ] Add first source-controlled rule parity fixture for trailing whitespace
+- [ ] Add first source-controlled rule parity fixture for missing final newline
 - [ ] Add compiler-boundary parity fixture
 - [ ] Add CI job only after test runner exists
 
@@ -230,12 +267,13 @@ from the other repo if needed.
 
 - Do not move `tools/lint` in this step.
 - Do not copy `tools/lint` source in this step.
-- Do not add test fixtures in this step.
+- Do not add source-controlled test fixtures in this step.
 - Do not add golden files in this step.
 - Do not add Ari implementation code in this step.
 - Do not implement lint rules in this step.
-- Do not invoke `ari --check` in this step.
+- Do not add direct `ari --check` invocation in this repository in this step.
 - Do not add CI parity jobs in this step.
+- Do not make parity differences fail the local report in this step.
 - Do not claim compatibility matrix support in this step.
 - Do not modify `ari-foundry/ari` in this step.
 - Do not modify `ari-foundry/ari-foundry.github.io` in this step.

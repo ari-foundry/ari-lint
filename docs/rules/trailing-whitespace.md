@@ -93,7 +93,8 @@ The future implementation should compare behavior against the current bundled
 
 The rule-specific parity plan is documented in
 [docs/rules/trailing-whitespace-parity.md](trailing-whitespace-parity.md).
-The parity plan exists but runner is not implemented.
+A first local parity smoke/report exists in `scripts/parity.sh`, while strict
+rule-specific parity tests and golden comparisons remain future work.
 
 Parity dimensions:
 

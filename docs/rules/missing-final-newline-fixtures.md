@@ -23,7 +23,9 @@ remain future work.
 - The current reference behavior remains `tools/lint` in `ari-foundry/ari`.
 - Rule-specific parity planning is documented in
   [docs/rules/missing-final-newline-parity.md](missing-final-newline-parity.md).
-  Fixture comparison is planned but not automated yet.
+  Fixture comparison has first local smoke/report coverage through
+  `scripts/parity.sh`, but strict source-controlled fixture parity and golden
+  comparisons remain future work.
 
 ## Started Fixture Coverage
 
@@ -112,7 +114,9 @@ Future tests should compare the Ari implementation against current `tools/lint`.
 
 The detailed missing-final-newline parity plan is documented in
 [docs/rules/missing-final-newline-parity.md](missing-final-newline-parity.md).
-Fixture comparison is planned but not automated yet.
+Fixture comparison has first local smoke/report coverage through
+`scripts/parity.sh`, but strict source-controlled fixture parity and golden
+comparisons remain future work.
 
 Parity dimensions:
 

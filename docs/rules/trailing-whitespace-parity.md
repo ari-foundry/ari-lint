@@ -6,8 +6,9 @@ This document defines how future `lint/trailing-whitespace` behavior should be
 compared against the current bundled/reference `tools/lint` behavior in
 `ari-foundry/ari`.
 
-This step does not add a runner, execute `tools/lint`, add fixtures, or add
-golden output.
+This step adds only the local report-only `scripts/parity.sh` smoke. It does
+not add source-controlled fixtures, golden output, CI parity jobs, or a strict
+parity gate.
 
 ## Current Status
 
@@ -15,7 +16,7 @@ golden output.
 - An internal diagnostic mapping skeleton exists.
 - Initial clean/trailing-spaces fixtures exist.
 - Full rule execution is not complete.
-- No parity runner exists yet.
+- A first local non-gating parity smoke/report exists in `scripts/parity.sh`.
 - `tools/lint` in `ari-foundry/ari` remains the reference implementation.
 
 ## Reference Command Strategy
@@ -23,7 +24,10 @@ golden output.
 Future parity should use the current `tools/lint` command or Ari bundled lint
 command as the reference once the command is confirmed.
 
-Exact reference command: needs follow-up.
+The first local report verifies the Ari repo `Makefile` lint target and
+`tools/lint/main.cpp`, then uses an existing executable `build/ari-lint` or an
+explicit `ORIGINAL_LINT` path. Exact source-controlled parity command policy
+still needs follow-up.
 
 Future parity should avoid undocumented local monorepo paths. It should record
 the Ari compiler/tooling version or commit used for each comparison.
@@ -95,7 +99,9 @@ Future runner shape:
 5. compare diagnostic fields
 6. report mismatch
 
-This runner is not added in this step.
+The local `scripts/parity.sh` report implements only a first smoke-sized
+version of this shape. Strict comparison, golden output, and CI gating are not
+added in this step.
 
 ## Issue Routing
 
@@ -112,10 +118,9 @@ Cross-boundary bugs should link the owning issue.
 
 ## Non-Goals
 
-- Do not add a parity runner in this step.
-- Do not execute tools/lint in this step.
-- Do not add fixtures in this step.
+- Do not add a strict parity gate in this step.
+- Do not add source-controlled fixtures in this step.
 - Do not add golden output in this step.
 - Do not add CLI tests in this step.
-- Do not invoke ari --check in this step.
+- Do not add direct `ari --check` invocation in this repository in this step.
 - Do not copy tools/lint source in this step.
