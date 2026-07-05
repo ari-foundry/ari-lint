@@ -16,8 +16,8 @@ It builds this repository with `scripts/build.sh`, runs both implementations on
 usage, list-rules, source read-error, missing compiler path, compiler-error,
 config read-error, temporary clean, trailing-whitespace, missing-final-newline,
 config, short-name config, disabled explicit config, disabled command-line rule
-override, and multi-file cases, and prints a concise report without failing on
-behavior differences.
+override, dirty multi-file cases, and `multi-file-mixed`, and prints a concise
+report without failing on behavior differences.
 
 ## Current Status
 
@@ -216,7 +216,8 @@ Current local report-only flow in `scripts/parity.sh`:
 17. Run a report-only `--json --list-rules` case and report rule-code,
    default-severity, stdout/stderr, exit-code, and short-name-field signals.
 18. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
-   explicit-config, discovered-config, and multi-file fixtures.
+   explicit-config, discovered-config, dirty multi-file, and mixed clean/dirty
+   multi-file fixtures.
 19. Run a report-only invalid `--config` case and report stderr text,
    config-path, config-line, stdout/stderr, and exit-code signals.
 20. Run a report-only malformed `--rule` case and report invalid-override,
@@ -230,7 +231,8 @@ Current local report-only flow in `scripts/parity.sh`:
 23. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
    baseline rule, explicit `--config`, short-name config, disabled explicit
    config, disabled command-line `--rule`, command-line `--rule`, include-path
-   `-I`, discovered `ari-lint.rules`, and multi-file cases.
+   `-I`, discovered `ari-lint.rules`, dirty multi-file cases, and
+   `multi-file-mixed`.
 24. Report exit code, stdout/stderr presence, rule sightings, severity
    sightings, file-path hit counts, and line/column presence.
 
@@ -308,6 +310,8 @@ from the other repo if needed.
       trailing-whitespace, and missing-final-newline fixtures
 - [x] Expand the local non-gating parity smoke/report with explicit `--config`,
       command-line `--rule`, discovered `ari-lint.rules`, and multi-file cases
+- [x] Add a mixed clean/dirty `multi-file-mixed` report-only case to the local
+      non-gating parity smoke/report
 - [x] Add `--help` report-only CLI signals to the local non-gating parity
       smoke/report
 - [x] Add `--list-rules` report-only CLI signals to the local non-gating parity

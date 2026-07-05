@@ -49,7 +49,8 @@ tools with `--json --ari` on temporary trailing-whitespace,
 missing-final-newline, clean, missing-compiler, compiler-error, explicit-config,
 config-short-name, config-read-error, invalid config, invalid rule override,
 invalid rule severity, unknown rule override, config-off, rule-off,
-rule-override, include-path, discovered-config, and multi-file cases,
+rule-override, include-path, discovered-config, multi-file, and
+multi-file-mixed cases,
 and prints a concise report of exit codes, stdout/stderr
 presence, help/usage/list-rules signals, compiler-check-failed and missing
 compiler path sightings, compiler-error JSON-shape and diagnostic-code
