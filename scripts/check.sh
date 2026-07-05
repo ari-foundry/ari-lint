@@ -97,6 +97,7 @@ require_grep "case: short-help" scripts/parity.sh
 require_grep "case: no-source-file" scripts/parity.sh
 require_grep "case: read-error" scripts/parity.sh
 require_grep "case: missing-compiler" scripts/parity.sh
+require_grep "case: compiler-error" scripts/parity.sh
 require_grep "case: unknown-argument" scripts/parity.sh
 require_grep "case: missing-config-value" scripts/parity.sh
 require_grep "case: missing-rule-value" scripts/parity.sh
@@ -122,6 +123,7 @@ require_grep "ari_compiler_code_in_stdout" scripts/parity.sh
 require_grep "compiler_check_failed_code_in_stdout" scripts/parity.sh
 require_grep "exec_failed_text_in_stdout" scripts/parity.sh
 require_grep "missing_compiler_path_in_stdout" scripts/parity.sh
+require_grep "expected_top_level_declaration_text_in_stdout" scripts/parity.sh
 require_grep "unable_to_read_config_text_in_stderr" scripts/parity.sh
 require_grep "cannot_open_lint_config_text_in_stderr" scripts/parity.sh
 require_grep "unknown_argument_text_in_stderr" scripts/parity.sh
@@ -144,6 +146,7 @@ require_grep "Help Output Stream And Shape" docs/dev/parity-differences.md
 require_grep "No Source File Usage Text" docs/dev/parity-differences.md
 require_grep "Source Read Error Output" docs/dev/parity-differences.md
 require_grep "Missing Compiler Invocation Output" docs/dev/parity-differences.md
+require_grep "Compiler Error Output" docs/dev/parity-differences.md
 require_grep "Unknown Option Usage Text" docs/dev/parity-differences.md
 require_grep "Missing Config Value Usage Text" docs/dev/parity-differences.md
 require_grep "Config Read Error Output" docs/dev/parity-differences.md
@@ -163,6 +166,7 @@ require_grep "explicit .--config." docs/dev/parity-test-plan.md
 require_grep "no-source-file usage" scripts/README.md
 require_grep "source read-error behavior" scripts/README.md
 require_grep "missing compiler path behavior" scripts/README.md
+require_grep "compiler-error behavior" scripts/README.md
 require_grep "config-read-error" scripts/README.md
 require_grep "short-help" scripts/README.md
 require_grep "unknown-argument usage" scripts/README.md

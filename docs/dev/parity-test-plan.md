@@ -13,10 +13,10 @@ source.
 
 A first local non-gating parity smoke/report now exists at `scripts/parity.sh`.
 It builds this repository with `scripts/build.sh`, runs both implementations on
-usage, list-rules, source read-error, missing compiler path, config read-error,
-temporary clean, trailing-whitespace, missing-final-newline, config, and
-multi-file cases, and prints a concise report without failing on behavior
-differences.
+usage, list-rules, source read-error, missing compiler path, compiler-error,
+config read-error, temporary clean, trailing-whitespace, missing-final-newline,
+config, and multi-file cases, and prints a concise report without failing on
+behavior differences.
 
 ## Current Status
 
@@ -197,36 +197,39 @@ Current local report-only flow in `scripts/parity.sh`:
 9. Run a report-only missing compiler path case through `--ari` and report
    compiler-check-failed, JSON-shape, source-path, missing-compiler-path,
    stdout/stderr, and exit-code signals.
-10. Run a report-only unknown-option usage case and report usage text,
+10. Run a report-only compiler-error case and report compiler-diagnostic,
+   expected parser text, JSON-shape, source-path, stdout/stderr, and exit-code
+   signals.
+11. Run a report-only unknown-option usage case and report usage text,
    unknown-argument text, stdout/stderr, and exit-code signals.
-11. Run a report-only missing `--config` value case and report usage text,
+12. Run a report-only missing `--config` value case and report usage text,
    missing-option text, stdout/stderr, and exit-code signals.
-12. Run a report-only missing `--rule` value case and report usage text,
+13. Run a report-only missing `--rule` value case and report usage text,
    missing-option text, stdout/stderr, and exit-code signals.
-13. Run a report-only missing `--ari` value case and report usage text,
+14. Run a report-only missing `--ari` value case and report usage text,
    missing-option text, stdout/stderr, and exit-code signals.
-14. Run a report-only missing `-I` value case and report usage text,
+15. Run a report-only missing `-I` value case and report usage text,
    missing-option text, stdout/stderr, and exit-code signals.
-15. Run a report-only `--list-rules` case and report rule-code,
+16. Run a report-only `--list-rules` case and report rule-code,
    default-severity, stdout/stderr, exit-code, and short-name-field signals.
-16. Run a report-only `--json --list-rules` case and report rule-code,
+17. Run a report-only `--json --list-rules` case and report rule-code,
    default-severity, stdout/stderr, exit-code, and short-name-field signals.
-17. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
+18. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
    explicit-config, discovered-config, and multi-file fixtures.
-18. Run a report-only invalid `--config` case and report stderr text,
+19. Run a report-only invalid `--config` case and report stderr text,
    config-path, config-line, stdout/stderr, and exit-code signals.
-19. Run a report-only malformed `--rule` case and report invalid-override,
+20. Run a report-only malformed `--rule` case and report invalid-override,
    invalid-rule-setting, expected-shape, stdout/stderr, and exit-code signals.
-20. Run a report-only invalid `--rule` severity case and report
+21. Run a report-only invalid `--rule` severity case and report
    invalid-override, invalid-rule-setting, unknown-rule-or-severity,
    stdout/stderr, and exit-code signals.
-21. Run a report-only unknown `--rule` rule case and report invalid-override,
+22. Run a report-only unknown `--rule` rule case and report invalid-override,
    invalid-rule-setting, unknown-rule-or-severity, stdout/stderr, and
    exit-code signals.
-22. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
+23. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
    baseline rule, explicit `--config`, command-line `--rule`, include-path
    `-I`, discovered `ari-lint.rules`, and multi-file cases.
-23. Report exit code, stdout/stderr presence, rule sightings, severity
+24. Report exit code, stdout/stderr presence, rule sightings, severity
    sightings, file-path hit counts, and line/column presence.
 
 The report intentionally does not require exact text equality or exact JSON
@@ -310,6 +313,8 @@ from the other repo if needed.
 - [x] Add JSON list-rules report-only CLI signals to the local non-gating
       parity smoke/report
 - [x] Add missing-compiler report-only compiler-boundary signals to the local
+      non-gating parity smoke/report
+- [x] Add compiler-error report-only compiler-boundary signals to the local
       non-gating parity smoke/report
 - [x] Document known report-only parity differences
 - [ ] Add first source-controlled CLI smoke parity fixture
