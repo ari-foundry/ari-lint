@@ -12,14 +12,15 @@ matrix, not a parity claim, and not a release policy.
 
 ## Current Report Scope
 
-The local parity report currently compares temporary clean,
-trailing-whitespace, missing-final-newline, explicit-config, rule-override,
-discovered-config, and multi-file cases.
+The local parity report currently compares a report-only `--list-rules` CLI
+case plus temporary clean, trailing-whitespace, missing-final-newline,
+explicit-config, rule-override, discovered-config, and multi-file cases.
 
 It reports signals only:
 
 - exit code
 - stdout and stderr presence
+- list-rules rule-code, default-severity, and short-name-field sightings
 - rule sightings
 - severity sightings
 - file-path hit counts
@@ -99,6 +100,29 @@ Follow-up:
 
 - decide the standalone lint diagnostic exit-code contract before releases
 - add strict exit-code parity only after the contract is documented
+
+### List Rules Output Detail
+
+Current standalone `ari-lint` emits short rule name fields in `--list-rules`
+output, such as `name=trailing-whitespace`. Original `tools/lint` lists the
+same rule codes and default severities but does not emit those short name
+fields.
+
+Classification: original `tools/lint` behavior difference and expected known
+difference while standalone rule metadata remains implementation-owned by
+`ari-lint`.
+
+Impact:
+
+- exact `--list-rules` text equality is not expected yet
+- the local parity report records the difference without failing
+- release compatibility claims must not be made from the current report
+
+Follow-up:
+
+- decide whether short rule name fields are part of the future standalone
+  public output contract
+- add strict `--list-rules` golden checks only after the contract is documented
 
 ## Current Alignment Signals
 

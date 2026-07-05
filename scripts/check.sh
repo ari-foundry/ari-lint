@@ -92,6 +92,7 @@ require_no_grep "arix" .github/workflows/check.yml
 [ -x scripts/test.sh ] || fail "scripts/test.sh is not executable"
 
 require_grep "explicit-config" scripts/parity.sh
+require_grep "list-rules" scripts/parity.sh
 require_grep "rule-override" scripts/parity.sh
 require_grep "discovered-config" scripts/parity.sh
 require_grep "multi-file" scripts/parity.sh
@@ -101,12 +102,14 @@ require_grep "ari-lint Known Parity Differences" docs/dev/parity-differences.md
 require_grep "Compiler Check Boundary" docs/dev/parity-differences.md
 require_grep "JSON Diagnostic Shape" docs/dev/parity-differences.md
 require_grep "Diagnostic Exit Status" docs/dev/parity-differences.md
+require_grep "List Rules Output Detail" docs/dev/parity-differences.md
 require_grep "No Ari language/compiler/stdlib/toolchain bug" docs/dev/parity-differences.md
 require_grep "docs/dev/parity-differences.md" docs/dev/parity-test-plan.md
 require_grep "docs/dev/parity-differences.md" tests/README.md
 require_grep "report-only config, .--rule., discovered config" docs/dev/ari-implementation-plan.md
 require_grep "explicit .--config." docs/dev/parity-test-plan.md
-require_grep "rule-override, discovered-config, and multi-file cases" scripts/README.md
+require_grep "report-only .--list-rules. case" scripts/README.md
+require_grep "discovered-config, and multi-file cases" scripts/README.md
 
 require_grep "build.sh" scripts/smoke.sh
 require_grep "ARI_COMPILER" scripts/smoke.sh
