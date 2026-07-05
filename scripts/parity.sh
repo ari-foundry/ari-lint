@@ -604,6 +604,50 @@ print_read_error_summary() {
   printf '%s\n' "    source_path_in_stderr: $source_path_stderr"
 }
 
+print_multi_file_read_error_summary() {
+  tool_name="$1"
+  stdout_path="$2"
+  stderr_path="$3"
+  status_path="$4"
+  clean_path="$5"
+  missing_path="$6"
+
+  status=$(cat "$status_path")
+  unable_single_stdout=$(has_fixed_text "unable to read source file" "$stdout_path")
+  unable_single_stderr=$(has_fixed_text "unable to read source file" "$stderr_path")
+  unable_multi_stdout=$(has_fixed_text "unable to read one or more source files" "$stdout_path")
+  unable_multi_stderr=$(has_fixed_text "unable to read one or more source files" "$stderr_path")
+  cannot_open_stdout=$(has_fixed_text "cannot open input file" "$stdout_path")
+  cannot_open_stderr=$(has_fixed_text "cannot open input file" "$stderr_path")
+  ari_compiler_stdout=$(has_fixed_text "ari/compiler" "$stdout_path")
+  ari_compiler_stderr=$(has_fixed_text "ari/compiler" "$stderr_path")
+  json_files_stdout=$(has_fixed_text "\"files\"" "$stdout_path")
+  json_files_stderr=$(has_fixed_text "\"files\"" "$stderr_path")
+  clean_path_stdout=$(has_fixed_text "$clean_path" "$stdout_path")
+  clean_path_stderr=$(has_fixed_text "$clean_path" "$stderr_path")
+  missing_path_stdout=$(has_fixed_text "$missing_path" "$stdout_path")
+  missing_path_stderr=$(has_fixed_text "$missing_path" "$stderr_path")
+
+  printf '%s\n' "  $tool_name:"
+  printf '%s\n' "    exit_code: $status"
+  printf '%s\n' "    stdout_non_empty: $(has_text "$stdout_path")"
+  printf '%s\n' "    stderr_non_empty: $(has_text "$stderr_path")"
+  printf '%s\n' "    unable_to_read_source_text_in_stdout: $unable_single_stdout"
+  printf '%s\n' "    unable_to_read_source_text_in_stderr: $unable_single_stderr"
+  printf '%s\n' "    unable_to_read_multiple_sources_text_in_stdout: $unable_multi_stdout"
+  printf '%s\n' "    unable_to_read_multiple_sources_text_in_stderr: $unable_multi_stderr"
+  printf '%s\n' "    cannot_open_input_file_text_in_stdout: $cannot_open_stdout"
+  printf '%s\n' "    cannot_open_input_file_text_in_stderr: $cannot_open_stderr"
+  printf '%s\n' "    ari_compiler_code_in_stdout: $ari_compiler_stdout"
+  printf '%s\n' "    ari_compiler_code_in_stderr: $ari_compiler_stderr"
+  printf '%s\n' "    json_files_shape_in_stdout: $json_files_stdout"
+  printf '%s\n' "    json_files_shape_in_stderr: $json_files_stderr"
+  printf '%s\n' "    clean_path_in_stdout: $clean_path_stdout"
+  printf '%s\n' "    clean_path_in_stderr: $clean_path_stderr"
+  printf '%s\n' "    missing_path_in_stdout: $missing_path_stdout"
+  printf '%s\n' "    missing_path_in_stderr: $missing_path_stderr"
+}
+
 print_missing_compiler_summary() {
   tool_name="$1"
   stdout_path="$2"
@@ -866,6 +910,23 @@ report_read_error_case() {
   printf '%s\n' "case: read-error"
   print_read_error_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status" "$read_error_source"
   print_read_error_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status" "$read_error_source"
+  printf '%s\n' ""
+}
+
+report_multi_file_read_error_case() {
+  current_stdout="$tmp_dir/current-multi-file-read-error.stdout"
+  current_stderr="$tmp_dir/current-multi-file-read-error.stderr"
+  current_status="$tmp_dir/current-multi-file-read-error.status"
+  original_stdout="$tmp_dir/original-multi-file-read-error.stdout"
+  original_stderr="$tmp_dir/original-multi-file-read-error.stderr"
+  original_status="$tmp_dir/original-multi-file-read-error.status"
+
+  run_case_in_dir "$original_pwd" "current ari-lint" "$current_lint" "multi-file-read-error" "$current_stdout" "$current_stderr" "$current_status" "$clean_source" "$read_error_source"
+  run_case_in_dir "$original_pwd" "original tools/lint" "$original_lint" "multi-file-read-error" "$original_stdout" "$original_stderr" "$original_status" "$clean_source" "$read_error_source"
+
+  printf '%s\n' "case: multi-file-read-error"
+  print_multi_file_read_error_summary "current ari-lint" "$current_stdout" "$current_stderr" "$current_status" "$clean_source" "$read_error_source"
+  print_multi_file_read_error_summary "original tools/lint" "$original_stdout" "$original_stderr" "$original_status" "$clean_source" "$read_error_source"
   printf '%s\n' ""
 }
 
@@ -1227,6 +1288,7 @@ report_help_case
 report_short_help_case
 report_no_source_file_case
 report_read_error_case
+report_multi_file_read_error_case
 report_missing_compiler_case
 report_compiler_error_case
 report_unknown_argument_case
@@ -1271,6 +1333,7 @@ printf '%s\n' "- diagnostic exit codes may differ while this repository has no s
 printf '%s\n' "- current help output is multi-line stdout text; original tools/lint help is a one-line stderr usage."
 printf '%s\n' "- current no-source-file usage output reports a missing source file; original tools/lint prints generic usage."
 printf '%s\n' "- current read-error output reports a short stderr message; original tools/lint emits compiler-shaped JSON diagnostics on stdout."
+printf '%s\n' "- current multi-file read-error output reports a short stderr message with the first unread source path; original tools/lint follows its compiler-shaped read-error JSON path."
 printf '%s\n' "- current missing-compiler output reports clean lint results; original tools/lint emits compiler-check-failed JSON diagnostics."
 printf '%s\n' "- current compiler-error output reports clean lint results; original tools/lint emits compiler-shaped JSON diagnostics."
 printf '%s\n' "- current unknown-option usage output reports the first unknown argument; original tools/lint prints generic usage."
