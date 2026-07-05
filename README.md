@@ -136,10 +136,10 @@ presence, exit codes, basic rule sightings, severity sightings, file-path hit
 counts, and line/column presence. It includes report-only coverage for `--help`,
 no source file, an unknown option, missing `--config` value, missing `--rule`
 value, missing `--ari` value, `--list-rules`, `--json --list-rules`, explicit
-`--config`, CLI `--rule`, discovered `ari-lint.rules`, and multi-file
-invocations. Differences are reported but do not fail the script. The script
-fails only for infrastructure errors such as a missing compiler, missing Ari
-repo, missing original lint command, or local build failure.
+`--config`, invalid `--config`, CLI `--rule`, discovered `ari-lint.rules`, and
+multi-file invocations. Differences are reported but do not fail the script.
+The script fails only for infrastructure errors such as a missing compiler,
+missing Ari repo, missing original lint command, or local build failure.
 
 Known differences from the current report-only parity smoke are tracked in
 [docs/dev/parity-differences.md](docs/dev/parity-differences.md). That document

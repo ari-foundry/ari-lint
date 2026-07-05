@@ -100,6 +100,7 @@ require_grep "case: missing-rule-value" scripts/parity.sh
 require_grep "case: missing-ari-value" scripts/parity.sh
 require_grep "list-rules" scripts/parity.sh
 require_grep "case: json-list-rules" scripts/parity.sh
+require_grep "case: invalid-config" scripts/parity.sh
 require_grep "rule-override" scripts/parity.sh
 require_grep "discovered-config" scripts/parity.sh
 require_grep "multi-file" scripts/parity.sh
@@ -108,6 +109,8 @@ require_grep "source_file_text_in_stderr" scripts/parity.sh
 require_grep "file_operand_in_stderr" scripts/parity.sh
 require_grep "unknown_argument_text_in_stderr" scripts/parity.sh
 require_grep "missing_option_value_text_in_stderr" scripts/parity.sh
+require_grep "unknown_rule_or_severity_text_in_stderr" scripts/parity.sh
+require_grep "config_path_in_stderr" scripts/parity.sh
 require_grep "rule_option_in_stderr" scripts/parity.sh
 require_grep "ari_option_in_stderr" scripts/parity.sh
 require_grep "severity_note_present" scripts/parity.sh
@@ -119,6 +122,7 @@ require_grep "Help Output Stream And Shape" docs/dev/parity-differences.md
 require_grep "No Source File Usage Text" docs/dev/parity-differences.md
 require_grep "Unknown Option Usage Text" docs/dev/parity-differences.md
 require_grep "Missing Config Value Usage Text" docs/dev/parity-differences.md
+require_grep "Invalid Config Output Text" docs/dev/parity-differences.md
 require_grep "Missing Rule Value Usage Text" docs/dev/parity-differences.md
 require_grep "Missing Ari Value Usage Text" docs/dev/parity-differences.md
 require_grep "List Rules Output Detail" docs/dev/parity-differences.md
@@ -130,6 +134,7 @@ require_grep "explicit .--config." docs/dev/parity-test-plan.md
 require_grep "no-source-file usage" scripts/README.md
 require_grep "unknown-argument usage" scripts/README.md
 require_grep "missing config value usage" scripts/README.md
+require_grep "invalid config" scripts/README.md
 require_grep "missing rule value usage" scripts/README.md
 require_grep "missing ari value usage" scripts/README.md
 require_grep "JSON list-rules" scripts/README.md
