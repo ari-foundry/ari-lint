@@ -13,15 +13,16 @@ matrix, not a parity claim, and not a release policy.
 ## Current Report Scope
 
 The local parity report currently compares report-only `--help` and
-`--list-rules` CLI cases plus temporary clean, trailing-whitespace,
-missing-final-newline, explicit-config, rule-override, discovered-config, and
-multi-file cases.
+unknown-option usage and `--list-rules` CLI cases plus temporary clean,
+trailing-whitespace, missing-final-newline, explicit-config, rule-override,
+discovered-config, and multi-file cases.
 
 It reports signals only:
 
 - exit code
 - stdout and stderr presence
 - help usage-option sightings
+- unknown-option usage and unknown-argument text sightings
 - list-rules rule-code, default-severity, and short-name-field sightings
 - rule sightings
 - severity sightings
@@ -122,6 +123,28 @@ Follow-up:
 - decide whether standalone help text and stream behavior should preserve the
   original shape or define a new stable standalone contract
 - add strict help golden checks only after the help contract is documented
+
+### Unknown Option Usage Text
+
+Current standalone `ari-lint` reports the first unknown option in its usage
+error text, such as `unknown argument: --definitely-unknown`. Original
+`tools/lint` exits with a usage error but prints generic usage text instead.
+
+Classification: original `tools/lint` behavior difference and `ari-lint`
+diagnostic/CLI contract follow-up.
+
+Impact:
+
+- exact invalid-argument text equality is not expected yet
+- release compatibility claims must not be made from the current report
+- strict usage-error golden checks should wait until the CLI contract is
+  documented
+
+Follow-up:
+
+- decide whether standalone invalid-argument text should preserve the original
+  generic usage shape or define a new stable standalone diagnostic contract
+- add strict usage-error output checks only after that contract is documented
 
 ### List Rules Output Detail
 
