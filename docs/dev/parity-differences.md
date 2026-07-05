@@ -19,7 +19,7 @@ malformed `--rule` usage, invalid `--rule` severity usage, unknown `--rule`
 rule usage, `--list-rules`, and JSON list-rules CLI cases plus temporary clean,
 trailing-whitespace, missing-final-newline, explicit-config, invalid-config,
 invalid-rule-override, invalid-rule-severity, unknown-rule-override,
-rule-override, discovered-config, and multi-file cases.
+rule-override, include-path, discovered-config, and multi-file cases.
 
 It reports signals only:
 
