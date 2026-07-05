@@ -127,6 +127,8 @@ sightings, severity sightings, file-path hit counts, and line/column presence.
 Differences do not fail the script. It is not run by `scripts/test.sh` or CI,
 does not add golden files or source-controlled parity fixtures, and does not
 claim compatibility or parity.
+Known report-only differences are tracked in
+[docs/dev/parity-differences.md](../docs/dev/parity-differences.md).
 
 Compiler-backed tests remain future work. Current checks do not run the
 compiler. Future compiler-backed tests should use explicit compiler

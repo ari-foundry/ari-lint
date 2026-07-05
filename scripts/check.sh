@@ -52,6 +52,7 @@ require_file docs/dev/release-compatibility-policy.md
 require_file docs/dev/roadmap.md
 require_file docs/dev/ari-implementation-plan.md
 require_file docs/dev/parity-test-plan.md
+require_file docs/dev/parity-differences.md
 require_file docs/rules/trailing-whitespace.md
 require_file docs/rules/trailing-whitespace-fixtures.md
 require_file docs/rules/trailing-whitespace-parity.md
@@ -96,6 +97,13 @@ require_grep "discovered-config" scripts/parity.sh
 require_grep "multi-file" scripts/parity.sh
 require_grep "file_paths_present" scripts/parity.sh
 require_grep "severity_note_present" scripts/parity.sh
+require_grep "ari-lint Known Parity Differences" docs/dev/parity-differences.md
+require_grep "Compiler Check Boundary" docs/dev/parity-differences.md
+require_grep "JSON Diagnostic Shape" docs/dev/parity-differences.md
+require_grep "Diagnostic Exit Status" docs/dev/parity-differences.md
+require_grep "No Ari language/compiler/stdlib/toolchain bug" docs/dev/parity-differences.md
+require_grep "docs/dev/parity-differences.md" docs/dev/parity-test-plan.md
+require_grep "docs/dev/parity-differences.md" tests/README.md
 require_grep "report-only config, .--rule., discovered config" docs/dev/ari-implementation-plan.md
 require_grep "explicit .--config." docs/dev/parity-test-plan.md
 require_grep "rule-override, discovered-config, and multi-file cases" scripts/README.md
