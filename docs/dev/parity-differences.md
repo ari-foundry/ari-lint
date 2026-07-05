@@ -13,13 +13,14 @@ matrix, not a parity claim, and not a release policy.
 ## Current Report Scope
 
 The local parity report currently compares report-only `--help`, `-h`, and
-no-source-file usage, unknown-option usage, missing config value usage, missing
-rule value usage, missing Ari value usage, missing include value usage,
-malformed `--rule` usage, invalid `--rule` severity usage, unknown `--rule`
-rule usage, `--list-rules`, and JSON list-rules CLI cases plus temporary clean,
-trailing-whitespace, missing-final-newline, explicit-config, invalid-config,
-invalid-rule-override, invalid-rule-severity, unknown-rule-override,
-rule-override, include-path, discovered-config, and multi-file cases.
+no-source-file usage, source read-error behavior, unknown-option usage, missing
+config value usage, missing rule value usage, missing Ari value usage, missing
+include value usage, malformed `--rule` usage, invalid `--rule` severity usage,
+unknown `--rule` rule usage, `--list-rules`, and JSON list-rules CLI cases plus
+temporary clean, trailing-whitespace, missing-final-newline, explicit-config,
+invalid-config, invalid-rule-override, invalid-rule-severity,
+unknown-rule-override, rule-override, include-path, discovered-config, and
+multi-file cases.
 
 It reports signals only:
 
@@ -27,6 +28,7 @@ It reports signals only:
 - stdout and stderr presence
 - help and short-help usage-option sightings
 - no-source-file usage and missing-source-file text sightings
+- source read-error text, compiler-diagnostic, JSON-shape, and path sightings
 - unknown-option usage and unknown-argument text sightings
 - missing config value usage and missing-option text sightings
 - invalid config output and config-path text sightings
@@ -160,6 +162,31 @@ Follow-up:
 - decide whether standalone no-source-file text should preserve the original
   generic usage shape or define a new stable standalone diagnostic contract
 - add strict usage-error output checks only after that contract is documented
+
+### Source Read Error Output
+
+Current standalone `ari-lint` reports a missing or unreadable explicit source
+path as a short stderr message such as `unable to read source file`. Original
+`tools/lint`, when run with `--json --ari`, invokes the Ari compiler boundary
+and emits compiler-shaped JSON on stdout with `cannot open input file` and
+`ari/compiler` fields for the missing path.
+
+Classification: expected known difference and `ari-lint` diagnostic/CLI
+contract follow-up. No Ari language/compiler/stdlib/toolchain bug is identified
+by this report-only case.
+
+Impact:
+
+- exact source read-error output parity is not expected yet
+- current standalone read-error JSON output is not defined
+- release compatibility claims must not be made from the current report
+
+Follow-up:
+
+- decide whether standalone source read-error behavior should preserve the
+  original compiler-shaped JSON or define a new stable standalone diagnostic
+  contract
+- add strict read-error golden checks only after that contract is documented
 
 ### Unknown Option Usage Text
 
