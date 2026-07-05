@@ -1247,6 +1247,7 @@ report_invalid_config_case
 report_invalid_rule_override_case
 report_invalid_rule_severity_case
 report_unknown_rule_override_case
+report_case "rule-off" "$original_pwd" "$trailing_source" --rule trailing-whitespace=off "$trailing_source"
 report_case "rule-override" "$original_pwd" "$trailing_source" --config "$explicit_config_file" --rule trailing-whitespace=note "$trailing_source"
 report_case "include-path" "$original_pwd" "$trailing_source" -I "$tmp_dir" "$trailing_source"
 report_case "discovered-config" "$discovery_parent" "child/discovered.ari" "child/discovered.ari"

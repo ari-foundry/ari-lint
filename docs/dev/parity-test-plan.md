@@ -15,8 +15,9 @@ A first local non-gating parity smoke/report now exists at `scripts/parity.sh`.
 It builds this repository with `scripts/build.sh`, runs both implementations on
 usage, list-rules, source read-error, missing compiler path, compiler-error,
 config read-error, temporary clean, trailing-whitespace, missing-final-newline,
-config, disabled explicit config, and multi-file cases, and prints a concise
-report without failing on behavior differences.
+config, disabled explicit config, disabled command-line rule override, and
+multi-file cases, and prints a concise report without failing on behavior
+differences.
 
 ## Current Status
 
@@ -228,8 +229,8 @@ Current local report-only flow in `scripts/parity.sh`:
    exit-code signals.
 23. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
    baseline rule, explicit `--config`, disabled explicit config,
-   command-line `--rule`, include-path `-I`, discovered `ari-lint.rules`, and
-   multi-file cases.
+   disabled command-line `--rule`, command-line `--rule`, include-path `-I`,
+   discovered `ari-lint.rules`, and multi-file cases.
 24. Report exit code, stdout/stderr presence, rule sightings, severity
    sightings, file-path hit counts, and line/column presence.
 
@@ -318,6 +319,8 @@ from the other repo if needed.
 - [x] Add compiler-error report-only compiler-boundary signals to the local
       non-gating parity smoke/report
 - [x] Add disabled explicit config report-only signals to the local
+      non-gating parity smoke/report
+- [x] Add disabled command-line `--rule` report-only signals to the local
       non-gating parity smoke/report
 - [x] Document known report-only parity differences
 - [ ] Add first source-controlled CLI smoke parity fixture
