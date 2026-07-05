@@ -117,6 +117,7 @@ require_grep "case: invalid-rule-severity" scripts/parity.sh
 require_grep "case: unknown-rule-override" scripts/parity.sh
 require_grep "rule-override" scripts/parity.sh
 require_grep "rule-off" scripts/parity.sh
+require_grep "multi-file-config-rule" scripts/parity.sh
 require_grep "include-path" scripts/parity.sh
 require_grep "discovered-config" scripts/parity.sh
 require_grep "multi-file" scripts/parity.sh
