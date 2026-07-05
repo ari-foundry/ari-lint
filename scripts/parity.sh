@@ -1163,6 +1163,7 @@ read_error_source="$tmp_dir/read-error-missing.ari"
 missing_compiler_path="$tmp_dir/missing-ari-compiler"
 compiler_error_source="$tmp_dir/compiler-error.ari"
 explicit_config_file="$tmp_dir/explicit.rules"
+off_config_file="$tmp_dir/off.rules"
 config_read_error_file="$tmp_dir/missing-config.rules"
 invalid_config_file="$tmp_dir/invalid.rules"
 discovery_parent="$tmp_dir/discovery"
@@ -1187,6 +1188,7 @@ printf '%s\n' "this is not valid Ari source" > "$compiler_error_source"
 } > "$clean_source"
 
 printf '%s\n' "lint/trailing-whitespace = error" > "$explicit_config_file"
+printf '%s\n' "lint/trailing-whitespace = off" > "$off_config_file"
 printf '%s\n' "lint/unknown-rule = warning" > "$invalid_config_file"
 
 mkdir -p "$discovery_child"
@@ -1239,6 +1241,7 @@ for case_name in trailing-whitespace missing-final-newline clean; do
 done
 
 report_case "explicit-config" "$original_pwd" "$trailing_source" --config "$explicit_config_file" "$trailing_source"
+report_case "config-off" "$original_pwd" "$trailing_source" --config "$off_config_file" "$trailing_source"
 report_config_read_error_case
 report_invalid_config_case
 report_invalid_rule_override_case

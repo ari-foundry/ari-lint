@@ -142,8 +142,9 @@ compiler path behavior passed through `--ari`, compiler-error behavior,
 missing `--config` value, missing `--rule` value, missing `--ari` value, missing `-I`
 value, `--list-rules`, `--json --list-rules`, explicit `--config`, invalid
 `--config`, missing config file read errors, malformed `--rule`, invalid
-`--rule` severity, unknown `--rule` rule, CLI `--rule`, include-path `-I`,
-discovered `ari-lint.rules`, and multi-file invocations.
+`--rule` severity, unknown `--rule` rule, disabled rules from explicit config,
+CLI `--rule`, include-path `-I`, discovered `ari-lint.rules`, and multi-file
+invocations.
 Differences are reported but do not fail the script. The script fails only for
 infrastructure errors such as a missing compiler, missing Ari repo, missing
 original lint command, or local build failure.
@@ -192,7 +193,8 @@ compiler-backed CI, home/global/XDG config search, new lint semantics, or
 compatibility claims. The config smoke uses explicit temporary files and a
 temporary nested working directory containing `ari-lint.rules`; it checks only
 the current JSON rule code and severity fields for config precedence, including
-short rule names in config files. A focused usage-error smoke checks malformed
+short rule names in config files, and checks that `off` suppresses diagnostics
+from explicit config and CLI `--rule`. A focused usage-error smoke checks malformed
 `--rule` text, missing `--config`, `--rule`, or parser-only `--ari` values, and
 one unknown option only for the current short stderr summary. Focused diagnostic
 smoke checks assert current `ruleCode`, `severity`, `message`, `filePath`,

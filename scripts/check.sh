@@ -92,6 +92,8 @@ require_no_grep "arix" .github/workflows/check.yml
 [ -x scripts/test.sh ] || fail "scripts/test.sh is not executable"
 
 require_grep "explicit-config" scripts/parity.sh
+require_grep "config-off" scripts/parity.sh
+require_grep "off_config_file" scripts/parity.sh
 require_grep "case: help" scripts/parity.sh
 require_grep "case: short-help" scripts/parity.sh
 require_grep "case: no-source-file" scripts/parity.sh
@@ -178,6 +180,7 @@ require_grep "unknown rule override" scripts/README.md
 require_grep "missing rule value usage" scripts/README.md
 require_grep "missing ari value usage" scripts/README.md
 require_grep "missing include value usage" scripts/README.md
+require_grep "config-off" scripts/README.md
 require_grep "include-path" scripts/README.md
 require_grep "JSON list-rules" scripts/README.md
 require_grep "discovered-config, and multi-file cases" scripts/README.md
@@ -192,6 +195,7 @@ require_grep "./build/ari-lint --json --list-rules" README.md
 require_grep "./build/ari-lint --json --config" README.md
 require_grep "./build/ari-lint --json /tmp/.../one.ari /tmp/.../two.ari" README.md
 require_grep "--rule trailing-whitespace=note" README.md
+require_grep "disabled rules from explicit config" README.md
 require_grep "--config" scripts/smoke.sh
 require_grep "run_stdout_success_smoke" scripts/smoke.sh
 require_grep "run_stderr_usage_smoke" scripts/smoke.sh
@@ -211,6 +215,10 @@ require_grep '"severity":"error"' scripts/smoke.sh
 require_grep '"severity":"note"' scripts/smoke.sh
 require_grep '"severity":"warning"' scripts/smoke.sh
 require_grep "trailing-whitespace = error" scripts/smoke.sh
+require_grep "trailing-whitespace = off" scripts/smoke.sh
+require_grep "trailing-whitespace=off" scripts/smoke.sh
+require_grep "config_off_output" scripts/smoke.sh
+require_grep "rule_off_output" scripts/smoke.sh
 require_grep "missing-final-newline = warning" scripts/smoke.sh
 require_grep "discovery_parent" scripts/smoke.sh
 require_grep "discovery_child" scripts/smoke.sh
@@ -362,6 +370,8 @@ require_grep "Do not claim support for any Ari release" docs/dev/release-compati
 require_grep "release and compatibility policy documented" docs/dev/roadmap.md
 require_grep "release-compatibility-policy.md" tests/README.md
 require_grep "ari-lint Parity Test Plan" docs/dev/parity-test-plan.md
+require_grep "disabled explicit config" docs/dev/parity-test-plan.md
+require_grep "disabled explicit config case" docs/dev/parity-differences.md
 require_grep "tools/lint" docs/dev/parity-test-plan.md
 require_grep "docs/dev/compiler-invocation.md" docs/dev/parity-test-plan.md
 require_grep "docs/dev/compiler-provisioning.md" docs/dev/parity-test-plan.md
@@ -874,6 +884,9 @@ require_grep "lint_file_sources" src/lint.ari
 require_grep "lint_file_sources_with_overrides" src/lint.ari
 require_grep "collect_lint_diagnostics_in_memory" src/lint.ari
 require_grep "collect_file_lint_diagnostics" src/lint.ari
+require_grep "severity_is_enabled" src/lint.ari
+require_grep "suppress diagnostics configured to Off" src/lint.ari
+require_grep "enabled_diagnostic_count" src/lint.ari
 require_grep "append_file_lint_result" src/lint.ari
 require_grep "lint_trailing_whitespace_in_memory" src/lint.ari
 require_grep "lint_missing_final_newline_in_memory" src/lint.ari
