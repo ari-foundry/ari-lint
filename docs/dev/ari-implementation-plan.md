@@ -517,9 +517,10 @@ Current preparatory model skeleton files are source-only placeholders:
   command-line `--rule` overrides, and that explicit `--config` disables
   discovery. It now parses caller-provided config text with blank lines,
   comments, and `RULE = SEVERITY` entries into internal overrides and parse
-  problems after validating rule codes against the known rule registry. It also
-  parses caller-provided command-line rule override text in `RULE=SEVERITY`
-  form, normalizing documented short rule names into full lint rule codes and
+  problems, normalizing documented short rule names into full lint rule codes
+  before validating those codes against the known rule registry. It also parses
+  caller-provided command-line rule override text in `RULE=SEVERITY` form,
+  normalizing documented short rule names into full lint rule codes and
   validating those codes against the known rule registry. It also resolves
   effective severity data for a caller-provided rule code from an already-parsed
   override list and can rebuild one already-built diagnostic with that resolved
@@ -540,8 +541,8 @@ the CLI parser is limited to explicit caller-provided token lists, raw option
 values, and explicit `--config` path capture with scoped source-file
 diagnostic collection reading when provided,
 the config parser is limited to caller-provided text, rule/severity
-pairs, blank lines, comments, known-rule validation, and one caller-selected
-config file path, the rule override
+pairs, blank lines, comments, short-name normalization, known-rule validation,
+and one caller-selected config file path, the rule override
 parser is limited to caller-provided `--rule` text, internal override
 construction, and known-rule validation, the severity override resolver is
 limited to effective severity data for a caller-provided rule code and
@@ -619,11 +620,12 @@ manager commands, execute `tools/lint`, run parity checks, or claim
 compatibility.
 
 Config precedence is recorded from the current Ari lint reference docs. The
-minimal parser only handles caller-provided text. Initial config precedence
-fixture files and shell-only executable checks now exist, but standalone config
-discovery checks beyond local parent traversal and Ari-backed config precedence
-checks remain needs follow-up before this repository claims stable config
-behavior. The fixture plan is documented in
+minimal parser only handles caller-provided text and documented short rule-name
+normalization. Initial config precedence fixture files and shell-only
+executable checks now exist, but standalone config discovery checks beyond
+local parent traversal and Ari-backed config precedence checks remain needs
+follow-up before this repository claims stable config behavior. The fixture
+plan is documented in
 `docs/dev/config-precedence-fixtures.md`.
 
 The exact JSON schema and human-readable diagnostic text remain unstable and
@@ -866,6 +868,10 @@ usable.
 - [x] Add known-rule validation for caller-provided config text without reading
       config files, discovering config paths, applying overrides, scanning
       sources, emitting diagnostics, or invoking the compiler
+- [x] Accept documented short rule names in caller-provided config text before
+      known-rule validation without broadening config discovery, invoking the
+      compiler, executing `ari --check`, adding compiler-backed CI, adding
+      golden tests, or calling `tools/lint`
 - [x] Add minimal command-line rule override semantic parsing
 - [x] Add known-rule validation for caller-provided `--rule` override values
       without applying overrides, reading config files, scanning sources,

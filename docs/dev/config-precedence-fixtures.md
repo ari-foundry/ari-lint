@@ -10,8 +10,9 @@ manager wiring, release automation, or compatibility claims.
 ## Current Status
 
 `src/config.ari` can parse caller-provided config text and caller-provided
-`--rule` values into internal severity overrides. The CLI source-file lint path
-can apply parsed `--rule` overrides to explicit source-file inputs.
+`--rule` values into internal severity overrides, normalizing documented short
+rule names to full lint rule codes. The CLI source-file lint path can apply
+parsed `--rule` overrides to explicit source-file inputs.
 
 Initial config precedence fixture files now exist under
 `tests/fixtures/config-precedence/`. Lightweight checks verify the fixture set
