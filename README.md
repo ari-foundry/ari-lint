@@ -166,6 +166,7 @@ succeeds, it runs these current safe CLI invocations:
 ./build/ari-lint --json --list-rules
 ./build/ari-lint --json --config /tmp/.../explicit.rules /tmp/.../trailing.ari
 ./build/ari-lint --json --config /tmp/.../explicit.rules --rule trailing-whitespace=note /tmp/.../trailing.ari
+./build/ari-lint --rule trailing-whitespace /tmp/.../trailing.ari
 ./build/ari-lint --json /tmp/.../trailing.ari
 ./build/ari-lint --json /tmp/.../one.ari /tmp/.../two.ari
 ```
@@ -177,9 +178,10 @@ compiler-backed CI, home/global/XDG config search, new lint semantics, or
 compatibility claims. The config smoke uses explicit temporary files and a
 temporary nested working directory containing `ari-lint.rules`; it checks only
 the current JSON rule code and severity fields for config precedence, including
-short rule names in config files. Focused diagnostic smoke checks assert current
-`ruleCode`, `severity`, `message`, `filePath`, `line`, and `column` fields for
-`lint/trailing-whitespace` and `lint/missing-final-newline`, plus multi-file
-JSON diagnostics, a clean plus
+short rule names in config files. A focused usage-error smoke checks malformed
+`--rule` text only for the current short stderr summary. Focused diagnostic
+smoke checks assert current `ruleCode`, `severity`, `message`, `filePath`,
+`line`, and `column` fields for `lint/trailing-whitespace` and
+`lint/missing-final-newline`, plus multi-file JSON diagnostics, a clean plus
 dirty invocation, and a clean plus clean invocation. JSON list-rules output
 assertions and broader golden output coverage remain future smoke coverage.

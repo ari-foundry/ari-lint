@@ -444,8 +444,17 @@ fn write_diagnostics_json_stdout(
   return write_result.wrote_stdout;
 }
 
-fn write_cli_parse_problem_stderr(zone: ref mut Zone) -> bool {
-  let text = std::string::from(zone, "ari-lint: invalid command-line arguments\n");
+fn write_cli_parse_problem_stderr(
+  zone: ref mut Zone,
+  rule_override_problem_count: i64
+) -> bool {
+  var text = std::string::from(zone, "ari-lint: invalid command-line arguments\n");
+  if rule_override_problem_count > 0 {
+    text = std::string::from(
+      zone,
+      "ari-lint: invalid --rule override; expected --rule RULE=SEVERITY\n"
+    );
+  }
   let write_result = super::output::write_stderr_text(zone, ref text);
   return write_result.wrote_stderr;
 }
@@ -545,7 +554,10 @@ fn dispatch_cli_command_with_main_output(
   parse_result: CliParseResult
 ) -> CliCommandResult {
   if parse_result.problem_count > 0 || parse_result.args.rule_override_problem_count > 0 {
-    let wrote_parse_stderr = write_cli_parse_problem_stderr(zone);
+    let wrote_parse_stderr = write_cli_parse_problem_stderr(
+      zone,
+      parse_result.args.rule_override_problem_count
+    );
     if !wrote_parse_stderr {
       return cli_command_result(
         CliParseProblems,
@@ -622,7 +634,10 @@ fn dispatch_cli_command_with_main_output(
     );
     match command_result.kind {
       CliParseProblems => {
-        let wrote_collection_parse_stderr = write_cli_parse_problem_stderr(zone);
+        let wrote_collection_parse_stderr = write_cli_parse_problem_stderr(
+          zone,
+          parse_result.args.rule_override_problem_count
+        );
         if !wrote_collection_parse_stderr {
           return cli_command_result(
             CliParseProblems,
