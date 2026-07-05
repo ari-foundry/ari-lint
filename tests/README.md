@@ -100,16 +100,19 @@ delegates build behavior to `scripts/build.sh`, and then runs
 temporary files and a temporary nested working directory containing
 `ari-lint.rules` to check parent discovered config severity, nearest discovered
 config precedence, explicit `--config` precedence, and CLI `--rule` precedence
-for a trailing-whitespace diagnostic. It also checks JSON diagnostics for two
-dirty source files, a clean plus dirty multi-file invocation, and a clean plus
-clean multi-file invocation.
+for a trailing-whitespace diagnostic. It also checks current JSON diagnostic
+`ruleCode`, `severity`, `message`, `filePath`, `line`, and `column` fields for
+`lint/trailing-whitespace` and `lint/missing-final-newline`, JSON diagnostics
+for two dirty source files, a clean plus dirty multi-file invocation, and a
+clean plus clean multi-file invocation.
 It is not run by `scripts/test.sh` or CI, but it is the current local validation
 path for build, supported CLI commands, source-file JSON diagnostics, explicit
 config, discovered `ari-lint.rules`, nearest discovered config precedence, and
 CLI severity override precedence across explicit source files. It does not
 compare golden output, run a parity runner, search home/global/XDG config
 locations, add new lint semantics, or claim compatibility. JSON list-rules
-output assertions remain future smoke coverage.
+output assertions and broader golden output coverage remain future smoke
+coverage.
 
 Compiler-backed tests remain future work. Current checks do not run the
 compiler. Future compiler-backed tests should use explicit compiler

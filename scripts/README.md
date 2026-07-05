@@ -27,9 +27,11 @@ as the first argument or through `ARI_COMPILER`, delegates compilation to
 against temporary files and a temporary nested working directory containing
 `ari-lint.rules` to check parent discovered config severity, nearest discovered
 config precedence, explicit `--config` precedence, and CLI `--rule`
-precedence. It also checks JSON diagnostics for two dirty source files, a
-clean plus dirty multi-file invocation, and a clean plus clean multi-file
-invocation.
+precedence. It also checks current JSON diagnostic `ruleCode`, `severity`,
+`message`, `filePath`, `line`, and `column` fields for
+`lint/trailing-whitespace` and `lint/missing-final-newline`, JSON diagnostics
+for two dirty source files, a clean plus dirty multi-file invocation, and a
+clean plus clean multi-file invocation.
 
 `test.sh` does not download or build the Ari compiler. It does not execute
 `tools/lint`, run `ari --check`, install dependencies, run package manager
@@ -41,6 +43,6 @@ commands, run parity checks, or participate in CI yet.
 
 `smoke.sh` does not add golden output tests, a parity runner, compiler-backed
 CI, home/global/XDG config search, new lint semantics, or compatibility claims.
-It checks only the current JSON rule code, severity fields, and file paths for
-temporary diagnostics. JSON list-rules output assertions remain future smoke
-coverage.
+It checks only the current JSON rule code, severity, message, file path, line,
+and column fields for temporary diagnostics. JSON list-rules output assertions
+and broad golden output coverage remain future smoke coverage.

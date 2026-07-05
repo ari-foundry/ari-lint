@@ -91,7 +91,8 @@ main-facing file read error stderr output added /
 internal human diagnostic formatter added /
 internal human diagnostic array formatter added /
 multi-file source linting added /
-no stable JSON schema or JSON output tests yet.
+focused diagnostic field smoke coverage added /
+no stable JSON schema or broad JSON output suite yet.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -199,14 +200,16 @@ and test work.
       for unknown rules without applying overrides, reading config files,
       integrating with command dispatch, emitting diagnostics, serializing
       JSON, scanning sources, invoking the compiler, or executing lint rules.
-      Rule override parser tests and override application remain future work.
+      Rule override parser tests remain future work; source-file severity
+      override application has since been wired.
 - [x] Add data-only severity override resolution for a caller-provided rule code
       and already-parsed override list, returning effective internal severity
       data without reading config files, discovering config paths, integrating
       with command dispatch, mutating diagnostics, applying config to lint
       execution, emitting output, serializing JSON, scanning sources, invoking
       the compiler, or executing lint rules. Severity resolution tests and
-      lint-run config integration remain future work.
+      broader lint-run config tests remain future work; source-file config
+      integration has since been wired.
 - [x] Add single-diagnostic severity override application for one already-built
       internal diagnostic and an already-parsed override list, returning a
       rebuilt diagnostic with the resolved severity without reading config
@@ -214,7 +217,8 @@ and test work.
       running lint rules, applying config to lint execution, emitting output,
       serializing JSON, scanning sources, invoking the compiler, or executing
       `ari --check`. Diagnostic severity application tests and lint-run config
-      integration remain future work.
+      integration tests remain future work; source-file config integration has
+      since been wired.
 - [x] Add in-memory lint aggregation with already-parsed severity overrides for
       caller-provided source text, applying overrides only to the diagnostics
       returned by existing in-memory rule execution without reading config
@@ -231,8 +235,8 @@ and test work.
       discovering config paths, integrating with command dispatch, traversing
       directories, writing output, serializing JSON, invoking the compiler,
       executing `ari --check`, or calling `tools/lint`. File-backed override
-      aggregation tests, CLI config integration, and config discovery remain
-      future work.
+      aggregation tests remain future work; CLI config integration and config
+      discovery have since been wired for the supported source-file path.
 - [x] Apply caller-provided `--rule` overrides to the internal CLI source-file
       lint path by parsing already-captured rule override tokens and routing
       explicit source paths through file-backed lint aggregation with
@@ -448,7 +452,8 @@ and test work.
       discovering config files, reading config files, traversing directories,
       invoking the compiler, executing `ari --check`, calling `tools/lint`, or
       calling process exit. Main-facing human diagnostic output has since been
-      wired; JSON output, tests, and parity checks remain future work.
+      wired, source-file JSON output has since been wired, and dedicated
+      output tests plus parity checks remain future work.
 - [x] Retain all positional source file paths in the CLI argument model and
       iterate all explicit source-file arguments for lint execution, JSON
       output, human diagnostic output, aggregate diagnostic/read-error counts,
@@ -460,15 +465,16 @@ and test work.
       serializing JSON, discovering config files, traversing directories,
       invoking the compiler, executing `ari --check`, calling `tools/lint`, or
       calling process exit. Explicit `--config` file overrides have since been
-      wired into diagnostic collection; JSON output tests and parity checks
-      remain future work.
+      wired into diagnostic collection; dedicated JSON output tests beyond
+      focused smoke and parity checks remain future work.
 - [x] Wire the main-facing source-file `--json` path to serialize collected
       diagnostics as a JSON array and write it to stdout through the verified
       stdout adapter, without changing parse-error output, discovering config
       files, reading config files, traversing directories, invoking the
       compiler, executing `ari --check`, calling `tools/lint`, or calling
-      process exit. JSON schema stability, JSON output tests, config
-      integration, and parity checks remain future work.
+      process exit. Config integration has since been wired; JSON schema
+      stability, dedicated JSON output tests beyond focused smoke, and parity
+      checks remain future work.
 - [x] Wire the main-facing CLI parse problem path to write a short usage-error
       summary to stderr through the verified stderr adapter, without
       parse-error JSON output, config discovery, reading config
@@ -717,13 +723,20 @@ and test work.
       `scripts/build.sh`, and runs the current safe `--help`, `--list-rules`,
       and `--json --list-rules` CLI invocations without adding golden output
       tests, parity checks, compiler-backed CI, new lint semantics, or
-      compatibility claims. Later smoke coverage added config override and
-      parent discovery checks. JSON list-rules output assertions remain future
-      smoke coverage.
+      compatibility claims. Later smoke coverage added config override,
+      parent discovery, multi-file JSON, and focused diagnostic field checks.
+      JSON list-rules output assertions and broader golden output coverage
+      remain future smoke coverage.
 - [x] Add minimal config override smoke coverage in `scripts/smoke.sh` using
       temporary files and simple JSON rule-code/severity checks for explicit
       `--config` severity and CLI `--rule` precedence, without adding golden
       fixtures, a parity runner, compiler-backed CI, or new lint semantics.
+- [x] Add focused diagnostic field smoke coverage in `scripts/smoke.sh` using
+      temporary files for `lint/trailing-whitespace` and
+      `lint/missing-final-newline`, checking current JSON `ruleCode`,
+      `severity`, `message`, `filePath`, `line`, and `column` fields without
+      adding broad golden fixtures, a parity runner, compiler-backed CI, or
+      new lint semantics.
 - [x] Add parent-directory config discovery smoke coverage in
       `scripts/smoke.sh` with temporary nested directories, checking parent
       discovery, nearest discovered config precedence, and explicit `--config`

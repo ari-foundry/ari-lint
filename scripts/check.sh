@@ -113,6 +113,13 @@ require_grep "clean_source_two" scripts/smoke.sh
 require_grep "clean_output" scripts/smoke.sh
 require_grep "mixed_output" scripts/smoke.sh
 require_grep "require_json_no_grep" scripts/smoke.sh
+require_grep "field_config_file" scripts/smoke.sh
+require_grep "trailing_field_output" scripts/smoke.sh
+require_grep "missing_final_newline_field_output" scripts/smoke.sh
+require_grep '"message":"trailing whitespace"' scripts/smoke.sh
+require_grep '"message":"missing final newline"' scripts/smoke.sh
+require_grep '"line":1' scripts/smoke.sh
+require_grep '"column":2' scripts/smoke.sh
 require_grep "ari-lint.rules" scripts/smoke.sh
 require_grep "scripts/smoke.sh" docs/dev/ari-implementation-plan.md
 require_grep "local smoke validation added" docs/dev/roadmap.md
@@ -120,6 +127,7 @@ require_grep "minimal config override smoke coverage added" docs/dev/roadmap.md
 require_grep "current-directory config discovery added" docs/dev/roadmap.md
 require_grep "parent-directory config discovery added" docs/dev/roadmap.md
 require_grep "multi-file source linting added" docs/dev/roadmap.md
+require_grep "focused diagnostic field smoke coverage added" docs/dev/roadmap.md
 require_grep "scripts/smoke.sh" tests/README.md
 
 require_grep "repo_root" scripts/test.sh
@@ -210,6 +218,7 @@ require_grep "explicit Ari compiler path" README.md
 require_grep "Local build via" README.md
 require_grep "Local smoke validation via" README.md
 require_grep "all explicitly provided positional source files" README.md
+require_grep "diagnostic smoke checks assert current" README.md
 require_grep "local standalone test entrypoint" README.md
 require_grep "relative compiler paths" README.md
 require_grep "docs/migration.md" docs/README.md
