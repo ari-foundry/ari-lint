@@ -130,7 +130,7 @@ require_grep "compiler_check_failed_code_in_stdout" scripts/parity.sh
 require_grep "exec_failed_text_in_stdout" scripts/parity.sh
 require_grep "missing_compiler_path_in_stdout" scripts/parity.sh
 require_grep "expected_top_level_declaration_text_in_stdout" scripts/parity.sh
-require_grep "clean and disabled-rule JSON outputs omit file path entries" scripts/parity.sh
+require_grep "clean, disabled-rule, and mixed clean/dirty JSON outputs omit clean file path entries" scripts/parity.sh
 require_grep "unable_to_read_config_text_in_stderr" scripts/parity.sh
 require_grep "cannot_open_lint_config_text_in_stderr" scripts/parity.sh
 require_grep "unknown_argument_text_in_stderr" scripts/parity.sh
@@ -148,7 +148,8 @@ require_grep "severity_note_present" scripts/parity.sh
 require_grep "ari-lint Known Parity Differences" docs/dev/parity-differences.md
 require_grep "Compiler Check Boundary" docs/dev/parity-differences.md
 require_grep "JSON Diagnostic Shape" docs/dev/parity-differences.md
-require_grep "Clean And Disabled File Path Accounting" docs/dev/parity-differences.md
+require_grep "Clean, Disabled, And Mixed File Path Accounting" docs/dev/parity-differences.md
+require_grep "mixed clean/dirty JSON shape" docs/dev/parity-differences.md
 require_grep "Diagnostic Exit Status" docs/dev/parity-differences.md
 require_grep "Help Output Stream And Shape" docs/dev/parity-differences.md
 require_grep "No Source File Usage Text" docs/dev/parity-differences.md
