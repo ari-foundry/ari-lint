@@ -13,16 +13,17 @@ matrix, not a parity claim, and not a release policy.
 ## Current Report Scope
 
 The local parity report currently compares report-only `--help` and
-unknown-option usage, missing config value usage, missing rule value usage, and
-missing Ari value usage, and `--list-rules` CLI cases plus temporary clean,
-trailing-whitespace, missing-final-newline, explicit-config, rule-override,
-discovered-config, and multi-file cases.
+no-source-file usage, unknown-option usage, missing config value usage, missing
+rule value usage, missing Ari value usage, and `--list-rules` CLI cases plus
+temporary clean, trailing-whitespace, missing-final-newline, explicit-config,
+rule-override, discovered-config, and multi-file cases.
 
 It reports signals only:
 
 - exit code
 - stdout and stderr presence
 - help usage-option sightings
+- no-source-file usage and missing-source-file text sightings
 - unknown-option usage and unknown-argument text sightings
 - missing config value usage and missing-option text sightings
 - missing rule value usage and missing-option text sightings
@@ -127,6 +128,28 @@ Follow-up:
 - decide whether standalone help text and stream behavior should preserve the
   original shape or define a new stable standalone contract
 - add strict help golden checks only after the help contract is documented
+
+### No Source File Usage Text
+
+Current standalone `ari-lint` reports a no-argument invocation as
+`missing source file`. Original `tools/lint` exits with a usage error but prints
+generic usage text instead.
+
+Classification: original `tools/lint` behavior difference and `ari-lint`
+diagnostic/CLI contract follow-up.
+
+Impact:
+
+- exact no-source-file usage text equality is not expected yet
+- release compatibility claims must not be made from the current report
+- strict usage-error golden checks should wait until the CLI contract is
+  documented
+
+Follow-up:
+
+- decide whether standalone no-source-file text should preserve the original
+  generic usage shape or define a new stable standalone diagnostic contract
+- add strict usage-error output checks only after that contract is documented
 
 ### Unknown Option Usage Text
 
