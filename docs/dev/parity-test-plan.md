@@ -13,7 +13,8 @@ source.
 
 A first local non-gating parity smoke/report now exists at `scripts/parity.sh`.
 It builds this repository with `scripts/build.sh`, runs both implementations on
-a `--list-rules` CLI case plus temporary clean, trailing-whitespace,
+a `--help` CLI case, a `--list-rules` CLI case, and temporary clean,
+trailing-whitespace,
 missing-final-newline, config, and multi-file cases, and prints a concise
 report without failing on behavior differences.
 
@@ -185,14 +186,16 @@ Current local report-only flow in `scripts/parity.sh`:
 3. Verify the original lint entrypoint from the Ari repo `Makefile` and
    `tools/lint/main.cpp`.
 4. Build this repository's current `ari-lint` with `scripts/build.sh`.
-5. Run a report-only `--list-rules` case and report rule-code, default-severity,
-   stdout/stderr, exit-code, and short-name-field signals.
-6. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
+5. Run a report-only `--help` case and report usage-option, stdout/stderr, and
+   exit-code signals.
+6. Run a report-only `--list-rules` case and report rule-code,
+   default-severity, stdout/stderr, exit-code, and short-name-field signals.
+7. Create tiny temporary trailing-whitespace, missing-final-newline, clean,
    explicit-config, discovered-config, and multi-file fixtures.
-7. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
+8. Run current `ari-lint` and original `tools/lint` with `--json --ari` across
    baseline rule, explicit `--config`, command-line `--rule`, discovered
    `ari-lint.rules`, and multi-file cases.
-8. Report exit code, stdout/stderr presence, rule sightings, severity
+9. Report exit code, stdout/stderr presence, rule sightings, severity
    sightings, file-path hit counts, and line/column presence.
 
 The report intentionally does not require exact text equality or exact JSON
@@ -269,6 +272,8 @@ from the other repo if needed.
       trailing-whitespace, and missing-final-newline fixtures
 - [x] Expand the local non-gating parity smoke/report with explicit `--config`,
       command-line `--rule`, discovered `ari-lint.rules`, and multi-file cases
+- [x] Add `--help` report-only CLI signals to the local non-gating parity
+      smoke/report
 - [x] Add `--list-rules` report-only CLI signals to the local non-gating parity
       smoke/report
 - [x] Document known report-only parity differences
