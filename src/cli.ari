@@ -2,9 +2,9 @@
 // stdout-free dispatch, internal exit-code data, explicit-token list-rules
 // command wiring, explicit-token entry point, OS argv integration, a
 // main-facing output path, an internal source-file lint path, explicit config
-// path capture, explicit compiler path capture, parent-directory config
-// discovery, explicit config override application, and an internal
-// caller-provided diagnostic collection path.
+// path capture, explicit compiler path capture, compiler check planning,
+// parent-directory config discovery, explicit config override application, and
+// an internal caller-provided diagnostic collection path.
 // The positional source file input and documented options are represented here.
 // This file reads process arguments only through the verified std::env::args
 // boundary. Main now returns the internal command exit-code mapping through
@@ -73,6 +73,17 @@ pub struct CliArgs {
   rule_override_count: i64,
   rule_override_problem_count: i64,
   first_rule_override_problem: Slice[u8],
+}
+
+pub struct CliCompilerCheckPlan {
+  compiler_path_present: bool,
+  compiler_path: Slice[u8],
+  source_count: i64,
+  first_source_file: Slice[u8],
+  include_path_count: i64,
+  check_argument: Slice[u8],
+  invokes_compiler: bool,
+  calls_tools_lint: bool,
 }
 
 pub struct CliParseResult {
@@ -432,6 +443,30 @@ pub fn parse_cli_rule_overrides(
   rule_override: CliRuleOverrideArg
 ) -> super::config::RuleOverrideParseResult {
   return super::config::parse_rule_override_text(zone, rule_override.raw_text);
+}
+
+pub fn compiler_check_plan_from_cli_args(
+  zone: ref mut Zone,
+  args: CliArgs
+) -> CliCompilerCheckPlan {
+  return CliCompilerCheckPlan {
+    compiler_path_present: args.ari_compiler_path_present,
+    compiler_path: args.ari_compiler_path,
+    source_count: args.source_count,
+    first_source_file: args.first_source_file,
+    include_path_count: args.include_path_count,
+    check_argument: "--check",
+    invokes_compiler: false,
+    calls_tools_lint: false,
+  };
+}
+
+pub fn plan_explicit_cli_compiler_check(
+  zone: ref mut Zone,
+  tokens: std::vec::Vec[std::string::String]
+) -> CliCompilerCheckPlan {
+  let parse_result = parse_cli_tokens(zone, ref tokens);
+  return compiler_check_plan_from_cli_args(zone, parse_result.args);
 }
 
 pub fn dispatch_cli_command(
@@ -1275,6 +1310,10 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // applies discovered or explicit config and --rule severity overrides. It
 // searches from the current working directory upward for ari-lint.rules when
 // --config is absent.
+// compiler_check_plan_from_cli_args records a future ari --check invocation
+// plan from already-parsed CLI args without invoking the compiler or
+// tools/lint. plan_explicit_cli_compiler_check provides the same data-only plan
+// for caller-provided tokens.
 //
 // dispatch_cli_command maps a CliParseResult to a stdout-free internal command
 // result with internal exit-code data. For source-file arguments it reads each

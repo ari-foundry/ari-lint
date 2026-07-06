@@ -706,6 +706,7 @@ require_grep "CliSurfaceMetadata" src/cli.ari
 require_grep "CliArgs" src/cli.ari
 require_grep "CliParseResult" src/cli.ari
 require_grep "CliRuleOverrideArg" src/cli.ari
+require_grep "CliCompilerCheckPlan" src/cli.ari
 require_grep "CliArgumentProblem" src/cli.ari
 require_grep "CliCommandResultKind" src/cli.ari
 require_grep "CliCommandResult" src/cli.ari
@@ -733,6 +734,10 @@ require_grep "--ari=" src/cli.ari
 require_grep "ari_compiler_path_present" src/cli.ari
 require_grep "ari_compiler_path: Slice" src/cli.ari
 require_grep "ari_compiler_path = std::string::substring" src/cli.ari
+require_grep "compiler_check_plan_from_cli_args" src/cli.ari
+require_grep "plan_explicit_cli_compiler_check" src/cli.ari
+require_grep "check_argument: \"--check\"" src/cli.ari
+require_grep "calls_tools_lint: false" src/cli.ari
 require_grep "-I" src/cli.ari
 require_grep "include_path_count" src/cli.ari
 require_grep "--list-rules" src/cli.ari
