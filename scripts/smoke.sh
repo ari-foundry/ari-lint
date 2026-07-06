@@ -162,6 +162,11 @@ run_json_diagnostic_smoke "$rule_output" "$binary" --json --config "$config_file
 require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$rule_output"
 require_json_grep '"severity":"note"' "$rule_output"
 
+inline_rule_output="$tmp_dir/inline-rule-note.json"
+run_json_diagnostic_smoke "$inline_rule_output" "$binary" --json "--config=$config_file" "--rule=trailing-whitespace=note" "$source_file"
+require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$inline_rule_output"
+require_json_grep '"severity":"note"' "$inline_rule_output"
+
 printf '%s\n' "trailing-whitespace = off" > "$config_off_file"
 run_json_success_smoke "$config_off_output" "$binary" --json --config "$config_off_file" "$source_file"
 require_json_no_grep '"ruleCode":"lint/trailing-whitespace"' "$config_off_output"
