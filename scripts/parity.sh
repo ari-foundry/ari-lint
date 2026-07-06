@@ -1327,6 +1327,7 @@ report_case "multi-file-config-rule" "$original_pwd" "$multi_dirty_one|$multi_di
 report_case "include-path" "$original_pwd" "$trailing_source" -I "$tmp_dir" "$trailing_source"
 report_case "discovered-config" "$discovery_parent" "child/discovered.ari" "child/discovered.ari"
 report_case "multi-file-discovered-config" "$discovery_parent" "child/discovered.ari|child/discovered-missing-final-newline.ari" "child/discovered.ari" "child/discovered-missing-final-newline.ari"
+report_case "multi-file-discovered-rule" "$discovery_parent" "child/discovered.ari|child/discovered-missing-final-newline.ari" --rule missing-final-newline=note "child/discovered.ari" "child/discovered-missing-final-newline.ari"
 report_case "multi-file" "$original_pwd" "$multi_dirty_one|$multi_dirty_two" "$multi_dirty_one" "$multi_dirty_two"
 report_case "multi-file-mixed" "$original_pwd" "$clean_source|$multi_dirty_one" "$clean_source" "$multi_dirty_one"
 
