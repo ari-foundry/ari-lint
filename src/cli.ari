@@ -82,6 +82,7 @@ pub struct CliCompilerCheckPlan {
   compiler_path: Slice[u8],
   source_count: i64,
   first_source_file: Slice[u8],
+  source_files: std::vec::Vec[std::string::String],
   include_path_count: i64,
   first_include_path: Slice[u8],
   include_paths: std::vec::Vec[std::string::String],
@@ -473,6 +474,7 @@ pub fn compiler_check_plan_from_cli_args(
     compiler_path: args.ari_compiler_path,
     source_count: args.source_count,
     first_source_file: args.first_source_file,
+    source_files: args.source_files,
     include_path_count: args.include_path_count,
     first_include_path: args.first_include_path,
     include_paths: args.include_paths,
@@ -488,6 +490,36 @@ pub fn plan_explicit_cli_compiler_check(
 ) -> CliCompilerCheckPlan {
   let parse_result = parse_cli_tokens(zone, ref tokens);
   return compiler_check_plan_from_cli_args(zone, parse_result.args);
+}
+
+pub fn compiler_check_argv_from_plan(
+  zone: ref mut Zone,
+  plan: CliCompilerCheckPlan
+) -> std::vec::Vec[std::string::String] {
+  var argv = std::vec::new<std::string::String>(
+    zone,
+    1 + (plan.include_path_count * 2) + plan.source_count
+  );
+  argv.push(std::string::from_slice_in(zone, plan.check_argument));
+
+  for include_path in plan.include_paths {
+    argv.push(std::string::from(zone, "-I"));
+    argv.push(std::string::from_slice_in(zone, include_path.as_slice()));
+  }
+
+  for source_file in plan.source_files {
+    argv.push(std::string::from_slice_in(zone, source_file.as_slice()));
+  }
+
+  return argv;
+}
+
+pub fn plan_explicit_cli_compiler_check_argv(
+  zone: ref mut Zone,
+  tokens: std::vec::Vec[std::string::String]
+) -> std::vec::Vec[std::string::String] {
+  let plan = plan_explicit_cli_compiler_check(zone, tokens);
+  return compiler_check_argv_from_plan(zone, plan);
 }
 
 pub fn dispatch_cli_command(
