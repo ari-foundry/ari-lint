@@ -740,6 +740,10 @@ require_grep "check_argument: \"--check\"" src/cli.ari
 require_grep "calls_tools_lint: false" src/cli.ari
 require_grep "-I" src/cli.ari
 require_grep "include_path_count" src/cli.ari
+require_grep "first_include_path" src/cli.ari
+require_grep "include_paths: std::vec::Vec" src/cli.ari
+require_grep "include_paths.push" src/cli.ari
+require_grep "include_paths: args.include_paths" src/cli.ari
 require_grep "--list-rules" src/cli.ari
 require_grep "list_rules_requested" src/cli.ari
 require_grep "--config" src/cli.ari
