@@ -1237,6 +1237,7 @@ invalid_config_file="$tmp_dir/invalid.rules"
 discovery_parent="$tmp_dir/discovery"
 discovery_child="$discovery_parent/child"
 discovered_source="$discovery_child/discovered.ari"
+discovered_missing_source="$discovery_child/discovered-missing-final-newline.ari"
 multi_dirty_one="$tmp_dir/multi-dirty-one.ari"
 multi_dirty_two="$tmp_dir/multi-dirty-two.ari"
 
@@ -1267,6 +1268,8 @@ printf '%s\n' "lint/trailing-whitespace = note" > "$discovery_parent/ari-lint.ru
   printf '%s\n' "  return 0;"
   printf '%s\n' "}"
 } > "$discovered_source"
+
+printf '%s' "fn discovered_missing() -> i64 { return 1; }" > "$discovered_missing_source"
 
 {
   printf '%s  \n' "fn main() -> i64 {"
@@ -1323,6 +1326,7 @@ report_case "rule-override" "$original_pwd" "$trailing_source" --config "$explic
 report_case "multi-file-config-rule" "$original_pwd" "$multi_dirty_one|$multi_dirty_two" --config "$explicit_config_file" --rule trailing-whitespace=note "$multi_dirty_one" "$multi_dirty_two"
 report_case "include-path" "$original_pwd" "$trailing_source" -I "$tmp_dir" "$trailing_source"
 report_case "discovered-config" "$discovery_parent" "child/discovered.ari" "child/discovered.ari"
+report_case "multi-file-discovered-config" "$discovery_parent" "child/discovered.ari|child/discovered-missing-final-newline.ari" "child/discovered.ari" "child/discovered-missing-final-newline.ari"
 report_case "multi-file" "$original_pwd" "$multi_dirty_one|$multi_dirty_two" "$multi_dirty_one" "$multi_dirty_two"
 report_case "multi-file-mixed" "$original_pwd" "$clean_source|$multi_dirty_one" "$clean_source" "$multi_dirty_one"
 
