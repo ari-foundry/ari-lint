@@ -91,6 +91,17 @@ pub struct CliCompilerCheckPlan {
   calls_tools_lint: bool,
 }
 
+pub struct CliCompilerCheckExecutionBoundary {
+  compiler_path_present: bool,
+  compiler_path: Slice[u8],
+  planned_argument_count: i64,
+  uses_planned_argv: bool,
+  invokes_compiler: bool,
+  captures_stdout: bool,
+  captures_stderr: bool,
+  calls_tools_lint: bool,
+}
+
 pub struct CliParseResult {
   args: CliArgs,
   problem_count: i64,
@@ -520,6 +531,30 @@ pub fn plan_explicit_cli_compiler_check_argv(
 ) -> std::vec::Vec[std::string::String] {
   let plan = plan_explicit_cli_compiler_check(zone, tokens);
   return compiler_check_argv_from_plan(zone, plan);
+}
+
+pub fn compiler_check_execution_boundary_from_plan(
+  zone: ref mut Zone,
+  plan: CliCompilerCheckPlan
+) -> CliCompilerCheckExecutionBoundary {
+  return CliCompilerCheckExecutionBoundary {
+    compiler_path_present: plan.compiler_path_present,
+    compiler_path: plan.compiler_path,
+    planned_argument_count: 1 + (plan.include_path_count * 2) + plan.source_count,
+    uses_planned_argv: true,
+    invokes_compiler: false,
+    captures_stdout: false,
+    captures_stderr: false,
+    calls_tools_lint: false,
+  };
+}
+
+pub fn plan_explicit_cli_compiler_check_execution_boundary(
+  zone: ref mut Zone,
+  tokens: std::vec::Vec[std::string::String]
+) -> CliCompilerCheckExecutionBoundary {
+  let plan = plan_explicit_cli_compiler_check(zone, tokens);
+  return compiler_check_execution_boundary_from_plan(zone, plan);
 }
 
 pub fn dispatch_cli_command(
