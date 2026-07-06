@@ -3,8 +3,9 @@
 // command wiring, explicit-token entry point, OS argv integration, a
 // main-facing output path, an internal source-file lint path, explicit config
 // path capture, explicit compiler path capture, compiler check planning,
-// parent-directory config discovery, explicit config override application, and
-// an internal caller-provided diagnostic collection path.
+// compiler check result modeling, parent-directory config discovery, explicit
+// config override application, and an internal caller-provided diagnostic
+// collection path.
 // The positional source file input and documented options are represented here.
 // This file reads process arguments only through the verified std::env::args
 // boundary. Main now returns the internal command exit-code mapping through
@@ -100,6 +101,28 @@ pub struct CliCompilerCheckExecutionBoundary {
   captures_stdout: bool,
   captures_stderr: bool,
   calls_tools_lint: bool,
+}
+
+pub enum CliCompilerCheckResultKind {
+  CliCompilerCheckNotRun,
+  CliCompilerCheckSucceeded,
+  CliCompilerCheckFailed,
+}
+
+pub struct CliCompilerCheckResult {
+  kind: CliCompilerCheckResultKind,
+  compiler_path_present: bool,
+  compiler_path: Slice[u8],
+  planned_argument_count: i64,
+  uses_planned_argv: bool,
+  exit_code_available: bool,
+  exit_code: i64,
+  diagnostic_count: i64,
+  stdout_available: bool,
+  stderr_available: bool,
+  invokes_compiler: bool,
+  calls_tools_lint: bool,
+  detail: Slice[u8],
 }
 
 pub struct CliParseResult {
@@ -555,6 +578,38 @@ pub fn plan_explicit_cli_compiler_check_execution_boundary(
 ) -> CliCompilerCheckExecutionBoundary {
   let plan = plan_explicit_cli_compiler_check(zone, tokens);
   return compiler_check_execution_boundary_from_plan(zone, plan);
+}
+
+pub fn compiler_check_result_not_run_from_boundary(
+  zone: ref mut Zone,
+  boundary: CliCompilerCheckExecutionBoundary
+) -> CliCompilerCheckResult {
+  return CliCompilerCheckResult {
+    kind: CliCompilerCheckNotRun,
+    compiler_path_present: boundary.compiler_path_present,
+    compiler_path: boundary.compiler_path,
+    planned_argument_count: boundary.planned_argument_count,
+    uses_planned_argv: boundary.uses_planned_argv,
+    exit_code_available: false,
+    exit_code: 0,
+    diagnostic_count: 0,
+    stdout_available: false,
+    stderr_available: false,
+    invokes_compiler: false,
+    calls_tools_lint: false,
+    detail: "Compiler check result is modeled but not executed; ari --check remains future work.",
+  };
+}
+
+pub fn plan_explicit_cli_compiler_check_result(
+  zone: ref mut Zone,
+  tokens: std::vec::Vec[std::string::String]
+) -> CliCompilerCheckResult {
+  let boundary = plan_explicit_cli_compiler_check_execution_boundary(
+    zone,
+    tokens
+  );
+  return compiler_check_result_not_run_from_boundary(zone, boundary);
 }
 
 pub fn dispatch_cli_command(
@@ -1401,7 +1456,10 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // compiler_check_plan_from_cli_args records a future ari --check invocation
 // plan from already-parsed CLI args without invoking the compiler or
 // tools/lint. plan_explicit_cli_compiler_check provides the same data-only plan
-// for caller-provided tokens.
+// for caller-provided tokens. compiler_check_execution_boundary_from_plan and
+// compiler_check_result_not_run_from_boundary model the planned execution edge
+// and its not-run result without spawning the compiler, capturing streams,
+// emitting diagnostics, calling tools/lint, or interpreting compiler output.
 //
 // dispatch_cli_command maps a CliParseResult to a stdout-free internal command
 // result with internal exit-code data. For source-file arguments it reads each
