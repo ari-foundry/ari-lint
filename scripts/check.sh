@@ -731,6 +731,8 @@ require_grep "json_requested" src/cli.ari
 require_grep "--ari" src/cli.ari
 require_grep "--ari=" src/cli.ari
 require_grep "ari_compiler_path_present" src/cli.ari
+require_grep "ari_compiler_path: Slice" src/cli.ari
+require_grep "ari_compiler_path = std::string::substring" src/cli.ari
 require_grep "-I" src/cli.ari
 require_grep "include_path_count" src/cli.ari
 require_grep "--list-rules" src/cli.ari
