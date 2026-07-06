@@ -116,6 +116,7 @@ require_text_grep "--list-rules" "$help_output"
 require_text_grep "--json" "$help_output"
 require_text_grep "--config PATH" "$help_output"
 require_text_grep "--rule RULE=SEVERITY" "$help_output"
+require_text_grep "Treat following arguments as source files." "$help_output"
 
 list_rules_output="$tmp_dir/list-rules.out"
 run_stdout_success_smoke "$list_rules_output" "$binary" --list-rules
@@ -278,6 +279,16 @@ require_json_grep "\"filePath\":\"$multi_dirty_one\"" "$multi_output"
 require_json_grep "\"filePath\":\"$multi_dirty_two\"" "$multi_output"
 require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$multi_output"
 require_json_grep '"ruleCode":"lint/missing-final-newline"' "$multi_output"
+
+dash_source="$tmp_dir/-dash-source.ari"
+printf '%s  \n' "fn dash_source() -> i64 { return 0; }" > "$dash_source"
+dash_output="$tmp_dir/dash-source.json"
+(
+  cd "$tmp_dir"
+  run_json_diagnostic_smoke "$dash_output" "$binary" --json -- "-dash-source.ari"
+)
+require_json_grep '"filePath":"-dash-source.ari"' "$dash_output"
+require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$dash_output"
 
 clean_source="$tmp_dir/clean.ari"
 {
