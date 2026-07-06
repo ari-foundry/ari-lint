@@ -15,8 +15,10 @@ script_dir=$(CDPATH= cd "$(dirname "$0")" && pwd)
 repo_root=$(CDPATH= cd "$script_dir/.." && pwd)
 
 if [ "$#" -eq 1 ]; then
+  smoke_ari_compiler="$1"
   "$script_dir/build.sh" "$1"
 else
+  smoke_ari_compiler="${ARI_COMPILER:-}"
   "$script_dir/build.sh"
 fi
 
@@ -166,6 +168,10 @@ inline_rule_output="$tmp_dir/inline-rule-note.json"
 run_json_diagnostic_smoke "$inline_rule_output" "$binary" --json "--config=$config_file" "--rule=trailing-whitespace=note" "$source_file"
 require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$inline_rule_output"
 require_json_grep '"severity":"note"' "$inline_rule_output"
+
+inline_ari_output="$tmp_dir/inline-ari.json"
+run_json_diagnostic_smoke "$inline_ari_output" "$binary" --json "--ari=$smoke_ari_compiler" "$source_file"
+require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$inline_ari_output"
 
 printf '%s\n' "trailing-whitespace = off" > "$config_off_file"
 run_json_success_smoke "$config_off_output" "$binary" --json --config "$config_off_file" "$source_file"
