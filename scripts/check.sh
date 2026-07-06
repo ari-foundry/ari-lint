@@ -230,6 +230,8 @@ require_grep "--rule RULE=SEVERITY" scripts/smoke.sh
 require_grep "missing option value for --config" scripts/smoke.sh
 require_grep "missing option value for --rule" scripts/smoke.sh
 require_grep "missing option value for --ari" scripts/smoke.sh
+require_grep "--ari=" scripts/smoke.sh
+require_grep "inline_ari_output" scripts/smoke.sh
 require_grep "unknown argument: --definitely-unknown" scripts/smoke.sh
 require_grep "--config PATH" src/cli.ari
 require_grep "run_json_diagnostic_smoke" scripts/smoke.sh
@@ -727,6 +729,7 @@ require_grep "std::allocator::of" src/cli.ari
 require_grep "--json" src/cli.ari
 require_grep "json_requested" src/cli.ari
 require_grep "--ari" src/cli.ari
+require_grep "--ari=" src/cli.ari
 require_grep "ari_compiler_path_present" src/cli.ari
 require_grep "-I" src/cli.ari
 require_grep "include_path_count" src/cli.ari

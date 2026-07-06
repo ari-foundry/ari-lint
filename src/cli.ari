@@ -307,6 +307,9 @@ pub fn parse_cli_tokens(
       rule_override_problem_count =
         rule_override_problem_count + inline_rule_override_result.problem_count;
       index = index + 1;
+    } else if token.starts_with("--ari=") {
+      ari_compiler_path_present = true;
+      index = index + 1;
     } else if token.equals("--ari") {
       if index + 1 < tokens.len() {
         ari_compiler_path_present = true;
