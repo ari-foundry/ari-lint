@@ -736,8 +736,12 @@ require_grep "ari_compiler_path: Slice" src/cli.ari
 require_grep "ari_compiler_path = std::string::substring" src/cli.ari
 require_grep "compiler_check_plan_from_cli_args" src/cli.ari
 require_grep "plan_explicit_cli_compiler_check" src/cli.ari
+require_grep "compiler_check_argv_from_plan" src/cli.ari
+require_grep "plan_explicit_cli_compiler_check_argv" src/cli.ari
 require_grep "check_argument: \"--check\"" src/cli.ari
 require_grep "calls_tools_lint: false" src/cli.ari
+require_grep "source_files: args.source_files" src/cli.ari
+require_grep "argv.push(std::string::from_slice_in(zone, plan.check_argument))" src/cli.ari
 require_grep "-I" src/cli.ari
 require_grep "include_path_count" src/cli.ari
 require_grep "first_include_path" src/cli.ari
