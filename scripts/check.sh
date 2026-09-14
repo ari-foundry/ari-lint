@@ -766,6 +766,20 @@ require_grep "https://github.com/ari-foundry/ari/tags" docs/dev/release-compatib
 require_grep "No Ari compatibility claims are established yet" docs/dev/release-compatibility-policy.md
 require_grep "Do not invent version numbers" docs/dev/release-compatibility-policy.md
 require_grep "compiler-backed .ari-lint. tests pass" docs/dev/release-compatibility-policy.md
+require_grep "Recorded Compiler Validation Evidence" docs/dev/release-compatibility-policy.md
+require_fixed_grep '### Ari v0.1.0 prerelease compiler validation - evidence only' docs/dev/release-compatibility-policy.md
+require_fixed_grep 'This is a compiler validation evidence record, not a compatibility matrix' docs/dev/release-compatibility-policy.md
+require_grep "73a14027d3259de9b015bf17bc05466bbc42d2a3" docs/dev/release-compatibility-policy.md
+require_grep "actions/runs/34889392418" docs/dev/release-compatibility-policy.md
+require_grep "job/104127958190" docs/dev/release-compatibility-policy.md
+require_grep "2026-09-14T19:51:10Z" docs/dev/release-compatibility-policy.md
+require_grep "2026-09-14T19:52:03Z" docs/dev/release-compatibility-policy.md
+require_grep "c615f1c2ce1a93835118b4da8867a7f3dfaf991a" docs/dev/release-compatibility-policy.md
+require_grep "0af99459eb2ad4ad688ae8ba8e4e3bcce88358bba969f88bff65f5df3ced6da2" docs/dev/release-compatibility-policy.md
+require_grep "6a9eaefbbc6aef083496e7d78749ec5e13ef87175301923ee000e45a9824baa6" docs/dev/release-compatibility-policy.md
+require_fixed_grep '20260907.300.1' docs/dev/release-compatibility-policy.md
+require_grep "scripts/test.sh /absolute/path/to/ari" docs/dev/release-compatibility-policy.md
+require_fixed_grep 'the cited Compiler Smoke job did not execute `tools/lint` or either parity' docs/dev/release-compatibility-policy.md
 require_grep "Do not add release automation in this step" docs/dev/release-compatibility-policy.md
 require_grep "Do not claim support for any Ari release" docs/dev/release-compatibility-policy.md
 require_grep "release and compatibility policy documented" docs/dev/roadmap.md
