@@ -58,12 +58,14 @@ or local build failure.
 
 ## Known Differences
 
-A future strict compiler-boundary suite must explicitly allowlist exactly five
+A broader strict compiler-boundary suite must explicitly allowlist exactly five
 intentional runtime categories from this section: cross-stream ordering,
 retained-output capture, retained diagnostic material, non-interactive stdin,
-and out-of-range coordinates. Process-infrastructure errors and other CLI or
-output differences below remain unresolved implementation or contract work;
-they must not pass a strict gate through this allowlist.
+and out-of-range coordinates. The initial strict compiler case avoids those
+categories by emitting one in-range diagnostic on one stream. Process-
+infrastructure errors and other CLI or output differences below remain
+unresolved implementation or contract work; they must not pass a strict gate
+through this allowlist.
 
 ### Process Capture Infrastructure Errors
 
@@ -544,7 +546,7 @@ Follow-up:
 
 - decide whether standalone missing-option text should preserve the original
   generic usage shape or define a new stable standalone diagnostic contract
-- retain exact `-I DIR` forwarding coverage in strict compiler fixtures
+- add exact `-I DIR` forwarding coverage to a future strict compiler fixture
 - add strict usage-error output checks only after that contract is documented
 
 ### List Rules Output Detail
@@ -600,9 +602,10 @@ compiler exit is nonzero or any diagnostic remains. These are local smoke
 signals, not a compatibility claim.
 
 These report-only signals do not replace the strict subsets or compiler-backed
-CI. Separate source-controlled native and list-rules goldens now gate their
-documented scopes; broader CLI, config, and compiler-boundary parity remains
-open.
+CI. Separate source-controlled native and list-rules goldens gate their
+documented scopes, and one compiler-boundary fixture gates exact combined JSON
+and human output for a deterministic single-stream diagnostic. Broader CLI,
+config, and compiler-boundary parity remains open.
 
 ## Non-Goals
 

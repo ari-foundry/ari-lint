@@ -1,14 +1,15 @@
 # ari-lint Tests
 
 Compiler-free repository checks, local compiler-backed executable smoke
-validation, a local report-only parity smoke/report, and a strict checked-in
-native-rule parity subset all exist now. Exact standalone and reference
-list-rules contracts are also gated with separate goldens. The smoke suite
-includes representative exact runtime JSON, human-output, compiler invocation,
-and compiler-diagnostic checks. The strict subset gates clean, trailing-whitespace,
-missing-final-newline, ordered multi-file, and duplicate JSON results against
-the reference tool and source-controlled goldens. Focused Ari unit tests,
-strict CLI/config/compiler-boundary parity, source-controlled broad
+validation, a local report-only parity smoke/report, and strict checked-in
+list-rules, native-rule, and initial compiler-boundary subsets all exist now.
+The smoke suite includes representative exact runtime JSON, human-output,
+compiler invocation, and compiler-diagnostic checks. The native strict subset
+gates clean, trailing-whitespace, missing-final-newline, ordered multi-file, and
+duplicate JSON results against the reference tool and source-controlled
+goldens. The compiler-boundary subset gates one deterministic compiler/native
+diagnostic result in both JSON and human form. Focused Ari unit tests, strict
+CLI/config parity, broader compiler-boundary parity, source-controlled broad
 compiler-diagnostic goldens, and broader golden coverage remain future work.
 
 Current compiler-free checks verify repository shape, lightweight
@@ -45,11 +46,14 @@ stdout; the compiler-free checks do not execute that path, while
 A source-only parity runner skeleton records future comparison boundaries, and
 `scripts/parity.sh` provides a local report-only parity smoke/report. The
 lightweight checks do not execute that parity script.
-`scripts/parity-strict.sh` provides a separate gating subset over checked-in
-list-rules snapshots and native rule fixtures. List-rules intentionally uses
-different standalone/reference goldens. Native cases use a no-output fixture
-compiler and explicit empty config so compiler diagnostics and ambient config
-cannot affect those goldens.
+`scripts/parity-strict.sh` provides separate gating subsets over checked-in
+list-rules snapshots, native rule fixtures, and one compiler-boundary fixture.
+List-rules intentionally uses different standalone/reference goldens. Native
+cases use a no-output fixture compiler and explicit empty config so compiler
+diagnostics and ambient config cannot affect those goldens. The
+compiler-boundary case uses an argv-checking fixture compiler and requires an
+exact compiler diagnostic followed by the native diagnostic in JSON and human
+output.
 The config precedence fixture plan is documented. Shell-only lightweight checks
 verify the committed fixture files' presence, exact line order, and expected
 text; they do not execute Ari code. Dedicated Ari-backed config precedence tests
@@ -103,8 +107,8 @@ checksum-pinned Ari `v0.1.0` prerelease artifact and runs
 `scripts/test.sh "$ARI_COMPILER"`. Neither workflow executes `tools/lint`, runs
 parity, uses package-manager dependencies, or establishes compatibility.
 
-Run the strict list-rules and native-rule subsets from any checkout with
-explicit compiler and Ari repository paths:
+Run the strict list-rules, native-rule, and compiler-boundary subsets from any
+checkout with explicit compiler and Ari repository paths:
 
 ```sh
 scripts/parity-strict.sh /path/to/ari /path/to/ari-repo
@@ -126,6 +130,20 @@ option orders for each implementation, final LF, empty stderr, exit `0`, JSON
 validity for the standalone JSON form, and sentinel-backed absence of compiler
 invocation for the explicitly selected compiler. This provenance is not an Ari
 release compatibility claim.
+
+The exact outputs under `tests/golden/compiler-boundary/` use a deterministic
+fixture compiler, not an Ari release compiler. The fixture verifies the exact
+`SOURCE --check` child argv, emits one error on stderr, and exits `7`; the
+strict runner requires both implementations to produce the same combined
+compiler/native diagnostics, top-level exit `1`, stdout-only output, and final
+LF in JSON and human modes. This is a focused process and diagnostic contract,
+not compiler compatibility evidence.
+
+The reference side was approved with the existing Ari `v0.1.0` source
+provenance, commit `c615f1c2ce1a93835118b4da8867a7f3dfaf991a`. The relevant
+bundled lint/tooling source was also unchanged at inspected Ari commit
+`dd21529abbc8d043b7387d64f2e5c3d44c6aeacb`. This records reference provenance,
+not a release compatibility claim.
 
 `scripts/build.sh` is separate from the lightweight checks. It is a
 compiler-dependent local build scaffold that requires an explicit Ari compiler
@@ -273,11 +291,11 @@ Future fixtures should cover trailing tabs, whitespace-only lines, mixed spaces
 and tabs, final lines without trailing newlines, CRLF behavior, diagnostics,
 and parity with current `tools/lint`.
 
-The future trailing-whitespace fixture and test plan is documented in
+The broader trailing-whitespace fixture and test plan is documented in
 [docs/rules/trailing-whitespace-fixtures.md](../docs/rules/trailing-whitespace-fixtures.md).
-In-memory trailing-whitespace execution has started, but full
-trailing-whitespace behavior tests, golden files, and test runner behavior are
-not added yet.
+In-memory trailing-whitespace execution has started. The strict subset gates
+the checked-in clean and trailing-spaces shapes, but broader behavior tests,
+goldens, and dedicated Ari test-runner coverage are not added yet.
 
 The rule-specific trailing-whitespace parity plan is documented in
 [docs/rules/trailing-whitespace-parity.md](../docs/rules/trailing-whitespace-parity.md).
@@ -309,11 +327,11 @@ The lightweight workflow check verifies fixture presence, verifies
 not compile fixtures, run the Ari compiler, invoke `ari-lint`, compare
 diagnostics, or execute the helper directly.
 
-The future missing-final-newline fixture and test plan is documented in
+The broader missing-final-newline fixture and test plan is documented in
 [docs/rules/missing-final-newline-fixtures.md](../docs/rules/missing-final-newline-fixtures.md).
-In-memory missing-final-newline execution has started, but full
-missing-final-newline behavior tests, golden files, and test runner behavior
-are not added yet.
+In-memory missing-final-newline execution has started. The strict subset gates
+the checked-in newline-present and newline-missing shapes, but broader behavior
+tests, goldens, and dedicated Ari test-runner coverage are not added yet.
 
 The rule-specific missing-final-newline parity plan is documented in
 [docs/rules/missing-final-newline-parity.md](../docs/rules/missing-final-newline-parity.md).
@@ -392,8 +410,8 @@ exit codes, list-rules/help output, human and JSON source results, parse errors,
 missing input with and without `--json`, and stream isolation. Stdout-only
 successes require empty stderr; usage failures require empty stdout. Every JSON
 case is parsed as one document and must end in LF. Dedicated Ari main-entry and
-argv-boundary unit tests, environment isolation, and broader strict
-CLI/config/compiler parity remain future work.
+argv-boundary unit tests, environment isolation, and broader strict CLI,
+config, and compiler-boundary parity remain future work.
 
 No executable stdout/stderr output boundary tests are added yet. Future tests
 should cover the internal sink/result model, stdout versus stderr stream
@@ -540,9 +558,10 @@ future work.
 
 Parity testing is specified in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Checked-in
-native-rule fixtures and list-rules/native golden subsets now run through
-`scripts/parity-strict.sh`; `scripts/parity.sh` remains the broader report-only
-runner. A source-only Ari parity skeleton records intended internal boundaries.
+native-rule and compiler-boundary fixtures plus list-rules, native, and
+compiler-boundary golden subsets now run through `scripts/parity-strict.sh`;
+`scripts/parity.sh` remains the broader report-only runner. A source-only Ari
+parity skeleton records intended internal boundaries.
 
 No dedicated tests of the parity-runner infrastructure are added yet. Future
 runner tests should isolate reference and standalone command selection, fixture
@@ -562,9 +581,10 @@ relative compiler path preservation, `ARI_COMPILER` fallback behavior, output
 path handling, and failure diagnostics without adding compiler execution to
 lightweight checks.
 
-Future parity fixture categories include valid Ari source, trailing whitespace,
-missing final newline, compiler errors, config file overrides, command-line rule
-overrides, include paths, JSON diagnostics, and mixed compiler/lint diagnostics.
+Additional parity fixture categories include broader valid Ari source,
+trailing-whitespace, missing-final-newline, compiler-error, config, rule
+override, include-path, JSON diagnostic, and mixed compiler/lint diagnostic
+shapes beyond the current strict subsets.
 
 Compiler and standard library bugs should be filed in `ari-foundry/ari`, not in
 `ari-lint` as primary issues.

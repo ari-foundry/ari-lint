@@ -37,12 +37,15 @@ reference_lint=$(absolute_path "$reference_lint")
 
 standalone_lint="$repo_root/build/ari-lint"
 fixture_compiler="$repo_root/tests/fixtures/parity/compiler-ok.sh"
+diagnostic_compiler="$repo_root/tests/fixtures/parity/compiler-diagnostic.sh"
 empty_config="$repo_root/tests/fixtures/parity/empty.rules"
-golden_dir="$repo_root/tests/golden/native"
+native_golden_dir="$repo_root/tests/golden/native"
+compiler_golden_dir="$repo_root/tests/golden/compiler-boundary"
 list_rules_golden_dir="$repo_root/tests/golden/list-rules"
 
 [ -x "$standalone_lint" ] || fail "standalone lint is not executable: $standalone_lint"
 [ -x "$fixture_compiler" ] || fail "fixture compiler is not executable: $fixture_compiler"
+[ -x "$diagnostic_compiler" ] || fail "diagnostic compiler is not executable: $diagnostic_compiler"
 [ -f "$empty_config" ] || fail "missing empty config fixture: $empty_config"
 command -v python3 >/dev/null 2>&1 || fail "python3 is required to validate JSON goldens"
 
@@ -66,7 +69,14 @@ run_tool() {
   tool_name="$1"
   tool_path="$2"
   case_name="$3"
-  shift 3
+  selected_compiler="$4"
+  expects_json="$5"
+  shift 5
+
+  case "$expects_json" in
+    yes|no) ;;
+    *) fail "invalid JSON expectation for $case_name: $expects_json" ;;
+  esac
 
   stdout_path="$tmp_dir/$case_name.$tool_name.stdout"
   stderr_path="$tmp_dir/$case_name.$tool_name.stderr"
@@ -74,9 +84,14 @@ run_tool() {
 
   set +e
   (
-    CDPATH= cd "$repo_root" &&
-      "$tool_path" --json --ari "$fixture_compiler" \
+    CDPATH= cd "$repo_root" || exit 1
+    if [ "$expects_json" = "yes" ]; then
+      "$tool_path" --json --ari "$selected_compiler" \
         --config "$empty_config" "$@"
+    else
+      "$tool_path" --ari "$selected_compiler" \
+        --config "$empty_config" "$@"
+    fi
   ) > "$stdout_path" 2> "$stderr_path"
   status=$?
   set -e
@@ -152,14 +167,18 @@ require_no_metadata_compiler_invocation() {
 run_case() {
   case_name="$1"
   expected_status="$2"
-  expected_file="$golden_dir/$case_name.json"
-  shift 2
+  expected_file="$3"
+  selected_compiler="$4"
+  expects_json="$5"
+  shift 5
 
   [ -f "$expected_file" ] || fail "missing golden: $expected_file"
   require_final_newline "$expected_file"
 
-  run_tool standalone "$standalone_lint" "$case_name" "$@"
-  run_tool reference "$reference_lint" "$case_name" "$@"
+  run_tool standalone "$standalone_lint" "$case_name" \
+    "$selected_compiler" "$expects_json" "$@"
+  run_tool reference "$reference_lint" "$case_name" \
+    "$selected_compiler" "$expects_json" "$@"
 
   standalone_stdout="$tmp_dir/$case_name.standalone.stdout"
   standalone_stderr="$tmp_dir/$case_name.standalone.stderr"
@@ -192,9 +211,11 @@ run_case() {
 
   require_final_newline "$standalone_stdout"
   require_final_newline "$reference_stdout"
-  python3 -c 'import json, sys; [json.load(open(path, encoding="utf-8")) for path in sys.argv[1:]]' \
-    "$expected_file" "$standalone_stdout" "$reference_stdout" ||
-    fail "$case_name output is not valid JSON"
+  if [ "$expects_json" = "yes" ]; then
+    python3 -c 'import json, sys; [json.load(open(path, encoding="utf-8")) for path in sys.argv[1:]]' \
+      "$expected_file" "$standalone_stdout" "$reference_stdout" ||
+      fail "$case_name output is not valid JSON"
+  fi
 
   printf '%s\n' "parity-strict.sh: passed $case_name"
 }
@@ -221,13 +242,16 @@ run_metadata_case list-rules-json reference "$reference_lint" \
 require_no_metadata_compiler_invocation
 printf '%s\n' "strict list-rules contract goldens passed"
 
-run_case clean 0 \
+run_case clean 0 "$native_golden_dir/clean.json" "$fixture_compiler" yes \
   tests/fixtures/trailing-whitespace/clean.ari
-run_case trailing-whitespace 1 \
+run_case trailing-whitespace 1 "$native_golden_dir/trailing-whitespace.json" \
+  "$fixture_compiler" yes \
   tests/fixtures/trailing-whitespace/trailing-spaces.ari
-run_case missing-final-newline 1 \
+run_case missing-final-newline 1 "$native_golden_dir/missing-final-newline.json" \
+  "$fixture_compiler" yes \
   tests/fixtures/missing-final-newline/missing-final-newline.ari
 run_case ordered-multi-file-duplicate 1 \
+  "$native_golden_dir/ordered-multi-file-duplicate.json" "$fixture_compiler" yes \
   tests/fixtures/trailing-whitespace/clean.ari \
   tests/fixtures/trailing-whitespace/trailing-spaces.ari \
   tests/fixtures/missing-final-newline/with-final-newline.ari \
@@ -236,3 +260,12 @@ run_case ordered-multi-file-duplicate 1 \
 
 require_no_metadata_compiler_invocation
 printf '%s\n' "strict native parity goldens passed"
+
+run_case compiler-diagnostic-native-json 1 \
+  "$compiler_golden_dir/diagnostic-native.json" "$diagnostic_compiler" yes \
+  tests/fixtures/trailing-whitespace/trailing-spaces.ari
+run_case compiler-diagnostic-native-human 1 \
+  "$compiler_golden_dir/diagnostic-native.txt" "$diagnostic_compiler" no \
+  tests/fixtures/trailing-whitespace/trailing-spaces.ari
+
+printf '%s\n' "strict compiler-boundary parity goldens passed"

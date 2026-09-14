@@ -38,10 +38,11 @@ compiler and fails if it is invoked.
 - This plan does not move or copy `tools/lint`.
 - Compiler provisioning is documented in `docs/dev/compiler-provisioning.md`,
   and checksum-pinned compiler-smoke CI exercises standalone behavior. Strict
-  compiler-backed parity tests do not exist yet.
+  real-compiler parity and release compatibility validation do not exist yet.
 - Compiler invocation selection and the per-source runtime boundary are
-  implemented as documented in `docs/dev/compiler-invocation.md`. Strict
-  compiler-backed parity tests do not exist yet.
+  implemented as documented in `docs/dev/compiler-invocation.md`. One
+  deterministic fake-compiler strict case now gates exact `SOURCE --check`
+  child argv and combined compiler/native JSON and human output.
 - A source-only parity runner skeleton exists in `src/parity.ari`. It records
   the intended comparison boundary but does not run `tools/lint`, invoke an
   `ari-lint` binary, read fixtures, compare output, invoke the compiler, or run
@@ -54,9 +55,10 @@ compiler and fails if it is invoked.
 - `scripts/parity-strict.sh` is local-only and gating. Its current scope is
   the separately approved standalone/reference list-rules contracts plus native
   clean, trailing-whitespace, missing-final-newline, ordered multi-file, and
-  duplicate-input output. It does not cover remaining help/usage CLI, config,
-  compiler-boundary, or process-infrastructure differences and is not wired
-  into CI.
+  duplicate-input output, plus one deterministic compiler/native diagnostic in
+  JSON and human form. It does not cover remaining help/usage CLI, config,
+  broader compiler-boundary, or process-infrastructure differences and is not
+  wired into CI.
 
 ## Reference Implementation
 
@@ -173,6 +175,8 @@ The first strict layout is:
   `tests/fixtures/missing-final-newline/`
 - parity isolation inputs under `tests/fixtures/parity/`
 - exact native JSON results under `tests/golden/native/`
+- exact combined compiler/native JSON and human results under
+  `tests/golden/compiler-boundary/`
 - exact standalone and reference registry results under
   `tests/golden/list-rules/`
 
@@ -190,18 +194,21 @@ Additional and broader fixture categories:
   `docs/rules/missing-final-newline-fixtures.md` and
   `docs/rules/missing-final-newline-parity.md`; the initial strict native case
   exists, while broader missing-final-newline parity remains future work
-- compiler error
+- additional compiler-error cases beyond the initial strict fixture
 - config file override
 - command-line rule override
 - include path fixture
-- JSON diagnostics fixture
-- mixed compiler/lint diagnostics fixture
+- additional JSON diagnostic shapes beyond the initial strict fixture
+- additional mixed compiler/lint diagnostic shapes beyond the initial strict
+  fixture
 
 ## Golden Output Policy
 
 The strict native subset stores compact, newline-terminated JSON exactly as
-emitted by both implementations. Raw byte comparison fixes field order and
-escaping while a separate JSON parse rejects malformed documents.
+emitted by both implementations. The initial compiler-boundary subset stores
+one compact JSON result and its exact human form. Raw byte comparison fixes
+field order, escaping, and human formatting while a separate parse rejects
+malformed JSON documents.
 
 Human-readable output should only use golden files for stable text.
 
@@ -216,7 +223,9 @@ List-rules uses separate exact goldens because the standalone short-name and
 JSON registry fields are intentional CLI extensions. The strict runner does not
 hide that difference behind a parity allowlist.
 
-Compiler diagnostics may need separate golden files from lint diagnostics.
+The initial compiler-boundary goldens deliberately combine one compiler error
+with one native warning. Broader compiler diagnostics may need additional
+separate golden files.
 
 Golden files must identify the Ari compiler version or commit when relevant.
 
@@ -295,9 +304,12 @@ Future comparison flow:
 4. Compare diagnostics, severities, rule codes, and exit status.
 5. Record intentional differences explicitly.
 
-The current strict native flow already performs steps 1 through 4 for its
-checked-in subset. Compiler-boundary and unresolved CLI cases remain outside
-that gate rather than being silently normalized or allowlisted.
+The current strict native flow performs steps 1 through 4 for its checked-in
+rule subset. The initial deterministic compiler-boundary case performs the same
+comparison for exact `SOURCE --check` argv, child exit `7`, compiler-before-
+native diagnostic order, JSON and human stdout, empty stderr, final LF, and
+top-level exit `1`. Broader compiler-boundary and unresolved CLI cases remain
+outside that gate rather than being silently normalized or allowlisted.
 
 Exact command lines should be added only when the standalone build and test
 runner exist.
@@ -389,7 +401,8 @@ from the other repo if needed.
 - [x] Add first source-controlled rule parity fixture for missing final newline
 - [x] Add exact clean, rule, ordered multi-file, and duplicate JSON goldens
 - [x] Add a gating local native parity runner
-- [ ] Add compiler-boundary parity fixture
+- [x] Add an initial deterministic compiler-boundary parity fixture with exact
+      combined JSON and human goldens
 - [ ] Add a parity CI job only after its broader gating contract exists
 
 ## Original Planning-Step Non-Goals

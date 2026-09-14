@@ -234,6 +234,10 @@ tests, and documentation belong in `ari-lint`.
 - [x] Parse and normalize compiler diagnostics.
 - [x] Replace temporary explicit-path early failures with per-file results.
 - [x] Add focused fake-compiler smoke coverage.
+- [x] Add one strict fake-compiler parity fixture that gates exact
+  `SOURCE --check` argv, child status, combined compiler/native diagnostic
+  ordering, JSON and human output, stream selection, final LF, and top-level
+  status against the bundled reference.
 - [x] Bound retained compiler output while draining both pipes to completion.
 - [x] Record pinned real-compiler CI evidence without calling it compatibility.
 - [x] Add compiler-backed CI after completing its provisioning policy.
@@ -242,5 +246,6 @@ tests, and documentation belong in `ari-lint`.
 
 - The lightweight workflow does not download or invoke the compiler.
 - Compiler-smoke CI does not build Ari or execute reference parity.
-- No strict compiler-boundary parity, Ari compatibility, or release claim is
-  made by the pinned smoke baseline.
+- The pinned smoke baseline itself makes no strict compiler-boundary parity,
+  Ari compatibility, or release claim. The separate local strict runner covers
+  one deterministic fake-compiler boundary case only.
