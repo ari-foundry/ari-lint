@@ -10,22 +10,14 @@ behavior for `lint/trailing-whitespace`.
 - The rule is implemented in the Ari-language standalone path.
 - The current reference behavior is the bundled `tools/lint` implementation in
   `ari-foundry/ari`.
-- This repository currently has metadata/module layout and a minimal internal
-  single-line helper in `src/rules/trailing_whitespace.ari`.
-- The helper only checks whether one already-split byte line ends with a space
-  or tab.
-- Internal diagnostic mapping has started for one already-split line. The
-  mapping records whether the helper found trailing whitespace, the planned
-  diagnostic span, and default `warning` severity in an internal
-  diagnostic-like data value.
-- In-memory rule execution now scans caller-provided source text, splits it on
-  newline bytes, and returns internal `Diagnostic` values for lines with
-  trailing spaces or tabs.
-- Explicit-file reading, config severity overrides, CLI integration, and
-  reference-shaped human/JSON diagnostics are implemented. An initial strict
-  native parity case exists; dedicated Ari rule tests, broader fixtures, and
-  broader strict parity remain future work. The
-  main-facing CLI now combines this rule with compiler diagnostics.
+- `src/rules/trailing_whitespace.ari` scans caller-provided source bytes by
+  logical line and collects one internal `Diagnostic` for each match.
+- The standalone source path reads explicit files, applies config and CLI
+  severity overrides, combines compiler and native diagnostics, and emits the
+  documented human or JSON result.
+- Exact compiler-backed smoke and an initial strict native parity case cover
+  representative behavior. Dedicated Ari rule tests, broader fixtures, and
+  broader strict parity remain future work.
 - Fixture and test planning is tracked in
   [docs/rules/trailing-whitespace-fixtures.md](trailing-whitespace-fixtures.md);
   initial clean and trailing-spaces fixtures are started, while full fixture
@@ -38,25 +30,24 @@ behavior for `lint/trailing-whitespace`.
 - Default severity: `warning`, confirmed from the current Ari lint docs and
   reference rule registry.
 
-## Planned Detection
+## Detection
 
 The rule detects spaces or tabs at the end of a caller-provided source line.
 
-The newline itself should not be flagged. Empty lines that contain only spaces
-or tabs should be handled as trailing-whitespace diagnostics. A final line
-should be checked whether or not the file ends with a trailing newline.
+The newline itself is not flagged. A logical line containing only spaces or
+tabs is reported, and a final line is checked whether or not the file ends with
+a trailing newline.
 
-The current reference implementation removes a final carriage return from each
-line before checking for trailing spaces or tabs, so CRLF line endings should
-not be flagged solely because of the carriage return. Future parity fixtures
-should confirm this behavior before the Ari-language implementation treats it as
-stable. Standalone CRLF fixture coverage remains needs follow-up.
+The standalone and current reference implementations ignore a final carriage
+return on each logical line before checking for trailing spaces or tabs, so a
+CRLF line ending is not flagged solely because of the carriage return. Broader
+standalone CRLF fixture and strict-parity coverage remains future work.
 
 The current in-memory implementation splits caller-provided source text on
 newline bytes and checks each logical line. The single-line helper ignores a
 final carriage return before checking the last content byte.
 
-## Planned Diagnostic Location
+## Diagnostic Location
 
 The emitted diagnostic includes:
 
@@ -77,7 +68,7 @@ using the explicit file path and computed line number. The CLI emits that span
 in the reference human and JSON forms and applies configured severity. Recursive
 file scanning and broader strict parity tests remain future work.
 
-## Planned Message
+## Message
 
 The current reference implementation reports:
 

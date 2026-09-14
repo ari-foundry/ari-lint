@@ -7,8 +7,8 @@ This repository owns `ari-lint` tooling only.
 Ari compiler behavior remains in `ari-foundry/ari`. `ari-lint` invokes
 `ari --check` unless the dependency model changes.
 
-The long-term implementation direction is Ari-language implementation when the
-language and toolchain make that feasible.
+The implementation is written in Ari and should remain Ari-language-first where
+current language and toolchain support permit.
 
 The current `tools/lint` implementation in `ari-foundry/ari` is a
 bundled/reference implementation for behavior parity. Do not copy it wholesale
@@ -22,13 +22,15 @@ against current Ari usage.
 
 Broad Ari language and compiler docs must not be copied here. Keep docs focused
 on lint CLI behavior, rules, diagnostics, configuration, tests, releases, and
-compatibility once those topics are ready for this repository.
+compatibility.
 
 ## Current Split Status
 
-- Ari-language implementation source has not been added yet
-- docs migration from ari-foundry/ari has not happened yet
-- standalone build/test wiring has not happened yet
+- Ari-language implementation source is active under `src/`.
+- Focused user documentation is owned here; historical handoff links remain in
+  `ari-foundry/ari`, and portal navigation is separately owned.
+- Standalone build, checks, smoke, parity, and pinned compiler CI are wired.
+- No stable `ari-lint` release or Ari compatibility entry exists yet.
 
 ## Boundaries
 
@@ -44,8 +46,10 @@ read-only references:
 - https://github.com/ari-foundry/ari/releases
 - https://github.com/ari-foundry/ari/tags
 
-Compatibility claims must not be invented. The `ari-lint` release/version
-policy is not established yet.
+Compatibility claims must not be invented. The initial `ari-lint`
+release/version policy is documented in
+`docs/dev/release-compatibility-policy.md`, but no compatibility entry exists
+until its evidence requirements are satisfied.
 
 Do not invent Ari syntax or APIs without checking `ari-foundry/ari`.
 
