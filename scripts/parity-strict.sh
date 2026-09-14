@@ -1,0 +1,140 @@
+#!/bin/sh
+
+set -eu
+
+fail() {
+  printf '%s\n' "parity-strict.sh: $*" >&2
+  exit 1
+}
+
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+  fail "usage: scripts/parity-strict.sh ARI_COMPILER_PATH ARI_REPO_PATH [REFERENCE_LINT_PATH]"
+fi
+
+script_dir=$(CDPATH= cd "$(dirname "$0")" && pwd)
+repo_root=$(CDPATH= cd "$script_dir/.." && pwd)
+original_pwd=$(pwd)
+
+absolute_path() {
+  case "$1" in
+    /*) printf '%s\n' "$1" ;;
+    *) printf '%s/%s\n' "$original_pwd" "$1" ;;
+  esac
+}
+
+ari_compiler=$(absolute_path "$1")
+ari_repo=$(absolute_path "$2")
+reference_lint="${3:-$ari_repo/build/ari-lint}"
+reference_lint=$(absolute_path "$reference_lint")
+
+[ -x "$ari_compiler" ] || fail "Ari compiler is not executable: $ari_compiler"
+[ -d "$ari_repo" ] || fail "Ari repository does not exist: $ari_repo"
+[ -f "$ari_repo/Makefile" ] || fail "missing Ari Makefile: $ari_repo/Makefile"
+[ -f "$ari_repo/tools/lint/main.cpp" ] || fail "missing reference lint source: $ari_repo/tools/lint/main.cpp"
+[ -x "$reference_lint" ] || fail "reference lint is not executable: $reference_lint"
+
+"$script_dir/build.sh" "$ari_compiler"
+
+standalone_lint="$repo_root/build/ari-lint"
+fixture_compiler="$repo_root/tests/fixtures/parity/compiler-ok.sh"
+empty_config="$repo_root/tests/fixtures/parity/empty.rules"
+golden_dir="$repo_root/tests/golden/native"
+
+[ -x "$standalone_lint" ] || fail "standalone lint is not executable: $standalone_lint"
+[ -x "$fixture_compiler" ] || fail "fixture compiler is not executable: $fixture_compiler"
+[ -f "$empty_config" ] || fail "missing empty config fixture: $empty_config"
+command -v python3 >/dev/null 2>&1 || fail "python3 is required to validate JSON goldens"
+
+tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/ari-lint-parity-strict.XXXXXX")
+trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
+
+require_final_newline() {
+  last_byte=$(tail -c 1 "$1" | od -An -t x1 | tr -d ' \n')
+  [ "$last_byte" = "0a" ] || fail "expected final newline: $1"
+}
+
+run_tool() {
+  tool_name="$1"
+  tool_path="$2"
+  case_name="$3"
+  shift 3
+
+  stdout_path="$tmp_dir/$case_name.$tool_name.stdout"
+  stderr_path="$tmp_dir/$case_name.$tool_name.stderr"
+  status_path="$tmp_dir/$case_name.$tool_name.status"
+
+  set +e
+  (
+    CDPATH= cd "$repo_root" &&
+      "$tool_path" --json --ari "$fixture_compiler" \
+        --config "$empty_config" "$@"
+  ) > "$stdout_path" 2> "$stderr_path"
+  status=$?
+  set -e
+  printf '%s\n' "$status" > "$status_path"
+}
+
+run_case() {
+  case_name="$1"
+  expected_status="$2"
+  expected_file="$golden_dir/$case_name.json"
+  shift 2
+
+  [ -f "$expected_file" ] || fail "missing golden: $expected_file"
+  require_final_newline "$expected_file"
+
+  run_tool standalone "$standalone_lint" "$case_name" "$@"
+  run_tool reference "$reference_lint" "$case_name" "$@"
+
+  standalone_stdout="$tmp_dir/$case_name.standalone.stdout"
+  standalone_stderr="$tmp_dir/$case_name.standalone.stderr"
+  standalone_status="$tmp_dir/$case_name.standalone.status"
+  reference_stdout="$tmp_dir/$case_name.reference.stdout"
+  reference_stderr="$tmp_dir/$case_name.reference.stderr"
+  reference_status="$tmp_dir/$case_name.reference.status"
+
+  [ "$(cat "$standalone_status")" = "$expected_status" ] ||
+    fail "$case_name standalone exit status differs from $expected_status"
+  [ "$(cat "$reference_status")" = "$expected_status" ] ||
+    fail "$case_name reference exit status differs from $expected_status"
+  [ ! -s "$standalone_stderr" ] || fail "$case_name standalone stderr is not empty"
+  [ ! -s "$reference_stderr" ] || fail "$case_name reference stderr is not empty"
+
+  cmp -s "$expected_file" "$standalone_stdout" || {
+    diff -u "$expected_file" "$standalone_stdout" >&2 || true
+    fail "$case_name standalone stdout differs from golden"
+  }
+  cmp -s "$expected_file" "$reference_stdout" || {
+    diff -u "$expected_file" "$reference_stdout" >&2 || true
+    fail "$case_name reference stdout differs from golden"
+  }
+  cmp -s "$standalone_stdout" "$reference_stdout" ||
+    fail "$case_name implementations differ"
+  cmp -s "$standalone_stderr" "$reference_stderr" ||
+    fail "$case_name stderr streams differ"
+  cmp -s "$standalone_status" "$reference_status" ||
+    fail "$case_name exit statuses differ"
+
+  require_final_newline "$standalone_stdout"
+  require_final_newline "$reference_stdout"
+  python3 -c 'import json, sys; [json.load(open(path, encoding="utf-8")) for path in sys.argv[1:]]' \
+    "$expected_file" "$standalone_stdout" "$reference_stdout" ||
+    fail "$case_name output is not valid JSON"
+
+  printf '%s\n' "parity-strict.sh: passed $case_name"
+}
+
+run_case clean 0 \
+  tests/fixtures/trailing-whitespace/clean.ari
+run_case trailing-whitespace 1 \
+  tests/fixtures/trailing-whitespace/trailing-spaces.ari
+run_case missing-final-newline 1 \
+  tests/fixtures/missing-final-newline/missing-final-newline.ari
+run_case ordered-multi-file-duplicate 1 \
+  tests/fixtures/trailing-whitespace/clean.ari \
+  tests/fixtures/trailing-whitespace/trailing-spaces.ari \
+  tests/fixtures/missing-final-newline/with-final-newline.ari \
+  tests/fixtures/missing-final-newline/missing-final-newline.ari \
+  tests/fixtures/trailing-whitespace/trailing-spaces.ari
+
+printf '%s\n' "strict native parity goldens passed"

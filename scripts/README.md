@@ -74,6 +74,16 @@ compiler path sightings, compiler-error JSON-shape and diagnostic-code
 sightings, rule sightings, severity sightings, file-path hit counts, and
 line/column presence. Parity differences do not fail the script.
 
+`parity-strict.sh` is a local gating native-rule parity wrapper. It requires an
+explicit build compiler and Ari checkout, with an optional explicit reference
+lint binary. It builds the standalone implementation, runs both tools from this
+repository root on the same checked-in relative paths, and isolates native
+rules with a no-output fixture compiler plus an explicit empty config. Clean,
+trailing-whitespace, missing-final-newline, ordered multi-file, and duplicate
+inputs must match checked-in JSON goldens byte-for-byte. The runner separately
+requires empty stderr, exact exit status, a final LF, parseable JSON, and exact
+standalone/reference equality.
+
 `test.sh` does not download or build the Ari compiler. It does not execute
 `tools/lint`, run `ari --check`, install dependencies, run package manager
 commands, run parity checks, or participate in CI as a compiler-backed job yet.
@@ -104,3 +114,8 @@ source-controlled parity fixtures, new lint semantics, release compatibility
 claims, or copies of `tools/lint`. It fails only for infrastructure errors such
 as a missing build compiler, missing Ari repo, missing original lint command,
 or local `ari-lint` build failure.
+
+`parity-strict.sh` does not cover unresolved help/usage/list-rules differences,
+compiler output ordering or resource boundaries, parent-side process failures,
+or real-compiler diagnostics. It does not claim full parity or release
+compatibility and is not run in CI yet.

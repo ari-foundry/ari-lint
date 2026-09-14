@@ -20,7 +20,7 @@ pub fn parity_runner_skeleton(zone: ref mut Zone) -> ParityRunnerSkeleton {
   return ParityRunnerSkeleton {
     reference_implementation: "ari-foundry/ari tools/lint",
     implementation_under_test: "ari-lint Ari-language implementation",
-    status: "source-only parity runner skeleton; executable comparison remains future work",
+    status: "source-only parity runner skeleton remains data-only; a shell native parity runner exists separately",
     invokes_tools_lint: false,
     invokes_ari_lint_binary: false,
     invokes_compiler: false,

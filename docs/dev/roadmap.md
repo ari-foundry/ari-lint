@@ -4,8 +4,9 @@ Current status: active standalone split implementation with Ari source, local
 build and smoke validation, compiler-free checks, supported CLI help and
 list-rules output, multi-file source-file linting for the current rule set,
 JSON diagnostics, explicit and discovered config, CLI severity overrides,
-per-source Ari compiler execution and diagnostic parsing, and a local
-report-only parity smoke/report against the original bundled lint tool.
+per-source Ari compiler execution and diagnostic parsing, a local report-only
+parity smoke/report against the original bundled lint tool, and a strict
+checked-in native-rule parity subset.
 Historical milestones include: skeleton initialized / Ari source skeleton
 started / internal model skeleton started / registry-severity-config skeleton
 started /
@@ -102,7 +103,8 @@ native diagnostic exit status aligned /
 representative exact output smoke checks added /
 per-source compiler execution added /
 compiler diagnostic parsing and failure normalization added /
-fake-compiler runtime smoke matrix added.
+fake-compiler runtime smoke matrix added /
+strict native parity goldens and runner added.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -716,19 +718,21 @@ and test work.
       `docs/dev/compiler-invocation.md`; explicit `--ari`, `ARI_COMPILER`, the
       default compiler path, both `-I` forms, exact per-file argv, direct
       execution, diagnostic parsing, and failure normalization now exist.
-      Compiler-backed CI, a strict parity gate, and a compatibility matrix
-      remain future work.
-- [ ] Plan parity testing against current `tools/lint`;
+      Compiler-backed CI, strict compiler-boundary parity, and a compatibility
+      matrix remain future work.
+- [x] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the fixture and golden output
       strategy. A first local report-only `scripts/parity.sh` smoke now
       compares temporary clean, trailing-whitespace, missing-final-newline,
       explicit-config, rule-override, discovered-config, and multi-file cases
-      against the original bundled lint tool, but strict parity tests,
-      source-controlled parity fixtures, golden files, and CI parity jobs are
-      not implemented.
-- [x] Add source-only parity runner skeleton in `src/parity.ari`; Ari-source
-      parity runner execution, strict fixture comparison, golden output, Ari
-      compiler execution, and CI parity jobs remain future work.
+      against the original bundled lint tool. A strict local native-rule subset
+      now gates checked-in clean, trailing-whitespace, missing-final-newline,
+      ordered multi-file, and duplicate JSON results. Strict CLI, config,
+      compiler-boundary, and CI parity remain open.
+- [x] Add source-only parity runner skeleton in `src/parity.ari`; it remains a
+      data-only Ari model while the separate shell runner now performs the
+      strict native fixture/golden subset. Ari-source runner execution,
+      compiler-boundary comparison, and CI parity jobs remain future work.
 - [x] Add local parity smoke/report in `scripts/parity.sh` that builds this
       repository, verifies the original lint entrypoint from the Ari repo
       `Makefile` and `tools/lint/main.cpp`, compares temporary rule, config,
