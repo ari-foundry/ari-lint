@@ -73,6 +73,9 @@ including clean, missing, and duplicate paths. A nonzero compiler exit or any
 enabled compiler, config, or native diagnostic returns exit `1`. The
 compiler-free checks do not execute these paths, while `scripts/smoke.sh`
 verifies them through the built binary.
+The public source-result fields, ordering, encoding, stream selection, and
+status mapping are defined in
+[docs/diagnostics.md](../docs/diagnostics.md).
 
 Run the lightweight check script from the repository root:
 
@@ -215,12 +218,12 @@ No compatibility matrix entry should be added until compiler-backed tests pass
 against a recorded Ari release tag or commit.
 
 Future tests should expand the existing CLI/output smoke with dedicated Ari
-rule, configuration, serializer, compiler-boundary, and strict parity tests.
+rule, configuration, serializer, compiler-boundary, and broader strict parity
+tests.
 
 No model tests are added yet. Future model tests should validate severity
-handling, rule metadata, diagnostic data, config override data, JSON output
-shape after the schema is defined, and parity behavior against current
-`tools/lint`.
+handling, rule metadata, diagnostic data, config override data, the documented
+JSON output shape, and parity behavior against current `tools/lint`.
 
 Known rule registry construction has started from the existing
 `lint/trailing-whitespace` and `lint/missing-final-newline` metadata entries.
@@ -386,13 +389,16 @@ behavior, and absence of OS argv reads.
 
 Executable shell smoke enters through `main` and OS argv, checking returned
 exit codes, list-rules/help output, human and JSON source results, parse errors,
-missing input, and stream isolation. Dedicated Ari main-entry and argv-boundary
-unit tests, environment isolation, and broader strict CLI/config/compiler
-parity remain future work.
+missing input with and without `--json`, and stream isolation. Stdout-only
+successes require empty stderr; usage failures require empty stdout. Every JSON
+case is parsed as one document and must end in LF. Dedicated Ari main-entry and
+argv-boundary unit tests, environment isolation, and broader strict
+CLI/config/compiler parity remain future work.
 
 No executable stdout/stderr output boundary tests are added yet. Future tests
 should cover the internal sink/result model, stdout versus stderr stream
-selection, adapter failure paths, diagnostic stream behavior, and strict parity.
+selection, adapter failure paths, diagnostic stream behavior, and broader
+strict parity.
 
 No executable stdout adapter tests are added yet. Future tests should cover the
 minimal `std::io::print_string` adapter, successful write status, failed write
@@ -408,10 +414,10 @@ source-read failures in a source run belong to the per-file stdout result.
 Executable diagnostic output smoke tests validate exact reference-shaped JSON
 and human text for representative native diagnostics, numeric start/end
 positions, source/code fields, clean output, ordering, and newline termination.
-Human diagnostics are verified on stdout with stderr empty. The fake-compiler
-smoke also checks representative exact compiler diagnostic objects. Focused
-formatter helper tests and source-controlled broad compiler-diagnostic goldens
-remain follow-up work.
+All JSON cases are syntax-checked and human diagnostics are verified on stdout
+with stderr empty. The fake-compiler smoke also checks representative exact
+compiler diagnostic objects. Focused formatter helper tests and
+source-controlled broad compiler-diagnostic goldens remain follow-up work.
 
 No executable trailing-whitespace first-diagnostic capture tests are added yet.
 Future tests should validate the first captured diagnostic, count preservation,
@@ -425,9 +431,10 @@ behavior against current `tools/lint`.
 
 Executable CLI smoke tests now validate the runtime JSON envelope, exact native
 diagnostic objects, clean and mixed file accounting, duplicate inputs, final
-newlines, path control-byte escaping, and representative exact fake-compiler
-diagnostic objects. Focused internal serializer tests and source-controlled
-broad compiler-diagnostic golden cases remain follow-up work.
+newlines, JSON syntax, path control-byte escaping, opposite-stream isolation,
+and representative exact fake-compiler diagnostic objects. Focused internal
+serializer tests and source-controlled broad compiler-diagnostic golden cases
+remain follow-up work.
 
 No executable source input boundary tests are added yet. Future source input
 tests should validate caller-provided source text, path-only source entries,

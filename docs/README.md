@@ -35,6 +35,11 @@ The standalone rule-registry listing schema, exact stream/status behavior, and
 intentional differences from the bundled reference are defined in
 [docs/list-rules.md](list-rules.md).
 
+The standalone source-result JSON schema, human diagnostic shape, diagnostic
+ordering, encoding, stream selection, and top-level status mapping are defined
+in [docs/diagnostics.md](diagnostics.md). This is a tested pre-release contract,
+not an Ari compatibility claim.
+
 Local compiler selection and the checksum-pinned CI baseline are documented in
 [docs/dev/compiler-provisioning.md](dev/compiler-provisioning.md). The local
 runtime boundary and separate compiler-backed smoke workflow are implemented;

@@ -130,7 +130,9 @@ identity.
 
 Fixture shape checks should remain compiler-free.
 
-JSON golden tests should wait until the schema is stable.
+Existing native JSON goldens follow `docs/diagnostics.md`. New
+compiler-dependent goldens should also record the compiler identity when it can
+affect expected output.
 
 ## Failure Modes
 

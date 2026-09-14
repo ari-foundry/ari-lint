@@ -18,8 +18,9 @@ behavior for `lint/missing-final-newline`.
   line/column metadata from those bytes, and returns an internal `Diagnostic`
   when non-empty content does not end with a newline byte.
 - Explicit-file reading, config severity overrides, CLI integration, and
-  reference-shaped human/JSON diagnostics are implemented. Dedicated Ari rule
-  tests, broader fixtures, and strict parity remain future work. The
+  reference-shaped human/JSON diagnostics are implemented. An initial strict
+  native parity case exists; dedicated Ari rule tests, broader fixtures, and
+  broader strict parity remain future work. The
   main-facing CLI now combines this rule with compiler diagnostics.
 - Fixture and test planning is tracked in
   [docs/rules/missing-final-newline-fixtures.md](missing-final-newline-fixtures.md);
@@ -27,8 +28,9 @@ behavior for `lint/missing-final-newline`.
   fixture coverage and behavior tests remain future work.
 - Rule-specific parity planning is tracked in
   [docs/rules/missing-final-newline-parity.md](missing-final-newline-parity.md);
-  a first local parity smoke/report exists in `scripts/parity.sh`, while strict
-  rule-specific parity tests and golden comparisons remain future work.
+  a broad local parity smoke/report exists in `scripts/parity.sh`, and the
+  initial native rule case is gated by `scripts/parity-strict.sh`; broader
+  rule-specific parity remains future work.
 
 ## Rule Identity
 
@@ -92,13 +94,14 @@ diagnostics.
 
 ## Parity Expectations
 
-The future implementation should compare behavior against the current bundled
-`tools/lint` implementation.
+Remaining parity work should continue comparing behavior against the current
+bundled `tools/lint` implementation.
 
 The detailed missing-final-newline parity plan is documented in
 [docs/rules/missing-final-newline-parity.md](missing-final-newline-parity.md).
-A first local parity smoke/report exists in `scripts/parity.sh`, while strict
-rule-specific parity tests and golden comparisons remain future work.
+A broad local parity smoke/report exists in `scripts/parity.sh`, and the initial
+native rule case is gated by `scripts/parity-strict.sh`; broader rule-specific
+parity remains future work.
 
 Parity dimensions:
 
@@ -116,9 +119,9 @@ Parity dimensions:
 
 The detailed future fixture and test plan is documented in
 [docs/rules/missing-final-newline-fixtures.md](missing-final-newline-fixtures.md).
-The first minimal fixture coverage and representative executable behavior smoke
-exist; dedicated Ari rule tests, broad source-controlled goldens, and strict
-parity remain future work.
+The first fixtures, representative executable behavior smoke, and initial
+strict native golden exist; dedicated Ari rule tests, broader source-controlled
+goldens, and broader strict parity remain future work.
 
 Remaining future fixture ideas, without adding broad fixtures in this step:
 
@@ -130,7 +133,7 @@ Remaining future fixture ideas, without adding broad fixtures in this step:
 - CRLF final newline behavior
 - lone carriage return behavior if relevant
 
-## Non-Goals
+## Original Implementation-Step Non-Goals
 
 - Do not read files in this step.
 - Do not scan the filesystem in this step.

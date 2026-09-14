@@ -172,7 +172,7 @@ It does not move `tools/lint` or change build behavior.
   parse-problem, help, and missing-source command paths as internal command
   results. The dispatcher remains output-free; the main-facing layer formats
   those results and its source collection path invokes the compiler. Recursive
-  source scanning and strict parity remain future work.
+  source scanning and broader strict parity remain future work.
 - Internal command results now carry data-only exit-code mappings for success,
   usage-error, lint-failure, and unavailable command states. The model does not
   call process exit, run the CLI, read OS argv, write stdout/stderr, or claim
@@ -201,7 +201,7 @@ It does not move `tools/lint` or change build behavior.
   a short stderr summary. Source commands invoke the selected compiler and use
   its per-file result for compiler-visible read failures. Config discovery and
   representative executable smoke coverage are wired; detailed help parity,
-  dedicated Ari tests, and strict parity remain future work.
+  dedicated Ari tests, and broader strict parity remain future work.
 - An internal explicit-token entry path now composes the existing
   caller-provided token-list parser with the stdout-free command dispatcher and
   returns a `CliCommandResult`. It does not read OS argv, environment variables,
@@ -250,7 +250,8 @@ It does not move `tools/lint` or change build behavior.
   presence, exact line order, and key override values. They do not execute Ari
   parser code themselves. Separately, `scripts/smoke.sh` executes the built CLI
   against generated temporary configs. Dedicated Ari tests, source-controlled
-  runtime goldens, strict parity, and compatibility claims remain future work.
+  runtime goldens, broader strict parity, and compatibility claims remain
+  future work.
 - The rule module layout has started with source-only child modules for the
   trailing whitespace and missing final newline rules.
   A minimal internal single-line helper has started for trailing whitespace,
@@ -403,7 +404,8 @@ Reference locations:
 - record diagnostic output metadata before implementing formatting or JSON
   serialization
 - map lint diagnostics to documented output expectations
-- keep JSON schema follow-up explicit
+- publish the tested source-result JSON contract before making compatibility
+  claims
 
 Current Ari-language implementation module inventory:
 
@@ -592,10 +594,12 @@ source-controlled runtime goldens, and strict parity remain follow-up work
 before this repository claims stable config behavior. The fixture plan is
 documented in `docs/dev/config-precedence-fixtures.md`.
 
-The exact source-diagnostic JSON schema and human-readable source-diagnostic
-text remain unstable and need follow-up before this repository claims standalone
-output compatibility. The separately documented list-rules contract is already
-gated by exact goldens.
+The source-diagnostic JSON schema, human line shape, stream selection, and exit
+mapping are defined as a tested pre-release contract in
+`docs/diagnostics.md`. Native outputs are gated by exact goldens and executable
+smoke covers representative compiler and config results. Broader strict
+compiler/config goldens, detailed CLI text, and release compatibility remain
+follow-up work. The list-rules contract is documented separately.
 
 ### Phase 4: first rules
 
@@ -650,8 +654,8 @@ Current rule module state:
 The individual rule modules remain in-memory and do not own file reading,
 config, CLI, or output concerns. The surrounding lint and CLI layers now compose
 them for explicit files, invoke the compiler, and emit runtime results.
-Home/global/XDG config search, dedicated Ari unit tests, strict parity, and a
-release compatibility matrix remain future work.
+Home/global/XDG config search, dedicated Ari unit tests, broader strict parity,
+and a release compatibility matrix remain future work.
 
 The source input file-read boundary reads one explicitly provided path into a
 source input using `std::fs::read_detailed`. It does not scan directories,
@@ -690,13 +694,13 @@ main-facing OS argv path collects source-file diagnostics into a flat vector,
 
 - [x] add a local standalone test entrypoint with compiler-free and explicit
   compiler-backed modes
-- add fixtures
-- add golden JSON diagnostics when schema is stable
+- [x] add initial standalone fixtures
+- [x] add exact native JSON goldens for the documented source schema
 - [x] run local standalone tests with an explicit Ari compiler path
 - [x] add compiler-backed CI with explicit provisioning and identity recording
 - keep local smoke validation scoped to compiler-backed build plus
   representative exact CLI/output assertions until broader source-controlled
-  goldens and strict parity exist
+  goldens and broader strict parity exist
 
 The source-only parity runner skeleton in `src/parity.ari` records the future
 comparison boundary. It does not execute `tools/lint`, execute `ari-lint`, read
@@ -775,8 +779,10 @@ usable.
 
 - Ari language/toolchain may not yet support everything needed for `ari-lint`.
 - Invoking `ari --check` from Ari code may require runtime/process support.
-- JSON diagnostic schema may still be unstable.
-- Human-readable diagnostic text may still be unstable.
+- The pre-release diagnostic contract may still evolve, but public field,
+  stream, status, encoding, or line-shape changes require coordinated
+  documentation and exact-test updates.
+- Detailed help and usage text may still be unstable.
 - CLI parity may be hard to preserve exactly.
 - Tests may depend on a compatible Ari compiler binary.
 - Source layout may change after implementation starts.

@@ -34,6 +34,9 @@ if [ ! -x "$binary" ]; then
   fail "expected built ari-lint binary to be executable: $binary"
 fi
 
+command -v python3 >/dev/null 2>&1 ||
+  fail "python3 is required to validate smoke JSON output"
+
 run_smoke() {
   printf '%s\n' "smoke.sh: running $*"
   "$@"
@@ -41,13 +44,16 @@ run_smoke() {
 
 run_stdout_success_smoke() {
   output_file="$1"
+  stdout_success_stderr_file="${output_file}.stderr"
   shift
   printf '%s\n' "smoke.sh: running $*"
   set +e
-  "$@" > "$output_file"
+  "$@" > "$output_file" 2> "$stdout_success_stderr_file"
   status=$?
   set -e
   [ "$status" -eq 0 ] || fail "expected success exit code 0, got $status"
+  [ ! -s "$stdout_success_stderr_file" ] ||
+    fail "expected empty stderr: $stdout_success_stderr_file"
 }
 
 run_json_diagnostic_smoke() {
@@ -61,6 +67,7 @@ run_json_diagnostic_smoke() {
   set -e
   [ "$status" -eq 1 ] || fail "expected diagnostic exit code 1, got $status"
   [ ! -s "$json_stderr_file" ] || fail "expected empty stderr: $json_stderr_file"
+  require_json_document "$output_file"
 }
 
 run_json_success_smoke() {
@@ -74,6 +81,7 @@ run_json_success_smoke() {
   set -e
   [ "$status" -eq 0 ] || fail "expected success exit code 0, got $status"
   [ ! -s "$json_stderr_file" ] || fail "expected empty stderr: $json_stderr_file"
+  require_json_document "$output_file"
 }
 
 run_human_diagnostic_smoke() {
@@ -102,13 +110,16 @@ run_human_success_smoke() {
 
 run_stderr_usage_smoke() {
   output_file="$1"
+  usage_stdout_file="${output_file}.stdout"
   shift
   printf '%s\n' "smoke.sh: running $*"
   set +e
-  "$@" > "$tmp_dir/usage.stdout" 2> "$output_file"
+  "$@" > "$usage_stdout_file" 2> "$output_file"
   status=$?
   set -e
   [ "$status" -eq 2 ] || fail "expected usage exit code 2, got $status"
+  [ ! -s "$usage_stdout_file" ] || fail "expected empty stdout: $usage_stdout_file"
+  require_final_newline "$output_file"
 }
 
 run_stderr_unavailable_smoke() {
@@ -159,6 +170,35 @@ require_files_equal() {
   }
 }
 
+require_final_newline() {
+  final_newline_byte=$(tail -c 1 "$1" | od -An -t x1 | tr -d ' \n')
+  [ "$final_newline_byte" = "0a" ] || fail "expected final newline: $1"
+}
+
+require_json_document() {
+  require_final_newline "$1"
+  python3 -c '
+import json
+import pathlib
+import sys
+
+def reject_constant(value):
+    raise ValueError("non-standard JSON constant: " + value)
+
+data = pathlib.Path(sys.argv[1]).read_bytes()
+text = data[:-1].decode("utf-8")
+_, end = json.JSONDecoder(parse_constant=reject_constant).raw_decode(text)
+raise SystemExit(0 if end == len(text) else 1)
+' "$1" ||
+    fail "expected one valid JSON document: $1"
+}
+
+nonstandard_json_probe="$tmp_dir/nonstandard-json.out"
+printf '%s\n' "NaN" > "$nonstandard_json_probe"
+if (require_json_document "$nonstandard_json_probe") >/dev/null 2>&1; then
+  fail "expected strict JSON validation to reject NaN"
+fi
+
 require_text_order() {
   first_pattern="$1"
   second_pattern="$2"
@@ -192,6 +232,7 @@ require_text_grep "default=warning" "$list_rules_output"
 
 json_list_rules_output="$tmp_dir/json-list-rules.out"
 run_stdout_success_smoke "$json_list_rules_output" "$binary" --json --list-rules
+require_json_document "$json_list_rules_output"
 require_json_grep '[{"ruleCode":"lint/trailing-whitespace"' "$json_list_rules_output"
 require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$json_list_rules_output"
 require_json_grep '"name":"trailing-whitespace"' "$json_list_rules_output"
@@ -628,6 +669,16 @@ require_json_grep '"exitCode":7' "$compiler_noise_output"
 require_json_grep '"code":"ari/compiler-check-failed"' "$compiler_noise_output"
 require_json_grep '"message":"plain noise\n"' "$compiler_noise_output"
 
+compiler_noise_human_output="$tmp_dir/compiler-noise-failure.human"
+compiler_noise_human_stderr="$tmp_dir/compiler-noise-failure.human.stderr"
+run_human_diagnostic_smoke "$compiler_noise_human_output" "$compiler_noise_human_stderr" \
+  "$binary" --ari "$fake_compiler_path" "$compiler_noise_source"
+compiler_noise_human_expected="$tmp_dir/compiler-noise-failure.human.expected"
+printf '%s:1:1: error: [ari/compiler-check-failed] plain noise\n\n' \
+  "$compiler_noise_source" > "$compiler_noise_human_expected"
+require_files_equal "$compiler_noise_human_expected" "$compiler_noise_human_output"
+require_empty_file "$compiler_noise_human_stderr"
+
 compiler_empty_source="$tmp_dir/compiler-empty-failure.ari"
 cp "$clean_fixture" "$compiler_empty_source"
 compiler_empty_output="$tmp_dir/compiler-empty-failure.json"
@@ -635,6 +686,16 @@ run_json_diagnostic_smoke "$compiler_empty_output" "$binary" --json \
   --ari "$fake_compiler_path" "$compiler_empty_source"
 require_json_grep '"exitCode":7' "$compiler_empty_output"
 require_json_grep '"message":"compiler check failed"' "$compiler_empty_output"
+
+compiler_empty_human_output="$tmp_dir/compiler-empty-failure.human"
+compiler_empty_human_stderr="$tmp_dir/compiler-empty-failure.human.stderr"
+run_human_diagnostic_smoke "$compiler_empty_human_output" "$compiler_empty_human_stderr" \
+  "$binary" --ari "$fake_compiler_path" "$compiler_empty_source"
+compiler_empty_human_expected="$tmp_dir/compiler-empty-failure.human.expected"
+printf '%s:1:1: error: [ari/compiler-check-failed] compiler check failed\n' \
+  "$compiler_empty_source" > "$compiler_empty_human_expected"
+require_files_equal "$compiler_empty_human_expected" "$compiler_empty_human_output"
+require_empty_file "$compiler_empty_human_stderr"
 
 compiler_signal_source="$tmp_dir/compiler-signal.ari"
 cp "$clean_fixture" "$compiler_signal_source"
@@ -711,6 +772,14 @@ require_text_grep "missing option value for --ari" "$missing_ari_output"
 unknown_argument_output="$tmp_dir/unknown-argument.stderr"
 run_stderr_usage_smoke "$unknown_argument_output" "$binary" --definitely-unknown
 require_text_grep "unknown argument: --definitely-unknown" "$unknown_argument_output"
+
+missing_source_output="$tmp_dir/missing-source.stderr"
+run_stderr_usage_smoke "$missing_source_output" "$binary"
+require_text_grep "missing source file" "$missing_source_output"
+
+json_missing_source_output="$tmp_dir/json-missing-source.stderr"
+run_stderr_usage_smoke "$json_missing_source_output" "$binary" --json
+require_text_grep "missing source file" "$json_missing_source_output"
 
 discovery_parent="$tmp_dir/discovery"
 discovery_child="$discovery_parent/child"

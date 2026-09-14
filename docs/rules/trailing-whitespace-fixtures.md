@@ -5,9 +5,9 @@
 This document plans future fixtures and tests for
 `lint/trailing-whitespace`.
 
-The first minimal fixture coverage and executable CLI smoke exist. Broader
-source-controlled goldens, dedicated rule tests, strict parity, and CI jobs
-remain future work.
+The first fixtures, exact native JSON goldens, executable CLI smoke, and strict
+local native parity case exist. Broader fixture/golden coverage, dedicated rule
+tests, and parity CI remain future work.
 
 ## Current Status
 
@@ -15,8 +15,8 @@ remain future work.
 - `ari-lint` has in-memory and explicit-file execution for trailing whitespace.
 - Diagnostic production, CLI/config behavior, and reference-shaped human/JSON
   output are wired for explicit files.
-- Recursive source scanning, broad fixtures, source-controlled goldens, and
-  strict parity remain future work.
+- Recursive source scanning, broad fixtures and goldens, and broader strict
+  parity remain future work.
 - The first minimal fixture files now exist:
   `tests/fixtures/trailing-whitespace/clean.ari` and
   `tests/fixtures/trailing-whitespace/trailing-spaces.ari`.
@@ -107,9 +107,9 @@ with the current bundled/reference `tools/lint` implementation in
 
 The rule-specific parity plan is documented in
 [docs/rules/trailing-whitespace-parity.md](trailing-whitespace-parity.md).
-Fixture comparison has first local smoke/report coverage through
-`scripts/parity.sh`, but strict source-controlled fixture parity and golden
-comparisons remain future work.
+Fixture comparison has broad report-only coverage through `scripts/parity.sh`
+and an initial source-controlled strict native case through
+`scripts/parity-strict.sh`. Broader strict fixture parity remains future work.
 
 Parity dimensions should include:
 
@@ -119,15 +119,14 @@ Parity dimensions should include:
 - configured severity
 - message text
 - human-readable diagnostics
-- JSON diagnostics once the schema is stable
+- JSON diagnostics under the documented source-result contract
 - exit behavior
 
 ## Golden Output Policy
 
-Golden files should not be added until output shape is stable.
-
-JSON golden files should wait for a stable standalone schema and path
-normalization policy.
+Exact native JSON goldens now cover the initial fixture subset under
+`tests/golden/native/`. Broader goldens should follow the documented
+source-result contract and the current no-rewrite relative-path policy.
 
 Human-readable golden files should be limited to stable text. Volatile paths,
 compiler-dependent diagnostics, and environment-dependent values should be
@@ -138,16 +137,15 @@ affects expected output.
 
 ## Test Runner Notes
 
-No test runner behavior is added in this step.
-
-Future tests should define how to invoke the standalone `ari-lint`
-implementation, how to invoke or compare against current `tools/lint`, and how
-to normalize environment-dependent output.
+`scripts/parity-strict.sh` is the gating local runner for the checked-in native
+subset, while `scripts/parity.sh` remains report-only for broader signals.
+Future cases should preserve explicit tool paths and normalize only genuinely
+environment-dependent output.
 
 CI parity jobs should be added only after source implementation, fixture files,
 and a standalone test runner exist.
 
-## Non-Goals
+## Original Planning-Step Non-Goals
 
 - Do not add source implementation in this step.
 - Do not add a broad fixture set in this step.

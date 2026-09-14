@@ -7,7 +7,9 @@ JSON diagnostics, explicit and discovered config, CLI severity overrides,
 per-source Ari compiler execution and diagnostic parsing, a local report-only
 parity smoke/report against the original bundled lint tool, a strict checked-in
 native-rule parity subset, exact standalone/reference list-rules contracts, and
-checksum-pinned Ari `v0.1.0` compiler-smoke CI.
+checksum-pinned Ari `v0.1.0` compiler-smoke CI. The source-result JSON,
+human-line, stream, and exit-status contract is published in
+`docs/diagnostics.md`.
 Historical milestones include: skeleton initialized / Ari source skeleton
 started / internal model skeleton started / registry-severity-config skeleton
 started /
@@ -108,7 +110,8 @@ per-source compiler execution added /
 compiler diagnostic parsing and failure normalization added /
 fake-compiler runtime smoke matrix added /
 strict native parity goldens and runner added /
-standalone list-rules contract and strict goldens added.
+standalone list-rules contract and strict goldens added /
+source diagnostic output contract published.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -361,6 +364,9 @@ and test work.
       sources, invoking the compiler, executing lint rules, or adding golden
       tests. JSON serializer tests, user-facing JSON output, and final schema
       stability remain future work.
+      These three entries describe their incremental milestones; the current
+      source-result schema has since been published in `docs/diagnostics.md`
+      and is exercised by exact output tests.
 - [x] Add an internal human-readable formatter for one already-built diagnostic,
       returning newline-terminated text in memory without writing stderr,
       wiring CLI output, serializing diagnostic arrays, scanning sources,
@@ -469,7 +475,8 @@ and test work.
       invoking the compiler, executing `ari --check`, calling `tools/lint`, or
       calling process exit. Main-facing human diagnostic output has since been
       wired, source-file JSON output has since been wired, and dedicated
-      output tests plus parity checks remain future work.
+      output tests plus parity checks remained future work at that milestone;
+      the source-result contract and initial exact native goldens now exist.
 - [x] Retain all positional source file paths in the CLI argument model and
       iterate all explicit source-file arguments for lint execution, JSON
       output, human diagnostic output, aggregate diagnostic/read-error counts,
@@ -488,9 +495,10 @@ and test work.
       stdout adapter, without changing parse-error output, discovering config
       files, reading config files, traversing directories, invoking the
       compiler, executing `ari --check`, calling `tools/lint`, or calling
-      process exit. Config integration has since been wired; JSON schema
-      stability, dedicated JSON output tests beyond focused smoke, and parity
-      checks remain future work.
+      process exit. Config integration has since been wired; dedicated JSON
+      output tests beyond focused smoke and broader parity
+      checks remain future work; the source-result contract and initial exact
+      native goldens now exist.
 - [x] Wire the main-facing CLI parse problem path to write a short usage-error
       summary to stderr through the verified stderr adapter, without
       parse-error JSON output, config discovery, reading config
@@ -620,8 +628,9 @@ and test work.
       placeholders; minimal internal single-diagnostic JSON serialization has
       started, but real diagnostic output, human-readable formatting,
       diagnostic arrays, source scanning, CLI parsing, config parsing, compiler
-      invocation, tests, and CI remain future work, and the JSON schema remains
-      needs follow-up.
+      invocation, tests, and CI remained future work at that milestone. The
+      source-result schema has since been published and compiler-smoke CI has
+      since been added.
 - [x] Refine config override skeleton for default config, `ari-lint.rules`,
       explicit `--config` file path, `--rule` command-line override, rule
       severity override, and documented override precedence as metadata-only Ari

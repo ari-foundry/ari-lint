@@ -36,9 +36,9 @@ compiler and fails if it is invoked.
   `ari-foundry/ari`.
 - The standalone implementation is written in Ari; parity remains the target.
 - This plan does not move or copy `tools/lint`.
-- Future compiler provisioning for compiler-backed parity inputs is planned in
-  `docs/dev/compiler-provisioning.md`. Compiler-backed parity tests do not
-  exist yet.
+- Compiler provisioning is documented in `docs/dev/compiler-provisioning.md`,
+  and checksum-pinned compiler-smoke CI exercises standalone behavior. Strict
+  compiler-backed parity tests do not exist yet.
 - Compiler invocation selection and the per-source runtime boundary are
   implemented as documented in `docs/dev/compiler-invocation.md`. Strict
   compiler-backed parity tests do not exist yet.
@@ -94,23 +94,17 @@ Bugs in compiler behavior or standard library behavior should be filed in
 ### Rule parity
 
 - `lint/trailing-whitespace`
-- planned `lint/trailing-whitespace` behavior is documented in
-  `docs/rules/trailing-whitespace.md`; future parity fixtures should compare
-  that design against the current reference behavior
-- future trailing-whitespace fixture strategy is documented in
-  `docs/rules/trailing-whitespace-fixtures.md`; initial clean/trailing-spaces
-  fixtures exist, but parity tests and an executable parity runner are not
-  added yet
+- `lint/trailing-whitespace` behavior and fixture strategy are documented in
+  `docs/rules/trailing-whitespace.md` and
+  `docs/rules/trailing-whitespace-fixtures.md`; the initial strict native case
+  exists, while broader rule fixtures remain future work
 - rule-specific trailing-whitespace parity planning is documented in
   `docs/rules/trailing-whitespace-parity.md`
 - `lint/missing-final-newline`
-- planned `lint/missing-final-newline` behavior is documented in
-  `docs/rules/missing-final-newline.md`; future parity fixtures should compare
-  that design against the current reference behavior, but missing-final-newline
-  parity tests are not added yet
-- rule-specific missing-final-newline parity planning is documented in
-  `docs/rules/missing-final-newline-parity.md`; no executable parity runner
-  exists yet
+- `lint/missing-final-newline` behavior and rule-specific parity planning are
+  documented in `docs/rules/missing-final-newline.md` and
+  `docs/rules/missing-final-newline-parity.md`; the initial strict native case
+  exists, while broader rule fixtures remain future work
 - short rule names if supported
 - default severity behavior
 - disabled-rule behavior
@@ -182,21 +176,20 @@ The first strict layout is:
 - exact standalone and reference registry results under
   `tests/golden/list-rules/`
 
-Remaining fixture categories:
+Additional and broader fixture categories:
 
-- valid Ari source
+- additional valid Ari source shapes
 - trailing whitespace, including future parity cases for spaces, tabs,
   whitespace-only lines, final lines without newlines, and CRLF behavior; see
   `docs/rules/trailing-whitespace-fixtures.md` and
   `docs/rules/trailing-whitespace-parity.md`
-- missing final newline
-- missing final newline future parity cases for files with final newlines,
+- broader missing-final-newline parity cases for files with final newlines,
   files without final newlines, empty files, single-line files, multi-line
   files, CRLF behavior, and lone carriage return behavior; see
   `docs/rules/missing-final-newline.md` and
   `docs/rules/missing-final-newline-fixtures.md` and
-  `docs/rules/missing-final-newline-parity.md`; missing-final-newline parity
-  runner execution and parity tests are not added yet
+  `docs/rules/missing-final-newline-parity.md`; the initial strict native case
+  exists, while broader missing-final-newline parity remains future work
 - compiler error
 - config file override
 - command-line rule override
@@ -340,9 +333,12 @@ from the other repo if needed.
 
 - Reference behavior may change in `ari-foundry/ari` before parity tests are
   implemented.
-- JSON diagnostic schema may still be unstable.
+- The pre-release JSON diagnostic schema is documented; broader compiler and
+  config goldens are still incomplete, and any schema change requires a
+  coordinated contract and exact-test update.
 - Compiler diagnostics may depend on Ari compiler version.
-- Exact human-readable output may be too unstable for golden tests.
+- Broader compiler-dependent human text and detailed usage output may be too
+  unstable for exact golden tests.
 - Ari captures child stdout and stderr separately, so exact cross-stream
   interleaving cannot match the reference shared-pipe implementation.
 - Include path behavior may differ outside the `ari` monorepo.
@@ -353,6 +349,8 @@ from the other repo if needed.
       and the Ari repo `Makefile`
 - [x] Define the initial native fixture directory layout
 - [x] Define the initial compact JSON golden format
+- [x] Document the exact standalone source-result JSON, human line, stream,
+      and exit-status contract
 - [x] Define the no-rewrite relative-path policy for current strict fixtures
 - [x] Define the Ari compiler version pinning policy for the compiler-smoke
       baseline
@@ -394,7 +392,7 @@ from the other repo if needed.
 - [ ] Add compiler-boundary parity fixture
 - [ ] Add a parity CI job only after its broader gating contract exists
 
-## Explicit Non-Goals
+## Original Planning-Step Non-Goals
 
 - Do not move `tools/lint` in this step.
 - Do not copy `tools/lint` source in this step.

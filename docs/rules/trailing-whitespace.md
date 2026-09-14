@@ -22,8 +22,9 @@ behavior for `lint/trailing-whitespace`.
   newline bytes, and returns internal `Diagnostic` values for lines with
   trailing spaces or tabs.
 - Explicit-file reading, config severity overrides, CLI integration, and
-  reference-shaped human/JSON diagnostics are implemented. Dedicated Ari rule
-  tests, broader fixtures, and strict parity remain future work. The
+  reference-shaped human/JSON diagnostics are implemented. An initial strict
+  native parity case exists; dedicated Ari rule tests, broader fixtures, and
+  broader strict parity remain future work. The
   main-facing CLI now combines this rule with compiler diagnostics.
 - Fixture and test planning is tracked in
   [docs/rules/trailing-whitespace-fixtures.md](trailing-whitespace-fixtures.md);
@@ -74,7 +75,7 @@ normalization.
 The Ari-language implementation maps each matching line to an internal span
 using the explicit file path and computed line number. The CLI emits that span
 in the reference human and JSON forms and applies configured severity. Recursive
-file scanning and strict parity tests remain future work.
+file scanning and broader strict parity tests remain future work.
 
 ## Planned Message
 
@@ -89,13 +90,14 @@ diagnostics.
 
 ## Parity Expectations
 
-The future implementation should compare behavior against the current bundled
-`tools/lint` implementation.
+Remaining parity work should continue comparing behavior against the current
+bundled `tools/lint` implementation.
 
 The rule-specific parity plan is documented in
 [docs/rules/trailing-whitespace-parity.md](trailing-whitespace-parity.md).
-A first local parity smoke/report exists in `scripts/parity.sh`, while strict
-rule-specific parity tests and golden comparisons remain future work.
+A broad local parity smoke/report exists in `scripts/parity.sh`, and the initial
+native rule case is gated by `scripts/parity-strict.sh`; broader rule-specific
+parity remains future work.
 
 Parity dimensions:
 
@@ -116,7 +118,8 @@ Initial fixture coverage includes:
 
 Compiler-free checks validate fixture shape, and compiler-backed smoke runs
 representative temporary equivalents through `ari-lint` with exact output.
-Strict source-controlled comparison against `tools/lint` remains future work.
+The initial source-controlled comparison against `tools/lint` is gated locally;
+broader fixture comparison remains future work.
 
 Remaining future fixture ideas:
 
@@ -129,10 +132,10 @@ Remaining future fixture ideas:
 The detailed future fixture and test plan is documented in
 [docs/rules/trailing-whitespace-fixtures.md](trailing-whitespace-fixtures.md).
 Compiler-backed CLI smoke covers representative behavior and exact output;
-dedicated Ari rule tests, broad source-controlled goldens, and strict parity
-remain future work.
+dedicated Ari rule tests, broader source-controlled goldens, and broader strict
+parity remain future work.
 
-## Non-Goals
+## Original Implementation-Step Non-Goals
 
 - Do not read files in this step.
 - Do not scan the filesystem in this step.
