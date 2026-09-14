@@ -96,6 +96,14 @@ require_text_grep() {
   grep -F -q -- "$pattern" "$file" || fail "missing expected text in $file: $pattern"
 }
 
+require_empty_file() {
+  [ ! -s "$1" ] || fail "expected empty file: $1"
+}
+
+require_path_absent() {
+  [ ! -e "$1" ] || fail "unexpected path: $1"
+}
+
 require_json_grep() {
   pattern="$1"
   file="$2"
@@ -172,6 +180,35 @@ require_json_grep '"severity":"note"' "$inline_rule_output"
 inline_ari_output="$tmp_dir/inline-ari.json"
 run_json_diagnostic_smoke "$inline_ari_output" "$binary" --json "--ari=$smoke_ari_compiler" "$source_file"
 require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$inline_ari_output"
+
+missing_compiler_path="$tmp_dir/missing-ari"
+missing_compiler_output="$tmp_dir/missing-ari.stderr"
+run_stderr_unavailable_smoke "$missing_compiler_output" "$binary" --json --ari "$missing_compiler_path" "$source_file"
+require_text_grep "Ari compiler path does not exist" "$missing_compiler_output"
+require_text_grep "$missing_compiler_path" "$missing_compiler_output"
+require_empty_file "$tmp_dir/unavailable.stdout"
+
+non_executable_compiler_path="$tmp_dir/non-executable-ari"
+non_executable_compiler_output="$tmp_dir/non-executable-ari.stderr"
+printf '%s\n' "not an executable compiler" > "$non_executable_compiler_path"
+chmod 600 "$non_executable_compiler_path"
+run_stderr_unavailable_smoke "$non_executable_compiler_output" "$binary" --json --ari "$non_executable_compiler_path" "$source_file"
+require_text_grep "Ari compiler path is not executable" "$non_executable_compiler_output"
+require_text_grep "$non_executable_compiler_path" "$non_executable_compiler_output"
+require_empty_file "$tmp_dir/unavailable.stdout"
+
+sentinel_compiler_path="$tmp_dir/sentinel-ari"
+sentinel_compiler_marker="$sentinel_compiler_path.spawned"
+sentinel_compiler_output="$tmp_dir/sentinel-ari.json"
+{
+  printf '%s\n' '#!/bin/sh'
+  printf '%s\n' 'touch "$0.spawned"'
+  printf '%s\n' 'exit 99'
+} > "$sentinel_compiler_path"
+chmod 700 "$sentinel_compiler_path"
+run_json_diagnostic_smoke "$sentinel_compiler_output" "$binary" --json --ari "$sentinel_compiler_path" "$source_file"
+require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$sentinel_compiler_output"
+require_path_absent "$sentinel_compiler_marker"
 
 printf '%s\n' "trailing-whitespace = off" > "$config_off_file"
 run_json_success_smoke "$config_off_output" "$binary" --json --config "$config_off_file" "$source_file"
