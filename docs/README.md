@@ -20,8 +20,9 @@ Future compatibility docs should reference real Ari releases and tags:
 Documentation migration is staged and tracked in
 [docs/migration.md](migration.md).
 
-Ari-language implementation is active but not yet compiler-integrated. The implementation plan is
-tracked in [docs/dev/ari-implementation-plan.md](dev/ari-implementation-plan.md).
+Ari-language implementation is active, including per-source external compiler
+checks. The implementation plan is tracked in
+[docs/dev/ari-implementation-plan.md](dev/ari-implementation-plan.md).
 
 Parity testing against the current bundled/reference `tools/lint` behavior is
 planned in [docs/dev/parity-test-plan.md](dev/parity-test-plan.md). A local
@@ -29,29 +30,29 @@ report-only parity runner exists; a strict gate does not.
 Known parity differences from the current report-only local smoke are tracked
 in [docs/dev/parity-differences.md](dev/parity-differences.md).
 
-Future Ari compiler provisioning for compiler-backed tests and boundary
-behavior is planned in
-[docs/dev/compiler-provisioning.md](dev/compiler-provisioning.md). Compiler
-provisioning is not implemented yet.
+Local compiler selection and the remaining pinned CI provisioning work are
+documented in
+[docs/dev/compiler-provisioning.md](dev/compiler-provisioning.md). The local
+runtime boundary is implemented; compiler-backed CI is not.
 
-The compiler selection and per-file argv boundary is documented in
-[docs/dev/compiler-invocation.md](dev/compiler-invocation.md). Explicit
-`--ari` path validation and `-I` planning exist, but compiler invocation and
-`ARI_COMPILER` fallback are not implemented yet.
+The implemented compiler selection, per-file argv, diagnostic parsing, and
+process-status boundary is documented in
+[docs/dev/compiler-invocation.md](dev/compiler-invocation.md). Source commands
+select `--ari`, then `ARI_COMPILER`, then `build/ari`, and invoke the selected
+compiler directly without a shell.
 
 The initial release and compatibility policy is documented in
 [docs/dev/release-compatibility-policy.md](dev/release-compatibility-policy.md).
 It does not claim compatibility with any Ari release or tag.
 
-Rule documentation is currently a set of design notes until Ari-language rule
-implementation exists. Current rule design notes include
+Rule documentation contains focused behavior and design notes for the current
+rule implementation. Current rule notes include
 [docs/rules/trailing-whitespace.md](rules/trailing-whitespace.md) and
 [docs/rules/missing-final-newline.md](rules/missing-final-newline.md).
 
 Compiler and standard library (stdlib) bugs should be filed in
 `ari-foundry/ari`, not `ari-lint`.
 
-This documentation is provisional until Ari-language implementation and docs
-migration are complete. Do not copy `docs/lint` content from `ari-foundry/ari`
-wholesale in this skeleton step, and do not include unverified Ari syntax
-examples.
+This documentation remains provisional until the standalone implementation and
+docs migration are complete. Do not copy `docs/lint` content from
+`ari-foundry/ari` wholesale, and do not include unverified Ari syntax examples.

@@ -7,9 +7,9 @@ It now carries Ari-language source, local build and smoke scripts, lint rule
 metadata, config handling, diagnostic output wiring, and focused development
 documentation for the split.
 
-The near-term dependency model is invoking `ari --check` for compiler-backed
-checking when that boundary is added. Compiler behavior remains owned by the
-Ari compiler project. The current `tools/lint` implementation in
+The near-term dependency model invokes an external Ari compiler with `--check`
+once for every explicit source file. Compiler behavior remains owned by the Ari
+compiler project. The current `tools/lint` implementation in
 `ari-foundry/ari` remains the reference implementation for now.
 
 The long-term implementation direction is to develop `ari-lint` in Ari when
@@ -50,10 +50,15 @@ here.
   compiler path or `ARI_COMPILER`, plus an Ari repository path or `ARI_REPO`.
 - CLI `--help` output.
 - CLI `--list-rules` output.
-- Explicit `--ari PATH` / `--ari=PATH` parsing and source-command path
-  validation. The path is not spawned yet.
-- `-I DIR` / `-IDIR` parsing with per-file compiler argv planned as
-  `-I DIR ... FILE --check`.
+- Compiler selection for source commands from explicit `--ari PATH` /
+  `--ari=PATH`, then a present `ARI_COMPILER` environment entry, then the
+  literal default `build/ari`.
+- `-I DIR` / `-IDIR` parsing and direct, shell-free compiler execution once per
+  positional source file with argv `-I DIR ... FILE --check`.
+- Compiler diagnostic parsing from captured output, with the compiler status
+  retained as each JSON file result's `exitCode`. Launch failures use
+  `exitCode` `127` and a per-file `ari/compiler-check-failed` diagnostic when
+  no other diagnostic explains the failure.
 - Source-file lint for all explicitly provided positional source files, using
   the currently implemented rules:
   `lint/trailing-whitespace` and `lint/missing-final-newline`.
@@ -77,8 +82,19 @@ here.
 - There is no strict parity gate or golden parity suite yet. The local
   parity smoke/report is report-only and does not claim parity.
 - CI is not compiler-backed yet.
-- The main command does not invoke `ari --check` yet; compiler selection from
-  `ARI_COMPILER` and the reference `build/ari` default is also pending.
+- Child stderr and stdout are captured separately and parsed in deterministic
+  stderr-then-stdout order. This can differ from the reference implementation's
+  cross-stream write order; see
+  [docs/dev/compiler-invocation.md](docs/dev/compiler-invocation.md).
+- Compiler stdout and stderr are drained concurrently, with at most 256 KiB
+  retained from each stream. Excess output is discarded without blocking the
+  child; every truncated run adds an `ari/compiler-output-truncated` error so
+  lost diagnostics cannot produce a silent success. The per-file `exitCode`
+  still preserves the compiler's actual status.
+- Parsed compiler diagnostics are limited to 2,048 per file, 4,096 per run,
+  and, together with raw compiler-failure fallback text, 1 MiB of repeated
+  file/code/message payload per run. Exceeding a budget omits later material,
+  adds `ari/compiler-diagnostics-truncated`, and fails closed.
 - The implemented rule set is limited.
 - Directory traversal and recursive source-tree scanning are not implemented;
   pass source files explicitly.
@@ -117,6 +133,11 @@ both are provided. The build script resolves the repository root, uses the
 compiler root when `lib/std.arih` is available there, writes `build/ari-lint`,
 does not download or build the Ari compiler, and does not run `tools/lint`. It
 preserves relative compiler paths from the caller's directory.
+
+This selects the compiler used to build `ari-lint`. When the resulting binary
+checks source files, its runtime compiler selection independently follows
+`--ari`, then `ARI_COMPILER`, then `build/ari`. Help and rule-listing commands
+do not execute the runtime compiler.
 
 CI does not run compiler-backed builds or tests yet, and this repository is not
 a standalone release.
@@ -180,7 +201,8 @@ You may also set `ARI_COMPILER`:
 ARI_COMPILER=/path/to/ari scripts/smoke.sh
 ```
 
-The smoke script delegates build behavior to `scripts/build.sh`. After the build
+The smoke script delegates build behavior to `scripts/build.sh` and makes the
+selected compiler available to source-command runtime checks. After the build
 succeeds, it runs these current safe CLI invocations:
 
 ```sh
@@ -217,7 +239,8 @@ Focused diagnostic smoke checks assert the runtime `files`, `path`, `exitCode`,
 `diagnostics`, `file`, position, `severity`, `message`, `source`, and `code`
 fields for `lint/trailing-whitespace` and `lint/missing-final-newline`. Exact
 checks cover representative JSON and human output, including final newlines.
-The smoke also covers dirty multi-file, clean/dirty, all-clean,
-duplicate-argument, and escaped path cases. Dedicated Ari tests,
-source-controlled broad goldens, strict parity, compiler-backed CI, and
-compiler-diagnostic goldens remain future work.
+Source invocations also exercise the compiler-backed `--check` boundary. The
+smoke covers dirty multi-file, clean/dirty, all-clean, duplicate-argument, and
+escaped path cases. Dedicated Ari tests, source-controlled broad goldens,
+strict parity, compiler-backed CI, and broad compiler-diagnostic goldens remain
+future work.

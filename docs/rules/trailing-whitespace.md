@@ -23,8 +23,8 @@ behavior for `lint/trailing-whitespace`.
   trailing spaces or tabs.
 - Explicit-file reading, config severity overrides, CLI integration, and
   reference-shaped human/JSON diagnostics are implemented. Dedicated Ari rule
-  tests, broader fixtures, compiler integration, and strict parity remain
-  future work.
+  tests, broader fixtures, and strict parity remain future work. The
+  main-facing CLI now combines this rule with compiler diagnostics.
 - Fixture and test planning is tracked in
   [docs/rules/trailing-whitespace-fixtures.md](trailing-whitespace-fixtures.md);
   initial clean and trailing-spaces fixtures are started, while full fixture

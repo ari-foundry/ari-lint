@@ -3,8 +3,9 @@
 Current status: active standalone split implementation with Ari source, local
 build and smoke validation, compiler-free checks, supported CLI help and
 list-rules output, multi-file source-file linting for the current rule set,
-JSON diagnostics, explicit and discovered config, CLI severity overrides, and a
-local report-only parity smoke/report against the original bundled lint tool.
+JSON diagnostics, explicit and discovered config, CLI severity overrides,
+per-source Ari compiler execution and diagnostic parsing, and a local
+report-only parity smoke/report against the original bundled lint tool.
 Historical milestones include: skeleton initialized / Ari source skeleton
 started / internal model skeleton started / registry-severity-config skeleton
 started /
@@ -98,7 +99,10 @@ local parity smoke/report config and multi-file cases added /
 known parity differences documented /
 reference-shaped runtime JSON and human output added /
 native diagnostic exit status aligned /
-representative exact output smoke checks added.
+representative exact output smoke checks added /
+per-source compiler execution added /
+compiler diagnostic parsing and failure normalization added /
+fake-compiler runtime smoke matrix added.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -115,9 +119,9 @@ and test work.
       implementation plan.
 - [x] Start Ari source as the first step toward Ari-language implementation;
       the current implementation now includes rule execution, CLI parsing,
-      diagnostics, local build and smoke validation, and focused documentation,
-      while compiler invocation, parity tests, golden output tests, and release
-      compatibility claims remain future work.
+      diagnostics, compiler invocation, local build and smoke validation, and
+      focused documentation, while strict parity tests, golden output tests,
+      compiler-backed CI, and release compatibility claims remain future work.
 - [x] Add a minimal main entry shell that delegates through a local internal
       shell function and returns success. Main wiring to the OS argv integration
       entry path, stdout/stderr output, JSON output, config parsing, compiler
@@ -709,10 +713,11 @@ and test work.
       setup, compiler download/build automation, parity runner behavior, and a
       compatibility matrix remain future work.
 - [x] Add Ari compiler invocation plan in
-      `docs/dev/compiler-invocation.md`; explicit `--ari` parsing/path
-      validation, both `-I` forms, and exact per-file argv planning now exist.
-      `ARI_COMPILER` handling, compiler execution, compiler-backed tests, a
-      strict parity gate, and a compatibility matrix remain future work.
+      `docs/dev/compiler-invocation.md`; explicit `--ari`, `ARI_COMPILER`, the
+      default compiler path, both `-I` forms, exact per-file argv, direct
+      execution, diagnostic parsing, and failure normalization now exist.
+      Compiler-backed CI, a strict parity gate, and a compatibility matrix
+      remain future work.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the fixture and golden output
       strategy. A first local report-only `scripts/parity.sh` smoke now
@@ -730,8 +735,8 @@ and test work.
       and multi-file cases, and keeps differences non-gating without adding CI
       parity jobs or compatibility claims.
 - [x] Document known report-only parity differences in
-      `docs/dev/parity-differences.md`, including the compiler-check boundary,
-      JSON shape, and diagnostic exit-code differences, without making a stable
+      `docs/dev/parity-differences.md`, including cross-stream compiler output
+      ordering and remaining CLI/output differences, without making a stable
       parity or compatibility claim.
 - [x] Record compiler-backed CI gate; `.github/workflows/check.yml` remains
       lightweight and compiler-free until standalone tests and explicit Ari
@@ -747,7 +752,9 @@ and test work.
       parent discovery, multi-file JSON, and focused diagnostic field checks.
       Later smoke coverage also added focused list-rules output assertions for
       rule-code, short-name, and default-severity signals;
-      broader golden output coverage remains future smoke coverage.
+      compiler execution coverage now includes selection precedence, exact argv,
+      parsed diagnostics, failures, signals, ordering, and no-spawn commands.
+      Broader source-controlled golden output remains future work.
 - [x] Add minimal config override smoke coverage in `scripts/smoke.sh` using
       temporary files and simple JSON rule-code/severity checks for explicit
       `--config` severity and CLI `--rule` precedence, without adding golden

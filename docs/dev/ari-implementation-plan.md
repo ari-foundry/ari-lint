@@ -24,14 +24,15 @@ It does not move `tools/lint` or change build behavior.
   adapter. Source runs write reference-shaped human or JSON output to stdout;
   the JSON envelope retains every positional file, and enabled diagnostics
   return exit `1`. CLI help writes concise text to stdout.
-  CLI parse problems and missing source-file input write short summaries to
-  stderr. Source read failures and explicit config read or parse failures also
-  use stderr. Bad lines in a discovered config instead become ordered per-file
-  `lint/config` diagnostics on stdout and return exit `1`. The path does not read
-  compiler-selection environment variables, produce parse-error JSON, produce
-  source-read-error JSON, search home/global/XDG config locations, recursively
-  discover source files, invoke the compiler, invoke `ari --check`, call
-  `tools/lint`, or call process exit.
+  CLI parse problems, missing source-file input, and explicit config read or
+  parse failures use stderr. Bad lines in a discovered config become ordered
+  per-file `lint/config` diagnostics on stdout. Source commands select an Ari
+  compiler from `--ari`, `ARI_COMPILER`, or `build/ari`, invoke it once per
+  positional source, and combine compiler, config, and native diagnostics.
+  Compiler-visible source read failures therefore use the reference per-file
+  output path. The CLI does not produce parse-error JSON, search
+  home/global/XDG config locations, recursively discover source files, call
+  `tools/lint`, or call process exit directly.
 - The rule registry, severity, and config model skeleton has started as
   preparatory source-only declarations. The registry now constructs known
   entries for `lint/trailing-whitespace` and `lint/missing-final-newline` from
@@ -64,9 +65,8 @@ It does not move `tools/lint` or change build behavior.
   directory for its nearest readable `ari-lint.rules`. Command-line `--rule`
   overrides are applied after the selected config for every source. A semantic
   parser now converts caller-provided `--rule` values into command-line-sourced
-  internal severity overrides and parse problems. Actual OS process argument collection now
-  has a minimal internal entry path; compiler-selection environment handling
-  remains future work.
+  internal severity overrides and parse problems. Actual OS process argument
+  collection and compiler-selection environment handling are implemented.
 - An explicit OS argv boundary now exists in `src/cli.ari`. It reads process
   arguments through the verified Ari `std::env::args` API, drops argv[0], and
   reuses the existing explicit-token parser and stdout-free dispatcher. `main`
@@ -74,18 +74,20 @@ It does not move `tools/lint` or change build behavior.
   main-facing `--list-rules` branch writes the existing human-readable
   list-rules text through the verified stdout adapter. Source runs now write
   reference-shaped human or JSON output to stdout and return exit `1` when any
-  enabled diagnostic is present. CLI parse problems, missing input, source read
-  failures, and explicit config read or parse failures remain stderr errors.
-  Discovered config parse problems are ordinary per-file `lint/config`
-  diagnostics on stdout. The path does not read compiler-selection environment
-  variables, invoke the compiler, or recursively scan sources.
+  diagnostic remains or any compiler check exits nonzero. CLI parse problems,
+  missing input, and explicit config read or parse failures remain stderr
+  errors. Discovered config parse problems and compiler-visible source read
+  failures are ordinary per-file diagnostics on stdout. The path reads
+  `ARI_COMPILER` when `--ari` is absent, invokes the compiler once per source,
+  and does not recursively scan sources.
 - Runtime output uses a flat diagnostic store plus ordered per-file ranges.
   JSON matches the reference `files` envelope with per-file `path`, `exitCode`,
   and `diagnostics`; diagnostic objects contain mandatory numeric positions,
   `severity`, `message`, `source`, and optional `code`. Human source results use
   `PATH: ok` or bracketed codes on stdout. Representative exact JSON and human
-  smoke checks cover clean, dirty, mixed, duplicate, and escaped-path cases.
-  Compiler-result population remains follow-up work.
+  smoke checks cover clean, dirty, mixed, duplicate, escaped-path, compiler
+  failure, and compiler-diagnostic cases. Each per-file `exitCode` now records
+  the corresponding compiler result.
 - The source input boundary model has started for caller-provided source text,
   path-only source entries, and explicit file reads. It records internal
   source inputs without recursively scanning the filesystem, discovering config
@@ -136,10 +138,11 @@ It does not move `tools/lint` or change build behavior.
   adapter. Bad discovered config lines are inserted as ordered per-file
   `lint/config` diagnostics before native rule diagnostics. Explicit config read
   or parse failures write all reference-shaped errors to stderr and exit `2`
-  before linting. It does not search home/global/XDG config locations,
-  recursively discover source files, invoke the compiler, call `ari --check`, or
-  call `tools/lint`. Source-file read errors still write short stderr summaries
-  and do not produce read-error JSON output yet.
+  before linting. For every source, the main-facing path first runs the selected
+  compiler with `-I DIR ... SOURCE --check`, then adds discovered-config and
+  native diagnostics. Compiler diagnostics are parsed before those later
+  diagnostics. It does not search home/global/XDG config locations, recursively
+  discover source files, or call `tools/lint`.
 - A source-only parity runner skeleton now records intended comparison
   boundaries against current `tools/lint`, with all execution, file IO, and
   output-comparison flags false. It does not run `tools/lint`, invoke an
@@ -156,8 +159,8 @@ It does not move `tools/lint` or change build behavior.
   `lint/trailing-whitespace` and `lint/missing-final-newline`, and an internal
   human-readable list-rules formatter and standalone JSON extension build from
   the same metadata. The main-facing OS argv `--list-rules` path writes the
-  selected form to stdout through the verified adapter. Compiler invocation and
-  strict parity remain future work.
+  selected form to stdout through the verified adapter without invoking the
+  compiler. Strict parity remains future work.
 - An internal stdout-free command dispatcher now maps parsed CLI arguments to
   internal command results. It routes list-rules requests to the internal
   human-readable list-rules formatter and routes source-file requests through
@@ -167,8 +170,8 @@ It does not move `tools/lint` or change build behavior.
   diagnostics. It keeps
   parse-problem, help, and missing-source command paths as internal command
   results. The dispatcher remains output-free; the main-facing layer formats
-  those results. Compiler invocation, recursive source scanning, and strict
-  parity remain future work.
+  those results and its source collection path invokes the compiler. Recursive
+  source scanning and strict parity remain future work.
 - Internal command results now carry data-only exit-code mappings for success,
   usage-error, lint-failure, and unavailable command states. The model does not
   call process exit, run the CLI, read OS argv, write stdout/stderr, or claim
@@ -182,10 +185,10 @@ It does not move `tools/lint` or change build behavior.
   `std::io::print_string` and `std::io::eprint_string` APIs and return local
   status data. The stdout adapter is wired for main-facing list-rules, help,
   and source-file human/JSON results. The stderr adapter is wired for parse
-  problems, missing input, source failures, explicit-config failures, and
-  current compiler-path failures. Discovered config problems travel through the
-  diagnostic stdout path instead. These adapters are not wired to compiler
-  invocation or recursive source scanning.
+  problems, missing input, and explicit-config failures. Compiler diagnostics,
+  launch failures, source failures visible to the compiler, and discovered
+  config problems travel through the source-result stdout path instead. The
+  adapters are not used for recursive source scanning.
 - An internal OS argv entry path now reads arguments through the verified Ari
   `std::env::args` API, drops the program-name argument, and dispatches the
   remaining user tokens through the existing explicit-token parser and
@@ -194,10 +197,10 @@ It does not move `tools/lint` or change build behavior.
   human-readable list-rules text to stdout. The main-facing help, source-file
   diagnostic, source-file JSON diagnostic, and parse problem output paths are
   also wired through verified output adapters. Missing source-file input writes
-  a short stderr summary. Source-file read errors also write a short stderr
-  summary. Config discovery and representative executable smoke coverage are
-  now wired; compiler invocation, detailed help parity, dedicated Ari tests,
-  and strict parity remain future work.
+  a short stderr summary. Source commands invoke the selected compiler and use
+  its per-file result for compiler-visible read failures. Config discovery and
+  representative executable smoke coverage are wired; detailed help parity,
+  dedicated Ari tests, and strict parity remain future work.
 - An internal explicit-token entry path now composes the existing
   caller-provided token-list parser with the stdout-free command dispatcher and
   returns a `CliCommandResult`. It does not read OS argv, environment variables,
@@ -246,8 +249,7 @@ It does not move `tools/lint` or change build behavior.
   presence, exact line order, and key override values. They do not execute Ari
   parser code themselves. Separately, `scripts/smoke.sh` executes the built CLI
   against generated temporary configs. Dedicated Ari tests, source-controlled
-  runtime goldens, strict parity, compiler invocation, and compatibility claims
-  remain future work.
+  runtime goldens, strict parity, and compatibility claims remain future work.
 - The rule module layout has started with source-only child modules for the
   trailing whitespace and missing final newline rules.
   A minimal internal single-line helper has started for trailing whitespace,
@@ -298,8 +300,9 @@ It does not move `tools/lint` or change build behavior.
   `lint/trailing-whitespace` and `lint/missing-final-newline`. Exact JSON and
   human expected files cover ordering and final newlines; multi-file, clean,
   mixed, duplicate, and escaped path cases are also exercised. Dedicated Ari
-  tests, source-controlled broad goldens, strict parity, compiler-backed CI, and
-  compiler diagnostics remain follow-up work.
+  tests, source-controlled broad goldens, strict parity, and compiler-backed CI
+  remain follow-up work. Focused compiler invocation and diagnostic parsing are
+  covered by local smoke validation.
 - A local parity smoke/report script now exists at `scripts/parity.sh`. It
   accepts an explicit Ari compiler path or `ARI_COMPILER`, an Ari repository
   path or `ARI_REPO`, and optionally an existing original lint command path or
@@ -325,11 +328,11 @@ It does not move `tools/lint` or change build behavior.
 - The implementation direction remains Ari-language development in `ari-lint`.
 - Behavior parity with current `tools/lint` is the intended transition path.
 - The near-term dependency model remains invoking `ari --check`.
-- Future Ari compiler provisioning for compiler-backed behavior is planned in
-  `docs/dev/compiler-provisioning.md`. Compiler invocation remains future work.
-- Future Ari compiler invocation selection through `--ari PATH` or
-  `ARI_COMPILER` is planned in `docs/dev/compiler-invocation.md`. Compiler
-  invocation remains future work.
+- Ari compiler provisioning for compiler-backed CI remains planned in
+  `docs/dev/compiler-provisioning.md`.
+- Runtime compiler selection through `--ari PATH`, `ARI_COMPILER`, and the
+  `build/ari` default is implemented as documented in
+  `docs/dev/compiler-invocation.md`.
 
 ## Reference Implementation
 
@@ -403,10 +406,10 @@ Current Ari-language implementation module inventory:
 
 - `src/main.ari` defines a minimal main entry shell and delegates `main` through
   a local `run_main_entry_shell` function. The shell calls the existing OS argv
-  CLI entry path and returns the internal exit-code mapping. It does not invoke
-  the compiler, call `ari --check`, call `tools/lint`, or call process exit.
-  Scoped main-facing stdout/stderr output is delegated through the CLI layer's
-  verified adapters.
+  CLI entry path and returns the internal exit-code mapping. Source dispatch in
+  that CLI path invokes the compiler; `main` itself does not call `tools/lint`
+  or call process exit. Scoped main-facing stdout/stderr output is delegated
+  through the CLI layer's verified adapters.
 - `src/model.ari` groups future model modules.
 - `src/source.ari` defines the internal source input boundary model for
   caller-provided source text, path-only source entries, and path-list inputs
@@ -454,12 +457,21 @@ Current Ari-language implementation module inventory:
   explicit-token path. The source-file collection path can read one explicit
   config for all source files or search lexically upward from each source file's
   directory for its nearest readable `ari-lint.rules` when `--config` is absent.
-  It does not read compiler-selection environment variables, search
-  home/global/XDG config locations, or call process exit.
+  It selects a compiler from `--ari`, `ARI_COMPILER`, or `build/ari`, invokes
+  one compiler process per source, and combines compiler diagnostics before
+  config and native diagnostics. It does not search home/global/XDG config
+  locations or call process exit directly.
   `main` returns the internal exit-code mapping from that path. Main-facing
   list-rules, help, and source human/JSON results use stdout; parse problems,
-  missing-source summaries, and current read/compiler-path failures use stderr
-  through the verified adapters.
+  missing-source summaries, and explicit-config failures use stderr through the
+  verified adapters. Compiler launch and source failures use per-file results.
+- `src/compiler.ari` owns direct shell-free compiler execution, exit-status
+  normalization, bounded concurrent stream draining, deterministic
+  stderr-then-stdout capture, parsing of the four reference Ari diagnostic
+  forms, and construction of deferred compiler-check failure diagnostics. It
+  retains at most 256 KiB per stream and drains excess bytes. Variable
+  diagnostic text and any actually needed fallback output are copied into the
+  caller zone before per-process scratch storage is released.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
 - `src/diagnostic.ari` defines diagnostic concepts such as file path, line,
@@ -526,34 +538,35 @@ Current Ari-language implementation module inventory:
 The current standalone path implements explicit-file native rule execution,
 CLI/config severity validation, per-source nearest readable config discovery,
 explicit-config discovery suppression, CLI-last precedence, ordered per-file
-results, reference-shaped runtime JSON and human output, and main-entry exit
+results, reference-shaped runtime JSON and human output, per-source
+`ari --check` execution, compiler diagnostic parsing, and main-entry exit
 behavior. Bad discovered config lines are per-file `lint/config` diagnostics;
 explicit config read and parse failures use reference-shaped stderr and exit
-`2`. The output layer retains focused single-diagnostic and caller-provided
-diagnostic-array helpers, and adds `FileResult`/`RunResult` serializers used by
-the CLI. Registry-backed dispatch, file-backed aggregation, and the two native
-rules are wired into the current executable path.
+`2`. Compiler launch failures become per-file exit `127`, and compiler-visible
+source failures use compiler diagnostics. The output layer retains focused
+single-diagnostic and caller-provided diagnostic-array helpers, and adds
+`FileResult`/`RunResult` serializers used by the CLI. Registry-backed dispatch,
+file-backed aggregation, and the two native rules are wired into the executable
+path.
 
-The remaining implementation limits are explicit: `ari --check` is not invoked;
-compiler selection does not read `ARI_COMPILER`; source read failures do not yet
-use the reference per-file JSON diagnostic path; and recursive source discovery
-is out of scope. Focused executable shell smoke exists, but dedicated Ari unit
-tests, compiler-invocation tests, broad source-controlled goldens, strict parity,
-compiler-backed CI, and a release-backed compatibility matrix remain future
-work.
+The remaining implementation limits are explicit: recursive source discovery
+and home/global/XDG config search are out of scope. Focused executable compiler
+smoke exists, but dedicated Ari unit tests, broad source-controlled goldens,
+strict parity, compiler-backed CI, and a release-backed compatibility matrix
+remain future work.
 
 The local build scaffold and `scripts/smoke.sh` provide compiler-backed build
 and executable CLI/output smoke validation, but they are not compiler-backed
-CI or full build validation. Dedicated Ari tests, compiler-invocation tests,
-broad source-controlled goldens, compiler provisioning in CI, strict parity,
-and compatibility validation remain future work.
+CI or full build validation. Dedicated Ari tests, broad source-controlled
+goldens, compiler provisioning in CI, strict parity, and compatibility
+validation remain future work.
 
 The local standalone test entrypoint is not a full executable test suite.
 `scripts/test.sh` resolves the repository root and delegates to
 `scripts/check.sh` only. Compiler-backed executable smoke lives separately in
-`scripts/smoke.sh`; dedicated Ari unit tests, compiler-invocation tests, broad
-source-controlled golden comparison, strict parity, package manager commands,
-and CI compiler execution remain future work.
+`scripts/smoke.sh`; dedicated Ari unit tests, broad source-controlled golden
+comparison, strict parity, package manager commands, and CI compiler execution
+remain future work.
 
 Standalone build wiring is local-only. `scripts/build.sh` resolves the
 repository root, requires an explicit compiler path or `ARI_COMPILER`, writes
@@ -631,8 +644,8 @@ Current rule module state:
 
 The individual rule modules remain in-memory and do not own file reading,
 config, CLI, or output concerns. The surrounding lint and CLI layers now compose
-them for explicit files and emit runtime results. Compiler invocation,
-home/global/XDG config search, dedicated Ari unit tests, strict parity, and CI
+them for explicit files, invoke the compiler, and emit runtime results.
+Home/global/XDG config search, dedicated Ari unit tests, strict parity, and CI
 compiler provisioning remain future work.
 
 The source input file-read boundary reads one explicitly provided path into a
@@ -649,23 +662,24 @@ main-facing OS argv path collects source-file diagnostics into a flat vector,
   discovered config or the invocation-wide explicit config first, then parsed
   command-line `--rule` severity overrides, and writes reference-shaped human or
   JSON results to stdout. Bad discovered config lines become ordered per-file
-  `lint/config` diagnostics on stdout. CLI parse problems and explicit config
-  read or parse failures write reference-shaped errors to stderr; source-file
-  read errors write short stderr summaries and do not produce read-error JSON
-  output. It does not produce parse-error JSON, search home/global/XDG config
-  locations, recursively discover source files, invoke the compiler, call
-  `ari --check`, call `tools/lint`, or call process exit.
+  `lint/config` diagnostics on stdout. The main-facing collection path invokes
+  the selected compiler before config/native lint for each source and records
+  the compiler exit code. CLI parse problems and explicit config read or parse
+  failures write reference-shaped errors to stderr; compiler-visible
+  source-file read errors remain per-file compiler diagnostics on stdout. It
+  does not produce parse-error JSON, search home/global/XDG config locations,
+  recursively discover source files, call `tools/lint`, or call process exit.
 
 ### Phase 5: compiler boundary
 
-- invoke `ari --check`
-- handle compiler failures
-- combine compiler-backed diagnostics with lint diagnostics
-- preserve behavior parity where possible
+- [x] invoke `ari --check` once per explicit source
+- [x] handle compiler failures and normalize process status
+- [x] combine compiler-backed diagnostics with config and lint diagnostics
+- [x] preserve reference behavior where Ari process APIs permit it
 - use the compiler provisioning plan in `docs/dev/compiler-provisioning.md`
   before adding compiler-backed tests or CI compiler setup
-- use the compiler invocation plan in `docs/dev/compiler-invocation.md` before
-  implementing `--ari`, `ARI_COMPILER`, or compiler execution
+- [x] implement `--ari`, `ARI_COMPILER`, default selection, and exact argv as
+  specified in `docs/dev/compiler-invocation.md`
 
 ### Phase 6: standalone tests and CI
 
@@ -787,14 +801,14 @@ usable.
 
 ## Follow-up Checklist
 
-- [ ] Confirm current Ari language docs and examples
-- [ ] Define initial Ari source layout
-- [ ] Identify Ari runtime/process support needed for invoking `ari --check`
-- [ ] Define minimal CLI parser strategy
-- [ ] Define concrete CLI metadata value construction after Ari syntax choices
+- [x] Confirm current Ari language docs and examples
+- [x] Define initial Ari source layout
+- [x] Identify and use Ari runtime/process support for invoking `ari --check`
+- [x] Define minimal CLI parser strategy
+- [x] Define concrete CLI metadata value construction after Ari syntax choices
       are verified
-- [ ] Define diagnostic data model
-- [ ] Define concrete diagnostic output metadata value construction after Ari
+- [x] Define diagnostic data model
+- [x] Define concrete diagnostic output metadata value construction after Ari
       syntax choices are verified
 - [x] Define the reference-compatible runtime JSON schema and human-readable
       diagnostic text policy
@@ -946,6 +960,14 @@ usable.
       command-line rule override, discovered config, and multi-file cases
 - [x] Record compiler-backed CI gate without running the Ari compiler,
       `ari --check`, `tools/lint`, package managers, or release automation
+- [x] Add direct per-source compiler execution with `--ari`, `ARI_COMPILER`,
+      and `build/ari` selection, exact `-I DIR ... SOURCE --check` argv,
+      compiler diagnostic parsing, normalized exit status, and deferred
+      compiler-check failure diagnostics
+- [x] Add local fake-compiler smoke coverage for argv preservation, selection
+      precedence, diagnostic parsing, stream merge order, failures, signals,
+      fallback suppression, bounded stream and diagnostic material,
+      fail-closed truncation, and compiler/truncation/config/native ordering
 - [x] Wire local standalone build script root handling without running the Ari
       compiler in CI or adding package manager files
 - [x] Add local smoke validation that delegates to `scripts/build.sh` and runs

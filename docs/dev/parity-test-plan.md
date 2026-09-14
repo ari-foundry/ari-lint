@@ -2,8 +2,8 @@
 
 ## Purpose
 
-This document defines how the future Ari-language implementation of `ari-lint`
-should be compared against the current bundled/reference `tools/lint`
+This document defines how the standalone Ari-language `ari-lint`
+implementation should be compared against the bundled/reference `tools/lint`
 implementation in `ari-foundry/ari`.
 
 The original parity planning step did not add tests, fixtures, golden files,
@@ -25,15 +25,14 @@ report without failing on behavior differences.
   source-file lint path and two implemented rules.
 - The current reference implementation remains `tools/lint` in
   `ari-foundry/ari`.
-- The future implementation direction is Ari-language reimplementation with
-  behavior parity.
+- The standalone implementation is written in Ari; parity remains the target.
 - This plan does not move or copy `tools/lint`.
 - Future compiler provisioning for compiler-backed parity inputs is planned in
   `docs/dev/compiler-provisioning.md`. Compiler-backed parity tests do not
   exist yet.
-- Future compiler invocation selection is planned in
-  `docs/dev/compiler-invocation.md`. Compiler-backed parity tests that require
-  invocation do not exist yet.
+- Compiler invocation selection and the per-source runtime boundary are
+  implemented as documented in `docs/dev/compiler-invocation.md`. Strict
+  compiler-backed parity tests do not exist yet.
 - A source-only parity runner skeleton exists in `src/parity.ari`. It records
   the intended comparison boundary but does not run `tools/lint`, invoke an
   `ari-lint` binary, read fixtures, compare output, invoke the compiler, or run
@@ -121,12 +120,28 @@ Bugs in compiler behavior or standard library behavior should be filed in
 
 ### Compiler-boundary parity
 
+The strict compiler-boundary allowlist has five documented categories:
+cross-stream ordering, retained-output capture, retained diagnostic material,
+non-interactive stdin, and out-of-range coordinates.
+Parent-side process infrastructure errors are unresolved strict-gate cases,
+not a sixth allowlist category.
+
 - compiler binary selection through `--ari`
+- separated `--ari PATH` reference parity and an explicit CLI-contract decision
+  for standalone-only `--ari=PATH`
+- an explicit CLI-contract decision for the standalone-only `--` separator
 - `ARI_COMPILER` behavior if supported
 - include path forwarding through `-I`
 - compiler-check failure behavior
 - mixed compiler and lint diagnostics
 - missing compiler binary behavior
+- retained-output boundary, fail-closed truncation diagnostics, and late
+  diagnostic loss behavior
+- per-file, per-run, and repeated-payload compiler diagnostic budgets
+- non-interactive compiler stdin policy
+- fault-injected spawn/pipe/read/wait infrastructure-error behavior
+- cross-stream ordering and out-of-range coordinate allowlists documented in
+  `docs/dev/parity-differences.md`
 
 ### Exit-status parity
 
@@ -247,7 +262,7 @@ Future comparison flow:
 
 1. Run current reference `tools/lint` or built `ari-lint` from
    `ari-foundry/ari`.
-2. Run future Ari-language `ari-lint` implementation on the same fixture.
+2. Run standalone Ari-language `ari-lint` on the same fixture.
 3. Normalize paths and environment-dependent fields.
 4. Compare diagnostics, severities, rule codes, and exit status.
 5. Record intentional differences explicitly.
@@ -289,7 +304,8 @@ from the other repo if needed.
 - JSON diagnostic schema may still be unstable.
 - Compiler diagnostics may depend on Ari compiler version.
 - Exact human-readable output may be too unstable for golden tests.
-- Process invocation from Ari may require runtime/toolchain support.
+- Ari captures child stdout and stderr separately, so exact cross-stream
+  interleaving cannot match the reference shared-pipe implementation.
 - Include path behavior may differ outside the `ari` monorepo.
 
 ## Follow-up Checklist
@@ -302,7 +318,7 @@ from the other repo if needed.
 - [ ] Define Ari compiler version pinning policy
 - [ ] Define compiler provisioning policy from
       `docs/dev/compiler-provisioning.md`
-- [ ] Define compiler invocation policy from
+- [x] Define and implement compiler invocation policy from
       `docs/dev/compiler-invocation.md`
 - [x] Add source-only parity runner skeleton without executing either
       implementation
@@ -343,7 +359,6 @@ from the other repo if needed.
 - Do not add golden files in this step.
 - Do not add Ari implementation code in this step.
 - Do not implement lint rules in this step.
-- Do not add direct `ari --check` invocation in this repository in this step.
 - Do not add CI parity jobs in this step.
 - Do not make parity differences fail the local report in this step.
 - Do not claim compatibility matrix support in this step.

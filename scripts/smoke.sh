@@ -22,6 +22,10 @@ else
   "$script_dir/build.sh"
 fi
 
+smoke_compiler_dir=$(CDPATH= cd "$(dirname "$smoke_ari_compiler")" && pwd)
+smoke_ari_compiler="$smoke_compiler_dir/$(basename "$smoke_ari_compiler")"
+export ARI_COMPILER="$smoke_ari_compiler"
+
 binary="$repo_root/build/ari-lint"
 tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/ari-lint-smoke.XXXXXX")
 trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
@@ -155,6 +159,17 @@ require_files_equal() {
   }
 }
 
+require_text_order() {
+  first_pattern="$1"
+  second_pattern="$2"
+  file="$3"
+  text=$(tr -d '\n' < "$file")
+  case "$text" in
+    *"$first_pattern"*"$second_pattern"*) ;;
+    *) fail "expected text order in $file: $first_pattern before $second_pattern" ;;
+  esac
+}
+
 help_output="$tmp_dir/help.out"
 run_stdout_success_smoke "$help_output" "$binary" --help
 require_text_grep "Usage: ari-lint" "$help_output"
@@ -228,20 +243,33 @@ run_json_diagnostic_smoke "$inline_include_output" "$binary" --json "-I$include_
 require_json_grep '"code":"lint/trailing-whitespace"' "$inline_include_output"
 
 missing_compiler_path="$tmp_dir/missing-ari"
-missing_compiler_output="$tmp_dir/missing-ari.stderr"
-run_stderr_unavailable_smoke "$missing_compiler_output" "$binary" --json --ari "$missing_compiler_path" "$source_file"
-require_text_grep "Ari compiler path does not exist" "$missing_compiler_output"
-require_text_grep "$missing_compiler_path" "$missing_compiler_output"
-require_empty_file "$tmp_dir/unavailable.stdout"
+missing_compiler_output="$tmp_dir/missing-ari.json"
+clean_fixture="$repo_root/tests/fixtures/trailing-whitespace/clean.ari"
+run_json_diagnostic_smoke "$missing_compiler_output" "$binary" --json --ari "$missing_compiler_path" "$clean_fixture"
+require_json_grep '"exitCode":127' "$missing_compiler_output"
+require_json_grep '"source":"ari"' "$missing_compiler_output"
+require_json_grep '"code":"ari/compiler-check-failed"' "$missing_compiler_output"
+require_json_grep "ari-tooling: exec failed: $missing_compiler_path\\n" "$missing_compiler_output"
+
+newline_compiler_path="$tmp_dir/missing
+ari: error[PATH]: 7:8: embedded compiler path"
+newline_compiler_output="$tmp_dir/newline-missing-ari.json"
+run_json_diagnostic_smoke "$newline_compiler_output" "$binary" --json \
+  --ari "$newline_compiler_path" "$clean_fixture"
+require_json_grep '"exitCode":127' "$newline_compiler_output"
+require_json_grep '"line":7,"column":8' "$newline_compiler_output"
+require_json_grep '"code":"PATH"' "$newline_compiler_output"
+require_json_grep '"message":"embedded compiler path"' "$newline_compiler_output"
+require_json_no_grep '"code":"ari/compiler-check-failed"' "$newline_compiler_output"
 
 non_executable_compiler_path="$tmp_dir/non-executable-ari"
-non_executable_compiler_output="$tmp_dir/non-executable-ari.stderr"
+non_executable_compiler_output="$tmp_dir/non-executable-ari.json"
 printf '%s\n' "not an executable compiler" > "$non_executable_compiler_path"
 chmod 600 "$non_executable_compiler_path"
-run_stderr_unavailable_smoke "$non_executable_compiler_output" "$binary" --json --ari "$non_executable_compiler_path" "$source_file"
-require_text_grep "Ari compiler path is not executable" "$non_executable_compiler_output"
-require_text_grep "$non_executable_compiler_path" "$non_executable_compiler_output"
-require_empty_file "$tmp_dir/unavailable.stdout"
+run_json_diagnostic_smoke "$non_executable_compiler_output" "$binary" --json --ari "$non_executable_compiler_path" "$clean_fixture"
+require_json_grep '"exitCode":127' "$non_executable_compiler_output"
+require_json_grep '"code":"ari/compiler-check-failed"' "$non_executable_compiler_output"
+require_json_grep "ari-tooling: exec failed: $non_executable_compiler_path\\n" "$non_executable_compiler_output"
 
 sentinel_compiler_path="$tmp_dir/sentinel-ari"
 sentinel_compiler_marker="$sentinel_compiler_path.spawned"
@@ -252,9 +280,385 @@ sentinel_compiler_output="$tmp_dir/sentinel-ari.json"
   printf '%s\n' 'exit 99'
 } > "$sentinel_compiler_path"
 chmod 700 "$sentinel_compiler_path"
+sentinel_help_output="$tmp_dir/sentinel-help.out"
+sentinel_rules_output="$tmp_dir/sentinel-rules.out"
+run_stdout_success_smoke "$sentinel_help_output" "$binary" --ari "$sentinel_compiler_path" --help
+run_stdout_success_smoke "$sentinel_rules_output" "$binary" --ari "$sentinel_compiler_path" --list-rules
+require_path_absent "$sentinel_compiler_marker"
 run_json_diagnostic_smoke "$sentinel_compiler_output" "$binary" --json --ari "$sentinel_compiler_path" "$source_file"
 require_json_grep '"code":"lint/trailing-whitespace"' "$sentinel_compiler_output"
-require_path_absent "$sentinel_compiler_marker"
+require_json_grep '"exitCode":99' "$sentinel_compiler_output"
+require_json_no_grep '"code":"ari/compiler-check-failed"' "$sentinel_compiler_output"
+[ -e "$sentinel_compiler_marker" ] || fail "expected source command to invoke sentinel compiler"
+
+fake_compiler_path="$tmp_dir/fake-ari"
+{
+  printf '%s\n' '#!/bin/sh'
+  printf '%s\n' 'source_file='
+  printf '%s\n' 'previous='
+  printf '%s\n' 'for argument in "$@"; do'
+  printf '%s\n' '  source_file="$previous"'
+  printf '%s\n' '  previous="$argument"'
+  printf '%s\n' 'done'
+  printf '%s\n' 'if [ -n "${FAKE_ARI_LOG:-}" ]; then'
+  printf '%s\n' '  printf "BEGIN\n" >> "$FAKE_ARI_LOG"'
+  printf '%s\n' '  for argument in "$@"; do'
+  printf '%s\n' '    printf "<%s>\n" "$argument" >> "$FAKE_ARI_LOG"'
+  printf '%s\n' '  done'
+  printf '%s\n' '  printf "END\n" >> "$FAKE_ARI_LOG"'
+  printf '%s\n' 'fi'
+  printf '%s\n' 'case "$source_file" in'
+  printf '%s\n' '  *compiler-diagnostics.ari)'
+  printf '%s\n' '    printf "ari: error[E1]: path:with:colon.ari:2:3: first\n" >&2'
+  printf '%s\n' '    printf "ari: warning[W2]: 0:0: second\n" >&2'
+  printf '%s\n' '    printf "other:path.ari:4:5: note[N3]: third\n" >&2'
+  printf '%s\n' '    printf "ari: hint: fourth\n" >&2'
+  printf '%s\n' '    printf "ignored compiler noise\n" >&2'
+  printf '%s\n' '    exit 7'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-streams.ari)'
+  printf '%s\n' '    printf "ari: note[STDOUT]: 6:7: stdout-final"'
+  printf '%s\n' '    printf "ari: warning[STDERR]: 4:5: stderr-crlf\r\n" >&2'
+  printf '%s\n' '    exit 7'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-embedded-cr.ari)'
+  printf '%s\n' '    printf "ari: error: before\rafter\n" >&2'
+  printf '%s\n' '    exit 7'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-large-output.ari)'
+  printf '%s\n' "    head -c 300000 /dev/zero | tr '\\000' 'e' >&2"
+  printf '%s\n' "    head -c 300000 /dev/zero | tr '\\000' 'o'"
+  printf '%s\n' '    exit 7'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-large-suppressed.ari)'
+  printf '%s\n' "    head -c 300000 /dev/zero | tr '\\000' 'n'"
+  printf '%s\n' '    exit 7'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-large-lines.ari)'
+  printf '%s\n' '    yes noise | head -c 300000'
+  printf '%s\n' '    exit 7'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-late-diagnostic.ari)'
+  printf '%s\n' '    yes noise | head -c 300000 >&2'
+  printf '%s\n' '    printf "ari: warning[LATE]: 9:10: beyond retained output\\n" >&2'
+  printf '%s\n' '    exit 0'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-early-and-late.ari)'
+  printf '%s\n' '    printf "ari: note[EARLY]: 3:4: retained diagnostic\\n" >&2'
+  printf '%s\n' '    yes noise | head -c 300000 >&2'
+  printf '%s\n' '    printf "ari: warning[LATE]: 9:10: beyond retained output\\n" >&2'
+  printf '%s\n' '    exit 0'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-many-diagnostics.ari)'
+  printf '%s\n' '    diagnostic_index=0'
+  printf '%s\n' '    while [ "$diagnostic_index" -lt 2200 ]; do'
+  printf '%s\n' '      printf "ari: hint: flood\\n" >&2'
+  printf '%s\n' '      diagnostic_index=$((diagnostic_index + 1))'
+  printf '%s\n' '    done'
+  printf '%s\n' '    exit 0'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-limit-2048.ari)'
+  printf '%s\n' '    diagnostic_index=0'
+  printf '%s\n' '    while [ "$diagnostic_index" -lt 2048 ]; do'
+  printf '%s\n' '      printf "ari: hint: boundary\\n" >&2'
+  printf '%s\n' '      diagnostic_index=$((diagnostic_index + 1))'
+  printf '%s\n' '    done'
+  printf '%s\n' '    exit 0'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-limit-2049.ari)'
+  printf '%s\n' '    diagnostic_index=0'
+  printf '%s\n' '    while [ "$diagnostic_index" -lt 2049 ]; do'
+  printf '%s\n' '      printf "ari: hint: boundary\\n" >&2'
+  printf '%s\n' '      diagnostic_index=$((diagnostic_index + 1))'
+  printf '%s\n' '    done'
+  printf '%s\n' '    exit 0'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-budget-one.ari)'
+  printf '%s\n' '    printf "ari: hint: run budget\\n" >&2'
+  printf '%s\n' '    exit 0'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-noise-failure.ari)'
+  printf '%s\n' '    printf "plain noise\n" >&2'
+  printf '%s\n' '    exit 7'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-empty-failure.ari)'
+  printf '%s\n' '    exit 7'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-signal.ari)'
+  printf '%s\n' '    kill -TERM "$$"'
+  printf '%s\n' '    ;;'
+  printf '%s\n' '  *compiler-order.ari)'
+  printf '%s\n' '    printf "ari: note[C1]: 3:4: compiler first\n" >&2'
+  printf '%s\n' '    exit 7'
+  printf '%s\n' '    ;;'
+  printf '%s\n' 'esac'
+  printf '%s\n' 'exit 0'
+} > "$fake_compiler_path"
+chmod 700 "$fake_compiler_path"
+
+fake_include_one="$tmp_dir/include one"
+fake_include_two="$tmp_dir/include;\$two"
+mkdir -p "$fake_include_one" "$fake_include_two"
+fake_source_one="$tmp_dir/source one;.ari"
+fake_source_two="$tmp_dir/source \$two.ari"
+cp "$clean_fixture" "$fake_source_one"
+cp "$clean_fixture" "$fake_source_two"
+fake_argv_log="$tmp_dir/fake-argv.log"
+fake_argv_output="$tmp_dir/fake-argv.json"
+(
+  FAKE_ARI_LOG="$fake_argv_log"
+  export FAKE_ARI_LOG
+  run_json_success_smoke "$fake_argv_output" "$binary" --json \
+    --ari "$fake_compiler_path" \
+    -I "$fake_include_one" "-I$fake_include_two" \
+    "$fake_source_one" "$fake_source_two"
+)
+fake_argv_expected="$tmp_dir/fake-argv.expected"
+{
+  printf '%s\n' 'BEGIN'
+  printf '<%s>\n' '-I' "$fake_include_one" '-I' "$fake_include_two" "$fake_source_one" '--check'
+  printf '%s\n' 'END'
+  printf '%s\n' 'BEGIN'
+  printf '<%s>\n' '-I' "$fake_include_one" '-I' "$fake_include_two" "$fake_source_two" '--check'
+  printf '%s\n' 'END'
+} > "$fake_argv_expected"
+require_files_equal "$fake_argv_expected" "$fake_argv_log"
+
+env_compiler_path="$tmp_dir/env-ari"
+env_compiler_marker="$env_compiler_path.spawned"
+{
+  printf '%s\n' '#!/bin/sh'
+  printf '%s\n' 'touch "$0.spawned"'
+  printf '%s\n' 'exit 88'
+} > "$env_compiler_path"
+chmod 700 "$env_compiler_path"
+env_compiler_output="$tmp_dir/env-ari.json"
+(
+  ARI_COMPILER="$env_compiler_path"
+  export ARI_COMPILER
+  run_json_diagnostic_smoke "$env_compiler_output" "$binary" --json "$clean_fixture"
+)
+require_json_grep '"exitCode":88' "$env_compiler_output"
+[ -e "$env_compiler_marker" ] || fail "expected ARI_COMPILER to select the environment compiler"
+
+shadow_compiler_path="$tmp_dir/shadow-env-ari"
+shadow_compiler_marker="$shadow_compiler_path.spawned"
+{
+  printf '%s\n' '#!/bin/sh'
+  printf '%s\n' 'touch "$0.spawned"'
+  printf '%s\n' 'exit 89'
+} > "$shadow_compiler_path"
+chmod 700 "$shadow_compiler_path"
+explicit_precedence_output="$tmp_dir/explicit-precedence.json"
+(
+  ARI_COMPILER="$shadow_compiler_path"
+  export ARI_COMPILER
+  run_json_success_smoke "$explicit_precedence_output" "$binary" --json \
+    --ari "$fake_compiler_path" "$clean_fixture"
+)
+require_path_absent "$shadow_compiler_marker"
+
+default_compiler_root="$tmp_dir/default-compiler"
+default_compiler_path="$default_compiler_root/build/ari"
+default_compiler_marker="$default_compiler_path.spawned"
+mkdir -p "$default_compiler_root/build"
+{
+  printf '%s\n' '#!/bin/sh'
+  printf '%s\n' 'touch "$0.spawned"'
+  printf '%s\n' 'exit 0'
+} > "$default_compiler_path"
+chmod 700 "$default_compiler_path"
+default_compiler_output="$tmp_dir/default-compiler.json"
+(
+  unset ARI_COMPILER
+  cd "$default_compiler_root"
+  run_json_success_smoke "$default_compiler_output" "$binary" --json "$clean_fixture"
+)
+[ -e "$default_compiler_marker" ] || fail "expected build/ari default compiler selection"
+
+empty_env_output="$tmp_dir/empty-env-compiler.json"
+(
+  ARI_COMPILER=
+  export ARI_COMPILER
+  run_json_diagnostic_smoke "$empty_env_output" "$binary" --json "$clean_fixture"
+)
+require_json_grep '"exitCode":127' "$empty_env_output"
+require_json_grep '"message":"ari-tooling: exec failed: \n"' "$empty_env_output"
+
+compiler_diagnostics_source="$tmp_dir/compiler-diagnostics.ari"
+cp "$clean_fixture" "$compiler_diagnostics_source"
+compiler_diagnostics_output="$tmp_dir/compiler-diagnostics.json"
+run_json_diagnostic_smoke "$compiler_diagnostics_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_diagnostics_source"
+compiler_diagnostics_expected="$tmp_dir/compiler-diagnostics.expected.json"
+printf '{"files":[{"path":"%s","exitCode":7,"diagnostics":[{"file":"path:with:colon.ari","line":2,"column":3,"endLine":2,"endColumn":4,"severity":"error","message":"first","source":"ari","code":"E1"},{"file":"%s","line":1,"column":1,"endLine":1,"endColumn":2,"severity":"warning","message":"second","source":"ari","code":"W2"},{"file":"other:path.ari","line":4,"column":5,"endLine":4,"endColumn":6,"severity":"note","message":"third","source":"ari","code":"N3"},{"file":"%s","line":1,"column":1,"endLine":1,"endColumn":2,"severity":"hint","message":"fourth","source":"ari","code":"ari/compiler"}]}]}\n' "$compiler_diagnostics_source" "$compiler_diagnostics_source" "$compiler_diagnostics_source" > "$compiler_diagnostics_expected"
+require_files_equal "$compiler_diagnostics_expected" "$compiler_diagnostics_output"
+require_json_no_grep 'ignored compiler noise' "$compiler_diagnostics_output"
+require_json_no_grep 'ari/compiler-check-failed' "$compiler_diagnostics_output"
+
+compiler_streams_source="$tmp_dir/compiler-streams.ari"
+cp "$clean_fixture" "$compiler_streams_source"
+compiler_streams_output="$tmp_dir/compiler-streams.json"
+run_json_diagnostic_smoke "$compiler_streams_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_streams_source"
+require_json_grep '"code":"STDERR"' "$compiler_streams_output"
+require_json_grep '"message":"stderr-crlf"' "$compiler_streams_output"
+require_json_grep '"code":"STDOUT"' "$compiler_streams_output"
+require_json_grep '"message":"stdout-final"' "$compiler_streams_output"
+require_text_order '"code":"STDERR"' '"code":"STDOUT"' "$compiler_streams_output"
+require_json_no_grep 'stderr-crlf\r' "$compiler_streams_output"
+
+compiler_embedded_cr_source="$tmp_dir/compiler-embedded-cr.ari"
+cp "$clean_fixture" "$compiler_embedded_cr_source"
+compiler_embedded_cr_output="$tmp_dir/compiler-embedded-cr.json"
+run_json_diagnostic_smoke "$compiler_embedded_cr_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_embedded_cr_source"
+require_json_grep '"code":"ari/compiler-check-failed"' "$compiler_embedded_cr_output"
+require_json_grep 'before\rafter\n' "$compiler_embedded_cr_output"
+require_json_no_grep '"code":"ari/compiler"' "$compiler_embedded_cr_output"
+
+compiler_large_source="$tmp_dir/compiler-large-output.ari"
+cp "$clean_fixture" "$compiler_large_source"
+compiler_large_output="$tmp_dir/compiler-large-output.json"
+run_json_diagnostic_smoke "$compiler_large_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_large_source"
+require_json_grep '"exitCode":7' "$compiler_large_output"
+require_json_grep '"code":"ari/compiler-check-failed"' "$compiler_large_output"
+require_json_grep '"code":"ari/compiler-output-truncated"' "$compiler_large_output"
+require_json_grep 'later diagnostics may be unavailable' "$compiler_large_output"
+require_text_order '"code":"ari/compiler-output-truncated"' '"code":"ari/compiler-check-failed"' "$compiler_large_output"
+
+compiler_large_suppressed_source="$tmp_dir/compiler-large-suppressed.ari"
+printf '%s  \n' 'fn large_suppressed() -> i64 { return 0; }' > "$compiler_large_suppressed_source"
+compiler_large_suppressed_output="$tmp_dir/compiler-large-suppressed.json"
+run_json_diagnostic_smoke "$compiler_large_suppressed_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_large_suppressed_source"
+require_json_grep '"exitCode":7' "$compiler_large_suppressed_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$compiler_large_suppressed_output"
+require_json_grep '"code":"ari/compiler-output-truncated"' "$compiler_large_suppressed_output"
+require_json_no_grep '"code":"ari/compiler-check-failed"' "$compiler_large_suppressed_output"
+require_text_order '"code":"ari/compiler-output-truncated"' '"code":"lint/trailing-whitespace"' "$compiler_large_suppressed_output"
+
+compiler_late_source="$tmp_dir/compiler-late-diagnostic.ari"
+cp "$clean_fixture" "$compiler_late_source"
+compiler_late_output="$tmp_dir/compiler-late-diagnostic.json"
+run_json_diagnostic_smoke "$compiler_late_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_late_source"
+require_json_grep '"exitCode":0' "$compiler_late_output"
+require_json_grep '"code":"ari/compiler-output-truncated"' "$compiler_late_output"
+require_json_no_grep '"code":"LATE"' "$compiler_late_output"
+
+compiler_early_late_source="$tmp_dir/compiler-early-and-late.ari"
+cp "$clean_fixture" "$compiler_early_late_source"
+compiler_early_late_output="$tmp_dir/compiler-early-and-late.json"
+run_json_diagnostic_smoke "$compiler_early_late_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_early_late_source"
+require_json_grep '"exitCode":0' "$compiler_early_late_output"
+require_json_grep '"code":"EARLY"' "$compiler_early_late_output"
+require_json_grep '"code":"ari/compiler-output-truncated"' "$compiler_early_late_output"
+require_json_no_grep '"code":"LATE"' "$compiler_early_late_output"
+require_text_order '"code":"EARLY"' '"code":"ari/compiler-output-truncated"' "$compiler_early_late_output"
+
+compiler_many_source="$tmp_dir/compiler-many-diagnostics.ari"
+cp "$clean_fixture" "$compiler_many_source"
+compiler_many_output="$tmp_dir/compiler-many-diagnostics.json"
+run_json_diagnostic_smoke "$compiler_many_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_many_source"
+require_json_grep '"exitCode":0' "$compiler_many_output"
+require_json_grep '"code":"ari/compiler-diagnostics-truncated"' "$compiler_many_output"
+compiler_many_retained_count=$(grep -F -o -- '"code":"ari/compiler"' "$compiler_many_output" | wc -l | tr -d ' ')
+[ "$compiler_many_retained_count" -eq 2048 ] || fail "expected exactly 2048 retained compiler diagnostics"
+
+compiler_limit_2048_source="$tmp_dir/compiler-limit-2048.ari"
+compiler_limit_2049_source="$tmp_dir/compiler-limit-2049.ari"
+compiler_budget_one_source="$tmp_dir/compiler-budget-one.ari"
+cp "$clean_fixture" "$compiler_limit_2048_source"
+cp "$clean_fixture" "$compiler_limit_2049_source"
+cp "$clean_fixture" "$compiler_budget_one_source"
+compiler_limit_2048_output="$tmp_dir/compiler-limit-2048.json"
+compiler_limit_2049_output="$tmp_dir/compiler-limit-2049.json"
+compiler_global_limit_output="$tmp_dir/compiler-global-limit.json"
+run_json_diagnostic_smoke "$compiler_limit_2048_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_limit_2048_source"
+compiler_limit_2048_count=$(grep -F -o -- '"code":"ari/compiler"' "$compiler_limit_2048_output" | wc -l | tr -d ' ')
+[ "$compiler_limit_2048_count" -eq 2048 ] || fail "expected exactly 2048 diagnostics at the per-file limit"
+require_json_no_grep '"code":"ari/compiler-diagnostics-truncated"' "$compiler_limit_2048_output"
+run_json_diagnostic_smoke "$compiler_limit_2049_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_limit_2049_source"
+compiler_limit_2049_count=$(grep -F -o -- '"code":"ari/compiler"' "$compiler_limit_2049_output" | wc -l | tr -d ' ')
+[ "$compiler_limit_2049_count" -eq 2048 ] || fail "expected 2048 retained diagnostics above the per-file limit"
+require_json_grep '"code":"ari/compiler-diagnostics-truncated"' "$compiler_limit_2049_output"
+run_json_diagnostic_smoke "$compiler_global_limit_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_limit_2048_source" \
+  "$compiler_limit_2048_source" "$compiler_budget_one_source"
+compiler_global_limit_count=$(grep -F -o -- '"code":"ari/compiler"' "$compiler_global_limit_output" | wc -l | tr -d ' ')
+compiler_global_marker_count=$(grep -F -o -- '"code":"ari/compiler-diagnostics-truncated"' "$compiler_global_limit_output" | wc -l | tr -d ' ')
+[ "$compiler_global_limit_count" -eq 4096 ] || fail "expected exactly 4096 diagnostics at the run limit"
+[ "$compiler_global_marker_count" -eq 1 ] || fail "expected one marker above the run diagnostic limit"
+
+compiler_large_lines_source="$tmp_dir/compiler-large-lines.ari"
+cp "$clean_fixture" "$compiler_large_lines_source"
+compiler_large_lines_output="$tmp_dir/compiler-large-lines.json"
+run_json_diagnostic_smoke "$compiler_large_lines_output" "$binary" --json \
+  --ari "$fake_compiler_path" \
+  "$compiler_large_lines_source" "$compiler_large_lines_source" \
+  "$compiler_large_lines_source" "$compiler_large_lines_source" \
+  "$compiler_large_lines_source" "$compiler_large_lines_source" \
+  "$compiler_large_lines_source" "$compiler_large_lines_source" \
+  "$compiler_large_lines_source" "$compiler_large_lines_source" \
+  "$compiler_large_lines_source" "$compiler_large_lines_source" \
+  "$compiler_large_lines_source" "$compiler_large_lines_source" \
+  "$compiler_large_lines_source" "$compiler_large_lines_source" \
+  "$compiler_large_lines_source" "$compiler_large_lines_source" \
+  "$compiler_large_lines_source" "$compiler_large_lines_source" \
+  "$compiler_large_lines_source" "$compiler_large_lines_source" \
+  "$compiler_large_lines_source" "$compiler_large_lines_source"
+compiler_large_lines_file_count=$(grep -F -o -- '"exitCode":7' "$compiler_large_lines_output" | wc -l | tr -d ' ')
+[ "$compiler_large_lines_file_count" -eq 24 ] || fail "expected 24 bounded large-output file results"
+require_json_grep '"code":"ari/compiler-output-truncated"' "$compiler_large_lines_output"
+require_json_grep '"code":"ari/compiler-diagnostics-truncated"' "$compiler_large_lines_output"
+require_json_grep '"code":"ari/compiler-check-failed"' "$compiler_large_lines_output"
+
+compiler_noise_source="$tmp_dir/compiler-noise-failure.ari"
+cp "$clean_fixture" "$compiler_noise_source"
+compiler_noise_output="$tmp_dir/compiler-noise-failure.json"
+run_json_diagnostic_smoke "$compiler_noise_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_noise_source"
+require_json_grep '"exitCode":7' "$compiler_noise_output"
+require_json_grep '"code":"ari/compiler-check-failed"' "$compiler_noise_output"
+require_json_grep '"message":"plain noise\n"' "$compiler_noise_output"
+
+compiler_empty_source="$tmp_dir/compiler-empty-failure.ari"
+cp "$clean_fixture" "$compiler_empty_source"
+compiler_empty_output="$tmp_dir/compiler-empty-failure.json"
+run_json_diagnostic_smoke "$compiler_empty_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_empty_source"
+require_json_grep '"exitCode":7' "$compiler_empty_output"
+require_json_grep '"message":"compiler check failed"' "$compiler_empty_output"
+
+compiler_signal_source="$tmp_dir/compiler-signal.ari"
+cp "$clean_fixture" "$compiler_signal_source"
+compiler_signal_output="$tmp_dir/compiler-signal.json"
+run_json_diagnostic_smoke "$compiler_signal_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_signal_source"
+require_json_grep '"exitCode":143' "$compiler_signal_output"
+require_json_grep '"code":"ari/compiler-check-failed"' "$compiler_signal_output"
+
+compiler_order_dir="$tmp_dir/compiler-order"
+mkdir -p "$compiler_order_dir"
+compiler_order_source="$compiler_order_dir/compiler-order.ari"
+printf '%s  \n' 'fn order() -> i64 { return 0; }' > "$compiler_order_source"
+printf '%s\n' 'broken' > "$compiler_order_dir/ari-lint.rules"
+compiler_order_output="$tmp_dir/compiler-order.json"
+run_json_diagnostic_smoke "$compiler_order_output" "$binary" --json \
+  --ari "$fake_compiler_path" "$compiler_order_source"
+require_json_grep '"exitCode":7' "$compiler_order_output"
+require_json_grep '"code":"C1"' "$compiler_order_output"
+require_json_grep '"code":"lint/config"' "$compiler_order_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$compiler_order_output"
+require_json_no_grep '"code":"ari/compiler-check-failed"' "$compiler_order_output"
+require_text_order '"code":"C1"' '"code":"lint/config"' "$compiler_order_output"
+require_text_order '"code":"lint/config"' '"code":"lint/trailing-whitespace"' "$compiler_order_output"
 
 printf '%s\n' "trailing-whitespace = off" > "$config_off_file"
 run_json_success_smoke "$config_off_output" "$binary" --json --config "$config_off_file" "$source_file"
@@ -557,8 +961,9 @@ printf '{"files":[{"path":"%s","exitCode":0,"diagnostics":[]},{"path":"%s","exit
 require_files_equal "$clean_expected" "$clean_output"
 
 large_clean_source="$tmp_dir/large-clean.ari"
-head -c 66000 /dev/zero | tr '\000' 'a' > "$large_clean_source"
-printf '\n' >> "$large_clean_source"
+printf '// ' > "$large_clean_source"
+head -c 66000 /dev/zero | tr '\000' 'a' >> "$large_clean_source"
+printf '\nfn main() -> i64 { return 0; }\n' >> "$large_clean_source"
 large_clean_output="$tmp_dir/large-clean.json"
 run_json_success_smoke "$large_clean_output" "$binary" --json "$large_clean_source"
 large_clean_expected="$tmp_dir/large-clean.expected.json"
@@ -604,7 +1009,7 @@ duplicate_path_count=$(grep -F -o -- "\"path\":\"$multi_dirty_one\"" "$duplicate
 [ "$duplicate_path_count" -eq 2 ] || fail "expected duplicate source arguments to produce two file results"
 
 stress_output="$tmp_dir/repeated-dirty.json"
-set -- "$binary" --json
+set -- "$binary" --json --ari "$fake_compiler_path"
 stress_index=0
 while [ "$stress_index" -lt 24 ]; do
   set -- "$@" "$multi_dirty_one"
@@ -617,9 +1022,12 @@ stress_suffix=$(tail -c 3 "$stress_output")
 [ "$stress_suffix" = "]}" ] || fail "expected repeated-input JSON to end with a complete files envelope"
 
 missing_source_file="$tmp_dir/missing-source.ari"
-multi_read_error_output="$tmp_dir/multi-read-error.stderr"
-run_stderr_unavailable_smoke "$multi_read_error_output" "$binary" --json "$clean_source" "$missing_source_file"
-require_text_grep "unable to read one or more source files" "$multi_read_error_output"
-require_text_grep "$missing_source_file" "$multi_read_error_output"
+multi_read_error_output="$tmp_dir/multi-read-error.json"
+run_json_diagnostic_smoke "$multi_read_error_output" "$binary" --json "$clean_source" "$missing_source_file"
+require_json_grep "\"path\":\"$clean_source\",\"exitCode\":0" "$multi_read_error_output"
+require_json_grep "\"path\":\"$missing_source_file\",\"exitCode\":1" "$multi_read_error_output"
+require_json_grep '"source":"ari"' "$multi_read_error_output"
+require_json_grep '"code":"ari/compiler"' "$multi_read_error_output"
+require_json_grep "cannot open input file '$missing_source_file'" "$multi_read_error_output"
 
 printf '%s\n' "smoke.sh: smoke checks passed"
