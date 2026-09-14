@@ -108,6 +108,7 @@ pub enum CliCompilerPathValidationKind {
   CliCompilerPathRecordedNotChecked,
   CliCompilerPathMissing,
   CliCompilerPathNotExecutable,
+  CliCompilerPathReady,
 }
 
 pub struct CliCompilerPathValidationResult {
@@ -159,6 +160,7 @@ pub enum CliCommandResultKind {
   CliListRulesJson,
   CliParseProblems,
   CliHelpText,
+  CliCompilerPathError,
   CliSourceLintResult,
   CliConfigReadError,
   CliMissingSource,
@@ -645,17 +647,31 @@ pub fn compiler_path_validation_from_boundary(
     );
   }
 
+  if !std::fs::exists(boundary.compiler_path) {
+    return missing_compiler_path_validation_result(
+      zone,
+      boundary.compiler_path
+    );
+  }
+
+  if !std::fs::can_execute(boundary.compiler_path) {
+    return non_executable_compiler_path_validation_result(
+      zone,
+      boundary.compiler_path
+    );
+  }
+
   return cli_compiler_path_validation_result(
-    CliCompilerPathRecordedNotChecked,
+    CliCompilerPathReady,
     true,
     boundary.compiler_path,
-    false,
-    false,
-    false,
-    false,
+    true,
+    true,
+    true,
+    true,
     0,
     "",
-    "Compiler path is recorded but not filesystem-validated or executed."
+    "Explicit compiler path exists and is executable; compiler execution remains future work."
   );
 }
 
@@ -667,13 +683,13 @@ pub fn missing_compiler_path_validation_result(
     CliCompilerPathMissing,
     true,
     compiler_path,
-    false,
+    true,
     true,
     false,
     false,
     1,
     "compiler-path/missing",
-    "Missing compiler path diagnostic is modeled without invoking the compiler."
+    "Explicit compiler path does not exist; the compiler was not invoked."
   );
 }
 
@@ -685,13 +701,13 @@ pub fn non_executable_compiler_path_validation_result(
     CliCompilerPathNotExecutable,
     true,
     compiler_path,
-    false,
+    true,
     true,
     true,
     false,
     1,
     "compiler-path/not-executable",
-    "Non-executable compiler path diagnostic is modeled without invoking the compiler."
+    "Explicit compiler path is not executable; the compiler was not invoked."
   );
 }
 
@@ -932,6 +948,37 @@ fn write_config_read_error_stderr(zone: ref mut Zone, path: Slice[u8]) -> bool {
   return write_result.wrote_stderr;
 }
 
+fn write_compiler_path_error_stderr(
+  zone: ref mut Zone,
+  validation: CliCompilerPathValidationResult
+) -> bool {
+  var text = std::string::new(zone, 160);
+  match validation.kind {
+    CliCompilerPathMissing => {
+      text.append_string_in(zone, "ari-lint: Ari compiler path does not exist");
+    }
+    CliCompilerPathNotExecutable => {
+      text.append_string_in(zone, "ari-lint: Ari compiler path is not executable");
+    }
+    CliCompilerPathNotProvided => {
+      text.append_string_in(zone, "ari-lint: Ari compiler path was not provided");
+    }
+    CliCompilerPathRecordedNotChecked => {
+      text.append_string_in(zone, "ari-lint: Ari compiler path was not validated");
+    }
+    CliCompilerPathReady => {
+      text.append_string_in(zone, "ari-lint: unexpected Ari compiler path validation error");
+    }
+  }
+  if validation.compiler_path.len() > 0 {
+    text.append_string_in(zone, ": ");
+    text.append_string_in(zone, validation.compiler_path);
+  }
+  text.append_string_in(zone, "\n");
+  let write_result = super::output::write_stderr_text(zone, ref text);
+  return write_result.wrote_stderr;
+}
+
 fn format_config_parse_problem_stderr(
   zone: ref mut Zone,
   path: Slice[u8],
@@ -1103,6 +1150,43 @@ fn dispatch_cli_command_with_main_output(
   }
 
   if parse_result.args.has_source_file {
+    let compiler_check_plan = compiler_check_plan_from_cli_args(
+      zone,
+      parse_result.args
+    );
+    let compiler_check_boundary = compiler_check_execution_boundary_from_plan(
+      zone,
+      compiler_check_plan
+    );
+    let compiler_path_validation = compiler_path_validation_from_boundary(
+      zone,
+      compiler_check_boundary
+    );
+    if compiler_path_validation.diagnostic_count > 0 {
+      let wrote_compiler_path_stderr = write_compiler_path_error_stderr(
+        zone,
+        compiler_path_validation
+      );
+      if !wrote_compiler_path_stderr {
+        return cli_command_result(
+          CliCompilerPathError,
+          false,
+          compiler_path_validation.diagnostic_count,
+          0,
+          cli_unavailable_exit_code(zone),
+          "Compiler path validation stderr write failed through the verified stderr adapter."
+        );
+      }
+      return cli_command_result(
+        CliCompilerPathError,
+        false,
+        compiler_path_validation.diagnostic_count,
+        0,
+        cli_unavailable_exit_code(zone),
+        compiler_path_validation.detail
+      );
+    }
+
     var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 8);
     var command_result = collect_cli_source_diagnostics_from_tokens(
       zone,
@@ -1162,6 +1246,7 @@ fn dispatch_cli_command_with_main_output(
       CliListRulesText => {}
       CliListRulesJson => {}
       CliHelpText => {}
+      CliCompilerPathError => {}
       CliSourceLintResult => {}
       CliMissingSource => {}
     }
@@ -1575,10 +1660,10 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // compiler_check_plan_from_cli_args records a future ari --check invocation
 // plan from already-parsed CLI args without invoking the compiler or
 // tools/lint. plan_explicit_cli_compiler_check provides the same data-only plan
-// for caller-provided tokens. compiler_path_validation_from_boundary,
-// missing_compiler_path_validation_result, and
-// non_executable_compiler_path_validation_result model compiler path validation
-// results without checking the filesystem or invoking the compiler.
+// for caller-provided tokens. CliCompilerPathRecordedNotChecked retains the
+// pre-validation model state. compiler_path_validation_from_boundary checks an
+// explicit path with std::fs::exists and std::fs::can_execute, while its result
+// helpers do not invoke the compiler.
 // compiler_check_execution_boundary_from_plan and
 // compiler_check_result_not_run_from_boundary model the planned execution edge
 // and its not-run result without spawning the compiler, capturing streams,
@@ -1626,6 +1711,7 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // read errors write short stderr summaries without producing read-error JSON
 // output. CLI help writes a concise stdout message, and CLI/config parse
 // problems write a short summary to stderr. Missing source-file input also
-// writes a short stderr summary. Home, global, and XDG config discovery,
+// writes a short stderr summary. Explicit --ari paths are validated before
+// source linting without invoking them. Home, global, and XDG config discovery,
 // parse-error JSON, compiler invocation, ari --check, tools/lint, and process
 // exit remain outside this path.

@@ -1340,7 +1340,7 @@ printf '%s\n' "- current help output is multi-line stdout text; original tools/l
 printf '%s\n' "- current no-source-file usage output reports a missing source file; original tools/lint prints generic usage."
 printf '%s\n' "- current read-error output reports a short stderr message; original tools/lint emits compiler-shaped JSON diagnostics on stdout."
 printf '%s\n' "- current multi-file read-error output reports a short stderr message with the first unread source path; original tools/lint follows its compiler-shaped read-error JSON path."
-printf '%s\n' "- current missing-compiler output reports clean lint results; original tools/lint emits compiler-check-failed JSON diagnostics."
+printf '%s\n' "- current missing-compiler output performs explicit path preflight with stderr and exit 1; original tools/lint emits compiler-check-failed JSON with per-file exitCode 127."
 printf '%s\n' "- current compiler-error output reports clean lint results; original tools/lint emits compiler-shaped JSON diagnostics."
 printf '%s\n' "- current unknown-option usage output reports the first unknown argument; original tools/lint prints generic usage."
 printf '%s\n' "- current missing-config-value usage output reports the missing option value; original tools/lint prints generic usage."

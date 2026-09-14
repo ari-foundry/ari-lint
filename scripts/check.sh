@@ -160,6 +160,9 @@ require_grep "Help Output Stream And Shape" docs/dev/parity-differences.md
 require_grep "No Source File Usage Text" docs/dev/parity-differences.md
 require_grep "Source Read Error Output" docs/dev/parity-differences.md
 require_grep "Missing Compiler Invocation Output" docs/dev/parity-differences.md
+require_grep "intentional explicit" docs/dev/parity-differences.md
+require_grep "exitCode. .127" docs/dev/parity-differences.md
+require_grep "explicit path preflight with stderr and exit 1" scripts/parity.sh
 require_grep "Compiler Error Output" docs/dev/parity-differences.md
 require_grep "Unknown Option Usage Text" docs/dev/parity-differences.md
 require_grep "Missing Config Value Usage Text" docs/dev/parity-differences.md
@@ -218,7 +221,13 @@ require_grep "and CLI .--rule." README.md
 require_grep "--config" scripts/smoke.sh
 require_grep "run_stdout_success_smoke" scripts/smoke.sh
 require_grep "run_stderr_usage_smoke" scripts/smoke.sh
+require_grep "run_stderr_unavailable_smoke" scripts/smoke.sh
 require_grep "require_text_grep" scripts/smoke.sh
+require_grep "missing_compiler_path" scripts/smoke.sh
+require_grep "non_executable_compiler_path" scripts/smoke.sh
+require_grep "sentinel_compiler_marker" scripts/smoke.sh
+require_grep "Ari compiler path does not exist" scripts/smoke.sh
+require_grep "Ari compiler path is not executable" scripts/smoke.sh
 require_grep "list_rules_output" scripts/smoke.sh
 require_grep "json_list_rules_output" scripts/smoke.sh
 require_grep "Reports spaces or tabs at the end of a source line." scripts/smoke.sh
@@ -714,6 +723,7 @@ require_grep "CliCompilerPathNotProvided" src/cli.ari
 require_grep "CliCompilerPathRecordedNotChecked" src/cli.ari
 require_grep "CliCompilerPathMissing" src/cli.ari
 require_grep "CliCompilerPathNotExecutable" src/cli.ari
+require_grep "CliCompilerPathReady" src/cli.ari
 require_grep "CliCompilerCheckResultKind" src/cli.ari
 require_grep "CliCompilerCheckResult" src/cli.ari
 require_grep "CliCompilerCheckNotRun" src/cli.ari
@@ -721,6 +731,7 @@ require_grep "CliCompilerCheckSucceeded" src/cli.ari
 require_grep "CliCompilerCheckFailed" src/cli.ari
 require_grep "CliArgumentProblem" src/cli.ari
 require_grep "CliCommandResultKind" src/cli.ari
+require_grep "CliCompilerPathError" src/cli.ari
 require_grep "CliCommandResult" src/cli.ari
 require_grep "diagnostic_count" src/cli.ari
 require_grep "first_diagnostic" src/cli.ari
@@ -770,6 +781,10 @@ require_grep "checks_filesystem: checks_filesystem" src/cli.ari
 require_grep "can_execute_compiler: can_execute_compiler" src/cli.ari
 require_grep "compiler-path/missing" src/cli.ari
 require_grep "compiler-path/not-executable" src/cli.ari
+require_grep "std::fs::can_execute" src/cli.ari
+require_grep "write_compiler_path_error_stderr" src/cli.ari
+require_grep "Ari compiler path does not exist" src/cli.ari
+require_grep "Ari compiler path is not executable" src/cli.ari
 require_grep "Compiler check result is modeled but not executed" src/cli.ari
 require_grep "-I" src/cli.ari
 require_grep "include_path_count" src/cli.ari

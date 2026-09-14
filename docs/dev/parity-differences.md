@@ -83,10 +83,12 @@ Follow-up:
 ### Missing Compiler Invocation Output
 
 Current standalone `ari-lint`, when run with `--json --ari` pointing at a
-missing compiler and a clean source file, reports clean lint results because
-compiler-backed `ari --check` invocation is not implemented yet. Original
-`tools/lint` invokes that compiler boundary and emits
-`ari/compiler-check-failed` JSON on stdout with the missing compiler path.
+missing compiler and a clean source file, performs an intentional explicit
+compiler-path preflight. It writes a short missing-path message to stderr,
+returns top-level exit status `1`, emits no JSON, and does not spawn the path.
+Original `tools/lint` attempts the compiler invocation and emits
+`ari/compiler-check-failed` JSON on stdout with per-file `exitCode` `127` and
+the missing compiler path.
 
 Classification: expected known difference and `ari-lint` compiler-boundary
 implementation/design follow-up. No Ari language/compiler/stdlib/toolchain bug
@@ -95,15 +97,13 @@ is identified by this report-only case.
 Impact:
 
 - exact missing-compiler output and exit-code parity are not expected yet
-- current standalone missing-compiler JSON output is not defined
+- current standalone preflight failure intentionally emits no JSON output
 - release compatibility claims must not be made from the current report
 
 Follow-up:
 
-- decide the standalone compiler invocation contract before strict parity
-  fixtures
-- add strict missing-compiler checks only after compiler provisioning and
-  invocation behavior are documented and implemented
+- revisit the intentional preflight difference when compiler invocation and
+  strict parity fixtures are added
 
 ### Compiler Error Output
 
