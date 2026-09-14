@@ -26,8 +26,10 @@ checks. The implementation plan is tracked in
 
 Parity testing against the current bundled/reference `tools/lint` behavior is
 tracked in [docs/dev/parity-test-plan.md](dev/parity-test-plan.md). A local
-report-only runner and strict list-rules/native-rule subsets exist; broader
-CLI, config, and compiler-boundary parity remains open.
+report-only runner and strict list-rules/native-rule subsets exist. One
+deterministic strict compiler-boundary case also gates exact `SOURCE --check`
+child argv and combined compiler/native JSON and human output; broader CLI,
+config, and compiler-boundary parity remains open.
 Known parity differences from the current report-only local smoke are tracked
 in [docs/dev/parity-differences.md](dev/parity-differences.md).
 

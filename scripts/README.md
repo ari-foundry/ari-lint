@@ -87,9 +87,11 @@ intentional standalone/reference CLI difference. It also isolates native rules
 with a no-output fixture compiler plus an explicit empty config. Clean,
 trailing-whitespace, missing-final-newline, ordered multi-file, and duplicate
 inputs must match checked-in JSON goldens byte-for-byte in both tools. Every
-case requires its exact stdout, empty stderr, exit status, and final LF;
-JSON cases must also parse. Every list-rules case selects a sentinel compiler
-and fails if that compiler is invoked.
+case requires its exact stdout, empty stderr, exit status, and final LF. A
+separate argv-checking fixture compiler emits one deterministic diagnostic and
+exits `7`; both tools must match checked-in combined compiler/native JSON and
+human goldens. JSON cases must parse. Every list-rules case selects a sentinel
+compiler and fails if that compiler is invoked.
 
 `test.sh` does not download or build the Ari compiler. Its zero-argument mode
 does not invoke the compiler or `ari --check`. Its explicit-compiler mode runs
@@ -133,6 +135,6 @@ as a missing build compiler, missing Ari repo, missing original lint command,
 or local `ari-lint` build failure.
 
 `parity-strict.sh` does not cover unresolved help/usage differences, config
-error/precedence contracts, compiler output ordering or resource boundaries,
-parent-side process failures, or real-compiler diagnostics. It does not claim
-full parity or release compatibility and is not run in CI yet.
+error/precedence contracts, broader compiler output ordering or resource
+boundaries, parent-side process failures, or real-compiler diagnostics. It does
+not claim full parity or release compatibility and is not run in CI yet.

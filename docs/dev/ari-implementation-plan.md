@@ -696,6 +696,8 @@ main-facing OS argv path collects source-file diagnostics into a flat vector,
   compiler-backed modes
 - [x] add initial standalone fixtures
 - [x] add exact native JSON goldens for the documented source schema
+- [x] add one deterministic strict compiler-boundary fixture with exact JSON
+  and human goldens
 - [x] run local standalone tests with an explicit Ari compiler path
 - [x] add compiler-backed CI with explicit provisioning and identity recording
 - keep local smoke validation scoped to compiler-backed build plus
@@ -705,6 +707,10 @@ main-facing OS argv path collects source-file diagnostics into a flat vector,
 The source-only parity runner skeleton in `src/parity.ari` records the future
 comparison boundary. It does not execute `tools/lint`, execute `ari-lint`, read
 fixtures, compare outputs, invoke the compiler, or run in CI.
+
+The separate shell strict runner gates checked-in list-rules and native-rule
+subsets plus one deterministic fake-compiler boundary case. Broader CLI,
+config, real-compiler, and process-infrastructure parity remain open.
 
 The local `scripts/parity.sh` smoke/report executes outside Ari source as a
 developer helper only. It compares current output signals with the original
@@ -1055,8 +1061,8 @@ usable.
       executing `ari --check`, calling `tools/lint`, or calling process exit
 - [ ] Define concrete metadata value construction after Ari syntax choices are
       verified
-- [ ] Define parity test fixtures against current `tools/lint`
-- [ ] Decide when to add first Ari source files
+- [x] Define initial parity test fixtures against current `tools/lint`
+- [x] Add the first Ari source files after verifying current syntax and APIs
 - [ ] Track Ari compiler/toolchain blockers in `ari-foundry/ari` issues
 
 ## Explicit Non-Goals

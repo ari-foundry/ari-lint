@@ -1,0 +1,2 @@
+fake.ari:2:3: error: [E1] compiler first
+tests/fixtures/trailing-whitespace/trailing-spaces.ari:1:19: warning: [lint/trailing-whitespace] trailing whitespace
