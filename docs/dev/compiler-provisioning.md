@@ -78,8 +78,8 @@ The compiler baseline is:
   `0af99459eb2ad4ad688ae8ba8e4e3bcce88358bba969f88bff65f5df3ced6da2`
 - extracted `BUILDINFO` SHA-256:
   `6a9eaefbbc6aef083496e7d78749ec5e13ef87175301923ee000e45a9824baa6`
-- checkout action: `actions/checkout@v4.4.0`, pinned to
-  `11d5960a326750d5838078e36cf38b85af677262`
+- checkout action: `actions/checkout@v7.0.1`, pinned to
+  `3d3c42e5aac5ba805825da76410c181273ba90b1`
 
 The release is currently marked `immutable: false` by GitHub. The workflow
 therefore trusts neither the tag name nor download URL alone: it verifies the

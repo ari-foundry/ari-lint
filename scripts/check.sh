@@ -128,16 +128,16 @@ require_fixed_line ".github/workflows/*.yml text eol=lf" .gitattributes
 # These workflows are deliberately small and security-sensitive. Whole-file
 # pins make added steps, permission changes, and trigger re-parenting explicit
 # review events instead of relying only on independent lexical assertions.
-require_sha256 "bb2ad40c33167d9d6a961031abc8cc3f449d372ff0b9dc84522f74183550353d" .github/workflows/check.yml
-require_sha256 "2a2be932f71566575a3d67af89b18c41ca6ec0c4ef3c092269bfe07a4510a742" .github/workflows/compiler-smoke.yml
+require_sha256 "918a40ab52a1ad1fa23be19f2dac8c9a68eeae83a158db74a0af33c76ea0d47e" .github/workflows/check.yml
+require_sha256 "c73d553cda57fc9c7d3ba329e40a6b32bd262243a4fd4ad59fcc6e0d34f04524" .github/workflows/compiler-smoke.yml
 
 require_grep "compiler-free" .github/workflows/check.yml
 require_grep "scripts/test.sh" .github/workflows/check.yml
 require_grep "ubuntu-24.04" .github/workflows/check.yml
 require_grep "permissions:" .github/workflows/check.yml
 require_grep "contents: read" .github/workflows/check.yml
-require_grep "actions/checkout@11d5960a326750d5838078e36cf38b85af677262" .github/workflows/check.yml
-require_fixed_line "        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0" .github/workflows/check.yml
+require_grep "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" .github/workflows/check.yml
+require_fixed_line "        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1" .github/workflows/check.yml
 require_grep "persist-credentials: false" .github/workflows/check.yml
 require_fixed_line "  pull_request:" .github/workflows/check.yml
 require_fixed_line "  push:" .github/workflows/check.yml
@@ -162,8 +162,8 @@ require_grep "ubuntu-24.04" .github/workflows/compiler-smoke.yml
 require_grep "timeout-minutes: 20" .github/workflows/compiler-smoke.yml
 require_grep "permissions:" .github/workflows/compiler-smoke.yml
 require_grep "contents: read" .github/workflows/compiler-smoke.yml
-require_grep "actions/checkout@11d5960a326750d5838078e36cf38b85af677262" .github/workflows/compiler-smoke.yml
-require_fixed_line "        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0" .github/workflows/compiler-smoke.yml
+require_grep "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" .github/workflows/compiler-smoke.yml
+require_fixed_line "        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1" .github/workflows/compiler-smoke.yml
 require_grep "persist-credentials: false" .github/workflows/compiler-smoke.yml
 require_fixed_line "  pull_request:" .github/workflows/compiler-smoke.yml
 require_fixed_line "  push:" .github/workflows/compiler-smoke.yml
