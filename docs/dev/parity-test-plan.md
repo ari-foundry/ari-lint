@@ -19,14 +19,17 @@ config, short-name config, disabled explicit config, disabled command-line rule
 override, dirty multi-file cases, and `multi-file-mixed`, and prints a concise
 report without failing on behavior differences.
 
-A separate gating list-rules and native-rule subset now exists at
+A separate gating list-rules, native-rule, config, and compiler-boundary
+subsets now exist at
 `scripts/parity-strict.sh`. List-rules uses separately approved standalone and
 reference snapshots. Native cases reuse checked-in source fixtures and isolate
 both implementations with a deterministic no-output compiler and explicit
-empty config. Stdout must match the case golden, stderr must be empty, exit
-status must match the case expectation, and JSON output must retain its final
-LF and parse successfully. Every list-rules case also selects a sentinel
-compiler and fails if it is invoked.
+empty config. Config cases select committed explicit config fixtures, and the
+compiler-boundary case selects a deterministic diagnostic fixture compiler.
+Stdout must match the case golden, stderr must be empty, exit status must match
+the case expectation, and JSON output must retain its final LF and parse
+successfully. Every list-rules case also selects a sentinel compiler and fails
+if it is invoked.
 
 ## Current Status
 
@@ -55,9 +58,10 @@ compiler and fails if it is invoked.
 - `scripts/parity-strict.sh` is local-only and gating. Its current scope is
   the separately approved standalone/reference list-rules contracts plus native
   clean, trailing-whitespace, missing-final-newline, ordered multi-file, and
-  duplicate-input output, plus one deterministic compiler/native diagnostic in
-  JSON and human form. It does not cover remaining help/usage CLI, config,
-  broader compiler-boundary, or process-infrastructure differences and is not
+  duplicate-input output; explicit config severity, `off`, and CLI-last
+  behavior; plus one deterministic compiler/native diagnostic in JSON and human
+  form. It does not cover remaining help/usage CLI, broader config or
+  compiler-boundary behavior, or process-infrastructure differences and is not
   wired into CI.
 
 ## Reference Implementation
@@ -112,6 +116,11 @@ Bugs in compiler behavior or standard library behavior should be filed in
 - disabled-rule behavior
 
 ### Config parity
+
+The initial strict config subset covers full rule-code explicit severity,
+explicit `off`, a CLI-last short-name override, and leading comment lines.
+Discovery, blank-line shapes, read/parse errors, and broader precedence
+combinations remain outside that strict subset.
 
 - `ari-lint.rules` discovery
 - `--config PATH`
@@ -175,6 +184,7 @@ The first strict layout is:
   `tests/fixtures/missing-final-newline/`
 - parity isolation inputs under `tests/fixtures/parity/`
 - exact native JSON results under `tests/golden/native/`
+- exact explicit-config JSON and human results under `tests/golden/config/`
 - exact combined compiler/native JSON and human results under
   `tests/golden/compiler-boundary/`
 - exact standalone and reference registry results under
@@ -205,10 +215,11 @@ Additional and broader fixture categories:
 ## Golden Output Policy
 
 The strict native subset stores compact, newline-terminated JSON exactly as
-emitted by both implementations. The initial compiler-boundary subset stores
-one compact JSON result and its exact human form. Raw byte comparison fixes
-field order, escaping, and human formatting while a separate parse rejects
-malformed JSON documents.
+emitted by both implementations. The initial config subset stores three compact
+JSON results and one exact human form, and the initial compiler-boundary subset
+stores one compact JSON result and its exact human form. Raw byte comparison
+fixes field order, escaping, and human formatting while a separate parse
+rejects malformed JSON documents.
 
 Human-readable output should only use golden files for stable text.
 
@@ -305,11 +316,13 @@ Future comparison flow:
 5. Record intentional differences explicitly.
 
 The current strict native flow performs steps 1 through 4 for its checked-in
-rule subset. The initial deterministic compiler-boundary case performs the same
-comparison for exact `SOURCE --check` argv, child exit `7`, compiler-before-
-native diagnostic order, JSON and human stdout, empty stderr, final LF, and
-top-level exit `1`. Broader compiler-boundary and unresolved CLI cases remain
-outside that gate rather than being silently normalized or allowlisted.
+rule subset. The config subset performs the same comparison for explicit
+severity, `off`, and CLI-last behavior. The initial deterministic
+compiler-boundary case compares exact `SOURCE --check` argv, child exit `7`,
+compiler-before-native diagnostic order, JSON and human stdout, empty stderr,
+final LF, and top-level exit `1`. Broader config/compiler-boundary and
+unresolved CLI cases remain outside that gate rather than being silently
+normalized or allowlisted.
 
 Exact command lines should be added only when the standalone build and test
 runner exist.
@@ -401,6 +414,8 @@ from the other repo if needed.
 - [x] Add first source-controlled rule parity fixture for missing final newline
 - [x] Add exact clean, rule, ordered multi-file, and duplicate JSON goldens
 - [x] Add a gating local native parity runner
+- [x] Add an initial strict explicit-config severity, `off`, and CLI-last
+      parity subset with exact JSON and human goldens
 - [x] Add an initial deterministic compiler-boundary parity fixture with exact
       combined JSON and human goldens
 - [ ] Add a parity CI job only after its broader gating contract exists

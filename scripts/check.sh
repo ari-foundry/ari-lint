@@ -107,6 +107,10 @@ require_file tests/fixtures/config-precedence/invalid.rules
 require_file tests/fixtures/parity/compiler-ok.sh
 require_file tests/fixtures/parity/compiler-diagnostic.sh
 require_file tests/fixtures/parity/empty.rules
+require_file tests/golden/config/cli-last-trailing-whitespace-error.json
+require_file tests/golden/config/explicit-missing-final-newline.json
+require_file tests/golden/config/explicit-missing-final-newline.txt
+require_file tests/golden/config/explicit-off-trailing-whitespace.json
 require_file tests/golden/compiler-boundary/diagnostic-native.json
 require_file tests/golden/compiler-boundary/diagnostic-native.txt
 require_file tests/golden/native/clean.json
@@ -232,6 +236,7 @@ require_no_grep "arix" .github/workflows/compiler-smoke.yml
 [ -x scripts/test.sh ] || fail "scripts/test.sh is not executable"
 
 require_grep "strict native parity goldens passed" scripts/parity-strict.sh
+require_grep "strict explicit-config parity goldens passed" scripts/parity-strict.sh
 require_grep "strict compiler-boundary parity goldens passed" scripts/parity-strict.sh
 require_grep "strict list-rules contract goldens passed" scripts/parity-strict.sh
 require_grep "list-rules-json" scripts/parity-strict.sh
@@ -244,6 +249,12 @@ require_grep "compiler-ok.sh" scripts/parity-strict.sh
 require_grep "compiler-diagnostic.sh" scripts/parity-strict.sh
 require_grep "diagnostic-native.json" scripts/parity-strict.sh
 require_grep "diagnostic-native.txt" scripts/parity-strict.sh
+require_grep "explicit-config-missing-final-newline-json" scripts/parity-strict.sh
+require_grep "explicit-config-missing-final-newline-human" scripts/parity-strict.sh
+require_grep "explicit-off-trailing-whitespace" scripts/parity-strict.sh
+require_grep "cli-last-trailing-whitespace-error" scripts/parity-strict.sh
+require_fixed_grep '--config "$selected_config"' scripts/parity-strict.sh
+require_fixed_grep '--rule trailing-whitespace=error' scripts/parity-strict.sh
 require_grep "cmp -s" scripts/parity-strict.sh
 require_grep "python3" scripts/parity-strict.sh
 require_grep "exit 0" tests/fixtures/parity/compiler-ok.sh
@@ -349,9 +360,12 @@ require_grep "No Ari language/compiler/stdlib/toolchain bug" docs/dev/parity-dif
 require_grep "docs/dev/parity-differences.md" docs/dev/parity-test-plan.md
 require_fixed_grep '- [x] Add an initial deterministic compiler-boundary parity fixture with exact' docs/dev/parity-test-plan.md
 require_grep "tests/golden/compiler-boundary/" docs/dev/parity-test-plan.md
+require_fixed_grep '- [x] Add an initial strict explicit-config severity, `off`, and CLI-last' docs/dev/parity-test-plan.md
+require_grep "tests/golden/config/" docs/dev/parity-test-plan.md
 require_grep "deterministic fake-compiler boundary case" docs/dev/ari-implementation-plan.md
 require_grep "docs/dev/parity-differences.md" tests/README.md
 require_grep "tests/golden/compiler-boundary/" tests/README.md
+require_grep "tests/golden/config/" tests/README.md
 require_grep "report-only config, .--rule., discovered config" docs/dev/ari-implementation-plan.md
 require_grep "explicit .--config." docs/dev/parity-test-plan.md
 require_grep "no-source-file usage" scripts/README.md
@@ -543,6 +557,9 @@ unexpected_parity_fixture=$(find tests/fixtures/parity -type f ! -name compiler-
 unexpected_compiler_golden=$(find tests/golden/compiler-boundary -type f ! -name diagnostic-native.json ! -name diagnostic-native.txt -print -quit)
 [ -z "$unexpected_compiler_golden" ] || fail "unexpected compiler-boundary golden: $unexpected_compiler_golden"
 
+unexpected_config_golden=$(find tests/golden/config -type f ! -name cli-last-trailing-whitespace-error.json ! -name explicit-missing-final-newline.json ! -name explicit-missing-final-newline.txt ! -name explicit-off-trailing-whitespace.json -print -quit)
+[ -z "$unexpected_config_golden" ] || fail "unexpected config golden: $unexpected_config_golden"
+
 unexpected_native_golden=$(find tests/golden/native -type f ! -name clean.json ! -name trailing-whitespace.json ! -name missing-final-newline.json ! -name ordered-multi-file-duplicate.json -print -quit)
 [ -z "$unexpected_native_golden" ] || fail "unexpected native golden: $unexpected_native_golden"
 
@@ -555,6 +572,10 @@ require_final_newline tests/fixtures/missing-final-newline/with-final-newline.ar
 require_no_final_newline tests/fixtures/missing-final-newline/missing-final-newline.ari
 [ "$(wc -c < tests/fixtures/parity/empty.rules)" -eq 1 ] || fail "expected one blank line in empty parity config"
 require_final_newline tests/fixtures/parity/empty.rules
+require_final_newline tests/golden/config/cli-last-trailing-whitespace-error.json
+require_final_newline tests/golden/config/explicit-missing-final-newline.json
+require_final_newline tests/golden/config/explicit-missing-final-newline.txt
+require_final_newline tests/golden/config/explicit-off-trailing-whitespace.json
 require_final_newline tests/golden/compiler-boundary/diagnostic-native.json
 require_final_newline tests/golden/compiler-boundary/diagnostic-native.txt
 require_final_newline tests/golden/native/clean.json
@@ -571,6 +592,13 @@ require_grep '"code":"E1"' tests/golden/compiler-boundary/diagnostic-native.json
 require_grep '"code":"lint/trailing-whitespace"' tests/golden/compiler-boundary/diagnostic-native.json
 require_grep 'fake.ari:2:3: error: \[E1\] compiler first' tests/golden/compiler-boundary/diagnostic-native.txt
 require_grep 'warning: \[lint/trailing-whitespace\] trailing whitespace' tests/golden/compiler-boundary/diagnostic-native.txt
+require_grep '"severity":"error"' tests/golden/config/cli-last-trailing-whitespace-error.json
+require_grep '"code":"lint/trailing-whitespace"' tests/golden/config/cli-last-trailing-whitespace-error.json
+require_grep '"severity":"error"' tests/golden/config/explicit-missing-final-newline.json
+require_grep '"code":"lint/missing-final-newline"' tests/golden/config/explicit-missing-final-newline.json
+require_grep 'error: \[lint/missing-final-newline\] missing final newline' tests/golden/config/explicit-missing-final-newline.txt
+require_grep '"path":"tests/fixtures/trailing-whitespace/trailing-spaces.ari"' tests/golden/config/explicit-off-trailing-whitespace.json
+require_grep '"diagnostics":\[\]' tests/golden/config/explicit-off-trailing-whitespace.json
 require_grep '"code":"lint/trailing-whitespace"' tests/golden/native/trailing-whitespace.json
 require_grep '"code":"lint/missing-final-newline"' tests/golden/native/missing-final-newline.json
 require_grep '"path":"tests/fixtures/trailing-whitespace/trailing-spaces.ari"' tests/golden/native/ordered-multi-file-duplicate.json
@@ -821,7 +849,7 @@ require_grep 'explicit `--config` path is captured' tests/README.md
 require_grep "config read and parse errors use the reference stderr shape" tests/README.md
 require_grep 'defaults <' tests/README.md
 require_grep "shell smoke executes this path" tests/README.md
-require_grep "Dedicated Ari-backed config precedence tests" tests/README.md
+require_grep "Dedicated Ari config unit tests" tests/README.md
 require_grep "Initial config precedence fixtures exist" tests/README.md
 require_grep "OS argv integration added" docs/dev/roadmap.md
 require_grep "minimal config text parser added" docs/dev/roadmap.md

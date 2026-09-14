@@ -2,14 +2,16 @@
 
 Compiler-free repository checks, local compiler-backed executable smoke
 validation, a local report-only parity smoke/report, and strict checked-in
-list-rules, native-rule, and initial compiler-boundary subsets all exist now.
+list-rules, native-rule, initial config, and initial compiler-boundary subsets
+all exist now.
 The smoke suite includes representative exact runtime JSON, human-output,
 compiler invocation, and compiler-diagnostic checks. The native strict subset
 gates clean, trailing-whitespace, missing-final-newline, ordered multi-file, and
 duplicate JSON results against the reference tool and source-controlled
 goldens. The compiler-boundary subset gates one deterministic compiler/native
-diagnostic result in both JSON and human form. Focused Ari unit tests, strict
-CLI/config parity, broader compiler-boundary parity, source-controlled broad
+diagnostic result in both JSON and human form. The config subset gates explicit
+severity, `off`, and CLI-last behavior. Focused Ari unit tests, strict CLI and
+broader config/compiler-boundary parity, source-controlled broad
 compiler-diagnostic goldens, and broader golden coverage remain future work.
 
 Current compiler-free checks verify repository shape, lightweight
@@ -47,19 +49,22 @@ A source-only parity runner skeleton records future comparison boundaries, and
 `scripts/parity.sh` provides a local report-only parity smoke/report. The
 lightweight checks do not execute that parity script.
 `scripts/parity-strict.sh` provides separate gating subsets over checked-in
-list-rules snapshots, native rule fixtures, and one compiler-boundary fixture.
+list-rules snapshots, native rule fixtures, config fixtures, and one
+compiler-boundary fixture.
 List-rules intentionally uses different standalone/reference goldens. Native
 cases use a no-output fixture compiler and explicit empty config so compiler
 diagnostics and ambient config cannot affect those goldens. The
 compiler-boundary case uses an argv-checking fixture compiler and requires an
 exact compiler diagnostic followed by the native diagnostic in JSON and human
-output.
+output. The config subset selects committed explicit config fixtures and gates
+severity changes, `off` suppression, and CLI-last precedence.
 The config precedence fixture plan is documented. Shell-only lightweight checks
 verify the committed fixture files' presence, exact line order, and expected
-text; they do not execute Ari code. Dedicated Ari-backed config precedence tests
-are not added yet. Separately, `scripts/smoke.sh` executes the built CLI and
-asserts per-source discovered config, explicit-config suppression of discovery,
-CLI-last precedence, and config error output.
+text; they do not execute Ari code. The strict runner now executes a focused
+subset of those fixtures through both tools. Dedicated Ari config unit tests
+are not added yet. Separately, `scripts/smoke.sh` executes the
+built CLI and asserts per-source discovered config, explicit-config suppression
+of discovery, CLI-last precedence, and config error output.
 The shared rule module API has started for caller-provided in-memory source
 text, but the lightweight checks do not execute Ari rule API tests.
 Registry-backed in-memory rule dispatch has started for one exact known rule
@@ -107,8 +112,8 @@ checksum-pinned Ari `v0.1.0` prerelease artifact and runs
 `scripts/test.sh "$ARI_COMPILER"`. Neither workflow executes `tools/lint`, runs
 parity, uses package-manager dependencies, or establishes compatibility.
 
-Run the strict list-rules, native-rule, and compiler-boundary subsets from any
-checkout with explicit compiler and Ari repository paths:
+Run the strict list-rules, native-rule, explicit-config, and compiler-boundary
+subsets from any checkout with explicit compiler and Ari repository paths:
 
 ```sh
 scripts/parity-strict.sh /path/to/ari /path/to/ari-repo
@@ -130,6 +135,13 @@ option orders for each implementation, final LF, empty stderr, exit `0`, JSON
 validity for the standalone JSON form, and sentinel-backed absence of compiler
 invocation for the explicitly selected compiler. This provenance is not an Ari
 release compatibility claim.
+
+The exact outputs under `tests/golden/config/` use the deterministic no-output
+fixture compiler and committed config fixtures. They gate one explicit
+severity change in JSON and human form, explicit `off` suppression, and a
+CLI-last short-name override. The reference expectations use the same Ari
+`v0.1.0` source provenance above; this is a focused pre-release config contract,
+not a release compatibility claim.
 
 The exact outputs under `tests/golden/compiler-boundary/` use a deterministic
 fixture compiler, not an Ari release compiler. The fixture verifies the exact
@@ -550,18 +562,19 @@ Initial config precedence fixtures exist under
 - `invalid.rules` records unknown-rule and invalid-severity cases.
 
 The lightweight checks verify fixture presence, exact line order, and key text
-only. They do not parse these committed fixtures with Ari code. Separately, the
-smoke script runs CLI-process tests against generated temporary configs and
-compares focused exact output. Dedicated Ari-backed config precedence tests,
-source-controlled broad goldens, and broader strict config parity remain
-future work.
+only. They do not parse these committed fixtures with Ari code. The strict
+runner uses the two valid committed configs for exact explicit severity,
+`off`, and CLI-last parity. Separately, the smoke script runs CLI-process tests
+against generated temporary configs and compares focused exact output.
+Dedicated Ari config unit tests, source-controlled broad goldens,
+and broader strict config parity remain future work.
 
 Parity testing is specified in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Checked-in
-native-rule and compiler-boundary fixtures plus list-rules, native, and
-compiler-boundary golden subsets now run through `scripts/parity-strict.sh`;
-`scripts/parity.sh` remains the broader report-only runner. A source-only Ari
-parity skeleton records intended internal boundaries.
+native-rule, config, and compiler-boundary fixtures plus list-rules, native,
+config, and compiler-boundary golden subsets now run through
+`scripts/parity-strict.sh`; `scripts/parity.sh` remains the broader report-only
+runner. A source-only Ari parity skeleton records intended internal boundaries.
 
 No dedicated tests of the parity-runner infrastructure are added yet. Future
 runner tests should isolate reference and standalone command selection, fixture

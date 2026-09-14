@@ -39,7 +39,10 @@ standalone_lint="$repo_root/build/ari-lint"
 fixture_compiler="$repo_root/tests/fixtures/parity/compiler-ok.sh"
 diagnostic_compiler="$repo_root/tests/fixtures/parity/compiler-diagnostic.sh"
 empty_config="$repo_root/tests/fixtures/parity/empty.rules"
+explicit_config="$repo_root/tests/fixtures/config-precedence/explicit-config.rules"
+explicit_off_config="$repo_root/tests/fixtures/config-precedence/ari-lint.rules"
 native_golden_dir="$repo_root/tests/golden/native"
+config_golden_dir="$repo_root/tests/golden/config"
 compiler_golden_dir="$repo_root/tests/golden/compiler-boundary"
 list_rules_golden_dir="$repo_root/tests/golden/list-rules"
 
@@ -47,6 +50,8 @@ list_rules_golden_dir="$repo_root/tests/golden/list-rules"
 [ -x "$fixture_compiler" ] || fail "fixture compiler is not executable: $fixture_compiler"
 [ -x "$diagnostic_compiler" ] || fail "diagnostic compiler is not executable: $diagnostic_compiler"
 [ -f "$empty_config" ] || fail "missing empty config fixture: $empty_config"
+[ -f "$explicit_config" ] || fail "missing explicit config fixture: $explicit_config"
+[ -f "$explicit_off_config" ] || fail "missing explicit-off config fixture: $explicit_off_config"
 command -v python3 >/dev/null 2>&1 || fail "python3 is required to validate JSON goldens"
 
 tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/ari-lint-parity-strict.XXXXXX")
@@ -70,8 +75,9 @@ run_tool() {
   tool_path="$2"
   case_name="$3"
   selected_compiler="$4"
-  expects_json="$5"
-  shift 5
+  selected_config="$5"
+  expects_json="$6"
+  shift 6
 
   case "$expects_json" in
     yes|no) ;;
@@ -87,10 +93,10 @@ run_tool() {
     CDPATH= cd "$repo_root" || exit 1
     if [ "$expects_json" = "yes" ]; then
       "$tool_path" --json --ari "$selected_compiler" \
-        --config "$empty_config" "$@"
+        --config "$selected_config" "$@"
     else
       "$tool_path" --ari "$selected_compiler" \
-        --config "$empty_config" "$@"
+        --config "$selected_config" "$@"
     fi
   ) > "$stdout_path" 2> "$stderr_path"
   status=$?
@@ -169,16 +175,17 @@ run_case() {
   expected_status="$2"
   expected_file="$3"
   selected_compiler="$4"
-  expects_json="$5"
-  shift 5
+  selected_config="$5"
+  expects_json="$6"
+  shift 6
 
   [ -f "$expected_file" ] || fail "missing golden: $expected_file"
   require_final_newline "$expected_file"
 
   run_tool standalone "$standalone_lint" "$case_name" \
-    "$selected_compiler" "$expects_json" "$@"
+    "$selected_compiler" "$selected_config" "$expects_json" "$@"
   run_tool reference "$reference_lint" "$case_name" \
-    "$selected_compiler" "$expects_json" "$@"
+    "$selected_compiler" "$selected_config" "$expects_json" "$@"
 
   standalone_stdout="$tmp_dir/$case_name.standalone.stdout"
   standalone_stderr="$tmp_dir/$case_name.standalone.stderr"
@@ -242,16 +249,18 @@ run_metadata_case list-rules-json reference "$reference_lint" \
 require_no_metadata_compiler_invocation
 printf '%s\n' "strict list-rules contract goldens passed"
 
-run_case clean 0 "$native_golden_dir/clean.json" "$fixture_compiler" yes \
+run_case clean 0 "$native_golden_dir/clean.json" \
+  "$fixture_compiler" "$empty_config" yes \
   tests/fixtures/trailing-whitespace/clean.ari
 run_case trailing-whitespace 1 "$native_golden_dir/trailing-whitespace.json" \
-  "$fixture_compiler" yes \
+  "$fixture_compiler" "$empty_config" yes \
   tests/fixtures/trailing-whitespace/trailing-spaces.ari
 run_case missing-final-newline 1 "$native_golden_dir/missing-final-newline.json" \
-  "$fixture_compiler" yes \
+  "$fixture_compiler" "$empty_config" yes \
   tests/fixtures/missing-final-newline/missing-final-newline.ari
 run_case ordered-multi-file-duplicate 1 \
-  "$native_golden_dir/ordered-multi-file-duplicate.json" "$fixture_compiler" yes \
+  "$native_golden_dir/ordered-multi-file-duplicate.json" \
+  "$fixture_compiler" "$empty_config" yes \
   tests/fixtures/trailing-whitespace/clean.ari \
   tests/fixtures/trailing-whitespace/trailing-spaces.ari \
   tests/fixtures/missing-final-newline/with-final-newline.ari \
@@ -261,11 +270,33 @@ run_case ordered-multi-file-duplicate 1 \
 require_no_metadata_compiler_invocation
 printf '%s\n' "strict native parity goldens passed"
 
+run_case explicit-config-missing-final-newline-json 1 \
+  "$config_golden_dir/explicit-missing-final-newline.json" \
+  "$fixture_compiler" "$explicit_config" yes \
+  tests/fixtures/missing-final-newline/missing-final-newline.ari
+run_case explicit-config-missing-final-newline-human 1 \
+  "$config_golden_dir/explicit-missing-final-newline.txt" \
+  "$fixture_compiler" "$explicit_config" no \
+  tests/fixtures/missing-final-newline/missing-final-newline.ari
+run_case explicit-off-trailing-whitespace 0 \
+  "$config_golden_dir/explicit-off-trailing-whitespace.json" \
+  "$fixture_compiler" "$explicit_off_config" yes \
+  tests/fixtures/trailing-whitespace/trailing-spaces.ari
+run_case cli-last-trailing-whitespace-error 1 \
+  "$config_golden_dir/cli-last-trailing-whitespace-error.json" \
+  "$fixture_compiler" "$explicit_off_config" yes \
+  --rule trailing-whitespace=error \
+  tests/fixtures/trailing-whitespace/trailing-spaces.ari
+
+printf '%s\n' "strict explicit-config parity goldens passed"
+
 run_case compiler-diagnostic-native-json 1 \
-  "$compiler_golden_dir/diagnostic-native.json" "$diagnostic_compiler" yes \
+  "$compiler_golden_dir/diagnostic-native.json" \
+  "$diagnostic_compiler" "$empty_config" yes \
   tests/fixtures/trailing-whitespace/trailing-spaces.ari
 run_case compiler-diagnostic-native-human 1 \
-  "$compiler_golden_dir/diagnostic-native.txt" "$diagnostic_compiler" no \
+  "$compiler_golden_dir/diagnostic-native.txt" \
+  "$diagnostic_compiler" "$empty_config" no \
   tests/fixtures/trailing-whitespace/trailing-spaces.ari
 
 printf '%s\n' "strict compiler-boundary parity goldens passed"

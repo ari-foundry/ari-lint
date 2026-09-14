@@ -589,17 +589,19 @@ parser handles caller-provided text and documented short rule-name
 normalization, and the main-facing CLI now applies per-source nearest readable
 discovery, explicit-config discovery suppression, and CLI-last precedence.
 Initial config precedence fixture files, lightweight fixture checks, and focused
-executable shell smoke now exist. Dedicated Ari config tests,
-source-controlled runtime goldens, and strict parity remain follow-up work
-before this repository claims stable config behavior. The fixture plan is
-documented in `docs/dev/config-precedence-fixtures.md`.
+executable shell smoke now exist. The initial strict config subset gates
+explicit severity, `off`, and CLI-last behavior with source-controlled runtime
+goldens. Dedicated Ari config tests and broader discovery/error/precedence
+strict parity remain follow-up work. The fixture plan is documented in
+`docs/dev/config-precedence-fixtures.md`.
 
 The source-diagnostic JSON schema, human line shape, stream selection, and exit
 mapping are defined as a tested pre-release contract in
 `docs/diagnostics.md`. Native outputs are gated by exact goldens and executable
-smoke covers representative compiler and config results. Broader strict
-compiler/config goldens, detailed CLI text, and release compatibility remain
-follow-up work. The list-rules contract is documented separately.
+smoke covers representative compiler and config results. Initial exact config
+and compiler-boundary subsets now exist; broader strict compiler/config
+goldens, detailed CLI text, and release compatibility remain follow-up work.
+The list-rules contract is documented separately.
 
 ### Phase 4: first rules
 
@@ -708,9 +710,11 @@ The source-only parity runner skeleton in `src/parity.ari` records the future
 comparison boundary. It does not execute `tools/lint`, execute `ari-lint`, read
 fixtures, compare outputs, invoke the compiler, or run in CI.
 
-The separate shell strict runner gates checked-in list-rules and native-rule
-subsets plus one deterministic fake-compiler boundary case. Broader CLI,
-config, real-compiler, and process-infrastructure parity remain open.
+The separate shell strict runner gates checked-in list-rules, native-rule, and
+initial explicit-config subsets. It also gates one
+deterministic fake-compiler boundary case. Broader CLI, config
+discovery/error/precedence, real-compiler, and process-infrastructure parity
+remain open.
 
 The local `scripts/parity.sh` smoke/report executes outside Ari source as a
 developer helper only. It compares current output signals with the original
