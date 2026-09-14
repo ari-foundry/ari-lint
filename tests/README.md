@@ -30,33 +30,36 @@ JSON stdout output. The explicit `--config` path is captured in the
 CLI argument model and can be read when source-file diagnostics are collected.
 Documented short rule names in config files are normalized to full lint rule
 codes before known-rule validation.
-When `--config` is absent, the CLI source-file path searches upward from the
-current working directory for the nearest `ari-lint.rules`. The main-facing
-source-file lint path writes reference-shaped human results to stdout; the
-compiler-free checks do not execute that path, while `scripts/smoke.sh` does.
+When `--config` is absent, the CLI source-file path searches upward from each
+source file's directory for the nearest readable `ari-lint.rules`. Discovered
+config errors become ordered per-file `lint/config` diagnostics; explicit
+config read and parse errors use the reference stderr shape and exit `2`.
+The main-facing source-file lint path writes reference-shaped human results to
+stdout; the compiler-free checks do not execute that path, while
+`scripts/smoke.sh` does.
 A source-only parity runner skeleton records future comparison boundaries, and
 `scripts/parity.sh` provides a local report-only parity smoke/report. The
 lightweight checks do not execute that parity script.
-The config precedence fixture plan is documented.
-Shell-only executable config precedence fixture checks verify presence, exact
-line order, and expected text. Ari-backed config precedence tests are not added
-yet. An internal explicit config file parse boundary can read one
-caller-provided config file path and parse it into override data. The CLI
-source-file diagnostic collection path can apply those explicit config
-overrides before CLI `--rule` overrides, but these checks do not execute that
-boundary or assert CLI config output yet.
+The config precedence fixture plan is documented. Shell-only lightweight checks
+verify the committed fixture files' presence, exact line order, and expected
+text; they do not execute Ari code. Dedicated Ari-backed config precedence tests
+are not added yet. Separately, `scripts/smoke.sh` executes the built CLI and
+asserts per-source discovered config, explicit-config suppression of discovery,
+CLI-last precedence, and config error output.
 The shared rule module API has started for caller-provided in-memory source
 text, but the lightweight checks do not execute Ari rule API tests.
 Registry-backed in-memory rule dispatch has started for one exact known rule
 code and caller-provided source text, but the lightweight checks do not execute
 registry dispatch tests.
 The main entry returns the OS argv CLI command exit-code mapping. List-rules,
-help, and source-file results use stdout; CLI parse problems and current
-source/config read failures use stderr. Source `--json` output is one
-newline-terminated reference-shaped object with an ordered entry for every
-positional input, including clean and duplicate paths. Enabled native
-diagnostics return exit `1`. The compiler-free checks do not execute these
-paths, while `scripts/smoke.sh` verifies them through the built binary.
+help, and source-file results use stdout. CLI parse problems, source read
+failures, and explicit config read or parse failures use stderr. Bad lines in a
+discovered config are instead ordinary per-file `lint/config` diagnostics on
+stdout and return exit `1`. Source `--json` output is one newline-terminated
+reference-shaped object with an ordered entry for every positional input,
+including clean and duplicate paths. Enabled native diagnostics also return
+exit `1`. The compiler-free checks do not execute these paths, while
+`scripts/smoke.sh` verifies them through the built binary.
 
 Run the lightweight check script from the repository root:
 
@@ -94,25 +97,28 @@ explicit Ari compiler path as its first argument or through `ARI_COMPILER`,
 delegates build behavior to `scripts/build.sh`, and then runs
 `./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
 `./build/ari-lint --json --list-rules`. It also runs JSON smoke commands with
-temporary files and a temporary nested working directory containing
-`ari-lint.rules` to check parent discovered config severity, nearest discovered
-config precedence, explicit `--config` precedence, and CLI `--rule` precedence
-for a trailing-whitespace diagnostic. The temporary config files use documented
-short rule names to cover config-file normalization. It also checks the runtime
+temporary source trees containing `ari-lint.rules` to check per-source nearest
+readable discovery, different configs in one multi-file run, unreadable-nearer
+fallback, explicit `--config` discovery suppression, and CLI-last `--rule`
+precedence. It checks discovered bad lines as ordered per-file `lint/config`
+diagnostics on stdout with exit `1`, and exact explicit config read and parse
+errors on stderr with exit `2`. The temporary config files use documented short
+rule names to cover config-file normalization. The smoke also checks the runtime
 `files` envelope and per-file `path`, `exitCode`, and `diagnostics`, plus
 diagnostic `file`, positions, `severity`, `message`, `source`, and `code` for
-`lint/trailing-whitespace` and `lint/missing-final-newline`. Representative
-JSON and human outputs are checked exactly, including final newlines. Multi-file
-coverage includes two dirty files, clean plus dirty, all-clean, and duplicate
-source arguments.
+`lint/trailing-whitespace` and `lint/missing-final-newline`. Representative JSON
+and human outputs are checked exactly, including final newlines. Multi-file
+coverage includes two dirty files, per-source config differences, clean plus
+dirty, all-clean, and duplicate source arguments.
 It is not run by `scripts/test.sh` or CI, but it is the current local validation
 path for build, supported CLI commands, source-file JSON diagnostics, explicit
-config, discovered `ari-lint.rules`, nearest discovered config precedence, and
+config, per-source discovered `ari-lint.rules`, nearest readable precedence, and
 CLI severity override precedence across explicit source files. It does not run
-a strict parity gate, search home/global/XDG config
-locations, add new lint semantics, or claim compatibility. It now checks
-focused JSON list-rules rule-code, short-name, and default-severity output
-signals; compiler-diagnostic goldens remain follow-up work.
+a strict parity gate, search home/global/XDG config locations, add new lint
+semantics, or claim compatibility. It now checks focused JSON list-rules
+rule-code, short-name, and default-severity output signals; dedicated Ari tests,
+source-controlled broad goldens, compiler-backed CI, and compiler-diagnostic
+goldens remain follow-up work.
 
 `scripts/parity.sh` is the local report-only parity smoke/report. It accepts an
 explicit Ari compiler path or `ARI_COMPILER`, an Ari repo path or `ARI_REPO`,
@@ -154,12 +160,13 @@ Known rule registry construction has started from the existing
 `lint/trailing-whitespace` and `lint/missing-final-newline` metadata entries.
 A data-only known rule registry lookup by exact full rule code has also
 started. Registry-backed in-memory dispatch for one exact known rule code has
-also started, but no registry, severity, or config behavior tests are added yet.
-Future tests should validate severity values, rule registry metadata, known
-rule lookup behavior, registry-backed in-memory rule dispatch, unknown rule
-dispatch results, config overrides, severity override resolution,
-single-diagnostic severity application, diagnostics, JSON output after the
-schema is defined, and parity behavior against current `tools/lint`.
+also started, but no dedicated Ari registry, severity, or config behavior tests
+are added yet. The executable shell smoke covers representative main-facing
+config behavior. Future dedicated tests should validate severity values, rule
+registry metadata, known rule lookup behavior, registry-backed in-memory rule
+dispatch, unknown rule dispatch results, config overrides, severity override
+resolution, single-diagnostic severity application, diagnostics, JSON output,
+and parity behavior against current `tools/lint`.
 
 No executable registry dispatch tests are added yet. Future registry dispatch
 tests should validate exact full rule code matching, dispatch to
@@ -367,17 +374,20 @@ files sharing one override list, no config-file reads, no config discovery, no
 config-file CLI wiring, no directory traversal, no output, no JSON
 serialization, no compiler invocation, no `ari --check`, and parity behavior.
 
-No executable CLI file lint path tests are added yet. Future tests should cover
+No executable CLI file lint path tests are added yet as dedicated Ari tests.
+The shell smoke executes this path for representative runtime contracts. Future
+dedicated tests should cover
 explicit source-file arguments, successful file reads feeding in-memory lint
 aggregation, parsed `--rule` override validation, rule override parse
-problems, explicit config file override application, current-directory
+problems, explicit config file override application, per-source nearest readable
 `ari-lint.rules` discovery, parsed `--rule` severity override application after
-config overrides, file read error preservation, config read error preservation,
-diagnostic counts, first diagnostic command-result carrying, caller-provided
-diagnostic vector collection, exit-code mapping, no source directory traversal,
-no home/global/XDG config search, no stdout/stderr output in the internal path,
-no JSON serialization in the internal path, no compiler invocation, no
-`ari --check`, and parity behavior against current `tools/lint`.
+config overrides, discovered config diagnostics, file read error preservation,
+explicit config read error preservation, diagnostic counts, first diagnostic
+command-result carrying, caller-provided diagnostic vector collection,
+exit-code mapping, no recursive source directory traversal, no home/global/XDG
+config search, no stdout/stderr output in the internal path, no JSON
+serialization in the internal path, no compiler invocation, no `ari --check`,
+and parity behavior against current `tools/lint`.
 
 No executable list-rules formatter tests are added yet. Future tests should
 cover list-rules metadata and formatting for rule code, short name, default
@@ -385,11 +395,12 @@ severity, description, ordering, newline behavior, human-readable text
 stability, the existing standalone JSON form, main-facing stdout wiring, and
 parity behavior against current `tools/lint`.
 
-No executable config parser tests are added yet. Future config parser tests
+No executable config parser tests are added yet as dedicated Ari tests. The
+shell smoke exercises parsing through the built CLI. Future dedicated tests
 should validate caller-provided `RULE = SEVERITY` text, blank lines, comments,
 documented short-name normalization, invalid lines, invalid severity names,
 known-rule validation, explicit config file path parsing, read-error reporting,
-and parse problem reporting.
+and complete parse problem reporting.
 
 No executable rule override parser tests are added yet. Future rule override
 parser tests should validate caller-provided `--rule RULE=SEVERITY` text,
@@ -416,30 +427,33 @@ matches, no config-file reads, no config-file CLI wiring, no file reads, no
 filesystem scanning, no output, no JSON serialization, no compiler invocation,
 no `ari --check`, and parity behavior.
 
-No config override tests are added yet. Future config override tests should
-validate explicit `--config` behavior, `--rule` behavior, default < config <
-CLI `--rule` precedence, severity override resolution, single-diagnostic
-severity application, in-memory severity override aggregation, file-backed and
-CLI config application, CLI `--rule` lint dispatch, collected diagnostic
-severity rewriting, diagnostics, parent-directory `ari-lint.rules` discovery,
-and parity behavior against current `tools/lint`.
+No config override tests are added yet as dedicated Ari tests. The executable
+shell smoke covers representative main-facing behavior. Future dedicated tests
+should validate explicit `--config` behavior, `--rule` behavior, defaults <
+selected config < CLI `--rule` precedence, severity override resolution,
+single-diagnostic severity application, in-memory severity override aggregation,
+file-backed and CLI config application, CLI `--rule` lint dispatch, collected
+diagnostic severity rewriting, per-source nearest readable `ari-lint.rules`
+discovery, discovered config diagnostics, and parity behavior against current
+`tools/lint`.
 
-The future config precedence fixture plan is documented in
+The config precedence fixture and runtime coverage plan is documented in
 [docs/dev/config-precedence-fixtures.md](../docs/dev/config-precedence-fixtures.md).
-Initial config precedence fixtures have started under
+Initial config precedence fixtures exist under
 `tests/fixtures/config-precedence/`:
 
-- `ari-lint.rules` records a future discovered config-file override shape.
-- `explicit-config.rules` records a future explicit `--config` override shape.
-- `command-line-overrides.txt` records future command-line `--rule` values,
+- `ari-lint.rules` records a discovered config-file override shape.
+- `explicit-config.rules` records an explicit `--config` override shape.
+- `command-line-overrides.txt` records command-line `--rule` values,
   including repeated override ordering.
-- `invalid.rules` records future unknown-rule and invalid-severity cases.
+- `invalid.rules` records unknown-rule and invalid-severity cases.
 
 The lightweight checks verify fixture presence, exact line order, and key text
-only. They do not parse these fixtures with Ari code, run CLI-process tests,
-compare golden JSON, invoke the compiler, execute `ari --check`, or execute
-`tools/lint`. Ari-backed config precedence tests and parity checks remain
-future work.
+only. They do not parse these committed fixtures with Ari code. Separately, the
+smoke script runs CLI-process tests against generated temporary configs and
+compares focused exact output. Dedicated Ari-backed config precedence tests,
+source-controlled broad goldens, compiler invocation, and strict parity checks
+remain future work.
 
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity

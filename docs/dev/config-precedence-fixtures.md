@@ -1,39 +1,50 @@
 # ari-lint Config Precedence Fixture Plan
 
-This document records fixture coverage for future `ari-lint` configuration
-precedence behavior.
+This document records the narrow source-controlled fixture plan and the current
+executable smoke coverage for `ari-lint` configuration precedence behavior.
 
-It does not add executable parser tests, config-file discovery, `--config` file
-reading, CLI output, compiler execution, `ari --check`, `tools/lint`, package
-manager wiring, release automation, or compatibility claims.
+It does not add dedicated Ari parser tests, compiler invocation, `ari --check`,
+`tools/lint`, package manager wiring, release automation, strict parity, or
+compatibility claims.
 
 ## Current Status
 
-`src/config.ari` can parse caller-provided config text and caller-provided
-`--rule` values into internal severity overrides, normalizing documented short
-rule names to full lint rule codes. The CLI source-file lint path can apply
-parsed `--rule` overrides to explicit source-file inputs.
+`src/config.ari` parses caller-provided config text and `--rule` values into
+internal severity overrides, normalizing documented short rule names to full
+lint rule codes. The main-facing CLI searches lexically upward from each source
+file's directory for the nearest readable `ari-lint.rules`. An explicit
+`--config` applies to every source and disables discovery, and command-line
+`--rule` settings are applied last.
 
-Initial config precedence fixture files now exist under
-`tests/fixtures/config-precedence/`. Lightweight checks verify the fixture set
-key contents, and exact fixture line order only. Standalone config discovery,
-explicit `--config` file reading, Ari-backed config tests, and parity checks
-remain future work.
+Bad lines in a discovered config become ordered per-file `lint/config`
+diagnostics on stdout and make the command exit `1`; valid lines from the same
+file still participate in precedence. Explicit config read or parse errors are
+written to stderr in the reference shape, include every parse error, stop before
+source linting, and exit `2`.
 
-## Planned Precedence
+Initial config precedence fixture files exist under
+`tests/fixtures/config-precedence/`. Lightweight checks verify that committed
+fixture set's key contents and exact line order only. Separately,
+`scripts/smoke.sh` builds and executes the standalone CLI against generated
+temporary configs to cover per-source discovery, explicit-config precedence,
+CLI-last precedence, and config error output. Dedicated Ari tests,
+source-controlled runtime goldens, strict parity, and compiler-backed CI remain
+future work.
 
-The intended precedence order is:
+## Implemented Precedence
+
+The implemented precedence order is:
 
 1. default rule severity
-2. config-file overrides from future `ari-lint.rules` discovery or explicit
+2. config-file overrides from per-source `ari-lint.rules` discovery or explicit
    `--config`
 3. command-line `--rule` overrides
 
-Later matching overrides in the caller-provided override list win. Future
-fixture files must preserve that rule without claiming stable behavior until
-the executable tests exist.
+Later matching overrides in the caller-provided override list win. The local
+executable smoke exercises this order, but it is not a strict parity or release
+compatibility claim.
 
-## Planned Fixture Areas
+## Fixture Areas
 
 Initial fixtures cover:
 
@@ -56,13 +67,16 @@ The current fixture set is intentionally narrow:
 - `tests/fixtures/config-precedence/command-line-overrides.txt`
 - `tests/fixtures/config-precedence/invalid.rules`
 
-The lightweight checks do not parse these fixtures with Ari code. They only
-verify presence, exact line order, and expected text. Future Ari-backed tests
-must still connect the fixture data to config parsing and precedence behavior.
+The lightweight checks do not parse these committed fixtures with Ari code.
+They only verify presence, exact line order, and expected text. The separate
+executable smoke uses generated temporary config files rather than these
+source-controlled fixtures. Dedicated Ari tests must still connect committed
+fixture data to config parsing and precedence behavior.
 
-Avoid golden JSON, CLI-process tests, compiler execution, `ari --check`,
-`tools/lint`, and broad source fixture expansion until those behaviors are
-explicitly scoped.
+Broad source-controlled golden JSON, compiler invocation, `ari --check`,
+`tools/lint`, and broad source fixture expansion remain outside this fixture
+plan until those behaviors are explicitly scoped.
 
-Config precedence must not be documented as stable until fixture files,
-executable tests, and parity checks exist.
+Config precedence must not be documented as stable release compatibility until
+dedicated Ari tests, source-controlled runtime goldens, and strict parity checks
+exist.

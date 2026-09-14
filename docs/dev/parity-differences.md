@@ -260,50 +260,47 @@ Follow-up:
 
 ### Config Read Error Output
 
-Current standalone `ari-lint` reports an unreadable explicit config path as a
-short stderr message such as `unable to read config file`. Original
-`tools/lint`, when run with the same missing `--config` path, reports
-`cannot open lint config` on stderr and uses a different exit status.
+Current standalone `ari-lint` and original `tools/lint` both report the focused
+missing explicit `--config` path as
+`ari-lint: error: PATH: cannot open lint config` on stderr, leave stdout empty,
+emit no JSON envelope even with `--json`, and exit `2`.
 
-Classification: expected known difference and `ari-lint` diagnostic/CLI
-contract follow-up. No Ari language/compiler/stdlib/toolchain bug is identified
-by this report-only case.
+Classification: aligned for the focused explicit config read-error case. No Ari
+language/compiler/stdlib/toolchain bug is identified by this report-only case.
 
 Impact:
 
-- exact config read-error output and exit-code parity are not expected yet
+- focused explicit config read-error output and exit-code behavior are aligned
 - release compatibility claims must not be made from the current report
-- strict config read-error golden checks should wait until the CLI contract is
-  documented
+- broader error-ordering and strict parity coverage remain incomplete
 
 Follow-up:
 
-- decide whether standalone config read-error text should preserve the original
-  wording or define a new stable standalone diagnostic contract
-- add strict config read-error output checks only after that contract is
-  documented
+- add source-controlled parity goldens when strict parity work is scoped
+- retain coverage for combined-error ordering before making compatibility claims
 
 ### Invalid Config Output Text
 
-Current standalone `ari-lint` reports an invalid config file as
-`invalid command-line arguments`. Original `tools/lint` reports the config file
-path and line with `unknown rule or severity`.
+Current standalone `ari-lint` and original `tools/lint` both report every bad
+line in an explicit config on stderr as
+`ari-lint: error: PATH:LINE: REASON`, using `expected RULE=SEVERITY` for a
+missing equals sign and `unknown rule or severity` for other invalid settings.
+Both stop before source linting, leave stdout empty, emit no JSON envelope, and
+exit `2`.
 
-Classification: original `tools/lint` behavior difference and `ari-lint`
-diagnostic/CLI contract follow-up.
+Classification: aligned for the focused explicit invalid-config case.
 
 Impact:
 
-- exact invalid-config text equality is not expected yet
+- focused explicit invalid-config text, stream, and exit behavior are aligned
 - release compatibility claims must not be made from the current report
-- strict invalid-config golden checks should wait until the CLI contract is
-  documented
+- broad parser and combined-error ordering parity remain incomplete
 
 Follow-up:
 
-- decide whether standalone invalid-config text should preserve the original
-  file/line shape or define a new stable standalone diagnostic contract
-- add strict invalid-config output checks only after that contract is documented
+- add source-controlled parity goldens when strict parity work is scoped
+- retain discovered-config and multi-file error coverage before compatibility
+  claims
 
 ### Invalid Rule Override Usage Text
 
@@ -486,6 +483,10 @@ line/column presence, and dirty file paths for the covered
 rule/config/multi-file cases; disabled explicit config and command-line
 `--rule` cases suppress the configured diagnostic, and short-name config uses
 the same severity signal.
+
+The focused explicit config read-error and invalid-config cases also use the
+same stderr shape, leave stdout empty without a JSON envelope, and exit `2` in
+both implementations.
 
 These are smoke signals only. They do not replace source-controlled fixtures,
 golden output, compiler-backed parity, or CI parity jobs.

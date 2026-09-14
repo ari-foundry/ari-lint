@@ -207,6 +207,18 @@ fn parse_config_file_from_source_into(
   discovers_config_files: bool,
   overrides: ref mut std::vec::Vec[RuleSeverityOverride]
 ) -> ConfigFileParseResult {
+  if std::fs::is_dir(path) {
+    return config_file_parse_result(
+      0,
+      0,
+      0,
+      "",
+      "",
+      0,
+      discovers_config_files
+    );
+  }
+
   match std::fs::read_detailed(zone, path) {
     std::Ok(text) => {
       let parse_result = parse_config_text_from_source_into(
@@ -225,7 +237,7 @@ fn parse_config_file_from_source_into(
         discovers_config_files
       );
     }
-    std::Err(problem) => {
+    std::Err(read_problem) => {
       return config_file_parse_result(
         0,
         0,
@@ -444,13 +456,13 @@ fn parse_config_line(
   }
 }
 
-fn parse_config_text_from_source_into(
+fn parse_config_text_from_source_into_with_problems(
   zone: ref mut Zone,
   text: Slice[u8],
   source: ConfigSource,
-  overrides: ref mut std::vec::Vec[RuleSeverityOverride]
+  overrides: ref mut std::vec::Vec[RuleSeverityOverride],
+  problems: ref mut std::vec::Vec[ConfigParseProblem]
 ) -> ConfigParseResult {
-  var problems = std::vec::new<ConfigParseProblem>(zone, 4);
   let before_count = overrides.len();
   var lines = std::string::lines(text);
   var line_number = 1;
@@ -467,7 +479,7 @@ fn parse_config_text_from_source_into(
           line,
           source,
           overrides,
-          ref mut problems
+          problems
         );
         line_number = line_number + 1;
       }
@@ -491,6 +503,22 @@ fn parse_config_text_from_source_into(
     first_problem_text: first_problem_text,
     first_problem_detail: first_problem_detail,
   };
+}
+
+fn parse_config_text_from_source_into(
+  zone: ref mut Zone,
+  text: Slice[u8],
+  source: ConfigSource,
+  overrides: ref mut std::vec::Vec[RuleSeverityOverride]
+) -> ConfigParseResult {
+  var problems = std::vec::new<ConfigParseProblem>(zone, 4);
+  return parse_config_text_from_source_into_with_problems(
+    zone,
+    text,
+    source,
+    overrides,
+    ref mut problems
+  );
 }
 
 pub fn parse_config_text_into(
@@ -532,6 +560,130 @@ pub fn parse_explicit_config_file_into(
   );
 }
 
+fn append_config_text_bytes(
+  text: ref mut std::string::String,
+  value: Slice[u8]
+) -> void {
+  var index = 0;
+  while index < value.len() {
+    text.push(value.get(index));
+    index = index + 1;
+  }
+}
+
+fn append_config_text_u64(
+  text: ref mut std::string::String,
+  value: u64
+) -> void {
+  if value >= 10u64 {
+    append_config_text_u64(text, value / 10u64);
+  }
+  text.push(((value % 10u64) + 48u64) as u8);
+}
+
+fn append_config_text_i64(
+  text: ref mut std::string::String,
+  value: i64
+) -> void {
+  if value < 0 {
+    text.push('-');
+    append_config_text_u64(text, ((-(value + 1)) as u64) + 1u64);
+    return;
+  }
+  append_config_text_u64(text, value as u64);
+}
+
+fn append_reference_config_error_text(
+  zone: ref mut Zone,
+  path: Slice[u8],
+  line: i64,
+  detail: Slice[u8],
+  text: ref mut std::string::String
+) -> void {
+  append_config_text_bytes(text, "ari-lint: error: ");
+  append_config_text_bytes(text, path);
+  if line > 0 {
+    text.push(':');
+    append_config_text_i64(text, line);
+  }
+  append_config_text_bytes(text, ": ");
+  append_config_text_bytes(text, detail);
+  text.push('\n');
+}
+
+pub fn parse_explicit_config_file_into_with_error_text(
+  zone: ref mut Zone,
+  path: Slice[u8],
+  overrides: ref mut std::vec::Vec[RuleSeverityOverride],
+  error_text: ref mut std::string::String
+) -> ConfigFileParseResult {
+  if std::fs::is_dir(path) {
+    return config_file_parse_result(
+      0,
+      0,
+      0,
+      "",
+      "",
+      0,
+      false
+    );
+  }
+
+  match std::fs::read_detailed(zone, path) {
+    std::Ok(text) => {
+      var problems = std::vec::new<ConfigParseProblem>(zone, 4);
+      let parse_result = parse_config_text_from_source_into_with_problems(
+        zone,
+        text.as_slice(),
+        ExplicitConfigFile,
+        overrides,
+        ref mut problems
+      );
+
+      var problem_index = 0;
+      while problem_index < problems.len() {
+        let config_problem = problems.get(problem_index);
+        append_reference_config_error_text(
+          zone,
+          path,
+          config_problem.line,
+          reference_config_problem_detail(config_problem.kind),
+          error_text
+        );
+        problem_index = problem_index + 1;
+      }
+
+      return config_file_parse_result(
+        parse_result.override_count,
+        parse_result.problem_count,
+        parse_result.first_problem_line,
+        parse_result.first_problem_text,
+        parse_result.first_problem_detail,
+        0,
+        false
+      );
+    }
+    std::Err(config_read_problem) => {
+      append_reference_config_error_text(
+        zone,
+        path,
+        0,
+        "cannot open lint config",
+        error_text
+      );
+      return config_file_parse_result(
+        0,
+        0,
+        0,
+        "",
+        "",
+        1,
+        false
+      );
+    }
+  }
+}
+
 pub fn parse_explicit_config_file(
   zone: ref mut Zone,
   path: Slice[u8]
@@ -556,6 +708,126 @@ pub fn parse_discovered_config_file_into(
     true,
     overrides
   );
+}
+
+fn reference_config_problem_detail(
+  kind: ConfigParseProblemKind
+) -> Slice[u8] {
+  match kind {
+    ConfigMissingEquals => {
+      return "expected RULE=SEVERITY";
+    }
+    ConfigEmptyRule => {
+      return "unknown rule or severity";
+    }
+    ConfigUnknownRule => {
+      return "unknown rule or severity";
+    }
+    ConfigInvalidSeverity => {
+      return "unknown rule or severity";
+    }
+  }
+}
+
+fn append_discovered_config_diagnostic(
+  zone: ref mut Zone,
+  source_path: Slice[u8],
+  config_path: Slice[u8],
+  line: i64,
+  detail: Slice[u8],
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> void {
+  var message = std::string::new(zone, config_path.len() + detail.len() + 32);
+  message.append_string_in(zone, config_path);
+  if line > 0 {
+    message.append_string_in(zone, ":");
+    message.append_i64_in(zone, line);
+  }
+  message.append_string_in(zone, ": ");
+  message.append_string_in(zone, detail);
+
+  diagnostics.push(super::diagnostic::diagnostic_from_span(
+    super::diagnostic::source_span_with_end(source_path, 1, 1, 0, 0),
+    super::severity::Error,
+    "lint/config",
+    message.as_slice()
+  ));
+}
+
+pub fn parse_discovered_config_file_into_with_diagnostics(
+  zone: ref mut Zone,
+  path: Slice[u8],
+  source_path: Slice[u8],
+  overrides: ref mut std::vec::Vec[RuleSeverityOverride],
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> ConfigFileParseResult {
+  if std::fs::is_dir(path) {
+    return config_file_parse_result(
+      0,
+      0,
+      0,
+      "",
+      "",
+      0,
+      true
+    );
+  }
+
+  match std::fs::read_detailed(zone, path) {
+    std::Ok(text) => {
+      var problems = std::vec::new<ConfigParseProblem>(zone, 4);
+      let parse_result = parse_config_text_from_source_into_with_problems(
+        zone,
+        text.as_slice(),
+        AriLintRulesDiscovery,
+        overrides,
+        ref mut problems
+      );
+
+      var problem_index = 0;
+      while problem_index < problems.len() {
+        let problem = problems.get(problem_index);
+        append_discovered_config_diagnostic(
+          zone,
+          source_path,
+          path,
+          problem.line,
+          reference_config_problem_detail(problem.kind),
+          diagnostics
+        );
+        problem_index = problem_index + 1;
+      }
+
+      return config_file_parse_result(
+        parse_result.override_count,
+        parse_result.problem_count,
+        parse_result.first_problem_line,
+        parse_result.first_problem_text,
+        parse_result.first_problem_detail,
+        0,
+        true
+      );
+    }
+    std::Err(config_read_problem) => {
+      append_discovered_config_diagnostic(
+        zone,
+        source_path,
+        path,
+        0,
+        "cannot open lint config",
+        diagnostics
+      );
+      return config_file_parse_result(
+        0,
+        0,
+        0,
+        "",
+        "",
+        1,
+        true
+      );
+    }
+  }
 }
 
 pub fn parse_discovered_config_file(
@@ -679,12 +951,14 @@ pub fn apply_rule_severity_to_diagnostic(
 // parse_explicit_config_file and parse_explicit_config_file_into read one
 // explicit caller-provided config file path with std::fs::read_detailed, parse
 // its text through the same config parser, and return counts plus read-error
-// data.
+// data. parse_explicit_config_file_into_with_error_text additionally renders
+// every reference-shaped config error for the CLI's stderr path.
 //
 // parse_discovered_config_file and parse_discovered_config_file_into read one
 // caller-selected discovered config path with std::fs::read_detailed and mark
-// overrides as ari-lint.rules discovery sourced. The CLI layer decides whether
-// ./ari-lint.rules exists and should be parsed.
+// overrides as ari-lint.rules discovery sourced. The with-diagnostics variant
+// emits one lint/config diagnostic per discovered config error. The CLI layer
+// discovers the nearest file independently for each source path.
 //
 // Config file parsing does not inspect CLI arguments, apply config to
 // diagnostics or lint execution, write output, serialize JSON, or invoke the
@@ -710,7 +984,5 @@ pub fn apply_rule_severity_to_diagnostic(
 // run lint rules, apply config to lint execution, write output, serialize JSON,
 // or invoke the compiler.
 //
-// Config-file discovery, user-facing --rule command dispatch behavior,
-// severity override application inside rule execution, broader diagnostics
-// output, source scanning, and ari --check invocation remain outside this
-// module.
+// Config-file discovery, user-facing command dispatch, source scanning, and
+// ari --check invocation remain outside this module.
