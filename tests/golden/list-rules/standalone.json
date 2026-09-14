@@ -1,0 +1,1 @@
+[{"ruleCode":"lint/trailing-whitespace","name":"trailing-whitespace","defaultSeverity":"warning","description":"Reports spaces or tabs at the end of a source line."},{"ruleCode":"lint/missing-final-newline","name":"missing-final-newline","defaultSeverity":"warning","description":"Reports non-empty source files that do not end with a newline."}]

@@ -44,6 +44,7 @@ require_file README.md
 require_file AGENTS.md
 require_file .gitignore
 require_file docs/README.md
+require_file docs/list-rules.md
 require_file docs/migration.md
 require_file docs/dev/compiler-invocation.md
 require_file docs/dev/compiler-provisioning.md
@@ -73,6 +74,9 @@ require_file tests/golden/native/clean.json
 require_file tests/golden/native/trailing-whitespace.json
 require_file tests/golden/native/missing-final-newline.json
 require_file tests/golden/native/ordered-multi-file-duplicate.json
+require_file tests/golden/list-rules/standalone-human.txt
+require_file tests/golden/list-rules/standalone.json
+require_file tests/golden/list-rules/reference-human.txt
 require_file examples/README.md
 require_file tests/README.md
 require_file scripts/README.md
@@ -101,6 +105,11 @@ require_no_grep "arix" .github/workflows/check.yml
 [ -x scripts/test.sh ] || fail "scripts/test.sh is not executable"
 
 require_grep "strict native parity goldens passed" scripts/parity-strict.sh
+require_grep "strict list-rules contract goldens passed" scripts/parity-strict.sh
+require_grep "list-rules-json" scripts/parity-strict.sh
+require_grep "reference-human.txt" scripts/parity-strict.sh
+require_grep "metadata_sentinel_marker" scripts/parity-strict.sh
+require_grep "unexpectedly invoked the Ari compiler" scripts/parity-strict.sh
 require_grep "ordered-multi-file-duplicate" scripts/parity-strict.sh
 require_grep "--config" scripts/parity-strict.sh
 require_grep "compiler-ok.sh" scripts/parity-strict.sh
@@ -377,6 +386,9 @@ unexpected_parity_fixture=$(find tests/fixtures/parity -type f ! -name compiler-
 unexpected_native_golden=$(find tests/golden/native -type f ! -name clean.json ! -name trailing-whitespace.json ! -name missing-final-newline.json ! -name ordered-multi-file-duplicate.json -print -quit)
 [ -z "$unexpected_native_golden" ] || fail "unexpected native golden: $unexpected_native_golden"
 
+unexpected_list_rules_golden=$(find tests/golden/list-rules -type f ! -name standalone-human.txt ! -name standalone.json ! -name reference-human.txt -print -quit)
+[ -z "$unexpected_list_rules_golden" ] || fail "unexpected list-rules golden: $unexpected_list_rules_golden"
+
 require_no_grep '[[:blank:]]$' tests/fixtures/trailing-whitespace/clean.ari
 require_grep '[[:blank:]]$' tests/fixtures/trailing-whitespace/trailing-spaces.ari
 require_final_newline tests/fixtures/missing-final-newline/with-final-newline.ari
@@ -387,10 +399,17 @@ require_final_newline tests/golden/native/clean.json
 require_final_newline tests/golden/native/trailing-whitespace.json
 require_final_newline tests/golden/native/missing-final-newline.json
 require_final_newline tests/golden/native/ordered-multi-file-duplicate.json
+require_final_newline tests/golden/list-rules/standalone-human.txt
+require_final_newline tests/golden/list-rules/standalone.json
+require_final_newline tests/golden/list-rules/reference-human.txt
 require_grep '"diagnostics":\[\]' tests/golden/native/clean.json
 require_grep '"code":"lint/trailing-whitespace"' tests/golden/native/trailing-whitespace.json
 require_grep '"code":"lint/missing-final-newline"' tests/golden/native/missing-final-newline.json
 require_grep '"path":"tests/fixtures/trailing-whitespace/trailing-spaces.ari"' tests/golden/native/ordered-multi-file-duplicate.json
+require_grep 'name=trailing-whitespace' tests/golden/list-rules/standalone-human.txt
+require_grep '"ruleCode":"lint/trailing-whitespace"' tests/golden/list-rules/standalone.json
+require_grep '"name":"missing-final-newline"' tests/golden/list-rules/standalone.json
+require_no_grep 'name=' tests/golden/list-rules/reference-human.txt
 require_grep "lint/trailing-whitespace = off" tests/fixtures/config-precedence/ari-lint.rules
 require_grep "lint/missing-final-newline = warning" tests/fixtures/config-precedence/ari-lint.rules
 require_grep "explicit --config" tests/fixtures/config-precedence/explicit-config.rules
@@ -432,6 +451,7 @@ require_grep "Focused diagnostic" README.md
 require_grep "local standalone test entrypoint" README.md
 require_grep "relative compiler paths" README.md
 require_grep "docs/migration.md" docs/README.md
+require_grep "docs/list-rules.md" docs/README.md
 require_grep "docs/dev/ari-implementation-plan.md" docs/README.md
 require_grep "docs/dev/compiler-invocation.md" docs/README.md
 require_grep "docs/dev/compiler-provisioning.md" docs/README.md
@@ -447,6 +467,11 @@ require_grep "scripts/parity-strict.sh" tests/README.md
 require_grep "scripts/parity-strict.sh" docs/dev/parity-test-plan.md
 require_grep "strict native parity goldens and runner added" docs/dev/roadmap.md
 require_grep "c615f1c2ce1a93835118b4da8867a7f3dfaf991a" tests/README.md
+require_grep "ari-lint List-Rules Contract" docs/list-rules.md
+require_grep "tests/golden/list-rules/" docs/list-rules.md
+require_grep "intentional CLI contracts" docs/list-rules.md
+require_grep "docs/list-rules.md" docs/dev/parity-differences.md
+require_grep "standalone list-rules contract and strict goldens added" docs/dev/roadmap.md
 require_grep "Do not invent compatibility claims" docs/migration.md
 require_grep "Ari-language implementation" docs/dev/ari-implementation-plan.md
 require_grep "compiler bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
@@ -642,7 +667,7 @@ require_grep "No executable in-memory lint run aggregation tests are added yet" 
 require_grep "first-diagnostic preservation" tests/README.md
 require_grep "No executable file IO boundary tests are added yet" tests/README.md
 require_grep "No executable CLI file lint path tests are added yet" tests/README.md
-require_grep "No executable parity runner tests are added yet" tests/README.md
+require_grep "No dedicated tests of the parity-runner infrastructure are added yet" tests/README.md
 require_grep "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
 require_grep "current standalone path implements explicit-file native rule execution" docs/dev/ari-implementation-plan.md
 require_grep "source-only parity runner skeleton" docs/dev/ari-implementation-plan.md
@@ -705,7 +730,7 @@ require_grep "No executable CLI parser tests are added yet" tests/README.md
 require_grep "No executable dispatcher tests are added yet" tests/README.md
 require_grep "No dedicated Ari exit-code model tests are added yet" tests/README.md
 require_grep "No executable explicit-token entry tests are added yet" tests/README.md
-require_grep "No executable explicit-token list-rules command tests are added yet" tests/README.md
+require_grep "No dedicated Ari explicit-token list-rules command tests are added yet" tests/README.md
 require_grep "Executable shell smoke enters through .main. and OS argv" tests/README.md
 require_grep "No executable stdout/stderr output boundary tests are added yet" tests/README.md
 require_grep "No executable stdout adapter tests are added yet" tests/README.md
@@ -743,7 +768,7 @@ require_grep "No executable trailing-whitespace first-diagnostic capture tests a
 require_grep "No executable missing-final-newline first-diagnostic capture tests are added yet" tests/README.md
 require_grep "Executable CLI smoke tests now validate the runtime JSON envelope" tests/README.md
 require_grep "No executable source input boundary tests are added yet" tests/README.md
-require_grep "No executable list-rules formatter tests are added yet" tests/README.md
+require_grep "No dedicated Ari list-rules formatter unit tests are added yet" tests/README.md
 require_grep "config override skeleton" docs/dev/ari-implementation-plan.md
 require_grep "config override skeleton" docs/dev/roadmap.md
 require_grep "config text parser now handles" docs/dev/ari-implementation-plan.md

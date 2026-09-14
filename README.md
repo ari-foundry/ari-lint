@@ -50,6 +50,8 @@ here.
   compiler path or `ARI_COMPILER`, plus an Ari repository path or `ARI_REPO`.
 - CLI `--help` output.
 - CLI `--list-rules` output.
+- Exact human and JSON list-rules contracts with deterministic registry order,
+  short names, default severities, descriptions, and final newlines.
 - Compiler selection for source commands from explicit `--ari PATH` /
   `--ari=PATH`, then a present `ARI_COMPILER` environment entry, then the
   literal default `build/ari`.
@@ -81,8 +83,8 @@ here.
 - No Ari version compatibility claim is established yet.
 - A strict native-rule parity gate covers checked-in clean,
   trailing-whitespace, missing-final-newline, ordered multi-file, and duplicate
-  inputs. CLI, config, compiler-boundary, and broad golden parity remain open;
-  the wider local parity smoke/report is still report-only.
+  inputs. Remaining help/usage CLI, config, compiler-boundary, and broad golden
+  parity remain open; the wider local parity smoke/report is still report-only.
 - CI is not compiler-backed yet.
 - Child stderr and stdout are captured separately and parsed in deterministic
   stderr-then-stdout order. This can differ from the reference implementation's
@@ -188,19 +190,21 @@ Known differences from the current report-only parity smoke are tracked in
 [docs/dev/parity-differences.md](docs/dev/parity-differences.md). That document
 does not establish stable parity or release compatibility.
 
-Run the strict checked-in native-rule parity subset with an explicit build
-compiler and Ari checkout:
+Run the strict checked-in list-rules and native-rule subsets with an explicit
+build compiler and Ari checkout:
 
 ```sh
 scripts/parity-strict.sh /path/to/ari /path/to/ari-repo
 ```
 
 An optional third argument selects an already-built reference `ari-lint`.
-This gate uses identical relative operands, a deterministic no-output runtime
-compiler, and an explicit empty config. It compares standalone and reference
-JSON stdout byte-for-byte with checked-in goldens, requires equal empty stderr
-and exact expected exit status, and separately checks the final LF and JSON
-syntax. Passing this native subset is not a full parity or Ari release
+This gate checks separate exact standalone/reference list-rules contracts. For
+native rules it uses identical relative operands, a deterministic no-output
+runtime compiler, and an explicit empty config, then requires byte-identical
+JSON. Every case checks its approved golden, stdout/stderr selection, exit
+status, final LF, and JSON syntax where applicable. The list-rules cases also
+use a sentinel to prove that neither implementation invokes the selected Ari
+compiler. Passing these subsets is not a full parity or Ari release
 compatibility claim.
 
 ## Local Smoke Validation
@@ -258,6 +262,6 @@ fields for `lint/trailing-whitespace` and `lint/missing-final-newline`. Exact
 checks cover representative JSON and human output, including final newlines.
 Source invocations also exercise the compiler-backed `--check` boundary. The
 smoke covers dirty multi-file, clean/dirty, all-clean, duplicate-argument, and
-escaped path cases. Dedicated Ari tests, source-controlled broad goldens,
-strict parity, compiler-backed CI, and broad compiler-diagnostic goldens remain
-future work.
+escaped path cases. Dedicated Ari tests, broader source-controlled goldens,
+broader strict parity, compiler-backed CI, and broad compiler-diagnostic
+goldens remain future work.

@@ -160,7 +160,8 @@ It does not move `tools/lint` or change build behavior.
   human-readable list-rules formatter and standalone JSON extension build from
   the same metadata. The main-facing OS argv `--list-rules` path writes the
   selected form to stdout through the verified adapter without invoking the
-  compiler. Strict parity remains future work.
+  compiler. Exact standalone/reference list-rules contracts are now documented
+  and gated separately; broader CLI parity remains future work.
 - An internal stdout-free command dispatcher now maps parsed CLI arguments to
   internal command results. It routes list-rules requests to the internal
   human-readable list-rules formatter and routes source-file requests through
@@ -589,8 +590,10 @@ source-controlled runtime goldens, and strict parity remain follow-up work
 before this repository claims stable config behavior. The fixture plan is
 documented in `docs/dev/config-precedence-fixtures.md`.
 
-The exact JSON schema and human-readable diagnostic text remain unstable and
-need follow-up before this repository claims standalone output compatibility.
+The exact source-diagnostic JSON schema and human-readable source-diagnostic
+text remain unstable and need follow-up before this repository claims standalone
+output compatibility. The separately documented list-rules contract is already
+gated by exact goldens.
 
 ### Phase 4: first rules
 
@@ -786,9 +789,9 @@ usable.
   selected for the standalone implementation.
 - CLI metadata value construction may change once Ari constant or collection
   syntax is selected for the standalone implementation.
-- Diagnostic output and internal list-rules value construction may change once
-  broader Ari constant or collection syntax is selected for the standalone
-  implementation.
+- Internal diagnostic output construction may change as long as its public
+  contract remains intact. Public list-rules metadata or serialization changes
+  require a contract review and matching exact golden updates.
 - Source directories may accidentally collect README-style documentation unless
   docs stay under `docs/`.
 - The source-only parity runner skeleton may be mistaken for the local shell

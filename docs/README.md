@@ -25,10 +25,15 @@ checks. The implementation plan is tracked in
 [docs/dev/ari-implementation-plan.md](dev/ari-implementation-plan.md).
 
 Parity testing against the current bundled/reference `tools/lint` behavior is
-planned in [docs/dev/parity-test-plan.md](dev/parity-test-plan.md). A local
-report-only parity runner exists; a strict gate does not.
+tracked in [docs/dev/parity-test-plan.md](dev/parity-test-plan.md). A local
+report-only runner and strict list-rules/native-rule subsets exist; broader
+CLI, config, and compiler-boundary parity remains open.
 Known parity differences from the current report-only local smoke are tracked
 in [docs/dev/parity-differences.md](dev/parity-differences.md).
+
+The standalone rule-registry listing schema, exact stream/status behavior, and
+intentional differences from the bundled reference are defined in
+[docs/list-rules.md](list-rules.md).
 
 Local compiler selection and the remaining pinned CI provisioning work are
 documented in

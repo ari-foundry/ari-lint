@@ -555,22 +555,23 @@ output and `"name":"trailing-whitespace"` in JSON output. Original `tools/lint`
 lists the same rule codes and default severities for both invocations but does
 not emit those short name fields.
 
-Classification: original `tools/lint` behavior difference and expected known
-difference while standalone rule metadata remains implementation-owned by
-`ari-lint`.
+Classification: explicit standalone CLI contract difference. Rule metadata and
+the JSON registry form are implementation-owned by `ari-lint` and documented in
+`docs/list-rules.md`.
 
 Impact:
 
-- exact `--list-rules` or `--json --list-rules` text equality is not expected
-  yet
+- exact standalone/reference byte equality is intentionally not expected
 - the local parity report records the difference without failing
-- release compatibility claims must not be made from the current report
+- the strict runner gates separate exact standalone and reference snapshots
+- this contract decision does not establish release compatibility
 
 Follow-up:
 
-- decide whether short rule name fields are part of the future standalone
-  public output contract
-- add strict list-rules golden checks only after the contract is documented
+- update `docs/list-rules.md` and its exact goldens together for an intentional
+  registry or schema change
+- keep this CLI contract difference outside the five compiler-runtime
+  allowlist categories
 
 ## Current Alignment Signals
 
@@ -598,8 +599,10 @@ include-path forwarding, ordinary compiler diagnostics, missing compiler
 compiler exit is nonzero or any diagnostic remains. These are local smoke
 signals, not a compatibility claim.
 
-These are smoke signals only. They do not replace source-controlled fixtures,
-golden output, strict parity, or compiler-backed CI jobs.
+These report-only signals do not replace the strict subsets or compiler-backed
+CI. Separate source-controlled native and list-rules goldens now gate their
+documented scopes; broader CLI, config, and compiler-boundary parity remains
+open.
 
 ## Non-Goals
 
