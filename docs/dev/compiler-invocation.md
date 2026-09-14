@@ -1,133 +1,116 @@
-# Ari Compiler Invocation Plan
+# Ari Compiler Invocation Contract
 
 ## Purpose
 
-This document defines the future invocation contract for selecting an Ari
-compiler binary for `ari-lint` compiler-backed behavior.
-
-This step does not implement CLI parsing, environment-variable handling,
-compiler execution, or `ari --check`.
+This document records the standalone `ari-lint` compiler-selection and
+argument-forwarding boundary. The near-term dependency model remains invoking
+an external Ari compiler with `--check`; compiler execution itself is not yet
+wired into the main command.
 
 ## Current Status
 
-- Compiler provisioning is documented but not implemented.
-- `scripts/check.sh` does not run the compiler.
-- `--ari PATH` and `ARI_COMPILER` are future invocation concepts in this
-  repository unless they are implemented later.
-- Compiler-backed behavior is future work.
-- Current `tools/lint` in `ari-foundry/ari` remains the reference
-  implementation.
+- The CLI accepts `--ari PATH` and `--ari=PATH`.
+- Source-lint commands validate an explicit compiler path for existence and
+  executability. Help and rule listing do not require a compiler.
+- The CLI accepts both `-I DIR` and `-IDIR` and retains include paths in command
+  order.
+- Compiler argv is planned once per input file as `-I DIR ... FILE --check`.
+- The planned boundary does not spawn the compiler or capture its output yet.
+- `ARI_COMPILER` and the reference default `build/ari` fallback are not wired
+  into the standalone command yet.
 
-## Invocation Sources
+The bundled implementation in `ari-foundry/ari` remains the behavior reference.
+The current source evidence is `tools/lint/main.cpp` and
+`tools/lint/checker.cpp`; the standalone code must not copy those files.
 
-Future compiler invocation may use these sources:
+## Selection Precedence
 
-- explicit `--ari PATH`
-- `ARI_COMPILER` environment variable
+The reference implementation selects the compiler in this order:
 
-Future standalone `ari-lint` should not use:
+1. `--ari PATH`
+2. `ARI_COMPILER`, when the environment entry is present
+3. the literal path `build/ari`
 
-- implicit monorepo-relative defaults
-- network download fallback
-- package-manager fallback
+The standalone command currently implements only the explicit CLI selection.
+Environment/default resolution must be added and tested before the standalone
+tool claims full selection parity. A present-but-empty `ARI_COMPILER` value is
+observable reference behavior and needs an explicit fixture.
 
-## Precedence
+## Per-File Argument Contract
 
-The current bundled/reference implementation in `ari-foundry/ari` uses
-`ARI_COMPILER` only when `--ari PATH` is not provided, so future standalone
-behavior should prefer `--ari PATH` over `ARI_COMPILER` if that remains the
-confirmed contract.
+The reference launches one compiler process for each positional source file,
+preserving source-file order. For every file, arguments after the compiler
+program are:
 
-Standalone precedence tests and compatibility policy do not exist yet.
+```text
+-I DIR ... FILE --check
+```
 
-needs follow-up
+Each include path is forwarded as a separate `-I`, `DIR` pair, in CLI order.
+The source path keeps the user's spelling. `--check` is last. Multiple source
+files must not be grouped into one compiler invocation because the Ari driver
+accepts one positional input for this path.
 
-Do not invent final behavior if future Ari reference behavior changes or is not
-confirmed by docs, source, and tests.
+The current Ari implementation models this as:
 
-## Validation Rules
+- `planned_invocation_count`: the positional source count
+- `planned_argument_count_per_invocation`: two arguments for `FILE --check`,
+  plus two for every include path
+- `uses_per_file_argv`: true
 
-Future compiler path validation should check that:
+## Validation And Execution
 
-- path must exist
-- path must be executable
-- path should identify an Ari compiler binary
-- version/tag/commit should be recorded when available
-- invalid path should produce a clear error
-- missing compiler should not silently fall back to unrelated binaries
+The current explicit-path preflight distinguishes ready, missing, and
+non-executable paths. This is a temporary standalone boundary: strict runtime
+parity requires unavailable compilers to become per-file compiler failures
+with an `ari/compiler-check-failed` diagnostic rather than a stderr-only early
+return.
 
-These are planned rules, not implemented in this step.
+When execution is added, it must:
 
-## Failure Behavior
+- invoke the selected executable directly, without a shell
+- capture stderr and stdout for compiler diagnostic parsing
+- preserve the raw per-file compiler status for JSON `exitCode`
+- normalize process-launch failures consistently with the reference contract
+- continue native lint rules after a per-file compiler failure
+- never call or copy the bundled `tools/lint` implementation
 
-Future compiler invocation should define behavior for:
+## Test Contract
 
-- missing `--ari` path
-- non-existent path
-- non-executable path
-- compiler invocation failure
-- compiler returns unsupported output
-- compiler crashes
-- incompatible compiler version
-
-Exact diagnostic wording or exit status:
-
-needs follow-up
-
-## Test Runner Integration
-
-Fixture-shape checks remain compiler-free.
-
-Helper-level tests should remain compiler-free.
-
-Future compiler-boundary tests must require explicit compiler provisioning.
-
-A future parity runner must record compiler identity.
-
-JSON golden tests should wait until the schema is stable.
+Compiler-free checks should cover token parsing and planned argv structure.
+Fake executable fixtures should cover exact argv order, one invocation per
+file, selection precedence, output capture, missing executables, nonzero exits,
+and signals. Compiler-backed integration must use an explicitly provisioned,
+pinned Ari release or commit and record that identity.
 
 ## Security And Reproducibility
 
-Do not execute arbitrary compiler paths implicitly.
-
-Do not download compiler binaries automatically in lightweight checks.
-
-CI must pin compiler source by release tag or commit when compiler-backed tests
-are added.
-
-Logs should record compiler identity without leaking secrets.
+Do not execute compiler paths for help or metadata-only commands. Do not invoke
+the compiler through a shell. CI must pin and verify any downloaded compiler
+artifact, and must not silently choose an unrelated executable.
 
 ## Issue Routing
 
-Compiler bugs go to `ari-foundry/ari`.
-
-Standard library bugs go to `ari-foundry/ari`.
-
-Ari language/toolchain limitations go to `ari-foundry/ari`.
-
-`ari-lint` issues should track lint behavior, config, diagnostics, CLI, docs,
-tests, and Ari-language implementation.
-
-Cross-boundary issues should link both repos if needed.
+Compiler, standard-library, and language/toolchain bugs belong in
+`ari-foundry/ari`. Compiler-boundary parsing, forwarding, diagnostics, config,
+tests, and documentation belong in `ari-lint`.
 
 ## Follow-up Checklist
 
-- [ ] Confirm current `--ari` behavior from ari reference implementation
-- [ ] Confirm whether `ARI_COMPILER` is supported
-- [ ] Decide precedence between `--ari` and `ARI_COMPILER`
-- [ ] Define missing/non-executable compiler diagnostics
-- [ ] Define compiler identity recording format
-- [ ] Add CLI metadata update only after behavior is confirmed
-- [ ] Add implementation only after tests are planned
+- [x] Confirm `--ari` behavior from the reference source.
+- [x] Confirm `ARI_COMPILER` and `build/ari` fallback behavior from source.
+- [x] Confirm one-process-per-file `-I DIR ... FILE --check` ordering.
+- [x] Parse `--ari`, `-I DIR`, and `-IDIR` in the standalone CLI.
+- [x] Model the exact per-file compiler argv.
+- [ ] Resolve `--ari` / `ARI_COMPILER` / `build/ari` at runtime.
+- [ ] Execute the compiler and capture output.
+- [ ] Parse and normalize compiler diagnostics.
+- [ ] Replace temporary explicit-path early failures with per-file results.
+- [ ] Add fake-compiler and pinned real-compiler tests.
 
-## Non-Goals
+## Non-Goals Of The Current Slice
 
-- Do not implement `--ari` parsing in this step.
-- Do not implement `ARI_COMPILER` handling in this step.
-- Do not add compiler execution to CI in this step.
-- Do not add direct `ari --check` invocation to this repository or CI in this
-  step.
-- Do not add compiler download or build automation in this step.
-- Do not add `tools/lint` execution to CI in this step.
-- Do not add a strict parity gate in this step.
-- Do not add compatibility claims in this step.
+- No compiler process is spawned.
+- No network download or compiler build is added.
+- No compiler-backed CI or strict parity claim is added.
+- No Ari compatibility or release claim is made.
