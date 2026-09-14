@@ -1,11 +1,13 @@
 # ari-lint Config Precedence Fixture Plan
 
-This document records the narrow source-controlled fixture plan and the current
-executable smoke coverage for `ari-lint` configuration precedence behavior.
+This document records the narrow source-controlled fixture set, executable
+smoke coverage, and initial strict parity subset for `ari-lint` configuration
+precedence behavior.
 
-It does not add dedicated Ari parser tests, compiler invocation, `ari --check`,
-`tools/lint`, package manager wiring, release automation, strict parity, or
-compatibility claims.
+It does not add dedicated Ari parser tests, real-compiler validation, package
+manager wiring, release automation, broad strict parity, or compatibility
+claims. The local strict runner invokes the bundled `tools/lint` reference only
+when explicitly requested by a developer.
 
 ## Current Status
 
@@ -28,8 +30,11 @@ fixture set's key contents and exact line order only. Separately,
 `scripts/smoke.sh` builds and executes the standalone CLI against generated
 temporary configs to cover per-source discovery, explicit-config precedence,
 CLI-last precedence, and config error output; the pinned compiler-smoke CI now
-runs that suite. Dedicated Ari tests, source-controlled runtime goldens, and
-strict config parity remain future work.
+runs that suite. The local `scripts/parity-strict.sh` runner uses the committed
+config fixtures to gate explicit severity, `off` suppression, and CLI-last
+override behavior against exact source-controlled JSON goldens, plus one exact
+human-output golden. Dedicated Ari unit tests and broader strict discovery and
+config-error coverage remain future work.
 
 ## Implemented Precedence
 
@@ -41,8 +46,9 @@ The implemented precedence order is:
 3. command-line `--rule` overrides
 
 Later matching overrides in the caller-provided override list win. The local
-executable smoke exercises this order, but it is not a strict parity or release
-compatibility claim.
+executable smoke exercises the broader order, while the initial strict subset
+gates default-to-explicit severity changes, explicit `off`, and a later CLI
+override. Neither is a release compatibility claim.
 
 ## Fixture Areas
 
@@ -68,15 +74,18 @@ The current fixture set is intentionally narrow:
 - `tests/fixtures/config-precedence/invalid.rules`
 
 The lightweight checks do not parse these committed fixtures with Ari code.
-They only verify presence, exact line order, and expected text. The separate
-executable smoke uses generated temporary config files rather than these
-source-controlled fixtures. Dedicated Ari tests must still connect committed
-fixture data to config parsing and precedence behavior.
+They only verify presence, exact line order, expected text, and strict-runner
+wiring. The strict runner passes the committed discovered/explicit config files
+through both executable implementations; the separate executable smoke uses
+generated temporary config files for broader cases. Dedicated Ari unit tests
+remain future work.
 
-Broad source-controlled golden JSON, compiler invocation, `ari --check`,
-`tools/lint`, and broad source fixture expansion remain outside this fixture
-plan until those behaviors are explicitly scoped.
+Broader source-controlled golden coverage, real-compiler validation, and broad
+source fixture expansion remain outside this fixture plan until those
+behaviors are explicitly scoped.
 
-Config precedence must not be documented as stable release compatibility until
-dedicated Ari tests, source-controlled runtime goldens, and strict parity checks
-exist.
+The initial strict subset is a reviewed pre-release config behavior contract.
+Config precedence must not be documented as stable release compatibility from
+this subset; broader discovery, config-error, and multi-source strict coverage
+plus a deliberate compatibility entry remain separate requirements for any
+support claim.

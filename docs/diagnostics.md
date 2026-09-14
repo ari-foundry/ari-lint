@@ -228,6 +228,7 @@ invocation-wide stderr error instead.
 The current contract is exercised by:
 
 - checked-in exact native JSON goldens under `tests/golden/native/`
+- checked-in exact config JSON and human goldens under `tests/golden/config/`
 - checked-in combined compiler/native JSON and human goldens under
   `tests/golden/compiler-boundary/`
 - exact JSON and human compiler/config cases in `scripts/smoke.sh`

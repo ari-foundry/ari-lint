@@ -1,0 +1,1 @@
+{"files":[{"path":"tests/fixtures/missing-final-newline/missing-final-newline.ari","exitCode":0,"diagnostics":[{"file":"tests/fixtures/missing-final-newline/missing-final-newline.ari","line":3,"column":2,"endLine":3,"endColumn":3,"severity":"error","message":"missing final newline","source":"ari-lint","code":"lint/missing-final-newline"}]}]}

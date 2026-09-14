@@ -1,0 +1,1 @@
+{"files":[{"path":"tests/fixtures/trailing-whitespace/trailing-spaces.ari","exitCode":0,"diagnostics":[{"file":"tests/fixtures/trailing-whitespace/trailing-spaces.ari","line":1,"column":19,"endLine":1,"endColumn":20,"severity":"error","message":"trailing whitespace","source":"ari-lint","code":"lint/trailing-whitespace"}]}]}

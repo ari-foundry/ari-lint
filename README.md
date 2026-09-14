@@ -90,10 +90,12 @@ here.
 - No Ari version compatibility claim is established yet.
 - A strict native-rule parity gate covers checked-in clean,
   trailing-whitespace, missing-final-newline, ordered multi-file, and duplicate
-  inputs. One strict compiler-boundary case covers exact `SOURCE --check` argv
-  plus combined compiler/native JSON and human output. Remaining help/usage
-  CLI, config, broader compiler-boundary, and broad golden parity remain open;
-  the wider local parity smoke/report is still report-only.
+  inputs. An initial strict config subset covers explicit severity, `off`, and
+  CLI-last override behavior. One strict compiler-boundary case covers exact
+  `SOURCE --check` argv plus combined compiler/native JSON and human output.
+  Remaining help/usage CLI, broader config and compiler-boundary behavior, and
+  broad golden parity remain open; the wider local parity smoke/report is still
+  report-only.
 - Compiler-backed CI covers one pinned prerelease baseline only; it is not an
   Ari compatibility matrix or support claim.
 - Child stderr and stdout are captured separately and parsed in deterministic
@@ -203,8 +205,8 @@ Known differences from the current report-only parity smoke are tracked in
 [docs/dev/parity-differences.md](docs/dev/parity-differences.md). That document
 does not establish stable parity or release compatibility.
 
-Run the strict checked-in list-rules, native-rule, and compiler-boundary subsets
-with an explicit build compiler and Ari checkout:
+Run the strict checked-in list-rules, native-rule, explicit-config, and
+compiler-boundary subsets with an explicit build compiler and Ari checkout:
 
 ```sh
 scripts/parity-strict.sh /path/to/ari /path/to/ari-repo
@@ -214,12 +216,15 @@ An optional third argument selects an already-built reference `ari-lint`.
 This gate checks separate exact standalone/reference list-rules contracts. For
 native rules it uses identical relative operands, a deterministic no-output
 runtime compiler, and an explicit empty config, then requires byte-identical
-JSON. The compiler-boundary case uses an argv-checking fixture compiler and
-requires exact combined compiler/native JSON and human output. Every case
-checks its approved golden, stdout/stderr selection, exit status, final LF, and
-JSON syntax where applicable. The list-rules cases also use a sentinel to prove
-that neither implementation invokes the selected Ari compiler. Passing these
-subsets is not a full parity or Ari release compatibility claim.
+JSON. The config subset uses committed explicit config fixtures and gates
+severity changes, `off` suppression, and CLI-last precedence with exact JSON
+plus one exact human result. The compiler-boundary case uses an argv-checking
+fixture compiler and requires exact combined compiler/native JSON and human
+output. Every case checks its approved golden, stdout/stderr selection, exit
+status, final LF, and JSON syntax where applicable. The list-rules cases also
+use a sentinel to prove that neither implementation invokes the selected Ari
+compiler. Passing these subsets is not a full parity or Ari release
+compatibility claim.
 
 ## Local Smoke Validation
 
