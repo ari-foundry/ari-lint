@@ -1,0 +1,975 @@
+// Per-source Ari compiler execution and compiler diagnostic parsing.
+//
+// The process boundary invokes the selected compiler directly with the exact
+// argument order `-I DIR ... SOURCE --check`. It concurrently drains both
+// output streams, parses reference-shaped Ari diagnostics, and lets the caller
+// copy any retained diagnostic or fallback text before the per-process scratch
+// zone is released. Ari exposes separate pipes, so in-limit parsing uses a
+// deterministic stderr-then-stdout concatenation without a separator. Each
+// stream retains at most 256 KiB while excess bytes are drained and discarded.
+
+pub struct CompilerExecution {
+  mut exit_code: i64,
+  mut launch_failed: bool,
+  mut output_truncated: bool,
+}
+
+struct CapturedCompilerOutput {
+  captured: bool,
+  exit_code: i64,
+  stderr_truncated: bool,
+  stdout_truncated: bool,
+}
+
+struct DrainStep {
+  progressed: bool,
+  reached_eof: bool,
+  failed: bool,
+  truncated: bool,
+}
+
+struct SeverityHeader {
+  matched: bool,
+  severity: super::severity::Severity,
+  code: Slice[u8],
+  body_start: i64,
+}
+
+struct ParsedCoordinate {
+  matched: bool,
+  value: i64,
+}
+
+struct ParsedCompilerDiagnostic {
+  matched: bool,
+  file: Slice[u8],
+  line: i64,
+  column: i64,
+  severity: super::severity::Severity,
+  code: Slice[u8],
+  message: Slice[u8],
+}
+
+pub struct CompilerDiagnosticBudget {
+  mut remaining_count: i64,
+  mut remaining_payload_bytes: i64,
+  mut exhausted: bool,
+}
+
+pub struct CompilerDiagnosticParseResult {
+  diagnostic_count: i64,
+  diagnostics_truncated: bool,
+}
+
+fn unmatched_header() -> SeverityHeader {
+  return SeverityHeader {
+    matched: false,
+    severity: super::severity::Error,
+    code: "",
+    body_start: 0,
+  };
+}
+
+fn unmatched_coordinate() -> ParsedCoordinate {
+  return ParsedCoordinate {
+    matched: false,
+    value: 0,
+  };
+}
+
+fn unmatched_diagnostic() -> ParsedCompilerDiagnostic {
+  return ParsedCompilerDiagnostic {
+    matched: false,
+    file: "",
+    line: 1,
+    column: 1,
+    severity: super::severity::Error,
+    code: "",
+    message: "",
+  };
+}
+
+fn bytes_match_at(
+  values: Slice[u8],
+  offset: i64,
+  expected: Slice[u8]
+) -> bool {
+  if offset < 0 || offset + expected.len() > values.len() {
+    return false;
+  }
+  var index = 0;
+  while index < expected.len() {
+    if values.get(offset + index) != expected.get(index) {
+      return false;
+    }
+    index = index + 1;
+  }
+  return true;
+}
+
+fn next_byte(values: Slice[u8], start: i64, value: u8) -> i64 {
+  var index = start;
+  while index < values.len() {
+    if values.get(index) == value {
+      return index;
+    }
+    index = index + 1;
+  }
+  return -1;
+}
+
+fn contains_byte(values: Slice[u8], value: u8) -> bool {
+  return next_byte(values, 0, value) >= 0;
+}
+
+fn parse_coordinate(values: Slice[u8]) -> ParsedCoordinate {
+  if values.len() == 0 {
+    return unmatched_coordinate();
+  }
+  match std::ascii::parse_decimal(values) {
+    std::Some(value) => {
+      if value > 2147483647 {
+        return unmatched_coordinate();
+      }
+      var normalized = value;
+      if normalized < 1 {
+        normalized = 1;
+      }
+      return ParsedCoordinate {
+        matched: true,
+        value: normalized,
+      };
+    }
+    std::None => {
+      return unmatched_coordinate();
+    }
+  }
+}
+
+fn parse_severity_header(
+  line: Slice[u8],
+  start: i64
+) -> SeverityHeader {
+  var severity = super::severity::Error;
+  var cursor = start;
+  if bytes_match_at(line, start, "error") {
+    severity = super::severity::Error;
+    cursor = start + 5;
+  } else if bytes_match_at(line, start, "warning") {
+    severity = super::severity::Warning;
+    cursor = start + 7;
+  } else if bytes_match_at(line, start, "note") {
+    severity = super::severity::Note;
+    cursor = start + 4;
+  } else if bytes_match_at(line, start, "hint") {
+    severity = super::severity::Hint;
+    cursor = start + 4;
+  } else {
+    return unmatched_header();
+  }
+
+  var code: Slice[u8] = "";
+  if cursor < line.len() && line.get(cursor) == 91u8 {
+    let code_end = next_byte(line, cursor + 1, 93u8);
+    if code_end <= cursor + 1 {
+      return unmatched_header();
+    }
+    code = line.slice(cursor + 1, code_end);
+    cursor = code_end + 1;
+  }
+
+  if cursor + 1 >= line.len() || line.get(cursor) != 58u8 ||
+    line.get(cursor + 1) != 32u8 {
+    return unmatched_header();
+  }
+
+  return SeverityHeader {
+    matched: true,
+    severity: severity,
+    code: code,
+    body_start: cursor + 2,
+  };
+}
+
+fn parsed_diagnostic(
+  file: Slice[u8],
+  line: i64,
+  column: i64,
+  severity: super::severity::Severity,
+  code: Slice[u8],
+  message: Slice[u8]
+) -> ParsedCompilerDiagnostic {
+  return ParsedCompilerDiagnostic {
+    matched: true,
+    file: file,
+    line: line,
+    column: column,
+    severity: severity,
+    code: code,
+    message: message,
+  };
+}
+
+fn parse_file_location_body(
+  body: Slice[u8],
+  severity: super::severity::Severity,
+  code: Slice[u8]
+) -> ParsedCompilerDiagnostic {
+  var file_end = body.len() - 1;
+  while file_end >= 1 {
+    if body.get(file_end) == 58u8 {
+      let line_end = next_byte(body, file_end + 1, 58u8);
+      if line_end > file_end + 1 {
+        let column_end = next_byte(body, line_end + 1, 58u8);
+        if column_end > line_end + 1 && column_end + 1 < body.len() &&
+          body.get(column_end + 1) == 32u8 {
+          let parsed_line = parse_coordinate(
+            body.slice(file_end + 1, line_end)
+          );
+          let parsed_column = parse_coordinate(
+            body.slice(line_end + 1, column_end)
+          );
+          let file = body.slice(0, file_end);
+          let message = body.slice(column_end + 2, body.len());
+          if parsed_line.matched && parsed_column.matched &&
+            !contains_byte(file, 13u8) && !contains_byte(message, 13u8) {
+            return parsed_diagnostic(
+              file,
+              parsed_line.value,
+              parsed_column.value,
+              severity,
+              code,
+              message
+            );
+          }
+        }
+      }
+    }
+    file_end = file_end - 1;
+  }
+  return unmatched_diagnostic();
+}
+
+fn parse_fallback_location_body(
+  body: Slice[u8],
+  fallback_file: Slice[u8],
+  severity: super::severity::Severity,
+  code: Slice[u8]
+) -> ParsedCompilerDiagnostic {
+  let line_end = next_byte(body, 0, 58u8);
+  if line_end <= 0 {
+    return unmatched_diagnostic();
+  }
+  let column_end = next_byte(body, line_end + 1, 58u8);
+  if column_end <= line_end + 1 || column_end + 1 >= body.len() ||
+    body.get(column_end + 1) != 32u8 {
+    return unmatched_diagnostic();
+  }
+
+  let parsed_line = parse_coordinate(body.slice(0, line_end));
+  let parsed_column = parse_coordinate(body.slice(line_end + 1, column_end));
+  if !parsed_line.matched || !parsed_column.matched {
+    return unmatched_diagnostic();
+  }
+  let message = body.slice(column_end + 2, body.len());
+  if contains_byte(message, 13u8) {
+    return unmatched_diagnostic();
+  }
+  return parsed_diagnostic(
+    fallback_file,
+    parsed_line.value,
+    parsed_column.value,
+    severity,
+    code,
+    message
+  );
+}
+
+fn parse_file_first_diagnostic(line: Slice[u8]) -> ParsedCompilerDiagnostic {
+  var file_end = line.len() - 1;
+  while file_end >= 1 {
+    if line.get(file_end) == 58u8 {
+      let line_end = next_byte(line, file_end + 1, 58u8);
+      if line_end > file_end + 1 {
+        let column_end = next_byte(line, line_end + 1, 58u8);
+        if column_end > line_end + 1 && column_end + 1 < line.len() &&
+          line.get(column_end + 1) == 32u8 {
+          let parsed_line = parse_coordinate(
+            line.slice(file_end + 1, line_end)
+          );
+          let parsed_column = parse_coordinate(
+            line.slice(line_end + 1, column_end)
+          );
+          if parsed_line.matched && parsed_column.matched {
+            let header = parse_severity_header(line, column_end + 2);
+            if header.matched {
+              let file = line.slice(0, file_end);
+              let message = line.slice(header.body_start, line.len());
+              if contains_byte(file, 13u8) || contains_byte(message, 13u8) {
+                file_end = file_end - 1;
+                continue;
+              }
+              return parsed_diagnostic(
+                file,
+                parsed_line.value,
+                parsed_column.value,
+                header.severity,
+                header.code,
+                message
+              );
+            }
+          }
+        }
+      }
+    }
+    file_end = file_end - 1;
+  }
+  return unmatched_diagnostic();
+}
+
+fn parse_compiler_diagnostic_line(
+  line: Slice[u8],
+  fallback_file: Slice[u8]
+) -> ParsedCompilerDiagnostic {
+  var ari_header = unmatched_header();
+  if bytes_match_at(line, 0, "ari: ") {
+    ari_header = parse_severity_header(line, 5);
+    if ari_header.matched {
+      let body = line.slice(ari_header.body_start, line.len());
+      let with_file = parse_file_location_body(
+        body,
+        ari_header.severity,
+        ari_header.code
+      );
+      if with_file.matched {
+        return with_file;
+      }
+      let with_fallback = parse_fallback_location_body(
+        body,
+        fallback_file,
+        ari_header.severity,
+        ari_header.code
+      );
+      if with_fallback.matched {
+        return with_fallback;
+      }
+    }
+  }
+  let file_first = parse_file_first_diagnostic(line);
+  if file_first.matched {
+    return file_first;
+  }
+  if ari_header.matched {
+    let message = line.slice(ari_header.body_start, line.len());
+    if contains_byte(message, 13u8) {
+      return unmatched_diagnostic();
+    }
+    return parsed_diagnostic(
+      fallback_file,
+      1,
+      1,
+      ari_header.severity,
+      ari_header.code,
+      message
+    );
+  }
+  return unmatched_diagnostic();
+}
+
+fn append_owned_compiler_diagnostic(
+  zone: ref mut Zone,
+  parsed: ParsedCompilerDiagnostic,
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> void {
+  let owned_file = std::string::from_slice_in(zone, parsed.file);
+  var selected_code = parsed.code;
+  if selected_code.len() == 0 {
+    selected_code = "ari/compiler";
+  }
+  let owned_code = std::string::from_slice_in(zone, selected_code);
+  let owned_message = std::string::from_slice_in(zone, parsed.message);
+  diagnostics.push(super::diagnostic::compiler_diagnostic_from_span(
+    super::diagnostic::source_span_with_end(
+      owned_file.as_slice(),
+      parsed.line,
+      parsed.column,
+      0,
+      0
+    ),
+    parsed.severity,
+    owned_code.as_slice(),
+    owned_message.as_slice()
+  ));
+}
+
+fn compiler_diagnostic_owned_bytes(
+  parsed: ParsedCompilerDiagnostic
+) -> i64 {
+  var code_size = parsed.code.len();
+  if code_size == 0 {
+    code_size = 12;
+  }
+  return parsed.file.len() + code_size + parsed.message.len();
+}
+
+pub fn compiler_diagnostic_budget() -> CompilerDiagnosticBudget {
+  return CompilerDiagnosticBudget {
+    remaining_count: 4096,
+    remaining_payload_bytes: 1048576,
+    exhausted: false,
+  };
+}
+
+pub fn compiler_diagnostic_vector_capacity() -> i64 {
+  return 4112;
+}
+
+fn compiler_diagnostic_parse_result(
+  diagnostic_count: i64,
+  diagnostics_truncated: bool
+) -> CompilerDiagnosticParseResult {
+  return CompilerDiagnosticParseResult {
+    diagnostic_count: diagnostic_count,
+    diagnostics_truncated: diagnostics_truncated,
+  };
+}
+
+pub fn parse_ari_diagnostics_into(
+  zone: ref mut Zone,
+  text: Slice[u8],
+  fallback_file: Slice[u8],
+  budget: ref mut CompilerDiagnosticBudget,
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> CompilerDiagnosticParseResult {
+  let before_count = diagnostics.len();
+  var diagnostics_truncated = false;
+  var file_budget_exhausted = false;
+  var lines = std::string::lines(text);
+  while true {
+    match lines.next() {
+      std::Some(raw_line) => {
+        var line = raw_line;
+        if line.len() > 0 && line.get(line.len() - 1) == 13u8 {
+          line = line.slice(0, line.len() - 1);
+        }
+        let parsed = parse_compiler_diagnostic_line(line, fallback_file);
+        if parsed.matched {
+          let owned_bytes = compiler_diagnostic_owned_bytes(parsed);
+          if file_budget_exhausted || budget.exhausted {
+            diagnostics_truncated = true;
+          } else if diagnostics.len() - before_count >= 2048 {
+            file_budget_exhausted = true;
+            diagnostics_truncated = true;
+          } else if budget.remaining_count <= 0 ||
+            owned_bytes > budget.remaining_payload_bytes {
+            budget.exhausted = true;
+            diagnostics_truncated = true;
+          } else {
+            append_owned_compiler_diagnostic(zone, parsed, diagnostics);
+            budget.remaining_count = budget.remaining_count - 1;
+            budget.remaining_payload_bytes =
+              budget.remaining_payload_bytes - owned_bytes;
+          }
+        }
+      }
+      std::None => {
+        break;
+      }
+    }
+  }
+  return compiler_diagnostic_parse_result(
+    diagnostics.len() - before_count,
+    diagnostics_truncated
+  );
+}
+
+fn push_process_arg(
+  zone: ref mut Zone,
+  value: Slice[u8],
+  args: ref mut std::vec::Vec[std::process::Arg]
+) -> bool {
+  match std::process::arg_bytes(zone, value) {
+    std::Ok(argument) => {
+      args.push(argument);
+      return true;
+    }
+    std::Err(spawn_reason) => {
+      return false;
+    }
+  }
+}
+
+fn exec_failure_output(
+  zone: ref mut Zone,
+  compiler_path: Slice[u8]
+) -> std::string::String {
+  var output = std::string::new(zone, compiler_path.len() + 27);
+  output.append_string_in(zone, "ari-tooling: exec failed: ");
+  output.append_string_in(zone, compiler_path);
+  output.push('\n');
+  return output;
+}
+
+pub fn compiler_execution(
+  exit_code: i64,
+  launch_failed: bool,
+  output_truncated: bool
+) -> CompilerExecution {
+  return CompilerExecution {
+    exit_code: exit_code,
+    launch_failed: launch_failed,
+    output_truncated: output_truncated,
+  };
+}
+
+fn set_compiler_execution(
+  execution: ref mut CompilerExecution,
+  exit_code: i64,
+  launch_failed: bool,
+  output_truncated: bool
+) -> void {
+  execution.exit_code = exit_code;
+  execution.launch_failed = launch_failed;
+  execution.output_truncated = output_truncated;
+}
+
+fn normalized_exit_code(status: ref std::process::ExitStatus) -> i64 {
+  match status.code() {
+    std::Some(code) => {
+      return code;
+    }
+    std::None => {}
+  }
+  match status.signal() {
+    std::Some(signal) => {
+      return 128 + signal;
+    }
+    std::None => {
+      return 1;
+    }
+  }
+}
+
+fn compiler_stream_capture_limit() -> i64 {
+  return 262144;
+}
+
+pub fn compiler_scratch_capacity() -> i64 {
+  return 4194304;
+}
+
+fn drain_step(
+  progressed: bool,
+  reached_eof: bool,
+  failed: bool,
+  truncated: bool
+) -> DrainStep {
+  return DrainStep {
+    progressed: progressed,
+    reached_eof: reached_eof,
+    failed: failed,
+    truncated: truncated,
+  };
+}
+
+fn drain_one_if_ready(
+  reader: ref mut std::io::PipeReader,
+  bytes: ref mut std::string::String,
+  timeout_millis: i64
+) -> DrainStep {
+  match reader.as_fd().poll_read_millis(timeout_millis) {
+    std::Err(reason) => {
+      return drain_step(false, false, true, false);
+    }
+    std::Ok(ready) => {
+      if !ready {
+        return drain_step(false, false, false, false);
+      }
+    }
+  }
+
+  match reader.read_one() {
+    std::io::ReadByteValue(value) => {
+      if bytes.len() < compiler_stream_capture_limit() {
+        bytes.push(value);
+        return drain_step(true, false, false, false);
+      }
+      return drain_step(true, false, false, true);
+    }
+    std::io::ReadByteEof => {
+      return drain_step(true, true, false, false);
+    }
+    std::io::ReadByteError(read_reason) => {
+      return drain_step(false, false, true, false);
+    }
+  }
+}
+
+fn capture_failure() -> CapturedCompilerOutput {
+  return CapturedCompilerOutput {
+    captured: false,
+    exit_code: 127,
+    stderr_truncated: false,
+    stdout_truncated: false,
+  };
+}
+
+fn capture_compiler_output(
+  command: ref std::process::Command,
+  stdout_bytes: ref mut std::string::String,
+  stderr_bytes: ref mut std::string::String
+) -> CapturedCompilerOutput {
+  match command.spawn_piped() {
+    std::Err(reason) => {
+      return capture_failure();
+    }
+    std::Ok(child_value) => {
+      var child = child_value;
+      child.close_stdin();
+      var stdout_open = true;
+      var stderr_open = true;
+      var stdout_truncated = false;
+      var stderr_truncated = false;
+      var failed = false;
+
+      while (stdout_open || stderr_open) && !failed {
+        var progressed = false;
+        if stdout_open {
+          let stdout_now_step = drain_one_if_ready(
+            child.stdout(),
+            stdout_bytes,
+            0
+          );
+          if stdout_now_step.failed {
+            failed = true;
+          } else {
+            if stdout_now_step.reached_eof {
+              stdout_open = false;
+            }
+            if stdout_now_step.truncated {
+              stdout_truncated = true;
+            }
+            progressed = progressed || stdout_now_step.progressed;
+          }
+        }
+        if stderr_open && !failed {
+          let stderr_now_step = drain_one_if_ready(
+            child.stderr(),
+            stderr_bytes,
+            0
+          );
+          if stderr_now_step.failed {
+            failed = true;
+          } else {
+            if stderr_now_step.reached_eof {
+              stderr_open = false;
+            }
+            if stderr_now_step.truncated {
+              stderr_truncated = true;
+            }
+            progressed = progressed || stderr_now_step.progressed;
+          }
+        }
+        if !progressed && stdout_open && !failed {
+          let stdout_wait_step = drain_one_if_ready(
+            child.stdout(),
+            stdout_bytes,
+            25
+          );
+          if stdout_wait_step.failed {
+            failed = true;
+          } else {
+            if stdout_wait_step.reached_eof {
+              stdout_open = false;
+            }
+            if stdout_wait_step.truncated {
+              stdout_truncated = true;
+            }
+            progressed = progressed || stdout_wait_step.progressed;
+          }
+        }
+        if !progressed && stderr_open && !failed {
+          let stderr_wait_step = drain_one_if_ready(
+            child.stderr(),
+            stderr_bytes,
+            25
+          );
+          if stderr_wait_step.failed {
+            failed = true;
+          } else {
+            if stderr_wait_step.reached_eof {
+              stderr_open = false;
+            }
+            if stderr_wait_step.truncated {
+              stderr_truncated = true;
+            }
+          }
+        }
+      }
+
+      child.close_stdout();
+      child.close_stderr();
+      if failed {
+        child.kill(9);
+      }
+      while true {
+        match child.wait_status() {
+          std::Err(wait_reason) => {
+            if std::error::is_interrupted(ref wait_reason) {
+              continue;
+            }
+            return capture_failure();
+          }
+          std::Ok(status) => {
+            if failed {
+              return capture_failure();
+            }
+            return CapturedCompilerOutput {
+              captured: true,
+              exit_code: normalized_exit_code(ref status),
+              stderr_truncated: stderr_truncated,
+              stdout_truncated: stdout_truncated,
+            };
+          }
+        }
+      }
+    }
+  }
+}
+
+fn complete_line_prefix(values: Slice[u8], truncated: bool) -> Slice[u8] {
+  if !truncated {
+    return values;
+  }
+  var index = values.len();
+  while index > 0 {
+    if values.get(index - 1) == 10u8 {
+      return values.slice(0, index);
+    }
+    index = index - 1;
+  }
+  return "";
+}
+
+fn merged_output(
+  zone: ref mut Zone,
+  stderr: Slice[u8],
+  stdout: Slice[u8]
+) -> std::string::String {
+  var text = std::string::new(zone, stderr.len() + stdout.len());
+  var index = 0;
+  while index < stderr.len() {
+    text.push(stderr.get(index));
+    index = index + 1;
+  }
+  index = 0;
+  while index < stdout.len() {
+    text.push(stdout.get(index));
+    index = index + 1;
+  }
+  return text;
+}
+
+pub fn run_compiler_capture(
+  scratch: ref mut Zone,
+  compiler_path: Slice[u8],
+  include_paths: ref std::vec::Vec[std::string::String],
+  source_file: Slice[u8],
+  execution: ref mut CompilerExecution
+) -> std::string::String {
+  let program_result = std::c::from_slice_in(scratch, compiler_path);
+  if program_result.is_err() {
+    set_compiler_execution(execution, 127, true, false);
+    return exec_failure_output(scratch, compiler_path);
+  }
+  let program = program_result.unwrap();
+
+  var args = std::vec::new<std::process::Arg>(
+    scratch,
+    2 + (include_paths.len() * 2)
+  );
+  var include_index = 0;
+  while include_index < include_paths.len() {
+    let include_path = include_paths.get(include_index);
+    if !push_process_arg(scratch, "-I", ref mut args) ||
+      !push_process_arg(
+        scratch,
+        include_path.as_slice(),
+        ref mut args
+      ) {
+      set_compiler_execution(execution, 127, true, false);
+      return exec_failure_output(scratch, compiler_path);
+    }
+    include_index = include_index + 1;
+  }
+  if !push_process_arg(scratch, source_file, ref mut args) ||
+    !push_process_arg(scratch, "--check", ref mut args) {
+    set_compiler_execution(execution, 127, true, false);
+    return exec_failure_output(scratch, compiler_path);
+  }
+
+  let command = std::process::Command::with_args(
+    program.as_c_str(),
+    args.as_slice()
+  );
+  var stdout_bytes = std::string::new(
+    scratch,
+    compiler_stream_capture_limit()
+  );
+  var stderr_bytes = std::string::new(
+    scratch,
+    compiler_stream_capture_limit()
+  );
+  let captured = capture_compiler_output(
+    ref command,
+    ref mut stdout_bytes,
+    ref mut stderr_bytes
+  );
+  if !captured.captured {
+    set_compiler_execution(execution, 127, true, false);
+    return exec_failure_output(scratch, compiler_path);
+  }
+
+  let output_truncated = captured.stderr_truncated ||
+    captured.stdout_truncated;
+  set_compiler_execution(
+    execution,
+    captured.exit_code,
+    false,
+    output_truncated
+  );
+  if output_truncated {
+    return merged_output(
+      scratch,
+      complete_line_prefix(
+        stderr_bytes.as_slice(),
+        captured.stderr_truncated
+      ),
+      complete_line_prefix(
+        stdout_bytes.as_slice(),
+        captured.stdout_truncated
+      )
+    );
+  }
+  return merged_output(
+    scratch,
+    stderr_bytes.as_slice(),
+    stdout_bytes.as_slice()
+  );
+}
+
+fn append_compiler_failure_diagnostic(
+  zone: ref mut Zone,
+  source_file: Slice[u8],
+  fallback_output: Slice[u8],
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> void {
+  var base_message: Slice[u8] = "compiler check failed";
+  if fallback_output.len() > 0 {
+    base_message = fallback_output;
+  }
+  let message = std::string::from_slice_in(zone, base_message);
+  let owned_file = std::string::from_slice_in(zone, source_file);
+  diagnostics.push(super::diagnostic::compiler_diagnostic_from_span(
+    super::diagnostic::source_span_with_end(
+      owned_file.as_slice(),
+      1,
+      1,
+      0,
+      0
+    ),
+    super::severity::Error,
+    "ari/compiler-check-failed",
+    message.as_slice()
+  ));
+}
+
+fn reserve_compiler_failure_output_payload(
+  budget: ref mut CompilerDiagnosticBudget,
+  source_file: Slice[u8],
+  fallback_output: Slice[u8]
+) -> bool {
+  let required_payload = source_file.len() + 25 + fallback_output.len();
+  if budget.exhausted ||
+    required_payload > budget.remaining_payload_bytes {
+    budget.exhausted = true;
+    return false;
+  }
+  budget.remaining_payload_bytes =
+    budget.remaining_payload_bytes - required_payload;
+  return true;
+}
+
+pub fn append_compiler_output_truncated_diagnostic(
+  zone: ref mut Zone,
+  source_file: Slice[u8],
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> void {
+  let owned_file = std::string::from_slice_in(zone, source_file);
+  diagnostics.push(super::diagnostic::compiler_diagnostic_from_span(
+    super::diagnostic::source_span_with_end(
+      owned_file.as_slice(),
+      1,
+      1,
+      0,
+      0
+    ),
+    super::severity::Error,
+    "ari/compiler-output-truncated",
+    "compiler output truncated at 262144 bytes per stream; later diagnostics may be unavailable"
+  ));
+}
+
+pub fn append_compiler_diagnostics_truncated_diagnostic(
+  zone: ref mut Zone,
+  source_file: Slice[u8],
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> void {
+  let owned_file = std::string::from_slice_in(zone, source_file);
+  diagnostics.push(super::diagnostic::compiler_diagnostic_from_span(
+    super::diagnostic::source_span_with_end(
+      owned_file.as_slice(),
+      1,
+      1,
+      0,
+      0
+    ),
+    super::severity::Error,
+    "ari/compiler-diagnostics-truncated",
+    "compiler diagnostics truncated after 2048 diagnostics per file, 4096 diagnostics per run, or 1048576 payload bytes per run; later diagnostics may be unavailable"
+  ));
+}
+
+pub fn append_compiler_failure_diagnostics(
+  zone: ref mut Zone,
+  source_file: Slice[u8],
+  fallback_output: Slice[u8],
+  budget: ref mut CompilerDiagnosticBudget,
+  diagnostics_truncation_already_reported: bool,
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> void {
+  var selected_output = fallback_output;
+  var output_omitted = false;
+  if fallback_output.len() > 0 &&
+    !reserve_compiler_failure_output_payload(
+      budget,
+      source_file,
+      fallback_output
+    ) {
+    selected_output = "";
+    output_omitted = true;
+  }
+  if output_omitted && !diagnostics_truncation_already_reported {
+    append_compiler_diagnostics_truncated_diagnostic(
+      zone,
+      source_file,
+      diagnostics
+    );
+  }
+  append_compiler_failure_diagnostic(
+    zone,
+    source_file,
+    selected_output,
+    diagnostics
+  );
+}

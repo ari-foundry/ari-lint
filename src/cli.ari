@@ -2,10 +2,10 @@
 // stdout-free dispatch, internal exit-code data, explicit-token list-rules
 // command wiring, explicit-token entry point, OS argv integration, a
 // main-facing output path, an internal source-file lint path, explicit config
-// path capture, explicit compiler path capture, compiler check planning,
-// compiler path validation/result modeling, parent-directory config discovery,
-// explicit config override application, and an internal caller-provided
-// diagnostic collection path.
+// path capture, Ari compiler selection and per-source execution, retained
+// compiler planning/validation models for internal callers, parent-directory
+// config discovery, explicit config override application, and an internal
+// caller-provided diagnostic collection path.
 // The positional source file input and documented options are represented here.
 // This file reads process arguments only through the verified std::env::args
 // boundary. Main now returns the internal command exit-code mapping through
@@ -18,12 +18,14 @@
 // caller-provided vector and records each file's diagnostic range. The
 // main-facing path writes list-rules text, reference-shaped source JSON, or
 // reference-shaped human source results to stdout. CLI help is stdout; CLI
-// parse, config-read, source-read, and temporary compiler-path errors use
-// stderr through the verified output adapters.
+// parse and explicit-config errors use stderr through the verified output
+// adapters. Source commands select --ari, then ARI_COMPILER, then build/ari;
+// they execute one direct `-I DIR ... SOURCE --check` process per source and
+// combine compiler, discovered-config, and native-rule diagnostics.
 // Missing source-file input writes a short stderr summary. It does not read
 // compiler-selection environment variables or home/global/XDG config
-// locations, recursively scan source trees, call tools/lint, call process exit,
-// or invoke ari --check.
+// locations, recursively scan source trees, call tools/lint, or call process
+// exit directly.
 
 pub struct CliOptionMetadata {
   name: Slice[u8],
@@ -307,6 +309,17 @@ fn cli_file_lint_exit_code(
     return cli_unavailable_exit_code(zone);
   }
   if diagnostic_count > 0 {
+    return cli_lint_failure_exit_code(zone);
+  }
+  return cli_success_exit_code(zone);
+}
+
+fn cli_source_run_exit_code(
+  zone: ref mut Zone,
+  diagnostic_count: i64,
+  compiler_failure_count: i64
+) -> CliExitCodeMapping {
+  if diagnostic_count > 0 || compiler_failure_count > 0 {
     return cli_lint_failure_exit_code(zone);
   }
   return cli_success_exit_code(zone);
@@ -684,7 +697,7 @@ pub fn compiler_path_validation_from_boundary(
       false,
       0,
       "compiler-path/not-provided",
-      "No explicit compiler path was provided; environment fallback and missing compiler diagnostics remain future work."
+      "No explicit compiler path was provided to this data-only validation helper; the main runtime selects environment or default fallbacks separately."
     );
   }
 
@@ -712,7 +725,7 @@ pub fn compiler_path_validation_from_boundary(
     true,
     0,
     "",
-    "Explicit compiler path exists and is executable; compiler execution remains future work."
+    "Explicit compiler path exists and is executable; this data-only validation helper does not execute it."
   );
 }
 
@@ -778,7 +791,7 @@ pub fn compiler_check_result_not_run_from_boundary(
     stderr_available: false,
     invokes_compiler: false,
     calls_tools_lint: false,
-    detail: "Compiler check result is modeled but not executed; ari --check remains future work.",
+    detail: "Compiler check result is modeled but not executed by this data-only planning helper.",
   };
 }
 
@@ -1085,6 +1098,26 @@ fn selected_config_file_path(
   return std::string::new(zone, 0);
 }
 
+fn selected_ari_compiler_path(
+  zone: ref mut Zone,
+  parse_result: CliParseResult
+) -> std::string::String {
+  if parse_result.args.ari_compiler_path_present {
+    return std::string::from_slice_in(
+      zone,
+      parse_result.args.ari_compiler_path
+    );
+  }
+  match std::env::var(zone, "ARI_COMPILER") {
+    std::Some(path) => {
+      return path;
+    }
+    std::None => {
+      return std::string::from(zone, "build/ari");
+    }
+  }
+}
+
 fn dispatch_cli_command_with_main_output(
   zone: ref mut Zone,
   tokens: ref std::vec::Vec[std::string::String],
@@ -1189,48 +1222,14 @@ fn dispatch_cli_command_with_main_output(
   }
 
   if parse_result.args.has_source_file {
-    let compiler_check_plan = compiler_check_plan_from_cli_args(
-      zone,
-      parse_result.args
-    );
-    let compiler_check_boundary = compiler_check_execution_boundary_from_plan(
-      zone,
-      compiler_check_plan
-    );
-    let compiler_path_validation = compiler_path_validation_from_boundary(
-      zone,
-      compiler_check_boundary
-    );
-    if compiler_path_validation.diagnostic_count > 0 {
-      let wrote_compiler_path_stderr = write_compiler_path_error_stderr(
-        zone,
-        compiler_path_validation
-      );
-      if !wrote_compiler_path_stderr {
-        return cli_command_result(
-          CliCompilerPathError,
-          false,
-          compiler_path_validation.diagnostic_count,
-          0,
-          cli_unavailable_exit_code(zone),
-          "Compiler path validation stderr write failed through the verified stderr adapter."
-        );
-      }
-      return cli_command_result(
-        CliCompilerPathError,
-        false,
-        compiler_path_validation.diagnostic_count,
-        0,
-        cli_unavailable_exit_code(zone),
-        compiler_path_validation.detail
-      );
-    }
-
     var file_results = std::vec::new<super::output::FileResult>(
       zone,
       parse_result.args.source_count
     );
-    var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 8);
+    var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(
+      zone,
+      super::compiler::compiler_diagnostic_vector_capacity()
+    );
     var command_result = collect_cli_source_diagnostics_from_tokens(
       zone,
       tokens,
@@ -1529,12 +1528,60 @@ fn collect_cli_source_diagnostics_from_tokens(
     zone,
     explicit_overrides.len() + command_line_overrides.len() + 4
   );
+  let compiler_path = selected_ari_compiler_path(zone, parse_result);
+  var compiler_diagnostic_budget =
+    super::compiler::compiler_diagnostic_budget();
   var diagnostic_count = 0;
-  var read_error_count = 0;
-  var first_read_error_path = std::string::new(zone, 0);
+  var compiler_failure_count = 0;
   for source_file in parse_result.args.source_files {
+    var compiler_scratch = zone::temp(
+      super::compiler::compiler_scratch_capacity()
+    );
     effective_overrides.clear();
     let diagnostic_start = diagnostics.len();
+    var compiler_execution = super::compiler::compiler_execution(
+      0,
+      false,
+      false
+    );
+
+    let compiler_output = super::compiler::run_compiler_capture(
+      ref mut compiler_scratch,
+      compiler_path.as_slice(),
+      ref parse_result.args.include_paths,
+      source_file.as_slice(),
+      ref mut compiler_execution
+    );
+    let compiler_parse_result =
+      super::compiler::parse_ari_diagnostics_into(
+        zone,
+        compiler_output.as_slice(),
+        source_file.as_slice(),
+        ref mut compiler_diagnostic_budget,
+        diagnostics
+      );
+    let compiler_diagnostic_count =
+      compiler_parse_result.diagnostic_count;
+    var incomplete_diagnostic_count = 0;
+    if compiler_execution.output_truncated {
+      super::compiler::append_compiler_output_truncated_diagnostic(
+        zone,
+        source_file.as_slice(),
+        diagnostics
+      );
+      incomplete_diagnostic_count = incomplete_diagnostic_count + 1;
+    }
+    if compiler_parse_result.diagnostics_truncated {
+      super::compiler::append_compiler_diagnostics_truncated_diagnostic(
+        zone,
+        source_file.as_slice(),
+        diagnostics
+      );
+      incomplete_diagnostic_count = incomplete_diagnostic_count + 1;
+    }
+    if compiler_execution.exit_code != 0 {
+      compiler_failure_count = compiler_failure_count + 1;
+    }
 
     if explicit_config_selected {
       append_rule_overrides(ref mut effective_overrides, ref explicit_overrides);
@@ -1558,43 +1605,47 @@ fn collect_cli_source_diagnostics_from_tokens(
       ref command_line_overrides
     );
 
-    let collection_result = super::lint::collect_file_lint_diagnostics_with_override_refs(
+    super::lint::collect_file_lint_diagnostics_with_override_refs(
       zone,
       source_file.as_slice(),
       ref effective_overrides,
       diagnostics
     );
+    if compiler_execution.exit_code != 0 &&
+      compiler_diagnostic_count == 0 &&
+      diagnostics.len() == diagnostic_start + incomplete_diagnostic_count {
+      super::compiler::append_compiler_failure_diagnostics(
+        zone,
+        source_file.as_slice(),
+        compiler_output.as_slice(),
+        ref mut compiler_diagnostic_budget,
+        compiler_parse_result.diagnostics_truncated,
+        diagnostics
+      );
+    }
     let file_diagnostic_count = diagnostics.len() - diagnostic_start;
     file_results.push(super::output::file_result(
       source_file.as_slice(),
-      0,
+      compiler_execution.exit_code,
       diagnostic_start,
       file_diagnostic_count,
       diagnostics.len()
     ));
     diagnostic_count = diagnostic_count + file_diagnostic_count;
-    if collection_result.read_error_count > 0 && first_read_error_path.len() == 0 {
-      first_read_error_path = std::string::from_slice_in(
-        zone,
-        source_file.as_slice()
-      );
-    }
-    read_error_count = read_error_count + collection_result.read_error_count;
   }
 
-  let exit_code = cli_file_lint_exit_code(zone, diagnostic_count, read_error_count);
-  var result_detail: Slice[u8] =
-    "Source-file lint diagnostics were collected with per-source config discovery and command-line overrides.";
-  if read_error_count > 0 {
-    result_detail = first_read_error_path.as_slice();
-  }
+  let exit_code = cli_source_run_exit_code(
+    zone,
+    diagnostic_count,
+    compiler_failure_count
+  );
   var command_result = cli_command_result(
     CliSourceLintResult,
     false,
     diagnostic_count,
-    read_error_count,
+    0,
     exit_code,
-    result_detail
+    "Source files were checked by the selected Ari compiler, then by discovered config and native lint rules."
   );
   if diagnostics.len() > 0 {
     command_result.first_diagnostic =
@@ -1743,8 +1794,8 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // applies discovered or explicit config and --rule severity overrides. It
 // searches upward from each source file's directory for ari-lint.rules when
 // --config is absent.
-// compiler_check_plan_from_cli_args records a future ari --check invocation
-// plan from already-parsed CLI args without invoking the compiler or
+// compiler_check_plan_from_cli_args records an ari --check invocation plan
+// from already-parsed CLI args without invoking the compiler or
 // tools/lint. plan_explicit_cli_compiler_check provides the same data-only plan
 // for caller-provided tokens. CliCompilerPathRecordedNotChecked retains the
 // pre-validation model state. compiler_path_validation_from_boundary checks an
@@ -1759,13 +1810,13 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // result with internal exit-code data. For source-file arguments it reads each
 // explicitly provided file path, runs in-memory lint aggregation, and carries
 // the first internal diagnostic without writing output.
-// collect_cli_source_diagnostics and collect_explicit_cli_diagnostics use the
-// same explicit source-file boundary, but push full internal diagnostics into a
-// caller-provided vector, record per-file ranges, and apply discovered or
-// explicit config overrides followed by parsed --rule severity overrides when
-// provided. They do not write output, search home/global/XDG config locations,
-// scan source directories, call tools/lint, call process exit, or invoke ari
-// --check.
+// collect_cli_source_diagnostics keeps the older compiler-free parsed-result
+// helper. collect_explicit_cli_diagnostics uses the main source collection path:
+// it invokes the selected compiler per source, pushes compiler/config/native
+// diagnostics into a caller-provided vector, records per-file ranges, and
+// applies discovered or explicit config followed by parsed --rule overrides.
+// Neither helper writes output, searches home/global/XDG config locations,
+// scans source directories, calls tools/lint, or calls process exit.
 // run_explicit_cli_tokens composes parsing and dispatch for callers that
 // already have tokens. These entry paths do not write stdout/stderr, serialize
 // JSON, recursively scan source trees, call tools/lint, call process exit, or
@@ -1792,8 +1843,11 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // run_os_argv_cli_with_main_output is the main-facing output path. It writes
 // human-readable or JSON list-rules output to stdout. Source runs produce one
 // stdout result per positional file in human mode, or one newline-terminated
-// JSON files envelope in JSON mode; enabled diagnostics return exit 1. Source
-// and explicit-config read errors, CLI/config parse problems, and missing input
-// remain stderr errors. Explicit --ari paths are validated before source
-// linting without invoking them. Environment compiler selection, compiler
-// execution, and compiler diagnostic parsing remain follow-up work.
+// JSON files envelope in JSON mode. For each source it selects --ari, then a
+// present ARI_COMPILER, then build/ari; invokes that compiler directly with
+// include arguments, the source, and --check; and appends discovered-config and
+// native-rule diagnostics after parsed compiler diagnostics. Compiler-visible
+// source errors and launch failures stay in the per-file stdout result. A
+// nonzero compiler status or any diagnostic returns exit 1. CLI/config parse
+// problems, explicit-config read failures, and missing input remain stderr
+// errors.

@@ -2,21 +2,24 @@
 
 ## Purpose
 
-This document defines how future `ari-lint` tests and compiler-boundary
-behavior should receive an Ari compiler binary.
+This document defines how local `ari-lint` build, source-command, smoke, and
+future CI checks receive an Ari compiler binary.
 
-This step does not download, build, run, or validate the compiler.
+This document does not add compiler downloads, compiler builds, or CI
+provisioning. Local callers provide the compiler explicitly or through the
+documented runtime selection boundary.
 
 ## Current Status
 
-- `ari-lint` currently has lightweight repository checks only.
 - `scripts/check.sh` does not run the Ari compiler.
-- Compiler-backed behavior is future work.
+- `scripts/test.sh` delegates to the same compiler-free lightweight checks.
+- `scripts/build.sh` and `scripts/smoke.sh` accept a caller-provided Ari
+  compiler for local build and executable validation.
+- Standalone source commands invoke the selected compiler once per source with
+  `--check`.
 - The GitHub Actions workflow is intentionally compiler-free and runs only the
   lightweight check until explicit compiler provisioning, standalone tests, and
   compiler identity recording are ready.
-- The near-term dependency model remains invoking `ari --check` when compiler
-  integration begins.
 - Current `tools/lint` in `ari-foundry/ari` remains the reference
   implementation.
 
@@ -33,27 +36,25 @@ Compiler, standard library, parser, sema, module, and toolchain bugs belong in
 
 ## Local Compiler Selection
 
-Future local compiler selection should prefer explicit `--ari PATH` for CLI use
-when available.
+Standalone source commands select the runtime compiler in this order:
 
-`ARI_COMPILER` should be allowed only if it is documented by the standalone CLI
-contract or implemented later. The current bundled/reference implementation
-documents `ARI_COMPILER` as a fallback when `--ari` is not provided, but
-standalone behavior still needs tests and documentation before it becomes an
-`ari-lint` compatibility promise.
+1. explicit `--ari PATH` or `--ari=PATH`
+2. a present `ARI_COMPILER` environment entry, including an empty value
+3. the literal path `build/ari`
+
+`scripts/build.sh` has a separate build-time selection boundary: its positional
+compiler argument wins over its `ARI_COMPILER` fallback. It validates that path
+before using it to build `src/main.ari`.
 
 Tests should avoid guessing compiler paths.
 
 Tests should not depend on undocumented monorepo-relative paths.
 
-If both `--ari` and `ARI_COMPILER` exist later, precedence must be documented
-before implementation.
-
-needs follow-up
-
-The future invocation contract for `--ari PATH`, `ARI_COMPILER`, precedence,
-and validation is planned in `docs/dev/compiler-invocation.md`. Invocation is
-planned but not implemented.
+Local real-compiler checks should use an explicit compiler path. Focused
+process-boundary tests may provide controlled fake executables. The implemented
+selection, invocation, status, and diagnostic contract is documented in
+`docs/dev/compiler-invocation.md`; this behavior does not by itself establish
+compatibility with an Ari release.
 
 ## CI Compiler Strategy
 
@@ -61,8 +62,9 @@ Do not download or build the compiler in the current lightweight check.
 
 The current GitHub Actions workflow must not run `scripts/build.sh`, invoke the
 Ari compiler, invoke `ari --check`, execute `tools/lint`, install package
-manager dependencies, or claim compatibility. It is a gate that preserves
-compiler-free CI while compiler-backed test infrastructure remains future work.
+manager dependencies, or claim compatibility. It preserves a compiler-free CI
+gate while pinned compiler provisioning and identity recording remain future
+work.
 
 Future compiler-backed CI may use a pinned Ari release artifact or a pinned
 source commit.
@@ -85,11 +87,13 @@ Compatibility should be updated only after compiler-backed tests pass.
 
 ## Test Runner Integration
 
-Pure helper checks should not require the Ari compiler.
+Pure helper and repository-shape checks should not require the Ari compiler.
 
-Compiler-boundary tests should require an explicit compiler path.
+The local executable smoke accepts an explicit real compiler path and uses
+controlled fake executables for focused process-boundary behavior.
 
-Parity tests should record the compiler identity.
+Parity and compatibility tests using a real compiler should record its
+identity.
 
 Fixture shape checks should remain compiler-free.
 
@@ -97,7 +101,7 @@ JSON golden tests should wait until the schema is stable.
 
 ## Failure Modes
 
-Future compiler provisioning and compiler-boundary tests should account for:
+Compiler provisioning and compiler-boundary tests should account for:
 
 - missing compiler path
 - non-executable compiler path
@@ -122,14 +126,14 @@ Cross-boundary issues should link both repos if needed.
 
 ## Follow-up Checklist
 
-- [ ] Confirm documented `--ari` behavior
-- [ ] Confirm whether `ARI_COMPILER` is supported
-- [ ] Define precedence between `--ari` and `ARI_COMPILER`
+- [x] Confirm documented `--ari` behavior
+- [x] Support `ARI_COMPILER` for runtime compiler selection
+- [x] Define and implement precedence between `--ari` and `ARI_COMPILER`
 - [ ] Decide compiler version/commit recording format
 - [ ] Decide future CI compiler source
 - [x] Keep current GitHub Actions workflow compiler-free until explicit
       compiler provisioning and standalone tests exist
-- [ ] Add compiler-backed smoke test only after runner exists
+- [x] Add local compiler-backed executable smoke coverage
 - [ ] Update compatibility docs only after tests pass
 
 ## Non-Goals
@@ -137,7 +141,7 @@ Cross-boundary issues should link both repos if needed.
 - Do not download the compiler in this step.
 - Do not build the compiler in this step.
 - Do not add compiler execution to CI in this step.
-- Do not add direct `ari --check` invocation to this repository or CI in this
+- Do not add `ari --check` invocation to the lightweight check or CI in this
   step.
 - Do not add `tools/lint` execution to CI in this step.
 - Do not add a strict parity gate in this step.

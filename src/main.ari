@@ -2,6 +2,7 @@ mod cli;
 mod severity;
 mod diagnostic;
 mod output;
+mod compiler;
 mod rule;
 mod registry;
 mod rules;
@@ -13,7 +14,7 @@ mod parity;
 fn run_main_entry_shell() -> i64 {
   // The hosted Ari runtime uses fixed-capacity lexical arenas. Keep bounded
   // headroom for CLI data, source text, diagnostics, and formatted output.
-  region(1048576) {
+  region(16777216) {
     let result = cli::run_os_argv_cli_with_main_output();
     return result.exit_code.code;
   }

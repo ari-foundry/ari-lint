@@ -21,7 +21,8 @@ uses the verified Ari compiler form `ari input.ari -o output` to compile
 
 `smoke.sh` is a local smoke wrapper. It accepts an explicit Ari compiler path
 as the first argument or through `ARI_COMPILER`, delegates compilation to
-`scripts/build.sh`, and runs the current safe CLI smoke invocations:
+`scripts/build.sh`, exports that compiler for runtime checks, and runs the
+current CLI smoke invocations:
 `./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
 `./build/ari-lint --json --list-rules`. It also runs JSON smoke commands
 against temporary source trees containing `ari-lint.rules` to check per-source
@@ -35,6 +36,19 @@ and `diagnostics`, and diagnostic `file`, position, `severity`, `message`,
 `source`, and `code` fields. Exact expected output covers representative JSON
 and human results, including final newlines. Multi-file coverage includes dirty,
 clean plus dirty, all-clean, duplicate-argument, and escaped-path cases.
+It also uses fake compilers to verify `--ari`/environment/default selection,
+exact shell-free `-I DIR ... SOURCE --check` argv for every source, duplicate
+execution, all four accepted compiler diagnostic shapes, CRLF and final lines
+without newlines, deterministic stderr-then-stdout parsing, exit and signal
+normalization, missing/non-executable compiler exit `127`, fallback generation
+and suppression, embedded-carriage-return rejection, bounded concurrent
+stdout/stderr draining with fail-closed truncation diagnostics (including an
+exit-zero late-diagnostic case), dense compiler-diagnostic budgeting,
+exact 2,048-per-file and 4,096-per-run boundaries, bounded raw fallback
+material across repeated sources,
+compiler/truncation/config/native diagnostic order, and help/list-rules
+no-spawn behavior. The configured real
+compiler checks representative valid inputs and a missing-input diagnostic.
 
 `parity.sh` is a local report-only parity smoke wrapper. It accepts an explicit
 Ari compiler path as the first argument or through `ARI_COMPILER`, an
@@ -82,8 +96,8 @@ nearer-config fallback, discovery suppression by explicit config, CLI-last
 precedence, discovered config diagnostics, exact explicit config errors, clean,
 mixed, duplicate, 24-file repeated-input, 66 KB clean-source, final-newline,
 stderr-isolation, and valid, control-byte, and invalid-UTF-8 path behavior.
-Strict parity, source-controlled broad goldens, and compiler diagnostics remain
-future work.
+Strict parity, source-controlled broad compiler goldens, and compiler-backed CI
+remain future work.
 
 `parity.sh` does not add CI wiring, a strict parity gate, golden files,
 source-controlled parity fixtures, new lint semantics, release compatibility

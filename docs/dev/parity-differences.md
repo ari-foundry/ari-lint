@@ -58,77 +58,172 @@ or local build failure.
 
 ## Known Differences
 
-### Compiler Check Boundary
+A future strict compiler-boundary suite must explicitly allowlist exactly five
+intentional runtime categories from this section: cross-stream ordering,
+retained-output capture, retained diagnostic material, non-interactive stdin,
+and out-of-range coordinates. Process-infrastructure errors and other CLI or
+output differences below remain unresolved implementation or contract work;
+they must not pass a strict gate through this allowlist.
 
-Original `tools/lint` invokes `ari --check` before running native lint rules.
-The current standalone Ari-language `ari-lint` implementation does not invoke
-`ari --check` yet.
+### Process Capture Infrastructure Errors
 
-Classification: expected known difference and `ari-lint`
-implementation/design follow-up.
+Standalone retries an interrupted child wait, then currently maps other process
+launch/setup, pipe poll/read, and child-wait failures to per-file `exitCode`
+`127` plus `ari/compiler-check-failed` JSON on stdout. The bundled reference
+matches that shape for an `exec` failure, but
+parent-side pipe, fork, read, or wait errors instead escape the checker, become
+one invocation-wide `ari-lint: error: ...` message on stderr, and exit `1`.
+For example, a sufficiently low file-descriptor limit can make pipe creation
+take these different paths.
 
-Impact:
+The standalone Ari process API creates separate stdin, stdout, stderr, and
+setup pipes, while the reference uses one shared output pipe. In focused Linux
+testing, descriptor soft limits from 5 through 10 still allowed the reference
+`/bin/true` compiler check to succeed but made standalone report a launch
+failure; both succeeded from 11 in that test environment. These measurements
+describe the reproduced boundary, not a portable descriptor guarantee.
 
-- compiler diagnostics are not parity-covered by the current standalone path
-- missing compiler behavior is not aligned yet
-- include-path and compiler-boundary behavior remains future parity work
-
-Follow-up:
-
-- keep using `ari-foundry/ari` as the compiler behavior owner
-- add compiler invocation only after the documented provisioning and invocation
-  policy is ready
-- do not hide compiler, standard library, or toolchain bugs in `ari-lint`
-
-### Missing Compiler Invocation Output
-
-Current standalone `ari-lint`, when run with `--json --ari` pointing at a
-missing compiler and a clean source file, performs an intentional explicit
-compiler-path preflight. It writes a short missing-path message to stderr,
-returns top-level exit status `1`, emits no JSON, and does not spawn the path.
-Original `tools/lint` attempts the compiler invocation and emits
-`ari/compiler-check-failed` JSON on stdout with per-file `exitCode` `127` and
-the missing compiler path.
-
-Classification: expected known difference and `ari-lint` compiler-boundary
-implementation/design follow-up. No Ari language/compiler/stdlib/toolchain bug
-is identified by this report-only case.
+Classification: unresolved rare infrastructure-error contract difference,
+not an intentional compiler-boundary allowlist.
 
 Impact:
 
-- exact missing-compiler output and exit-code parity are not expected yet
-- current standalone preflight failure intentionally emits no JSON output
-- release compatibility claims must not be made from the current report
+- normal compiler exits, signals, missing executables, and non-executable paths
+  are unaffected
+- resource exhaustion or a parent-side pipe/wait failure can change JSON,
+  stream, scope, and exit-status behavior
+- extremely constrained descriptor environments can reject an otherwise
+  runnable compiler only on the standalone path
 
 Follow-up:
 
-- revisit the intentional preflight difference when compiler invocation and
-  strict parity fixtures are added
+- add a deterministic fault-injection or file-descriptor exhaustion case to
+  the strict executable suite
+- align the standalone invocation-wide error path with the reference or record
+  a separate explicit contract decision before compatibility is claimed
 
-### Compiler Error Output
+### Compiler Output Cross-Stream Ordering
 
-Current standalone `ari-lint`, when run with `--json --ari` on an invalid
-temporary source file, reports clean lint results because compiler-backed
-`ari --check` invocation is not implemented yet. Original `tools/lint` invokes
-that compiler boundary and emits compiler-shaped JSON on stdout with
-`ari/compiler` and a parse diagnostic for the same source path.
+Ari's process API captures child stdout and stderr separately. For output below
+the retention boundary, standalone `ari-lint` concatenates all stderr bytes
+followed immediately by all stdout bytes without inserting a separator. Byte
+order within each stream is preserved, but emission order across streams is
+not.
 
-Classification: expected known difference and `ari-lint` compiler-boundary
-implementation/design follow-up. No Ari language/compiler/stdlib/toolchain bug
-is identified by this report-only case; the source is intentionally invalid.
+The C++ reference redirects both streams to one pipe and observes their write
+interleaving. Diagnostics emitted on alternating streams may therefore be
+reordered. A stderr fragment without a final newline may also join the first
+stdout fragment, so exact cross-stream raw-output and diagnostic-order parity
+is not claimed.
+
+Classification: Ari process-API constraint and intentional standalone runtime
+difference.
 
 Impact:
 
-- exact compiler-error output and exit-code parity are not expected yet
-- current standalone compiler-error JSON output is not defined
-- release compatibility claims must not be made from the current report
+- ordinary compiler output confined to one stream keeps its byte order
+- strict parity must allowlist cross-stream ordering and boundary concatenation
+- compiler exit status, recognized diagnostic shapes, and within-stream order
+  remain covered independently
 
 Follow-up:
 
-- decide the standalone compiler invocation contract before strict parity
-  fixtures
-- add strict compiler-error checks only after compiler provisioning and
-  invocation behavior are documented and implemented
+- retain a focused fake-compiler smoke case for the deterministic
+  stderr-then-stdout policy
+- revisit only if Ari exposes a shared-pipe process API
+
+### Compiler Output Capture Boundary
+
+Standalone `ari-lint` concurrently drains both child streams but retains at
+most 262,144 bytes from stderr and 262,144 bytes from stdout for each compiler
+process. Bytes beyond either boundary are discarded while draining continues.
+Only complete retained lines from a truncated stream are parsed. Every
+truncated run adds an `ari/compiler-output-truncated` error, even when another
+diagnostic exists or the compiler exits zero; this makes lost output
+fail-closed instead of allowing a false-clean result. The actual compiler
+status remains the per-file `exitCode`.
+
+The C++ reference grows one merged output string without this explicit
+per-stream boundary.
+
+Classification: intentional bounded-memory standalone runtime difference.
+
+Impact:
+
+- ordinary compiler output below both boundaries is unaffected
+- excessive output cannot fill a pipe or exhaust the per-process Ari scratch
+  arena merely through unbounded capture
+- a diagnostic emitted only after the retained prefix is not silently treated
+  as a clean run
+- exact diagnostic and raw-output parity is not claimed after either stream
+  crosses its boundary
+
+Follow-up:
+
+- retain fake-compiler coverage that writes beyond both stream boundaries
+- retain an exit-zero case whose diagnostic appears beyond the boundary and
+  assert the explicit truncation error prevents a false-clean result
+- revisit the size only with measured real-compiler output and memory evidence
+
+### Compiler Diagnostic Material Boundary
+
+Standalone `ari-lint` retains at most 2,048 parsed compiler diagnostics per
+file, 4,096 per run, and 1,048,576 bytes per run when repeated file, code, and
+message payloads are counted. Raw compiler-failure fallback text consumes the
+same payload budget and is replaced by a fixed message when it would cross the
+limit. A file whose recognized diagnostic or raw fallback material crosses one
+of those limits receives an
+`ari/compiler-diagnostics-truncated` error, so an exit-zero compiler cannot
+turn omitted diagnostics into a clean result. The C++ reference does not apply
+these explicit budgets.
+
+Classification: intentional bounded-memory standalone runtime difference.
+
+Impact:
+
+- ordinary compiler output within all three budgets is unaffected
+- adversarially dense short diagnostics cannot exhaust the fixed Ari main
+  arena before JSON or human output is produced
+- exact output parity is not claimed after a parsed-diagnostic budget is
+  crossed
+
+Follow-up:
+
+- retain exact 2,048/2,049 boundary coverage and a dense diagnostic flood
+- retain a repeated multi-file raw-fallback case that crosses the run payload
+  budget without exhausting the arena
+- include repeated logical payload size, not only distinct allocations, when
+  reasoning about serialized output bounds
+
+### Compiler Stdin Policy
+
+Standalone `ari-lint` closes the compiler child's stdin pipe immediately. The
+C++ reference leaves stdin inherited. Normal `ari FILE --check` execution is
+non-interactive, but a custom compiler wrapper can observe EOF in standalone
+where it could otherwise read the parent's stdin.
+
+Classification: intentional non-interactive process-boundary policy.
+
+Impact:
+
+- normal Ari compiler checks are unaffected
+- custom wrappers must not depend on interactive stdin
+
+### Out-Of-Range Compiler Coordinates
+
+The reference parser converts decimal line and column fields with C++ `stoi`.
+Values above signed 32-bit range can therefore throw and abort the invocation;
+an accepted value at the signed maximum can also expose 32-bit overflow when a
+derived end position is formatted. Standalone `ari-lint` rejects coordinates
+above `2147483647`, continues safely, and retains 64-bit derived positions.
+
+Classification: intentional standalone robustness difference for malformed or
+non-realistic compiler output.
+
+Impact:
+
+- ordinary positive compiler locations and zero-to-one normalization match
+- strict fake-compiler parity must exclude or allowlist out-of-range locations
 
 ### Non-UTF-8 JSON Bytes
 
@@ -145,6 +240,39 @@ Impact:
 - strict parity must allowlist only invalid UTF-8 input text
 - the replacement rendering is not a byte-round-trip representation of the
   original POSIX path
+
+### Inline Ari Compiler Option
+
+Standalone `ari-lint` accepts both `--ari PATH` and `--ari=PATH`. The bundled
+reference accepts only the separated form; it treats `--ari=PATH` as an unknown
+option, writes usage to stderr, and exits `2`.
+
+Classification: standalone CLI extension and explicit parity-contract
+decision, not a compiler process-boundary allowlist.
+
+Impact:
+
+- `--ari PATH` remains the shared form for strict reference comparisons
+- callers may use `--ari=PATH` with standalone `ari-lint`, but exact CLI parity
+  is not claimed for that spelling
+- the strict CLI contract must either retain this extension explicitly or
+  remove it before compatibility is claimed
+
+### End-Of-Options Separator
+
+Standalone `ari-lint` treats `--` as an end-of-options separator and accepts a
+following dash-prefixed source path. The bundled reference treats `--` itself
+as an unknown option, writes usage to stderr, and exits `2`.
+
+Classification: standalone CLI extension and explicit parity-contract
+decision, not a compiler process-boundary allowlist.
+
+Impact:
+
+- ordinary source paths and option parsing are unaffected
+- exact reference CLI parity is not claimed for `--`
+- the strict CLI contract must decide whether the safer dash-prefixed-path
+  escape remains a standalone extension
 
 ### Help Output Stream And Shape
 
@@ -188,31 +316,6 @@ Follow-up:
 - decide whether standalone no-source-file text should preserve the original
   generic usage shape or define a new stable standalone diagnostic contract
 - add strict usage-error output checks only after that contract is documented
-
-### Source Read Error Output
-
-Current standalone `ari-lint` reports a missing or unreadable explicit source
-path as a short stderr message such as `unable to read source file`. Original
-`tools/lint`, when run with `--json --ari`, invokes the Ari compiler boundary
-and emits compiler-shaped JSON on stdout with `cannot open input file` and
-`ari/compiler` fields for the missing path.
-
-Classification: expected known difference and `ari-lint` diagnostic/CLI
-contract follow-up. No Ari language/compiler/stdlib/toolchain bug is identified
-by this report-only case.
-
-Impact:
-
-- exact source read-error output parity is not expected yet
-- current standalone read-error JSON output is not defined
-- release compatibility claims must not be made from the current report
-
-Follow-up:
-
-- decide whether standalone source read-error behavior should preserve the
-  original compiler-shaped JSON or define a new stable standalone diagnostic
-  contract
-- add strict read-error golden checks only after that contract is documented
 
 ### Unknown Option Usage Text
 
@@ -431,8 +534,8 @@ diagnostic/CLI contract follow-up.
 Impact:
 
 - exact missing-option-value text equality is not expected yet
-- include-path behavior remains non-gating until the compiler boundary is
-  specified
+- include paths are forwarded to the implemented compiler boundary, but the
+  report remains non-gating
 - release compatibility claims must not be made from the current report
 - strict usage-error golden checks should wait until the CLI contract is
   documented
@@ -441,7 +544,7 @@ Follow-up:
 
 - decide whether standalone missing-option text should preserve the original
   generic usage shape or define a new stable standalone diagnostic contract
-- define include-path behavior together with future compiler invocation work
+- retain exact `-I DIR` forwarding coverage in strict compiler fixtures
 - add strict usage-error output checks only after that contract is documented
 
 ### List Rules Output Detail
@@ -488,8 +591,15 @@ The focused explicit config read-error and invalid-config cases also use the
 same stderr shape, leave stdout empty without a JSON envelope, and exit `2` in
 both implementations.
 
+Focused compiler-backed runs also align for direct per-source invocation,
+include-path forwarding, ordinary compiler diagnostics, missing compiler
+`exitCode` `127` and `ari/compiler-check-failed` output, and missing-source
+`ari/compiler` JSON. The overall process exits `1` whenever any per-file
+compiler exit is nonzero or any diagnostic remains. These are local smoke
+signals, not a compatibility claim.
+
 These are smoke signals only. They do not replace source-controlled fixtures,
-golden output, compiler-backed parity, or CI parity jobs.
+golden output, strict parity, or compiler-backed CI jobs.
 
 ## Non-Goals
 

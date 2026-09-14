@@ -2,8 +2,9 @@
 
 Compiler-free repository checks, local compiler-backed executable smoke
 validation, and a local report-only parity smoke/report all exist now. The
-smoke suite includes representative exact runtime JSON and human-output checks.
-Focused Ari unit tests, strict parity, compiler diagnostics, and broader golden
+smoke suite includes representative exact runtime JSON, human-output, compiler
+invocation, and compiler-diagnostic checks. Focused Ari unit tests, strict
+parity, source-controlled broad compiler-diagnostic goldens, and broader golden
 coverage remain future work.
 
 Current compiler-free checks verify repository shape, lightweight
@@ -52,14 +53,17 @@ Registry-backed in-memory rule dispatch has started for one exact known rule
 code and caller-provided source text, but the lightweight checks do not execute
 registry dispatch tests.
 The main entry returns the OS argv CLI command exit-code mapping. List-rules,
-help, and source-file results use stdout. CLI parse problems, source read
-failures, and explicit config read or parse failures use stderr. Bad lines in a
-discovered config are instead ordinary per-file `lint/config` diagnostics on
+help, and source-file results use stdout. CLI parse problems and explicit config
+read or parse failures use stderr. Source read failures are represented by the
+selected compiler's per-file exit code and compiler diagnostic on stdout;
+native source-read failure does not replace that compiler-visible result. Bad
+lines in a discovered config are ordinary per-file `lint/config` diagnostics on
 stdout and return exit `1`. Source `--json` output is one newline-terminated
 reference-shaped object with an ordered entry for every positional input,
-including clean and duplicate paths. Enabled native diagnostics also return
-exit `1`. The compiler-free checks do not execute these paths, while
-`scripts/smoke.sh` verifies them through the built binary.
+including clean, missing, and duplicate paths. A nonzero compiler exit or any
+enabled compiler, config, or native diagnostic returns exit `1`. The
+compiler-free checks do not execute these paths, while `scripts/smoke.sh`
+verifies them through the built binary.
 
 Run the lightweight check script from the repository root:
 
@@ -110,6 +114,31 @@ diagnostic `file`, positions, `severity`, `message`, `source`, and `code` for
 and human outputs are checked exactly, including final newlines. Multi-file
 coverage includes two dirty files, per-source config differences, clean plus
 dirty, all-clean, and duplicate source arguments.
+The executable source path invokes the selected compiler once per positional
+file with exact `-I DIR ... FILE --check` arguments. The smoke verifies
+shell-free preservation of spaces and metacharacters, per-file invocation and
+include-path order, explicit `--ari` precedence over `ARI_COMPILER`, environment
+selection, the `build/ari` default, and the behavior of a present but empty
+`ARI_COMPILER` value. Help and both list-rules forms are checked with a sentinel
+compiler to ensure they do not spawn it.
+The fake-compiler matrix covers all four supported Ari diagnostic line shapes,
+greedy colon-containing file paths, coordinate normalization, explicit and
+fallback diagnostic codes, ignored non-diagnostic output, a trailing carriage
+return, rejection of an embedded carriage return in regex-dot fields, a final
+diagnostic line without a newline, and deterministic stderr then stdout parsing.
+It also checks missing, newline-containing missing, and non-executable compiler
+paths as per-file exit `127`, including reference-shaped reparsing of synthetic
+launch-failure output,
+ordinary nonzero and signal-derived exit codes, raw-output and empty-output
+fallback diagnostics, concurrent draining beyond the 256 KiB per-stream capture
+limit, an always-on `ari/compiler-output-truncated` error, exit-zero diagnostics
+beyond that boundary, a 2,048-per-file dense-diagnostic cap with
+`ari/compiler-diagnostics-truncated`, exact 2,048/2,049 and 4,096 run-boundary
+checks, bounded raw fallback material repeated across 24 files, fallback
+suppression when a config or native diagnostic
+already exists, and compiler-before-truncation-before-config-before-native
+diagnostic ordering. A missing source is checked through the real compiler's
+per-file JSON diagnostic with stderr empty.
 It is not run by `scripts/test.sh` or CI, but it is the current local validation
 path for build, supported CLI commands, source-file JSON diagnostics, explicit
 config, per-source discovered `ari-lint.rules`, nearest readable precedence, and
@@ -117,8 +146,8 @@ CLI severity override precedence across explicit source files. It does not run
 a strict parity gate, search home/global/XDG config locations, add new lint
 semantics, or claim compatibility. It now checks focused JSON list-rules
 rule-code, short-name, and default-severity output signals; dedicated Ari tests,
-source-controlled broad goldens, compiler-backed CI, and compiler-diagnostic
-goldens remain follow-up work.
+source-controlled broad goldens, compiler-backed CI, and broad
+compiler-diagnostic goldens remain follow-up work.
 
 `scripts/parity.sh` is the local report-only parity smoke/report. It accepts an
 explicit Ari compiler path or `ARI_COMPILER`, an Ari repo path or `ARI_REPO`,
@@ -135,13 +164,12 @@ claim compatibility or parity.
 Known report-only differences are tracked in
 [docs/dev/parity-differences.md](../docs/dev/parity-differences.md).
 
-The local executable smoke uses an explicit compiler to build and run
-`ari-lint`, but `ari-lint` does not invoke `ari --check` yet. Dedicated
-compiler-invocation and fake-compiler tests remain future work and should use
-explicit compiler provisioning as planned in
-[docs/dev/compiler-provisioning.md](../docs/dev/compiler-provisioning.md).
-Compiler invocation also remains future work; future compiler-backed tests
-should use explicit compiler invocation as planned in
+The local executable smoke uses an explicit compiler to build `ari-lint`, then
+verifies that source runs invoke the selected compiler with `--check`. Its
+fake-compiler cases isolate argv, selection, process status, output parsing, and
+diagnostic composition without depending on a particular compiler diagnostic.
+Compiler provisioning and the invocation contract are documented in
+[docs/dev/compiler-provisioning.md](../docs/dev/compiler-provisioning.md) and
 [docs/dev/compiler-invocation.md](../docs/dev/compiler-invocation.md).
 Release and compatibility policy is documented in
 [docs/dev/release-compatibility-policy.md](../docs/dev/release-compatibility-policy.md).
@@ -293,8 +321,8 @@ runner exists.
 
 No executable dispatcher tests are added yet. Future dispatcher tests should
 cover list-rules dispatch, missing-source commands, source-file lint requests,
-file read errors, the current stderr-only read-error path and future reference
-per-file/compiler-shaped read-error JSON, lint diagnostics,
+file read errors through the current per-file compiler-shaped JSON path, lint
+diagnostics,
 first diagnostic command-result carrying, caller-provided diagnostic vector
 collection, parsed `--rule` override application, rule override parse-problem
 results, internal exit-code mapping, stdout-free behavior, and parity behavior
@@ -331,13 +359,16 @@ reads, existing main-facing stdout wiring, and adapter failure paths.
 No executable stderr adapter tests are added yet. Future tests should cover the
 minimal `std::io::eprint_string` adapter, successful write status, failed write
 status if Ari exposes a practical failure path, no stdout writes, no OS argv
-reads, and current usage/source-read/config-read/compiler-path error wiring.
+reads, and current usage and explicit-config error wiring. Compiler launch and
+source-read failures in a source run belong to the per-file stdout result.
 
 Executable diagnostic output smoke tests validate exact reference-shaped JSON
 and human text for representative native diagnostics, numeric start/end
 positions, source/code fields, clean output, ordering, and newline termination.
-Human diagnostics are verified on stdout with stderr empty. Focused formatter
-helper tests and compiler-diagnostic goldens remain follow-up work.
+Human diagnostics are verified on stdout with stderr empty. The fake-compiler
+smoke also checks representative exact compiler diagnostic objects. Focused
+formatter helper tests and source-controlled broad compiler-diagnostic goldens
+remain follow-up work.
 
 No executable trailing-whitespace first-diagnostic capture tests are added yet.
 Future tests should validate the first captured diagnostic, count preservation,
@@ -351,8 +382,9 @@ behavior against current `tools/lint`.
 
 Executable CLI smoke tests now validate the runtime JSON envelope, exact native
 diagnostic objects, clean and mixed file accounting, duplicate inputs, final
-newlines, and path control-byte escaping. Focused internal serializer tests and
-compiler-diagnostic golden cases remain follow-up work.
+newlines, path control-byte escaping, and representative exact fake-compiler
+diagnostic objects. Focused internal serializer tests and source-controlled
+broad compiler-diagnostic golden cases remain follow-up work.
 
 No executable source input boundary tests are added yet. Future source input
 tests should validate caller-provided source text, path-only source entries,
@@ -386,8 +418,9 @@ explicit config read error preservation, diagnostic counts, first diagnostic
 command-result carrying, caller-provided diagnostic vector collection,
 exit-code mapping, no recursive source directory traversal, no home/global/XDG
 config search, no stdout/stderr output in the internal path, no JSON
-serialization in the internal path, no compiler invocation, no `ari --check`,
-and parity behavior against current `tools/lint`.
+serialization in the internal path, isolation of the compiler-free in-memory
+helpers, main-facing compiler invocation, and parity behavior against current
+`tools/lint`.
 
 No executable list-rules formatter tests are added yet. Future tests should
 cover list-rules metadata and formatting for rule code, short name, default
@@ -452,8 +485,7 @@ The lightweight checks verify fixture presence, exact line order, and key text
 only. They do not parse these committed fixtures with Ari code. Separately, the
 smoke script runs CLI-process tests against generated temporary configs and
 compares focused exact output. Dedicated Ari-backed config precedence tests,
-source-controlled broad goldens, compiler invocation, and strict parity checks
-remain future work.
+source-controlled broad goldens, and strict parity checks remain future work.
 
 Parity testing is planned in
 [docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
@@ -491,7 +523,9 @@ model changes.
 Future Ari-language implementation tests must follow current `ari-foundry/ari`
 language usage.
 
-Only the initial trailing-whitespace clean/trailing-spaces fixtures and
-missing-final-newline final-newline/no-final-newline fixtures are added so far;
-no broad fixture set, golden output, CLI test, executable parity runner, or
-compiler-backed test exists yet.
+Only the initial source-controlled trailing-whitespace
+clean/trailing-spaces fixtures and missing-final-newline
+final-newline/no-final-newline fixtures are added so far. Executable CLI and
+compiler-backed smoke coverage uses generated temporary cases, but no broad
+source-controlled fixture set, broad golden suite, strict parity runner, or
+compiler-backed CI job exists yet.

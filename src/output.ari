@@ -835,5 +835,6 @@ pub fn format_list_rules_json(
 // and format_run_result_human. List-rules JSON remains a documented standalone
 // extension with its own schema.
 //
-// write_stdout_text and write_stderr_text are the stream adapters. Compiler
-// invocation and compiler-diagnostic parsing remain separate follow-up work.
+// write_stdout_text and write_stderr_text are the stream adapters. The compiler
+// module owns process invocation and diagnostic parsing; the CLI composes its
+// diagnostics with config and native-rule output before using these adapters.

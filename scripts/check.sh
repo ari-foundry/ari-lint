@@ -151,17 +151,23 @@ require_grep "ari_option_in_stderr" scripts/parity.sh
 require_grep "include_option_in_stderr" scripts/parity.sh
 require_grep "severity_note_present" scripts/parity.sh
 require_grep "ari-lint Known Parity Differences" docs/dev/parity-differences.md
-require_grep "Compiler Check Boundary" docs/dev/parity-differences.md
+require_grep "Compiler Output Cross-Stream Ordering" docs/dev/parity-differences.md
+require_grep "retention boundary" docs/dev/parity-differences.md
+require_grep "Compiler Output Capture Boundary" docs/dev/parity-differences.md
+require_grep "Compiler Diagnostic Material Boundary" docs/dev/parity-differences.md
+require_grep "exactly five" docs/dev/parity-differences.md
+require_grep "Process Capture Infrastructure Errors" docs/dev/parity-differences.md
+require_grep "Compiler Stdin Policy" docs/dev/parity-differences.md
+require_grep "Out-Of-Range Compiler Coordinates" docs/dev/parity-differences.md
+require_grep "Inline Ari Compiler Option" docs/dev/parity-differences.md
+require_grep "End-Of-Options Separator" docs/dev/parity-differences.md
 require_grep "same top-level .files. JSON" docs/dev/parity-differences.md
 require_grep "exit .1. for enabled lint diagnostics" docs/dev/parity-differences.md
 require_grep "Help Output Stream And Shape" docs/dev/parity-differences.md
 require_grep "No Source File Usage Text" docs/dev/parity-differences.md
-require_grep "Source Read Error Output" docs/dev/parity-differences.md
-require_grep "Missing Compiler Invocation Output" docs/dev/parity-differences.md
-require_grep "intentional explicit" docs/dev/parity-differences.md
 require_grep "exitCode. .127" docs/dev/parity-differences.md
-require_grep "explicit path preflight with stderr and exit 1" scripts/parity.sh
-require_grep "Compiler Error Output" docs/dev/parity-differences.md
+require_grep "aligned compiler runtime signals" scripts/parity.sh
+require_grep "concatenates stderr then stdout" scripts/parity.sh
 require_grep "Non-UTF-8 JSON Bytes" docs/dev/parity-differences.md
 require_grep "Unknown Option Usage Text" docs/dev/parity-differences.md
 require_grep "Missing Config Value Usage Text" docs/dev/parity-differences.md
@@ -223,10 +229,25 @@ require_grep "run_stderr_usage_smoke" scripts/smoke.sh
 require_grep "run_stderr_unavailable_smoke" scripts/smoke.sh
 require_grep "require_text_grep" scripts/smoke.sh
 require_grep "missing_compiler_path" scripts/smoke.sh
+require_grep "newline_compiler_path" scripts/smoke.sh
 require_grep "non_executable_compiler_path" scripts/smoke.sh
 require_grep "sentinel_compiler_marker" scripts/smoke.sh
-require_grep "Ari compiler path does not exist" scripts/smoke.sh
-require_grep "Ari compiler path is not executable" scripts/smoke.sh
+require_grep '"exitCode":127' scripts/smoke.sh
+require_grep '"code":"ari/compiler-check-failed"' scripts/smoke.sh
+require_grep "ari-tooling: exec failed:" scripts/smoke.sh
+require_grep "compiler-large-output.ari" scripts/smoke.sh
+require_grep "compiler-large-suppressed.ari" scripts/smoke.sh
+require_grep "compiler-late-diagnostic.ari" scripts/smoke.sh
+require_grep "compiler-early-and-late.ari" scripts/smoke.sh
+require_grep "compiler-many-diagnostics.ari" scripts/smoke.sh
+require_grep "compiler-limit-2048.ari" scripts/smoke.sh
+require_grep "compiler-limit-2049.ari" scripts/smoke.sh
+require_grep "compiler-global-limit" scripts/smoke.sh
+require_grep "compiler-large-lines.ari" scripts/smoke.sh
+require_grep "compiler-embedded-cr.ari" scripts/smoke.sh
+require_grep '"code":"ari/compiler-output-truncated"' scripts/smoke.sh
+require_grep '"code":"ari/compiler-diagnostics-truncated"' scripts/smoke.sh
+require_grep "expected source command to invoke sentinel compiler" scripts/smoke.sh
 require_grep "list_rules_output" scripts/smoke.sh
 require_grep "json_list_rules_output" scripts/smoke.sh
 require_grep "Reports spaces or tabs at the end of a source line." scripts/smoke.sh
@@ -307,6 +328,7 @@ require_file src/cli.ari
 require_file src/severity.ari
 require_file src/diagnostic.ari
 require_file src/output.ari
+require_file src/compiler.ari
 require_file src/rule.ari
 require_file src/registry.ari
 require_file src/rules.ari
@@ -622,8 +644,8 @@ require_grep "No rule metadata tests are added yet" tests/README.md
 require_grep "CLI metadata skeleton" docs/dev/ari-implementation-plan.md
 require_grep "CLI argument result model" docs/dev/ari-implementation-plan.md
 require_grep "Minimal token-list parsing has started" docs/dev/ari-implementation-plan.md
-require_grep "process argument collection now" docs/dev/ari-implementation-plan.md
-require_grep "minimal internal entry path" docs/dev/ari-implementation-plan.md
+require_grep "compiler-selection environment handling are implemented" docs/dev/ari-implementation-plan.md
+require_grep "Actual OS process argument" docs/dev/ari-implementation-plan.md
 require_grep "std::env::args" docs/dev/ari-implementation-plan.md
 require_grep "internal stdout-free command dispatcher" docs/dev/ari-implementation-plan.md
 require_grep "main entry shell" docs/dev/ari-implementation-plan.md
@@ -656,17 +678,17 @@ require_grep "internal human diagnostic formatter added" docs/dev/roadmap.md
 require_grep "internal human diagnostic array formatter added" docs/dev/roadmap.md
 require_grep "trailing-whitespace first diagnostic capture added" docs/dev/roadmap.md
 require_grep "missing-final-newline first diagnostic capture added" docs/dev/roadmap.md
-require_grep "adds .FileResult./.RunResult. serializers used by" docs/dev/ari-implementation-plan.md
+require_grep ".FileResult./.RunResult. serializers used by" docs/dev/ari-implementation-plan.md
 require_grep "internal diagnostic JSON field serialization added" docs/dev/roadmap.md
 require_grep "internal diagnostic JSON array serialization added" docs/dev/roadmap.md
 require_grep "Human source results use" docs/dev/ari-implementation-plan.md
 require_grep "caller-provided diagnostics" docs/dev/ari-implementation-plan.md
 require_grep "first already-built" docs/dev/ari-implementation-plan.md
 require_grep "reference-shaped human or JSON output to stdout" docs/dev/ari-implementation-plan.md
-require_grep "CLI parse problems and missing source-file input write short summaries" docs/dev/ari-implementation-plan.md
+require_grep "CLI parse problems, missing source-file input" docs/dev/ari-implementation-plan.md
 require_grep "concise text to stdout" docs/dev/ari-implementation-plan.md
-require_grep "missing source-file input write short summaries" docs/dev/ari-implementation-plan.md
-require_grep "Source read failures and explicit config read or parse failures" docs/dev/ari-implementation-plan.md
+require_grep "missing source-file input, and explicit config" docs/dev/ari-implementation-plan.md
+require_grep "Source commands select an Ari" docs/dev/ari-implementation-plan.md
 require_grep "Bad discovered config lines are inserted as ordered per-file" docs/dev/ari-implementation-plan.md
 require_grep "overrides are applied after the selected config for every source" docs/dev/ari-implementation-plan.md
 require_grep "read-error JSON output" docs/dev/ari-implementation-plan.md
@@ -703,7 +725,7 @@ require_grep "trailing-whitespace helper started" docs/dev/roadmap.md
 require_grep "No executable trailing-whitespace rule execution tests are added yet" tests/README.md
 require_grep "fn main() -> i64" src/main.ari
 require_grep "run_main_entry_shell" src/main.ari
-require_grep "region(1048576)" src/main.ari
+require_grep "region(16777216)" src/main.ari
 require_grep "mod cli" src/main.ari
 require_grep "mod lint" src/main.ari
 require_grep "cli::run_os_argv_cli" src/main.ari
@@ -793,6 +815,25 @@ require_grep "write_compiler_path_error_stderr" src/cli.ari
 require_grep "Ari compiler path does not exist" src/cli.ari
 require_grep "Ari compiler path is not executable" src/cli.ari
 require_grep "Compiler check result is modeled but not executed" src/cli.ari
+require_grep "mod compiler;" src/main.ari
+require_grep "selected_ari_compiler_path" src/cli.ari
+require_grep 'std::env::var(zone, "ARI_COMPILER")' src/cli.ari
+require_grep "run_compiler_capture" src/cli.ari
+require_grep "std::process::Command::with_args" src/compiler.ari
+require_grep "spawn_piped" src/compiler.ari
+require_grep "poll_read_millis" src/compiler.ari
+require_grep "is_interrupted" src/compiler.ari
+require_grep "compiler_stream_capture_limit" src/compiler.ari
+require_grep "compiler output truncated at 262144 bytes per stream" src/compiler.ari
+require_grep "ari/compiler-output-truncated" src/compiler.ari
+require_grep "ari/compiler-diagnostics-truncated" src/compiler.ari
+require_grep "compiler_diagnostic_vector_capacity" src/compiler.ari
+require_grep "arg_bytes" src/compiler.ari
+require_grep "parse_ari_diagnostics_into" src/compiler.ari
+require_grep "ari/compiler-check-failed" src/compiler.ari
+require_grep "ari-tooling: exec failed:" src/compiler.ari
+require_grep "stderr_bytes.as_slice()" src/compiler.ari
+require_grep "stdout_bytes.as_slice()" src/compiler.ari
 require_grep "-I" src/cli.ari
 require_grep "include_path_count" src/cli.ari
 require_grep "first_include_path" src/cli.ari
@@ -854,7 +895,7 @@ require_grep "unknown_argument_problem" src/cli.ari
 require_grep "raw_rule_override" src/cli.ari
 require_grep "semantic rule override parsing bridge" src/cli.ari
 require_grep "applies discovered or explicit config and --rule severity overrides" src/cli.ari
-require_grep "does not read environment" src/cli.ari
+require_grep "Source commands select --ari, then ARI_COMPILER, then build/ari" src/cli.ari
 require_grep "The main-facing wrapper adds" src/cli.ari
 require_grep "write stdout/stderr" src/cli.ari
 require_grep "call process exit" src/cli.ari
