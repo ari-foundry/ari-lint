@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Keep this workflow compiler-free until explicit Ari compiler
-      # provisioning and standalone tests are ready.
+      # Zero-argument test mode is intentionally compiler-free. Explicit,
+      # pinned Ari compiler provisioning remains a separate follow-up.
       - name: Run lightweight checks
-        run: scripts/check.sh
+        run: scripts/test.sh

@@ -81,6 +81,7 @@ standalone build root wiring added /
 local smoke validation added /
 minimal config override smoke coverage added /
 standalone test entrypoint added /
+explicit compiler-backed test mode added /
 release and compatibility policy documented /
 main OS argv exit-code wiring added /
 main-facing list-rules stdout output added /
@@ -522,11 +523,11 @@ and test work.
       fixture comparison, golden output, source execution, and CI parity jobs
       remain future work.
 - [x] Record the compiler-backed CI gate by documenting that the GitHub Actions
-      workflow remains compiler-free and runs only `scripts/check.sh` until
-      explicit compiler provisioning, standalone tests, and compiler identity
-      recording are ready. Actual compiler-backed CI, Ari compiler execution,
-      `ari --check`, package manager commands, parity checks, release
-      automation, and compatibility claims remain future work.
+      workflow remains compiler-free and runs only zero-argument
+      `scripts/test.sh` until explicit compiler provisioning and compiler
+      identity recording are ready. Actual compiler-backed CI, Ari compiler
+      execution, `ari --check`, package manager commands, parity checks,
+      release automation, and compatibility claims remain future work.
 - [x] Wire local standalone build root handling in `scripts/build.sh` so the
       script resolves the repository root, uses the compiler root when
       `lib/std.arih` is available there, and compiles `src/main.ari` to
@@ -746,8 +747,8 @@ and test work.
       ordering and remaining CLI/output differences, without making a stable
       parity or compatibility claim.
 - [x] Record compiler-backed CI gate; `.github/workflows/check.yml` remains
-      lightweight and compiler-free until standalone tests and explicit Ari
-      compiler provisioning exist.
+      lightweight and compiler-free through zero-argument `scripts/test.sh`
+      until explicit Ari compiler provisioning exists.
 - [x] Wire local standalone build script root handling; build execution remains
       explicit/local and is not part of CI.
 - [x] Add local smoke validation in `scripts/smoke.sh` that accepts an explicit
@@ -778,8 +779,9 @@ and test work.
       precedence over discovery without adding golden fixtures, a parity
       runner, compiler-backed CI, home/global/XDG config search, or new lint
       semantics.
-- [x] Wire local standalone test entrypoint; executable compiler-backed, rule,
-      CLI, parity, and golden-output tests remain future work.
+- [x] Wire local standalone test entrypoint with a deterministic compiler-free
+      default and an explicit compiler-backed smoke mode; dedicated Ari unit,
+      parity, and broader golden-output tests remain future work.
 - [x] Define initial release and compatibility policy in
       `docs/dev/release-compatibility-policy.md` after inspecting Ari releases
       and Ari tags; actual `ari-lint` compatibility entries still require

@@ -84,20 +84,21 @@ Run the local standalone test entrypoint with:
 
 ```sh
 scripts/test.sh
+scripts/test.sh /path/to/ari
 ```
 
-The standalone test entrypoint resolves the repository root and delegates to
-`scripts/check.sh`. These scripts check repository shape, source guards,
-documentation guards, script guards, and fixture invariants only. They do not
-run the Ari compiler, execute `tools/lint`, invoke `ari --check`, run a parity
-runner, run CLI tests, or compare golden tests. The standalone test entrypoint
-does not run compiler-backed tests yet.
+With no argument, the standalone entrypoint resolves the repository root and
+runs only `scripts/check.sh`; a present `ARI_COMPILER` does not opt in. With one
+explicit, non-empty compiler path, it runs those checks and then the full
+`scripts/smoke.sh` suite. An empty path or more than one argument fails. Neither
+mode executes `tools/lint` or a parity runner. The explicit compiler path is the
+reproducer for compiler-backed validation and does not establish compatibility.
 
-The GitHub Actions workflow is intentionally compiler-free. It runs only
-`scripts/check.sh` and must not run `scripts/build.sh`, invoke the Ari
-compiler, invoke `ari --check`, execute `tools/lint`, install package manager
-dependencies, or run parity checks until standalone tests and explicit compiler
-provisioning are ready.
+The GitHub Actions workflow is intentionally compiler-free. It runs only the
+zero-argument `scripts/test.sh` mode and must not run `scripts/build.sh`, invoke
+the Ari compiler, invoke `ari --check`, execute `tools/lint`, install package
+manager dependencies, or run parity checks until explicit compiler provisioning
+is ready.
 
 Run the strict list-rules and native-rule subsets from any checkout with
 explicit compiler and Ari repository paths:
@@ -123,10 +124,11 @@ validity for the standalone JSON form, and sentinel-backed absence of compiler
 invocation for the explicitly selected compiler. This provenance is not an Ari
 release compatibility claim.
 
-`scripts/build.sh` is separate from `scripts/test.sh` and the lightweight
-checks. It is a compiler-dependent local build scaffold that requires an
-explicit Ari compiler path, resolves the repository root, uses the compiler root
-when `lib/std.arih` is available there, and is not run by default tests or CI.
+`scripts/build.sh` is separate from the lightweight checks. It is a
+compiler-dependent local build scaffold that requires an explicit Ari compiler
+path, resolves the repository root, and uses the compiler root when
+`lib/std.arih` is available there. Zero-argument tests and current CI do not run
+it; explicit-compiler `scripts/test.sh` reaches it through the smoke suite.
 Relative compiler paths are preserved from the caller's directory.
 
 `scripts/smoke.sh` is the local compiler-backed smoke entrypoint. It accepts an
@@ -172,10 +174,11 @@ suppression when a config or native diagnostic
 already exists, and compiler-before-truncation-before-config-before-native
 diagnostic ordering. A missing source is checked through the real compiler's
 per-file JSON diagnostic with stderr empty.
-It is not run by `scripts/test.sh` or CI, but it is the current local validation
-path for build, supported CLI commands, source-file JSON diagnostics, explicit
-config, per-source discovered `ari-lint.rules`, nearest readable precedence, and
-CLI severity override precedence across explicit source files. It does not run
+It is not run by zero-argument `scripts/test.sh` or CI. One-argument
+`scripts/test.sh` delegates to it as the current local validation path for
+build, supported CLI commands, source-file JSON diagnostics, explicit config,
+per-source discovered `ari-lint.rules`, nearest readable precedence, and CLI
+severity override precedence across explicit source files. It does not run
 a strict parity gate, search home/global/XDG config locations, add new lint
 semantics, or claim compatibility. It now checks focused JSON list-rules
 rule-code, short-name, and default-severity output signals; dedicated Ari tests,

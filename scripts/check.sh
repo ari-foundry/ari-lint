@@ -88,7 +88,9 @@ require_file scripts/test.sh
 require_file .github/workflows/check.yml
 
 require_grep "compiler-free" .github/workflows/check.yml
-require_grep "scripts/check.sh" .github/workflows/check.yml
+require_grep "scripts/test.sh" .github/workflows/check.yml
+require_no_grep "scripts/check.sh" .github/workflows/check.yml
+require_no_grep "scripts/smoke.sh" .github/workflows/check.yml
 require_no_grep "scripts/build.sh" .github/workflows/check.yml
 require_no_grep "ari --check" .github/workflows/check.yml
 require_no_grep "ARI_COMPILER" .github/workflows/check.yml
@@ -334,10 +336,14 @@ require_grep "scripts/smoke.sh" tests/README.md
 
 require_grep "repo_root" scripts/test.sh
 require_grep "scripts/check.sh" scripts/test.sh
+require_grep "scripts/smoke.sh" scripts/test.sh
+require_grep "usage: scripts/test.sh" scripts/test.sh
+require_grep "Ari compiler path must not be empty" scripts/test.sh
 require_no_grep "ari --check" scripts/test.sh
 require_no_grep "ARI_COMPILER" scripts/test.sh
 require_no_grep "tools/lint" scripts/test.sh
 require_no_grep "scripts/build.sh" scripts/test.sh
+require_no_grep "scripts/parity" scripts/test.sh
 require_no_grep "npm " scripts/test.sh
 require_no_grep "cargo " scripts/test.sh
 require_no_grep "arix" scripts/test.sh
@@ -442,7 +448,7 @@ require_grep "Ari" README.md
 require_grep "scripts/check.sh" README.md
 require_grep "scripts/test.sh" README.md
 require_grep "scripts/build.sh" README.md
-require_grep "not a full test suite yet" README.md
+require_grep "not a complete unit/parity suite" README.md
 require_grep "explicit Ari compiler path" README.md
 require_grep "Local build via" README.md
 require_grep "Local smoke validation via" README.md

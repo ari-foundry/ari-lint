@@ -1,14 +1,19 @@
 # ari-lint Scripts
 
-This directory contains lightweight repository helper scripts.
+This directory contains repository helpers for lightweight checks,
+compiler-backed smoke validation, and local parity work.
 
 `check.sh` verifies repository shape and fixture invariants only. It does not
 run or provision the Ari compiler, invoke `ari --check`, execute `tools/lint`,
 run parity checks, run CLI tests, or compare golden files.
 
-`test.sh` is the local standalone test entrypoint. It resolves the repository
-root and delegates to `scripts/check.sh`, so it currently runs the same
-compiler-free repository-shape and fixture-invariant checks.
+`test.sh` is the local standalone test entrypoint. With no argument it resolves
+the repository root and runs only `scripts/check.sh`, regardless of any
+`ARI_COMPILER` environment entry. With one explicit, non-empty compiler path it
+runs the same checks first and then delegates to `scripts/smoke.sh` with that
+path. It rejects an empty path or more than one argument. The explicit path is
+resolved by the existing build/smoke boundary relative to the caller's original
+working directory.
 
 `build.sh` is a local build scaffold for the Ari-language entrypoint. It
 requires an explicit Ari compiler path as the first argument or through
@@ -86,9 +91,11 @@ case requires its exact stdout, empty stderr, exit status, and final LF;
 JSON cases must also parse. Every list-rules case selects a sentinel compiler
 and fails if that compiler is invoked.
 
-`test.sh` does not download or build the Ari compiler. It does not execute
-`tools/lint`, run `ari --check`, install dependencies, run package manager
-commands, run parity checks, or participate in CI as a compiler-backed job yet.
+`test.sh` does not download or build the Ari compiler. Its zero-argument mode
+does not invoke the compiler or `ari --check`. Its explicit-compiler mode runs
+the existing smoke suite, which builds `ari-lint` and exercises source commands;
+neither mode executes `tools/lint`, installs dependencies, runs package manager
+commands, or runs parity checks. CI still uses only the compiler-free mode.
 
 `build.sh` does not download or build the Ari compiler. It does not execute
 `tools/lint`, run `ari --check`, install dependencies, run package manager

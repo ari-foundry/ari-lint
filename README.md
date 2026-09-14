@@ -117,12 +117,14 @@ Run the local standalone test entrypoint with:
 
 ```sh
 scripts/test.sh
+scripts/test.sh /path/to/ari
 ```
 
-This is not a full test suite yet. The standalone test entrypoint delegates to
-the lightweight check script, which checks repository-shape, source, script,
-documentation, and fixture invariants only. Use `scripts/smoke.sh` for local
-compiler-backed build and CLI smoke validation.
+With no argument, the entrypoint always runs only the compiler-free repository
+checks, even when `ARI_COMPILER` is present. With one explicit, non-empty Ari
+compiler path, it runs those checks first and then delegates to the full local
+compiler-backed build and CLI smoke. This is not a complete unit/parity suite;
+strict reference parity remains a separate command.
 
 ## Local Build Scaffold
 
