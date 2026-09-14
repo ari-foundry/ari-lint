@@ -4,9 +4,9 @@
 
 This document defines the initial `ari-lint` release and compatibility policy.
 
-It records policy only. It does not create an `ari-lint` release, add a
-release workflow, add a compatibility matrix, run compiler-backed tests, or
-claim support for any Ari version.
+It does not create an `ari-lint` release, add a release workflow, add a
+compatibility matrix, or claim support for any Ari version. A separately pinned
+compiler-smoke CI baseline supplies build/test evidence under this policy.
 
 ## Read-only Ari Sources
 
@@ -23,9 +23,9 @@ gh release list -R ari-foundry/ari
 git ls-remote --tags https://github.com/ari-foundry/ari.git
 ```
 
-These commands are reference checks only. Do not copy release artifacts,
-download compilers automatically, or infer `ari-lint` support from the
-existence of an Ari release or tag.
+These commands are reference checks only. Do not copy compiler sources or infer
+`ari-lint` support from the existence of an Ari release or tag. CI artifact use
+must follow the pinned identity checks in `docs/dev/compiler-provisioning.md`.
 
 ## Current Policy
 
@@ -40,9 +40,15 @@ compiler identity is recorded.
 Do not invent version numbers. Do not add a compatibility matrix entry without
 test evidence.
 
-The current lightweight workflow remains compiler-free. It must not run the
-Ari compiler, invoke `ari --check`, download or build the compiler, execute
-`tools/lint`, run package manager commands, or publish release artifacts.
+The lightweight `check.yml` workflow remains compiler-free. The separate
+`compiler-smoke.yml` workflow byte-verifies the exact Ari `v0.1.0` prerelease
+archive and BUILDINFO, then checks the recorded source commit and target before
+running `scripts/test.sh "$ARI_COMPILER"`. It does not build Ari, execute
+`tools/lint`, run parity, use a package manager, or publish artifacts.
+
+This single pinned baseline is continuous validation evidence, not an Ari
+compatibility matrix entry. GitHub reports the release as `immutable: false`,
+so both the archive and extracted BUILDINFO SHA-256 values are mandatory.
 
 ## Future Compatibility Entry Requirements
 
@@ -77,8 +83,9 @@ pre-release split work, not a stable standalone tool.
 - Do not add release automation in this step.
 - Do not add compatibility matrix claims in this step.
 - Do not claim support for any Ari release, tag, or commit in this step.
-- Do not download or build the Ari compiler automatically.
-- Do not run the Ari compiler in CI.
-- Do not invoke `ari --check` in CI.
+- Do not build the Ari compiler in CI.
+- Do not add compiler execution to the lightweight workflow.
+- Do not treat compiler-smoke success as a release-support declaration.
+- Do not run reference parity or `tools/lint` in compiler-smoke CI.
 - Do not modify `ari-foundry/ari`.
 - Do not modify `ari-foundry/ari-foundry.github.io`.

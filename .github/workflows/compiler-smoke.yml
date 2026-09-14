@@ -1,0 +1,71 @@
+name: Compiler Smoke
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  compiler-smoke:
+    name: Ari v0.1.0
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      ARI_VERSION: v0.1.0
+      ARI_COMMIT: c615f1c2ce1a93835118b4da8867a7f3dfaf991a
+      ARI_TARGET: linux-x86_64
+      ARI_ASSET: ari-v0.1.0-linux-x86_64.tar.gz
+      ARI_ARCHIVE_SHA256: 0af99459eb2ad4ad688ae8ba8e4e3bcce88358bba969f88bff65f5df3ced6da2
+      ARI_BUILDINFO_SHA256: 6a9eaefbbc6aef083496e7d78749ec5e13ef87175301923ee000e45a9824baa6
+      ARI_LLVM_CC: /usr/bin/clang-18
+      LC_ALL: C.UTF-8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Verify LLVM driver
+        run: |
+          test -x "$ARI_LLVM_CC"
+          "$ARI_LLVM_CC" --version
+
+      - name: Provision pinned Ari compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+
+          release_url="https://github.com/ari-foundry/ari/releases/download/${ARI_VERSION}/${ARI_ASSET}"
+          archive="$RUNNER_TEMP/$ARI_ASSET"
+          extract_dir=$(mktemp -d "$RUNNER_TEMP/ari-release.XXXXXX")
+          install_root="$extract_dir/ari-$ARI_VERSION"
+
+          curl --fail --location --silent --show-error \
+            --retry 3 --retry-all-errors --connect-timeout 15 --max-time 120 \
+            --proto '=https' --proto-redir '=https' --tlsv1.2 \
+            "$release_url" --output "$archive"
+          printf '%s  %s\n' "$ARI_ARCHIVE_SHA256" "$archive" | sha256sum --check -
+
+          tar --extract --gzip --file "$archive" --directory "$extract_dir" \
+            --no-same-owner --no-same-permissions
+
+          buildinfo="$install_root/BUILDINFO"
+          compiler="$install_root/bin/ari"
+          test -f "$buildinfo"
+          test -f "$install_root/share/ari/lib/std.arih"
+          test -x "$compiler"
+          printf '%s  %s\n' "$ARI_BUILDINFO_SHA256" "$buildinfo" | sha256sum --check -
+          grep -Fx "ari_version=$ARI_VERSION" "$buildinfo"
+          grep -Fx "git_commit=$ARI_COMMIT" "$buildinfo"
+          grep -Fx "git_tag=$ARI_VERSION" "$buildinfo"
+          grep -Fx "target=$ARI_TARGET" "$buildinfo"
+          sed -n '1,20p' "$buildinfo"
+
+          printf 'ARI_COMPILER=%s\n' "$compiler" >> "$GITHUB_ENV"
+
+      - name: Run compiler-backed test suite
+        run: scripts/test.sh "$ARI_COMPILER"

@@ -94,11 +94,11 @@ explicit, non-empty compiler path, it runs those checks and then the full
 mode executes `tools/lint` or a parity runner. The explicit compiler path is the
 reproducer for compiler-backed validation and does not establish compatibility.
 
-The GitHub Actions workflow is intentionally compiler-free. It runs only the
-zero-argument `scripts/test.sh` mode and must not run `scripts/build.sh`, invoke
-the Ari compiler, invoke `ari --check`, execute `tools/lint`, install package
-manager dependencies, or run parity checks until explicit compiler provisioning
-is ready.
+The lightweight GitHub Actions workflow is intentionally compiler-free and runs
+zero-argument `scripts/test.sh`. A separate compiler-smoke workflow verifies a
+checksum-pinned Ari `v0.1.0` prerelease artifact and runs
+`scripts/test.sh "$ARI_COMPILER"`. Neither workflow executes `tools/lint`, runs
+parity, uses package-manager dependencies, or establishes compatibility.
 
 Run the strict list-rules and native-rule subsets from any checkout with
 explicit compiler and Ari repository paths:
@@ -127,8 +127,9 @@ release compatibility claim.
 `scripts/build.sh` is separate from the lightweight checks. It is a
 compiler-dependent local build scaffold that requires an explicit Ari compiler
 path, resolves the repository root, and uses the compiler root when
-`lib/std.arih` is available there. Zero-argument tests and current CI do not run
-it; explicit-compiler `scripts/test.sh` reaches it through the smoke suite.
+`lib/std.arih` is available there. Zero-argument tests and the lightweight CI
+job do not run it; explicit-compiler `scripts/test.sh` and compiler-smoke CI
+reach it through the smoke suite.
 Relative compiler paths are preserved from the caller's directory.
 
 `scripts/smoke.sh` is the local compiler-backed smoke entrypoint. It accepts an
@@ -174,16 +175,17 @@ suppression when a config or native diagnostic
 already exists, and compiler-before-truncation-before-config-before-native
 diagnostic ordering. A missing source is checked through the real compiler's
 per-file JSON diagnostic with stderr empty.
-It is not run by zero-argument `scripts/test.sh` or CI. One-argument
-`scripts/test.sh` delegates to it as the current local validation path for
-build, supported CLI commands, source-file JSON diagnostics, explicit config,
-per-source discovered `ari-lint.rules`, nearest readable precedence, and CLI
-severity override precedence across explicit source files. It does not run
+It is not run by zero-argument `scripts/test.sh` or the lightweight CI job.
+One-argument `scripts/test.sh`, including compiler-smoke CI, delegates to it as
+the current validation path for build, supported CLI commands, source-file JSON
+diagnostics, explicit config, per-source discovered `ari-lint.rules`, nearest
+readable precedence, and CLI severity override precedence across explicit source
+files. It does not run
 a strict parity gate, search home/global/XDG config locations, add new lint
 semantics, or claim compatibility. It now checks focused JSON list-rules
 rule-code, short-name, and default-severity output signals; dedicated Ari tests,
-source-controlled broad goldens, compiler-backed CI, and broad
-compiler-diagnostic goldens remain follow-up work.
+source-controlled broad goldens, and broad compiler-diagnostic goldens remain
+follow-up work.
 
 `scripts/parity.sh` is the local report-only parity smoke/report. It accepts an
 explicit Ari compiler path or `ARI_COMPILER`, an Ari repo path or `ARI_REPO`,
@@ -540,9 +542,10 @@ runner tests should isolate reference and standalone command selection, fixture
 inputs, path normalization, output comparison, exit-code comparison, and strict
 avoidance of accidental compiler or network execution in lightweight checks.
 
-No compiler-backed CI tests are added yet. Future compiler-backed CI should
-record the Ari compiler release tag or commit, use explicit compiler
-provisioning, and run only after standalone tests exist.
+Compiler-backed CI now records the Ari `v0.1.0` tag, source commit, target,
+archive SHA-256, and extracted BUILDINFO SHA-256 before running the explicit
+compiler test mode. The release is a prerelease and GitHub marks it mutable, so
+this is a pinned validation baseline rather than a compatibility claim.
 
 The local standalone test entrypoint exists.
 
@@ -559,8 +562,8 @@ overrides, include paths, JSON diagnostics, and mixed compiler/lint diagnostics.
 Compiler and standard library bugs should be filed in `ari-foundry/ari`, not in
 `ari-lint` as primary issues.
 
-Tests should use an explicit `--ari` compiler path in CI unless the dependency
-model changes.
+Compiler-backed CI must pass its verified compiler path explicitly to
+`scripts/test.sh`; the smoke suite then controls runtime compiler selection.
 
 Future Ari-language implementation tests must follow current `ari-foundry/ari`
 language usage.
@@ -569,4 +572,4 @@ The current source-controlled fixture set covers initial trailing-whitespace and
 missing-final-newline cases. Exact list-rules and focused native JSON goldens,
 plus their strict runner, now exist. Executable CLI and compiler-backed smoke
 coverage also uses generated temporary cases, but no broad compiler/config/CLI
-fixture-and-golden suite or compiler-backed CI job exists yet.
+fixture-and-golden suite exists yet.

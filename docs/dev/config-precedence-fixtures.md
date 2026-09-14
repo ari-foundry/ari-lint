@@ -27,9 +27,9 @@ Initial config precedence fixture files exist under
 fixture set's key contents and exact line order only. Separately,
 `scripts/smoke.sh` builds and executes the standalone CLI against generated
 temporary configs to cover per-source discovery, explicit-config precedence,
-CLI-last precedence, and config error output. Dedicated Ari tests,
-source-controlled runtime goldens, strict parity, and compiler-backed CI remain
-future work.
+CLI-last precedence, and config error output; the pinned compiler-smoke CI now
+runs that suite. Dedicated Ari tests, source-controlled runtime goldens, and
+strict config parity remain future work.
 
 ## Implemented Precedence
 

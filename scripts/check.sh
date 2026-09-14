@@ -19,6 +19,40 @@ require_grep() {
   grep -q -- "$1" "$2" || fail "missing expected text in $2: $1"
 }
 
+require_fixed_grep() {
+  grep -Fq -- "$1" "$2" || fail "missing expected text in $2: $1"
+}
+
+require_fixed_line() {
+  fixed_line_count=$(grep -Fxc -- "$1" "$2" || true)
+  [ "$fixed_line_count" -eq 1 ] ||
+    fail "expected exactly one line in $2: $1"
+}
+
+require_line_before() {
+  earlier_line=$(grep -nFx -- "$1" "$3" | sed -n '1s/:.*//p')
+  later_line=$(grep -nFx -- "$2" "$3" | sed -n '1s/:.*//p')
+  [ -n "$earlier_line" ] && [ -n "$later_line" ] &&
+    [ "$earlier_line" -lt "$later_line" ] ||
+    fail "expected ordered lines in $3: $1 before $2"
+}
+
+file_sha256() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  else
+    fail "need sha256sum or shasum to verify $1"
+  fi
+}
+
+require_sha256() {
+  actual_sha256=$(file_sha256 "$2")
+  [ "$actual_sha256" = "$1" ] ||
+    fail "unexpected SHA-256 for $2: $actual_sha256"
+}
+
 require_no_grep() {
   if grep -q -- "$1" "$2"; then
     fail "unexpected text in $2: $1"
@@ -43,6 +77,7 @@ require_line_equals() {
 require_file README.md
 require_file AGENTS.md
 require_file .gitignore
+require_file .gitattributes
 require_file docs/README.md
 require_file docs/list-rules.md
 require_file docs/migration.md
@@ -86,9 +121,27 @@ require_file scripts/parity.sh
 require_file scripts/parity-strict.sh
 require_file scripts/test.sh
 require_file .github/workflows/check.yml
+require_file .github/workflows/compiler-smoke.yml
+
+require_fixed_line ".github/workflows/*.yml text eol=lf" .gitattributes
+
+# These workflows are deliberately small and security-sensitive. Whole-file
+# pins make added steps, permission changes, and trigger re-parenting explicit
+# review events instead of relying only on independent lexical assertions.
+require_sha256 "918a40ab52a1ad1fa23be19f2dac8c9a68eeae83a158db74a0af33c76ea0d47e" .github/workflows/check.yml
+require_sha256 "c73d553cda57fc9c7d3ba329e40a6b32bd262243a4fd4ad59fcc6e0d34f04524" .github/workflows/compiler-smoke.yml
 
 require_grep "compiler-free" .github/workflows/check.yml
 require_grep "scripts/test.sh" .github/workflows/check.yml
+require_grep "ubuntu-24.04" .github/workflows/check.yml
+require_grep "permissions:" .github/workflows/check.yml
+require_grep "contents: read" .github/workflows/check.yml
+require_grep "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" .github/workflows/check.yml
+require_fixed_line "        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1" .github/workflows/check.yml
+require_grep "persist-credentials: false" .github/workflows/check.yml
+require_fixed_line "  pull_request:" .github/workflows/check.yml
+require_fixed_line "  push:" .github/workflows/check.yml
+require_fixed_line "    branches: [main]" .github/workflows/check.yml
 require_no_grep "scripts/check.sh" .github/workflows/check.yml
 require_no_grep "scripts/smoke.sh" .github/workflows/check.yml
 require_no_grep "scripts/build.sh" .github/workflows/check.yml
@@ -98,6 +151,73 @@ require_no_grep "tools/lint" .github/workflows/check.yml
 require_no_grep "npm " .github/workflows/check.yml
 require_no_grep "cargo " .github/workflows/check.yml
 require_no_grep "arix" .github/workflows/check.yml
+require_no_grep "actions/checkout@v" .github/workflows/check.yml
+require_no_grep "pull_request_target" .github/workflows/check.yml
+require_no_grep "write-all" .github/workflows/check.yml
+require_no_grep "id-token:" .github/workflows/check.yml
+require_no_grep "github.token" .github/workflows/check.yml
+
+require_grep "Compiler Smoke" .github/workflows/compiler-smoke.yml
+require_grep "ubuntu-24.04" .github/workflows/compiler-smoke.yml
+require_grep "timeout-minutes: 20" .github/workflows/compiler-smoke.yml
+require_grep "permissions:" .github/workflows/compiler-smoke.yml
+require_grep "contents: read" .github/workflows/compiler-smoke.yml
+require_grep "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" .github/workflows/compiler-smoke.yml
+require_fixed_line "        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1" .github/workflows/compiler-smoke.yml
+require_grep "persist-credentials: false" .github/workflows/compiler-smoke.yml
+require_fixed_line "  pull_request:" .github/workflows/compiler-smoke.yml
+require_fixed_line "  push:" .github/workflows/compiler-smoke.yml
+require_fixed_line "    branches: [main]" .github/workflows/compiler-smoke.yml
+require_grep "ARI_VERSION: v0.1.0" .github/workflows/compiler-smoke.yml
+require_grep "ARI_COMMIT: c615f1c2ce1a93835118b4da8867a7f3dfaf991a" .github/workflows/compiler-smoke.yml
+require_grep "ARI_TARGET: linux-x86_64" .github/workflows/compiler-smoke.yml
+require_grep "ari-v0.1.0-linux-x86_64.tar.gz" .github/workflows/compiler-smoke.yml
+require_grep "0af99459eb2ad4ad688ae8ba8e4e3bcce88358bba969f88bff65f5df3ced6da2" .github/workflows/compiler-smoke.yml
+require_grep "6a9eaefbbc6aef083496e7d78749ec5e13ef87175301923ee000e45a9824baa6" .github/workflows/compiler-smoke.yml
+require_grep "ARI_LLVM_CC: /usr/bin/clang-18" .github/workflows/compiler-smoke.yml
+require_grep "LC_ALL: C.UTF-8" .github/workflows/compiler-smoke.yml
+require_grep "--retry-all-errors" .github/workflows/compiler-smoke.yml
+require_grep "--proto '=https'" .github/workflows/compiler-smoke.yml
+require_grep "--proto-redir '=https'" .github/workflows/compiler-smoke.yml
+require_grep "mktemp -d" .github/workflows/compiler-smoke.yml
+require_grep "umask 077" .github/workflows/compiler-smoke.yml
+require_grep "sha256sum --check" .github/workflows/compiler-smoke.yml
+require_grep "--no-same-owner --no-same-permissions" .github/workflows/compiler-smoke.yml
+require_grep "BUILDINFO" .github/workflows/compiler-smoke.yml
+require_grep "share/ari/lib/std.arih" .github/workflows/compiler-smoke.yml
+require_fixed_line '          printf '\''%s  %s\n'\'' "$ARI_ARCHIVE_SHA256" "$archive" | sha256sum --check -' .github/workflows/compiler-smoke.yml
+require_fixed_line '          printf '\''%s  %s\n'\'' "$ARI_BUILDINFO_SHA256" "$buildinfo" | sha256sum --check -' .github/workflows/compiler-smoke.yml
+require_fixed_line '          grep -Fx "ari_version=$ARI_VERSION" "$buildinfo"' .github/workflows/compiler-smoke.yml
+require_fixed_line '          grep -Fx "git_commit=$ARI_COMMIT" "$buildinfo"' .github/workflows/compiler-smoke.yml
+require_fixed_line '          grep -Fx "git_tag=$ARI_VERSION" "$buildinfo"' .github/workflows/compiler-smoke.yml
+require_fixed_line '          grep -Fx "target=$ARI_TARGET" "$buildinfo"' .github/workflows/compiler-smoke.yml
+require_fixed_line '          printf '\''ARI_COMPILER=%s\n'\'' "$compiler" >> "$GITHUB_ENV"' .github/workflows/compiler-smoke.yml
+require_fixed_line '        run: scripts/test.sh "$ARI_COMPILER"' .github/workflows/compiler-smoke.yml
+require_line_before '          printf '\''%s  %s\n'\'' "$ARI_ARCHIVE_SHA256" "$archive" | sha256sum --check -' '          tar --extract --gzip --file "$archive" --directory "$extract_dir" \' .github/workflows/compiler-smoke.yml
+require_line_before '          tar --extract --gzip --file "$archive" --directory "$extract_dir" \' '          printf '\''%s  %s\n'\'' "$ARI_BUILDINFO_SHA256" "$buildinfo" | sha256sum --check -' .github/workflows/compiler-smoke.yml
+require_line_before '          printf '\''%s  %s\n'\'' "$ARI_BUILDINFO_SHA256" "$buildinfo" | sha256sum --check -' '          grep -Fx "ari_version=$ARI_VERSION" "$buildinfo"' .github/workflows/compiler-smoke.yml
+require_line_before '          grep -Fx "target=$ARI_TARGET" "$buildinfo"' '          printf '\''ARI_COMPILER=%s\n'\'' "$compiler" >> "$GITHUB_ENV"' .github/workflows/compiler-smoke.yml
+require_line_before '          printf '\''ARI_COMPILER=%s\n'\'' "$compiler" >> "$GITHUB_ENV"' '        run: scripts/test.sh "$ARI_COMPILER"' .github/workflows/compiler-smoke.yml
+require_grep "GITHUB_ENV" .github/workflows/compiler-smoke.yml
+require_grep 'scripts/test.sh "$ARI_COMPILER"' .github/workflows/compiler-smoke.yml
+require_no_grep "scripts/check.sh" .github/workflows/compiler-smoke.yml
+require_no_grep "scripts/smoke.sh" .github/workflows/compiler-smoke.yml
+require_no_grep "scripts/build.sh" .github/workflows/compiler-smoke.yml
+require_no_grep "scripts/parity" .github/workflows/compiler-smoke.yml
+require_no_grep "tools/lint" .github/workflows/compiler-smoke.yml
+require_no_grep "actions/cache" .github/workflows/compiler-smoke.yml
+require_no_grep "actions/checkout@v" .github/workflows/compiler-smoke.yml
+require_no_grep "pull_request_target" .github/workflows/compiler-smoke.yml
+require_no_grep "secrets\." .github/workflows/compiler-smoke.yml
+require_no_grep "secrets\[" .github/workflows/compiler-smoke.yml
+require_no_grep "github.token" .github/workflows/compiler-smoke.yml
+require_no_grep "write-all" .github/workflows/compiler-smoke.yml
+require_no_grep "id-token:" .github/workflows/compiler-smoke.yml
+require_no_grep "sudo " .github/workflows/compiler-smoke.yml
+require_no_grep "apt-get" .github/workflows/compiler-smoke.yml
+require_no_grep "npm " .github/workflows/compiler-smoke.yml
+require_no_grep "cargo " .github/workflows/compiler-smoke.yml
+require_no_grep "arix" .github/workflows/compiler-smoke.yml
 
 [ -x scripts/build.sh ] || fail "scripts/build.sh is not executable"
 [ -x scripts/smoke.sh ] || fail "scripts/smoke.sh is not executable"
@@ -651,6 +771,7 @@ require_grep "internal CLI file lint path added" docs/dev/roadmap.md
 require_grep "CLI source lint first diagnostic carry added" docs/dev/roadmap.md
 require_grep "source-only parity runner skeleton added" docs/dev/roadmap.md
 require_grep "compiler-backed CI gate documented" docs/dev/roadmap.md
+require_grep "pinned compiler-smoke CI added" docs/dev/roadmap.md
 require_grep "standalone build root wiring added" docs/dev/roadmap.md
 require_grep "standalone test entrypoint added" docs/dev/roadmap.md
 require_grep "main OS argv exit-code wiring added" docs/dev/roadmap.md
@@ -662,7 +783,7 @@ require_grep "file-read boundary for one" tests/README.md
 require_grep "internal CLI file lint path" tests/README.md
 require_grep "first diagnostic command-result carrying" tests/README.md
 require_grep "source-only parity runner skeleton" tests/README.md
-require_grep "GitHub Actions workflow is intentionally compiler-free" tests/README.md
+require_grep "lightweight GitHub Actions workflow is intentionally compiler-free" tests/README.md
 require_grep "local standalone test entrypoint" tests/README.md
 require_grep "No executable standalone build tests are added yet" tests/README.md
 require_grep "relative compiler path preservation" tests/README.md
@@ -677,11 +798,13 @@ require_grep "No dedicated tests of the parity-runner infrastructure are added y
 require_grep "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
 require_grep "current standalone path implements explicit-file native rule execution" docs/dev/ari-implementation-plan.md
 require_grep "source-only parity runner skeleton" docs/dev/ari-implementation-plan.md
-require_grep "compiler-backed CI gate" docs/dev/ari-implementation-plan.md
+require_grep "compiler-smoke.yml" docs/dev/ari-implementation-plan.md
 require_grep "local standalone test entrypoint" docs/dev/ari-implementation-plan.md
-require_grep "Standalone build wiring is local-only" docs/dev/ari-implementation-plan.md
+require_grep "Standalone build wiring remains explicit" docs/dev/ari-implementation-plan.md
 require_grep "relative compiler paths" docs/dev/ari-implementation-plan.md
-require_grep "The current GitHub Actions workflow must not run" docs/dev/compiler-provisioning.md
+require_grep "The compiler baseline is" docs/dev/compiler-provisioning.md
+require_grep "immutable: false" docs/dev/compiler-provisioning.md
+require_grep "scripts/test.sh .\$ARI_COMPILER." docs/dev/compiler-provisioning.md
 require_grep "in-memory lint run aggregation path" docs/dev/ari-implementation-plan.md
 require_grep "first already-built internal diagnostic" docs/dev/ari-implementation-plan.md
 require_grep "File-backed aggregation" docs/dev/ari-implementation-plan.md

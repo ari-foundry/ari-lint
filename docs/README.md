@@ -35,10 +35,10 @@ The standalone rule-registry listing schema, exact stream/status behavior, and
 intentional differences from the bundled reference are defined in
 [docs/list-rules.md](list-rules.md).
 
-Local compiler selection and the remaining pinned CI provisioning work are
-documented in
+Local compiler selection and the checksum-pinned CI baseline are documented in
 [docs/dev/compiler-provisioning.md](dev/compiler-provisioning.md). The local
-runtime boundary is implemented; compiler-backed CI is not.
+runtime boundary and separate compiler-backed smoke workflow are implemented;
+the baseline is not a compatibility claim.
 
 The implemented compiler selection, per-file argv, diagnostic parsing, and
 process-status boundary is documented in

@@ -95,14 +95,17 @@ and fails if that compiler is invoked.
 does not invoke the compiler or `ari --check`. Its explicit-compiler mode runs
 the existing smoke suite, which builds `ari-lint` and exercises source commands;
 neither mode executes `tools/lint`, installs dependencies, runs package manager
-commands, or runs parity checks. CI still uses only the compiler-free mode.
+commands, or runs parity checks. The lightweight CI job uses compiler-free mode;
+the separate compiler-smoke job supplies one pinned compiler path explicitly.
 
 `build.sh` does not download or build the Ari compiler. It does not execute
 `tools/lint`, run `ari --check`, install dependencies, run package manager
-commands, run parity checks, or participate in CI yet.
+commands, or run parity checks. Compiler-smoke CI reaches it only through
+explicit-compiler `scripts/test.sh` and `scripts/smoke.sh`.
 
-`smoke.sh` does not add a strict parity gate, compiler-backed CI,
-home/global/XDG config search, new lint semantics, or compatibility claims.
+`smoke.sh` does not add a strict parity gate, home/global/XDG config search, new
+lint semantics, or compatibility claims. The separate checksum-pinned
+compiler-smoke workflow runs it through `scripts/test.sh`.
 It checks that `--help` names the current supported option set, checks focused
 `--list-rules` and `--json --list-rules` rule-code, short-name, and
 default-severity output signals, checks focused
@@ -116,7 +119,7 @@ precedence, discovered config diagnostics, exact explicit config errors, clean,
 mixed, duplicate, 24-file repeated-input, 66 KB clean-source, final-newline,
 stderr-isolation, and valid, control-byte, and invalid-UTF-8 path behavior.
 Broader strict parity, source-controlled broad compiler goldens, and
-compiler-backed CI remain future work.
+dedicated Ari unit tests remain future work.
 
 `parity.sh` does not add CI wiring, a strict parity gate, golden files,
 source-controlled parity fixtures, new lint semantics, release compatibility

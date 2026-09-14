@@ -31,7 +31,7 @@ developer documentation, and future release notes.
 Contributors should use `ari-foundry/ari` docs, examples, and tests as the
 source of truth for current Ari language usage.
 
-Future `ari-lint` compatibility policy should be based on real Ari releases and
+Any future `ari-lint` compatibility entry must be based on real Ari releases or
 tags. Do not claim compatibility with any Ari version unless it is verified from
 an actual Ari release or tag.
 
@@ -46,6 +46,9 @@ here.
   `ARI_COMPILER`.
 - Local smoke validation via `scripts/smoke.sh` with an explicit Ari compiler
   path or `ARI_COMPILER`.
+- Compiler-backed GitHub Actions smoke with the exact Ari `v0.1.0` Linux x86-64
+  prerelease artifact, byte-pinned by archive and BUILDINFO hashes with its
+  recorded source commit identity checked.
 - Local parity smoke/report via `scripts/parity.sh` with an explicit Ari
   compiler path or `ARI_COMPILER`, plus an Ari repository path or `ARI_REPO`.
 - CLI `--help` output.
@@ -85,7 +88,8 @@ here.
   trailing-whitespace, missing-final-newline, ordered multi-file, and duplicate
   inputs. Remaining help/usage CLI, config, compiler-boundary, and broad golden
   parity remain open; the wider local parity smoke/report is still report-only.
-- CI is not compiler-backed yet.
+- Compiler-backed CI covers one pinned prerelease baseline only; it is not an
+  Ari compatibility matrix or support claim.
 - Child stderr and stdout are captured separately and parsed in deterministic
   stderr-then-stdout order. This can differ from the reference implementation's
   cross-stream write order; see
@@ -145,8 +149,9 @@ checks source files, its runtime compiler selection independently follows
 `--ari`, then `ARI_COMPILER`, then `build/ari`. Help and rule-listing commands
 do not execute the runtime compiler.
 
-CI does not run compiler-backed builds or tests yet, and this repository is not
-a standalone release.
+The separate compiler-smoke workflow runs the explicit-compiler test command
+against a checksum-pinned Ari `v0.1.0` artifact. This is build/test evidence,
+not a compatibility claim, and this repository is not a standalone release.
 
 ## Local Parity Smoke/Report
 
@@ -246,9 +251,9 @@ succeeds, it runs these current safe CLI invocations:
 These checks verify that the local binary builds, that the supported smoke
 commands execute, that `--help` names the current supported option set, and that
 `--list-rules` and `--json --list-rules` include the current rule-code,
-short-name, and default-severity signals. They do not add a strict parity gate,
-compiler-backed CI, home/global/XDG config search, new lint semantics, or
-compatibility claims. The config smoke uses explicit temporary files and
+short-name, and default-severity signals. The pinned compiler-smoke CI runs this
+suite, but it does not add a strict parity gate, home/global/XDG config search,
+new lint semantics, or compatibility claims. The config smoke uses explicit temporary files and
 temporary source trees containing `ari-lint.rules`. It checks per-source nearest
 readable discovery, different configs in one multi-file run, unreadable-nearer
 fallback, explicit `--config` discovery suppression, and CLI-last precedence.
@@ -265,5 +270,4 @@ checks cover representative JSON and human output, including final newlines.
 Source invocations also exercise the compiler-backed `--check` boundary. The
 smoke covers dirty multi-file, clean/dirty, all-clean, duplicate-argument, and
 escaped path cases. Dedicated Ari tests, broader source-controlled goldens,
-broader strict parity, compiler-backed CI, and broad compiler-diagnostic
-goldens remain future work.
+broader strict parity, and broad compiler-diagnostic goldens remain future work.
