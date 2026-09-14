@@ -12,14 +12,16 @@ documented runtime selection boundary.
 ## Current Status
 
 - `scripts/check.sh` does not run the Ari compiler.
-- `scripts/test.sh` delegates to the same compiler-free lightweight checks.
+- `scripts/test.sh` runs the compiler-free lightweight checks with no argument.
+  With one explicit, non-empty compiler path it runs those checks and then the
+  compiler-backed executable smoke. `ARI_COMPILER` alone does not opt it in.
 - `scripts/build.sh` and `scripts/smoke.sh` accept a caller-provided Ari
   compiler for local build and executable validation.
 - Standalone source commands invoke the selected compiler once per source with
   `--check`.
 - The GitHub Actions workflow is intentionally compiler-free and runs only the
-  lightweight check until explicit compiler provisioning, standalone tests, and
-  compiler identity recording are ready.
+  zero-argument test mode until explicit compiler provisioning and compiler
+  identity recording are ready.
 - Current `tools/lint` in `ari-foundry/ari` remains the reference
   implementation.
 
@@ -63,8 +65,8 @@ Do not download or build the compiler in the current lightweight check.
 The current GitHub Actions workflow must not run `scripts/build.sh`, invoke the
 Ari compiler, invoke `ari --check`, execute `tools/lint`, install package
 manager dependencies, or claim compatibility. It preserves a compiler-free CI
-gate while pinned compiler provisioning and identity recording remain future
-work.
+gate through zero-argument `scripts/test.sh` while pinned compiler provisioning
+and identity recording remain future work.
 
 Future compiler-backed CI may use a pinned Ari release artifact or a pinned
 source commit.
@@ -88,6 +90,12 @@ Compatibility should be updated only after compiler-backed tests pass.
 ## Test Runner Integration
 
 Pure helper and repository-shape checks should not require the Ari compiler.
+
+`scripts/test.sh` is the canonical orchestrator. Its zero-argument mode is
+deterministically compiler-free and ignores `ARI_COMPILER`. Its one-argument
+mode runs `scripts/check.sh` first and then passes the caller-provided path to
+`scripts/smoke.sh`. It downloads nothing and keeps parity outside the default
+test command.
 
 The local executable smoke accepts an explicit real compiler path and uses
 controlled fake executables for focused process-boundary behavior.
@@ -131,9 +139,10 @@ Cross-boundary issues should link both repos if needed.
 - [x] Define and implement precedence between `--ari` and `ARI_COMPILER`
 - [ ] Decide compiler version/commit recording format
 - [ ] Decide future CI compiler source
-- [x] Keep current GitHub Actions workflow compiler-free until explicit
-      compiler provisioning and standalone tests exist
+- [x] Keep current GitHub Actions workflow compiler-free pending explicit
+      compiler provisioning and compiler identity recording
 - [x] Add local compiler-backed executable smoke coverage
+- [x] Add an explicit compiler-backed mode to the standalone test entrypoint
 - [ ] Update compatibility docs only after tests pass
 
 ## Non-Goals

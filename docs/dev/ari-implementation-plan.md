@@ -16,8 +16,8 @@ It does not move `tools/lint` or change build behavior.
   Current `tools/lint` in `ari-foundry/ari` remains the reference
   implementation while parity work is still planned.
 - Local standalone build wiring exists through `scripts/build.sh`, local smoke
-  validation exists through `scripts/smoke.sh`, and the compiler-free local
-  test entrypoint exists through `scripts/test.sh`.
+  validation exists through `scripts/smoke.sh`, and `scripts/test.sh` provides
+  a deterministic compiler-free default plus an explicit compiler-backed mode.
 - A minimal Ari main entry shell is now present. It delegates to the existing
   OS argv CLI entry path and returns the internal command exit-code mapping.
   The main-facing `--list-rules` path writes stdout through the verified stdout
@@ -311,19 +311,18 @@ It does not move `tools/lint` or change build behavior.
   and multi-file cases, but is not run by `scripts/test.sh` or CI and is not a
   strict parity gate.
 - A local standalone test entrypoint now exists at `scripts/test.sh`. It
-  resolves the repository root and delegates to `scripts/check.sh`, so it
-  currently runs only compiler-free repository-shape and fixture-invariant
-  checks. It does not run the Ari compiler, invoke `ari --check`, execute
-  `tools/lint`, run CLI tests, run parity checks, install dependencies, or use
-  package manager commands.
+  resolves the repository root and runs `scripts/check.sh`. With no argument it
+  stays compiler-free even if `ARI_COMPILER` is present. With one explicit,
+  non-empty compiler path it runs the checks and delegates to
+  `scripts/smoke.sh`; parity remains separate. It does not download a compiler,
+  execute `tools/lint`, install dependencies, or use package manager commands.
 - The initial release and compatibility policy is documented in
   `docs/dev/release-compatibility-policy.md`. It uses Ari releases and tags as
   read-only references only and does not claim support for any Ari release,
   tag, or commit.
 - The CI compiler-backed check gate is documented. The GitHub Actions workflow
-  remains compiler-free and runs only `scripts/check.sh` until explicit Ari
-  compiler provisioning, standalone tests, and compiler identity recording are
-  ready.
+  remains compiler-free and runs zero-argument `scripts/test.sh` until explicit
+  Ari compiler provisioning and compiler identity recording are ready.
 - The existing `tools/lint` implementation remains in `ari-foundry/ari` as the
   current bundled/reference implementation.
 - The implementation direction remains Ari-language development in `ari-lint`.
@@ -562,12 +561,11 @@ CI or full build validation. Dedicated Ari tests, broad source-controlled
 goldens, compiler provisioning in CI, strict parity, and compatibility
 validation remain future work.
 
-The local standalone test entrypoint is not a full executable test suite.
-`scripts/test.sh` resolves the repository root and delegates to
-`scripts/check.sh` only. Compiler-backed executable smoke lives separately in
-`scripts/smoke.sh`; dedicated Ari unit tests, broad source-controlled golden
-comparison, strict parity, package manager commands, and CI compiler execution
-remain future work.
+The local standalone test entrypoint is not a full unit or parity suite.
+`scripts/test.sh` runs compiler-free checks by default and accepts one explicit
+compiler path to run the full executable smoke afterward. Dedicated Ari unit
+tests, broad source-controlled golden comparison, broader strict parity, package
+manager commands, and CI compiler execution remain future work.
 
 Standalone build wiring is local-only. `scripts/build.sh` resolves the
 repository root, requires an explicit compiler path or `ARI_COMPILER`, writes
@@ -686,14 +684,15 @@ main-facing OS argv path collects source-file diagnostics into a flat vector,
 
 ### Phase 6: standalone tests and CI
 
-- add a local standalone test entrypoint for lightweight checks
+- [x] add a local standalone test entrypoint with compiler-free and explicit
+  compiler-backed modes
 - add fixtures
 - add golden JSON diagnostics when schema is stable
-- run tests with explicit `--ari` compiler path
+- [x] run local standalone tests with an explicit Ari compiler path
 - add compiler-backed CI only after compiler provisioning, standalone tests,
   and compiler identity recording are ready
 - keep local smoke validation scoped to compiler-backed build plus
-  representative exact CLI/output assertions until broad source-controlled
+  representative exact CLI/output assertions until broader source-controlled
   goldens and strict parity exist
 
 The source-only parity runner skeleton in `src/parity.ari` records the future
@@ -998,8 +997,9 @@ usable.
       config search, parity runner, compiler-backed CI, broad golden tests,
       compatibility claims, `ari --check`, or `tools/lint`
 - [x] Add a local standalone test entrypoint that resolves the repository root
-      and delegates to `scripts/check.sh` only; executable rule, CLI,
-      compiler-backed, parity, and golden-output tests remain future work
+      with a deterministic compiler-free default and an explicit
+      compiler-backed smoke mode; dedicated Ari unit, parity, and broader
+      golden-output tests remain future work
 - [x] Define the initial release and compatibility policy without adding a
       release workflow, compatibility matrix, compiler-backed CI, or Ari
       version support claims
