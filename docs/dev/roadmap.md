@@ -96,7 +96,9 @@ focused diagnostic field smoke coverage added /
 local parity smoke/report added /
 local parity smoke/report config and multi-file cases added /
 known parity differences documented /
-no stable JSON schema or broad JSON output suite yet.
+reference-shaped runtime JSON and human output added /
+native diagnostic exit status aligned /
+representative exact output smoke checks added.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -152,9 +154,8 @@ and test work.
       API for caller-provided `String` text, returning local status data without
       reading OS argv, wiring diagnostic output, writing stdout, serializing
       JSON, invoking the compiler, scanning sources, executing lint rules, or
-      calling process exit. The main-facing human diagnostic stderr path has
-      since been wired; stderr-adapter tests and broader diagnostic output
-      wiring remain future work.
+      calling process exit. Main-facing human results now use stdout;
+      stderr-adapter tests and remaining error-path wiring are future work.
 - [x] Add internal OS argv integration using the verified Ari `std::env::args`
       API, dropping argv[0] and reusing the existing explicit-token parser and
       stdout-free dispatcher without reading environment variables, writing
@@ -173,9 +174,8 @@ and test work.
       without writing stderr, serializing JSON, printing diagnostics,
       discovering config files, traversing directories, invoking the compiler,
       executing `ari --check`, calling `tools/lint`, or calling process exit.
-      First diagnostic stderr output has since been wired for source-file lint
-      results, and source-file `--json` output has since been wired through
-      stdout; broader output tests and parity checks remain future work.
+      Reference-shaped human and JSON source results have since been wired
+      through stdout; broader output tests and strict parity remain future work.
 - [x] Add a minimal config text parser for caller-provided text using the
       documented `RULE = SEVERITY` shape, blank lines, and `#` comments,
       normalizing documented short rule names to full lint rule codes, and

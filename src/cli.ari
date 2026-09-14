@@ -15,11 +15,11 @@
 // provided, otherwise searches upward from the current working directory for
 // ari-lint.rules, and applies parsed config and --rule severity overrides when
 // provided. A separate collection path pushes full internal diagnostics into a
-// caller-provided vector. The main-facing path writes human-readable or JSON
-// list-rules text to stdout, source lint diagnostics to stderr, source-file JSON
-// diagnostics to stdout, CLI help text to stdout, CLI parse problem summaries
-// to stderr, and source/config file read errors to stderr through verified
-// output adapters.
+// caller-provided vector and records each file's diagnostic range. The
+// main-facing path writes list-rules text, reference-shaped source JSON, or
+// reference-shaped human source results to stdout. CLI help is stdout; CLI
+// parse, config-read, source-read, and temporary compiler-path errors use
+// stderr through the verified output adapters.
 // Missing source-file input writes a short stderr summary. It does not read
 // environment variables beyond the current working directory, home/global/XDG
 // config locations, recursively scan source trees, call tools/lint, call
@@ -173,6 +173,7 @@ pub enum CliCommandResultKind {
 pub enum CliExitCodeKind {
   CliExitSuccess,
   CliExitUsageError,
+  CliExitLintFailure,
   CliExitUnavailable,
 }
 
@@ -262,6 +263,14 @@ fn cli_usage_error_exit_code(zone: ref mut Zone) -> CliExitCodeMapping {
   );
 }
 
+fn cli_lint_failure_exit_code(zone: ref mut Zone) -> CliExitCodeMapping {
+  return cli_exit_code_mapping(
+    CliExitLintFailure,
+    1,
+    "Source lint diagnostics map to failure internally; process exit is returned by main."
+  );
+}
+
 fn cli_unavailable_exit_code(zone: ref mut Zone) -> CliExitCodeMapping {
   return cli_exit_code_mapping(
     CliExitUnavailable,
@@ -298,7 +307,7 @@ fn cli_file_lint_exit_code(
     return cli_unavailable_exit_code(zone);
   }
   if diagnostic_count > 0 {
-    return cli_usage_error_exit_code(zone);
+    return cli_lint_failure_exit_code(zone);
   }
   return cli_success_exit_code(zone);
 }
@@ -877,23 +886,20 @@ pub fn dispatch_cli_command(
   );
 }
 
-fn write_diagnostics_stderr(
+fn write_run_result_json_stdout(
   zone: ref mut Zone,
-  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic]
+  result: super::output::RunResult
 ) -> bool {
-  if diagnostics.len() == 0 {
-    return true;
-  }
-  let text = super::output::format_diagnostics_human(zone, diagnostics);
-  let write_result = super::output::write_stderr_text(zone, ref text);
-  return write_result.wrote_stderr;
+  let text = super::output::serialize_run_result_json(zone, result);
+  let write_result = super::output::write_stdout_text(zone, ref text);
+  return write_result.wrote_stdout;
 }
 
-fn write_diagnostics_json_stdout(
+fn write_run_result_human_stdout(
   zone: ref mut Zone,
-  diagnostics: std::vec::Vec[super::diagnostic::Diagnostic]
+  result: super::output::RunResult
 ) -> bool {
-  let text = super::output::serialize_diagnostics_json(zone, diagnostics);
+  let text = super::output::format_run_result_human(zone, result);
   let write_result = super::output::write_stdout_text(zone, ref text);
   return write_result.wrote_stdout;
 }
@@ -1226,11 +1232,16 @@ fn dispatch_cli_command_with_main_output(
       );
     }
 
+    var file_results = std::vec::new<super::output::FileResult>(
+      zone,
+      parse_result.args.source_count
+    );
     var diagnostics = std::vec::new<super::diagnostic::Diagnostic>(zone, 8);
     var command_result = collect_cli_source_diagnostics_from_tokens(
       zone,
       tokens,
       parse_result,
+      ref mut file_results,
       ref mut diagnostics
     );
     match command_result.kind {
@@ -1313,10 +1324,14 @@ fn dispatch_cli_command_with_main_output(
       }
       return command_result;
     }
+    let run_result = super::output::run_result(
+      file_results.as_slice(),
+      diagnostics.as_slice()
+    );
     if parse_result.args.json_requested {
-      let wrote_stdout = write_diagnostics_json_stdout(
+      let wrote_stdout = write_run_result_json_stdout(
         zone,
-        diagnostics
+        run_result
       );
       if !wrote_stdout {
         var failed_json_result = cli_command_result(
@@ -1330,19 +1345,19 @@ fn dispatch_cli_command_with_main_output(
         failed_json_result.first_diagnostic = command_result.first_diagnostic;
         return failed_json_result;
       }
-    } else if command_result.diagnostic_count > 0 {
-      let wrote_stderr = write_diagnostics_stderr(
+    } else {
+      let wrote_human_stdout = write_run_result_human_stdout(
         zone,
-        diagnostics
+        run_result
       );
-      if !wrote_stderr {
+      if !wrote_human_stdout {
         var failed_result = cli_command_result(
           CliSourceLintResult,
           false,
           command_result.diagnostic_count,
           command_result.read_error_count,
           cli_unavailable_exit_code(zone),
-          "Source-file diagnostics stderr write failed through the verified stderr adapter."
+          "Source-file human result stdout write failed through the verified stdout adapter."
         );
         failed_result.first_diagnostic = command_result.first_diagnostic;
         return failed_result;
@@ -1386,10 +1401,15 @@ pub fn collect_explicit_cli_diagnostics(
   diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
 ) -> CliCommandResult {
   let parse_result = parse_cli_tokens(zone, ref tokens);
+  var file_results = std::vec::new<super::output::FileResult>(
+    zone,
+    parse_result.args.source_count
+  );
   return collect_cli_source_diagnostics_from_tokens(
     zone,
     ref tokens,
     parse_result,
+    ref mut file_results,
     diagnostics
   );
 }
@@ -1438,6 +1458,7 @@ fn collect_cli_source_diagnostics_from_tokens(
   zone: ref mut Zone,
   tokens: ref std::vec::Vec[std::string::String],
   parse_result: CliParseResult,
+  file_results: ref mut std::vec::Vec[super::output::FileResult],
   diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
 ) -> CliCommandResult {
   if parse_result.problem_count > 0 || parse_result.args.rule_override_problem_count > 0 {
@@ -1544,13 +1565,22 @@ fn collect_cli_source_diagnostics_from_tokens(
     var read_error_count = 0;
     var first_read_error_path = std::string::new(zone, 0);
     for source_file in parse_result.args.source_files {
+      let diagnostic_start = diagnostics.len();
       let collection_result = super::lint::collect_file_lint_diagnostics_with_override_refs(
         zone,
         source_file.as_slice(),
         ref rule_overrides,
         diagnostics
       );
-      diagnostic_count = diagnostic_count + collection_result.diagnostic_count;
+      let file_diagnostic_count = diagnostics.len() - diagnostic_start;
+      file_results.push(super::output::file_result(
+        source_file.as_slice(),
+        0,
+        diagnostic_start,
+        file_diagnostic_count,
+        diagnostics.len()
+      ));
+      diagnostic_count = diagnostic_count + file_diagnostic_count;
       if collection_result.read_error_count > 0 && first_read_error_path.len() == 0 {
         first_read_error_path = std::string::from_slice_in(
           zone,
@@ -1580,12 +1610,18 @@ fn collect_cli_source_diagnostics_from_tokens(
     return command_result;
   }
 
-  return collect_cli_source_diagnostics(zone, parse_result, diagnostics);
+  return collect_cli_source_diagnostics_with_file_results(
+    zone,
+    parse_result,
+    file_results,
+    diagnostics
+  );
 }
 
-pub fn collect_cli_source_diagnostics(
+fn collect_cli_source_diagnostics_with_file_results(
   zone: ref mut Zone,
   parse_result: CliParseResult,
+  file_results: ref mut std::vec::Vec[super::output::FileResult],
   diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
 ) -> CliCommandResult {
   if parse_result.problem_count > 0 || parse_result.args.rule_override_problem_count > 0 {
@@ -1597,12 +1633,21 @@ pub fn collect_cli_source_diagnostics(
     var read_error_count = 0;
     var first_read_error_path = std::string::new(zone, 0);
     for source_file in parse_result.args.source_files {
+      let diagnostic_start = diagnostics.len();
       let collection_result = super::lint::collect_file_lint_diagnostics(
         zone,
         source_file.as_slice(),
         diagnostics
       );
-      diagnostic_count = diagnostic_count + collection_result.diagnostic_count;
+      let file_diagnostic_count = diagnostics.len() - diagnostic_start;
+      file_results.push(super::output::file_result(
+        source_file.as_slice(),
+        0,
+        diagnostic_start,
+        file_diagnostic_count,
+        diagnostics.len()
+      ));
+      diagnostic_count = diagnostic_count + file_diagnostic_count;
       if collection_result.read_error_count > 0 && first_read_error_path.len() == 0 {
         first_read_error_path = std::string::from_slice_in(
           zone,
@@ -1633,6 +1678,23 @@ pub fn collect_cli_source_diagnostics(
   }
 
   return dispatch_cli_command(zone, parse_result);
+}
+
+pub fn collect_cli_source_diagnostics(
+  zone: ref mut Zone,
+  parse_result: CliParseResult,
+  diagnostics: ref mut std::vec::Vec[super::diagnostic::Diagnostic]
+) -> CliCommandResult {
+  var file_results = std::vec::new<super::output::FileResult>(
+    zone,
+    parse_result.args.source_count
+  );
+  return collect_cli_source_diagnostics_with_file_results(
+    zone,
+    parse_result,
+    ref mut file_results,
+    diagnostics
+  );
 }
 
 pub fn run_explicit_list_rules_command(zone: ref mut Zone) -> CliCommandResult {
@@ -1687,9 +1749,9 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // explicit config path, parsed rule override values, first invalid rule
 // override value, rule override problem count, missing option value details,
 // unknown argument details, and parse problem counts in
-// CliParseResult. It intentionally leaves environment handling, path
-// validation, home/global/XDG config discovery, diagnostic printing, and
-// ari --check invocation as future work.
+// CliParseResult. It intentionally leaves environment handling, filesystem
+// validation, config discovery, output, and ari --check execution to later
+// layers.
 //
 // parse_cli_rule_overrides converts one raw --rule value into the internal
 // config override count model and parse problem count. Source-file collection
@@ -1714,10 +1776,10 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // the first internal diagnostic without writing output.
 // collect_cli_source_diagnostics and collect_explicit_cli_diagnostics use the
 // same explicit source-file boundary, but push full internal diagnostics into a
-// caller-provided vector and apply discovered or explicit config overrides
-// followed by parsed --rule severity overrides when provided. They do not
-// write output, serialize JSON, search home/global/XDG config locations, scan
-// source directories, call tools/lint, call process exit, or invoke ari
+// caller-provided vector, record per-file ranges, and apply discovered or
+// explicit config overrides followed by parsed --rule severity overrides when
+// provided. They do not write output, search home/global/XDG config locations,
+// scan source directories, call tools/lint, call process exit, or invoke ari
 // --check.
 // run_explicit_cli_tokens composes parsing and dispatch for callers that
 // already have tokens. These entry paths do not write stdout/stderr, serialize
@@ -1743,14 +1805,11 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // only the scoped stdout/stderr writes described below.
 //
 // run_os_argv_cli_with_main_output is the main-facing output path. It writes
-// human-readable list-rules text to stdout, or JSON list-rules text to stdout
-// when --json is requested. It writes source-file lint diagnostics to stderr,
-// or source-file JSON diagnostics to stdout when --json is requested, through
-// verified output adapters. Source-file read errors and explicit config-file
-// read errors write short stderr summaries without producing read-error JSON
-// output. CLI help writes a concise stdout message, and CLI/config parse
-// problems write a short summary to stderr. Missing source-file input also
-// writes a short stderr summary. Explicit --ari paths are validated before
-// source linting without invoking them. Home, global, and XDG config discovery,
-// parse-error JSON, compiler invocation, ari --check, tools/lint, and process
-// exit remain outside this path.
+// human-readable or JSON list-rules output to stdout. Source runs produce one
+// stdout result per positional file in human mode, or one newline-terminated
+// JSON files envelope in JSON mode; enabled diagnostics return exit 1. Source
+// and explicit-config read errors, CLI/config parse problems, and missing input
+// remain stderr errors. Explicit --ari paths are validated before source
+// linting without invoking them. Per-source config discovery, environment
+// compiler selection, compiler execution, and compiler diagnostic parsing
+// remain follow-up work.

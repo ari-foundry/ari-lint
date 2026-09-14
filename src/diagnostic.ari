@@ -17,8 +17,9 @@ pub struct SourceSpan {
 pub struct Diagnostic {
   span: SourceSpan,
   severity: super::severity::Severity,
-  rule_code: Slice[u8],
   message: Slice[u8],
+  source: Slice[u8],
+  code: Slice[u8],
 }
 
 pub enum OptionalDiagnostic {
@@ -45,15 +46,60 @@ pub fn source_span_with_end(
 pub fn diagnostic_from_span(
   span: SourceSpan,
   severity: super::severity::Severity,
-  rule_code: Slice[u8],
+  code: Slice[u8],
+  message: Slice[u8]
+) -> Diagnostic {
+  return diagnostic_from_span_with_source_code(
+    span,
+    severity,
+    "ari-lint",
+    code,
+    message
+  );
+}
+
+pub fn diagnostic_from_span_with_source_code(
+  span: SourceSpan,
+  severity: super::severity::Severity,
+  source: Slice[u8],
+  code: Slice[u8],
   message: Slice[u8]
 ) -> Diagnostic {
   return Diagnostic {
     span: span,
     severity: severity,
-    rule_code: rule_code,
     message: message,
+    source: source,
+    code: code,
   };
+}
+
+pub fn compiler_diagnostic_from_span(
+  span: SourceSpan,
+  severity: super::severity::Severity,
+  code: Slice[u8],
+  message: Slice[u8]
+) -> Diagnostic {
+  return diagnostic_from_span_with_source_code(
+    span,
+    severity,
+    "ari",
+    code,
+    message
+  );
+}
+
+pub fn diagnostic_with_severity(
+  diagnostic: Diagnostic,
+  severity: super::severity::Severity
+) -> Diagnostic {
+  return diagnostic_from_span_with_source_code(
+    diagnostic.span,
+    severity,
+    diagnostic.source,
+    diagnostic.code,
+    diagnostic.message
+  );
 }
 
 pub fn no_diagnostic() -> OptionalDiagnostic {

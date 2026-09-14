@@ -627,15 +627,13 @@ pub fn apply_rule_severity_to_diagnostic_from_overrides(
 ) -> DiagnosticSeverityApplication {
   let resolution = resolve_rule_severity_from_overrides(
     zone,
-    diagnostic.rule_code,
+    diagnostic.code,
     diagnostic.severity,
     overrides
   );
-  let configured_diagnostic = super::diagnostic::diagnostic_from_span(
-    diagnostic.span,
-    resolution.severity,
-    diagnostic.rule_code,
-    diagnostic.message
+  let configured_diagnostic = super::diagnostic::diagnostic_with_severity(
+    diagnostic,
+    resolution.severity
   );
 
   return DiagnosticSeverityApplication {

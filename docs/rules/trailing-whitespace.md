@@ -7,7 +7,7 @@ behavior for `lint/trailing-whitespace`.
 
 ## Current Status
 
-- The rule is planned for the Ari-language implementation.
+- The rule is implemented in the Ari-language standalone path.
 - The current reference behavior is the bundled `tools/lint` implementation in
   `ari-foundry/ari`.
 - This repository currently has metadata/module layout and a minimal internal
@@ -21,8 +21,10 @@ behavior for `lint/trailing-whitespace`.
 - In-memory rule execution now scans caller-provided source text, splits it on
   newline bytes, and returns internal `Diagnostic` values for lines with
   trailing spaces or tabs.
-- File reading, filesystem scanning, config integration, CLI integration,
-  user-facing diagnostics, JSON output, and tests remain future work.
+- Explicit-file reading, config severity overrides, CLI integration, and
+  reference-shaped human/JSON diagnostics are implemented. Dedicated Ari rule
+  tests, broader fixtures, compiler integration, and strict parity remain
+  future work.
 - Fixture and test planning is tracked in
   [docs/rules/trailing-whitespace-fixtures.md](trailing-whitespace-fixtures.md);
   initial clean and trailing-spaces fixtures are started, while full fixture
@@ -55,7 +57,7 @@ final carriage return before checking the last content byte.
 
 ## Planned Diagnostic Location
 
-The future diagnostic should include:
+The emitted diagnostic includes:
 
 - file path
 - line number for the source line containing trailing whitespace
@@ -69,11 +71,10 @@ The current reference implementation reports the column as the first trailing
 space or tab and `endColumn` as one past the logical line end after CRLF
 normalization.
 
-The Ari-language implementation maps each matching in-memory line to an
-internal span using the explicit file path and computed line number. Full
-diagnostics output is not implemented. JSON serialization is not implemented.
-CLI integration, file scanning, config integration, and parity tests remain
-future work.
+The Ari-language implementation maps each matching line to an internal span
+using the explicit file path and computed line number. The CLI emits that span
+in the reference human and JSON forms and applies configured severity. Recursive
+file scanning and strict parity tests remain future work.
 
 ## Planned Message
 
@@ -103,8 +104,7 @@ Parity dimensions:
 - rule code
 - severity
 - human-readable output
-- JSON output shape, once schema is stable; exact JSON output details remain
-  needs follow-up
+- reference-shaped JSON output
 - exit behavior
 
 ## Fixture Coverage
@@ -114,9 +114,9 @@ Initial fixture coverage includes:
 - `tests/fixtures/trailing-whitespace/clean.ari`
 - `tests/fixtures/trailing-whitespace/trailing-spaces.ari`
 
-These fixtures are checked only for fixture shape. They are not compiled, run
-through `ari-lint`, compared against `tools/lint`, or connected to diagnostic
-goldens yet.
+Compiler-free checks validate fixture shape, and compiler-backed smoke runs
+representative temporary equivalents through `ari-lint` with exact output.
+Strict source-controlled comparison against `tools/lint` remains future work.
 
 Remaining future fixture ideas:
 
@@ -128,8 +128,9 @@ Remaining future fixture ideas:
 
 The detailed future fixture and test plan is documented in
 [docs/rules/trailing-whitespace-fixtures.md](trailing-whitespace-fixtures.md).
-Full trailing-whitespace behavior tests, golden files, CLI tests, parity tests,
-and test runner behavior are not added yet.
+Compiler-backed CLI smoke covers representative behavior and exact output;
+dedicated Ari rule tests, broad source-controlled goldens, and strict parity
+remain future work.
 
 ## Non-Goals
 

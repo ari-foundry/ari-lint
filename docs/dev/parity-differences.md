@@ -130,79 +130,21 @@ Follow-up:
 - add strict compiler-error checks only after compiler provisioning and
   invocation behavior are documented and implemented
 
-### JSON Diagnostic Shape
+### Non-UTF-8 JSON Bytes
 
-Current standalone `ari-lint` emits source-file diagnostics as a flat JSON
-array with fields such as `filePath` and `ruleCode`.
+Standalone runtime JSON preserves valid UTF-8 and emits `\ufffd` for each
+invalid input byte. This keeps the output document valid JSON for POSIX paths
+that are not valid UTF-8. The bundled reference currently copies those bytes
+directly, which can produce a document that UTF-8 JSON parsers reject.
 
-Original `tools/lint` emits a top-level `files` array with per-file `path`,
-`exitCode`, and `diagnostics` entries. Individual diagnostics use fields such
-as `file`, `source`, and `code`.
-
-Classification: original `tools/lint` behavior difference and `ari-lint`
-diagnostic schema follow-up.
+Classification: intentional standalone JSON-validity extension.
 
 Impact:
 
-- exact JSON equality is not expected yet
-- clean-file JSON output shape differs because original `tools/lint` still
-  reports a per-file entry while current standalone `ari-lint` can emit an
-  empty diagnostic array
-- golden JSON files should wait until the schema and path-normalization policy
-  are defined
-
-Follow-up:
-
-- define the standalone JSON schema before strict parity fixtures
-- decide whether compatibility requires preserving the original shape or
-  documenting a new stable standalone shape
-
-### Clean, Disabled, And Mixed File Path Accounting
-
-For clean inputs, disabled-rule cases such as `config-off` and `rule-off`, and
-the clean member of mixed clean/dirty invocations such as `multi-file-mixed`,
-current standalone `ari-lint` emits no diagnostic file path entries in the local
-report. Original `tools/lint` still emits a per-file JSON entry with empty
-diagnostics for the same clean source path.
-
-Classification: original `tools/lint` behavior difference and `ari-lint`
-diagnostic schema follow-up.
-
-Impact:
-
-- exact clean JSON output parity is not expected yet
-- file-path hit counts differ for clean, disabled-rule, and mixed clean/dirty
-  cases even when both implementations agree that no lint diagnostic should be
-  reported for the clean source
-- strict clean/off golden checks should wait until the output schema contract
-  is documented
-
-Follow-up:
-
-- decide whether standalone clean output should preserve original per-file
-  entries or keep the current empty diagnostic output shape
-- define clean, disabled-rule, and mixed clean/dirty JSON shape before strict
-  parity fixtures
-
-### Diagnostic Exit Status
-
-For lint diagnostics, the current standalone `ari-lint` path currently reports
-exit code `2` in the local parity smoke, while original `tools/lint` reports
-exit code `1`. Both report success for clean inputs in the current smoke.
-
-Classification: original `tools/lint` behavior difference and `ari-lint`
-implementation/design follow-up.
-
-Impact:
-
-- exact exit-code parity is not established
-- scripts should not treat the local parity report as a strict exit-code gate
-- release compatibility claims must not be made from the current report
-
-Follow-up:
-
-- decide the standalone lint diagnostic exit-code contract before releases
-- add strict exit-code parity only after the contract is documented
+- ordinary UTF-8 paths and messages remain byte-compatible
+- strict parity must allowlist only invalid UTF-8 input text
+- the replacement rendering is not a byte-round-trip representation of the
+  original POSIX path
 
 ### Help Output Stream And Shape
 
@@ -533,13 +475,17 @@ Follow-up:
 ## Current Alignment Signals
 
 The current local report shows useful matching signals for the smoke-sized
-cases: both implementations report the expected lint rule names, severity names,
-line/column presence, and dirty file paths for the covered rule/config/multi-file
-cases, including the mixed clean/dirty multi-file case. The current local report
-also includes disabled explicit config and command-line `--rule` cases where
-the standalone implementation and original `tools/lint` suppress the configured
-rule diagnostic, plus a short-name explicit config case for the same rule
-severity signal.
+native-rule cases. Both implementations use the same top-level `files` JSON
+shape, keep every input file in order (including clean and duplicate inputs),
+emit the same per-diagnostic field names and numeric end positions, and return
+exit `1` for enabled lint diagnostics. Human source output also follows the
+reference `PATH: ok` and `[CODE]` forms on stdout.
+
+Both implementations report the expected rule names, severity names,
+line/column presence, and dirty file paths for the covered
+rule/config/multi-file cases; disabled explicit config and command-line
+`--rule` cases suppress the configured diagnostic, and short-name config uses
+the same severity signal.
 
 These are smoke signals only. They do not replace source-controlled fixtures,
 golden output, compiler-backed parity, or CI parity jobs.

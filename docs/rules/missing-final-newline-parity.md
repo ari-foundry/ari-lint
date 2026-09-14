@@ -15,7 +15,8 @@ parity gate.
 - A minimal missing-final-newline helper exists.
 - An internal diagnostic mapping skeleton exists.
 - Initial final-newline/no-final-newline fixtures exist.
-- Full rule execution is not complete.
+- Native explicit-file rule execution and representative output smoke are
+  complete; dedicated rule tests and strict parity remain open.
 - A first local non-gating parity smoke/report exists in `scripts/parity.sh`.
 - `tools/lint` in `ari-foundry/ari` remains the reference implementation.
 
@@ -57,16 +58,16 @@ Outputs to compare:
 - rule code
 - severity
 - message if confirmed
-- human-readable output once stable: needs follow-up
-- JSON output once schema is stable: needs follow-up
-- exit status: needs follow-up
+- human-readable output
+- JSON output
+- exit status
 
 The current reference implementation confirms the native rule code
 `lint/missing-final-newline`, default severity `warning`, message text
 `missing final newline`, source value `ari-lint`, and end column one column
-after the reported final column. Standalone parity output shape, exact command
-strategy, and command-level exit policy still need follow-up before this
-repository treats them as stable comparison data.
+after the reported final column. Standalone native output shape and diagnostic
+exit policy now match the reference; source-controlled strict comparison
+remains future work.
 
 ## Normalization Policy
 
@@ -76,9 +77,8 @@ Environment-specific fields should be ignored or normalized.
 
 Compiler/tooling version should be recorded.
 
-JSON comparison should wait until schema is stable.
-
-Human-readable output comparison should wait until message text is stable.
+JSON and human-readable output should be compared exactly after normalizing
+environment-specific path prefixes.
 
 ## Intentional Differences
 

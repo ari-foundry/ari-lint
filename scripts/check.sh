@@ -135,7 +135,7 @@ require_grep "compiler_check_failed_code_in_stdout" scripts/parity.sh
 require_grep "exec_failed_text_in_stdout" scripts/parity.sh
 require_grep "missing_compiler_path_in_stdout" scripts/parity.sh
 require_grep "expected_top_level_declaration_text_in_stdout" scripts/parity.sh
-require_grep "clean, disabled-rule, and mixed clean/dirty JSON outputs omit clean file path entries" scripts/parity.sh
+require_grep "aligned native runtime contract" scripts/parity.sh
 require_grep "unable_to_read_config_text_in_stderr" scripts/parity.sh
 require_grep "cannot_open_lint_config_text_in_stderr" scripts/parity.sh
 require_grep "unknown_argument_text_in_stderr" scripts/parity.sh
@@ -152,10 +152,8 @@ require_grep "include_option_in_stderr" scripts/parity.sh
 require_grep "severity_note_present" scripts/parity.sh
 require_grep "ari-lint Known Parity Differences" docs/dev/parity-differences.md
 require_grep "Compiler Check Boundary" docs/dev/parity-differences.md
-require_grep "JSON Diagnostic Shape" docs/dev/parity-differences.md
-require_grep "Clean, Disabled, And Mixed File Path Accounting" docs/dev/parity-differences.md
-require_grep "mixed clean/dirty JSON shape" docs/dev/parity-differences.md
-require_grep "Diagnostic Exit Status" docs/dev/parity-differences.md
+require_grep "same top-level .files. JSON" docs/dev/parity-differences.md
+require_grep "exit .1. for enabled lint diagnostics" docs/dev/parity-differences.md
 require_grep "Help Output Stream And Shape" docs/dev/parity-differences.md
 require_grep "No Source File Usage Text" docs/dev/parity-differences.md
 require_grep "Source Read Error Output" docs/dev/parity-differences.md
@@ -164,6 +162,7 @@ require_grep "intentional explicit" docs/dev/parity-differences.md
 require_grep "exitCode. .127" docs/dev/parity-differences.md
 require_grep "explicit path preflight with stderr and exit 1" scripts/parity.sh
 require_grep "Compiler Error Output" docs/dev/parity-differences.md
+require_grep "Non-UTF-8 JSON Bytes" docs/dev/parity-differences.md
 require_grep "Unknown Option Usage Text" docs/dev/parity-differences.md
 require_grep "Missing Config Value Usage Text" docs/dev/parity-differences.md
 require_grep "Config Read Error Output" docs/dev/parity-differences.md
@@ -259,6 +258,10 @@ require_grep "discovery_child" scripts/smoke.sh
 require_grep "nearest_discovery_output" scripts/smoke.sh
 require_grep "multi_dirty_one" scripts/smoke.sh
 require_grep "multi_dirty_two" scripts/smoke.sh
+require_grep "multi_expected" scripts/smoke.sh
+require_grep "stress_path_count" scripts/smoke.sh
+require_grep "invalid_utf8_path_output" scripts/smoke.sh
+require_grep "expected empty stderr" scripts/smoke.sh
 require_grep "clean_source_two" scripts/smoke.sh
 require_grep "clean_output" scripts/smoke.sh
 require_grep "mixed_output" scripts/smoke.sh
@@ -441,7 +444,7 @@ require_grep "docs/rules/trailing-whitespace-parity.md" docs/rules/trailing-whit
 require_grep "docs/rules/trailing-whitespace-parity.md" docs/dev/parity-test-plan.md
 require_grep "docs/rules/trailing-whitespace-parity.md" tests/README.md
 require_grep "Do not add a strict parity gate in this step" docs/rules/trailing-whitespace-parity.md
-require_grep "first minimal fixture coverage has started" docs/rules/trailing-whitespace-fixtures.md
+require_grep "first minimal fixture coverage and executable CLI smoke exist" docs/rules/trailing-whitespace-fixtures.md
 require_grep "initial clean and trailing-spaces fixtures are started" docs/rules/trailing-whitespace.md
 require_grep "trailing-whitespace design note" docs/dev/roadmap.md
 require_grep "trailing-whitespace fixture and test plan" docs/dev/roadmap.md
@@ -475,8 +478,8 @@ require_grep "main-facing missing source stderr output added" docs/dev/roadmap.m
 require_grep "main-facing file read error stderr output added" docs/dev/roadmap.md
 require_grep "run_os_argv_cli_with_main_output" src/cli.ari
 require_grep "write_stdout_text" src/cli.ari
-require_grep "write_diagnostics_stderr" src/cli.ari
-require_grep "write_diagnostics_json_stdout" src/cli.ari
+require_grep "write_run_result_human_stdout" src/cli.ari
+require_grep "write_run_result_json_stdout" src/cli.ari
 require_grep "write_cli_parse_problem_stderr" src/cli.ari
 require_grep "write_cli_parse_detail_stderr" src/cli.ari
 require_grep "format_config_parse_problem_stderr" src/cli.ari
@@ -515,10 +518,10 @@ require_grep "executable rule module API added" docs/dev/roadmap.md
 require_grep "shared executable rule module API" docs/dev/roadmap.md
 require_grep "data-only lookup" docs/dev/ari-implementation-plan.md
 require_grep "known-rule validation" docs/dev/ari-implementation-plan.md
-require_grep "severity override resolver" docs/dev/ari-implementation-plan.md
+require_grep "apply_rule_severity_to_diagnostic_from_overrides" src/config.ari
 require_grep "single-diagnostic application helper" docs/dev/ari-implementation-plan.md
-require_grep "override aggregation path" docs/dev/ari-implementation-plan.md
-require_grep "file-backed override aggregation path" docs/dev/ari-implementation-plan.md
+require_grep "collect_lint_diagnostics_in_memory_with_overrides" src/lint.ari
+require_grep "collect_file_lint_diagnostics_with_override_refs" src/lint.ari
 require_grep "retains all positional source file paths" docs/dev/ari-implementation-plan.md
 require_grep "explicit config file parse boundary" docs/dev/ari-implementation-plan.md
 require_grep "default severity < discovered config < explicit" docs/dev/ari-implementation-plan.md
@@ -579,7 +582,7 @@ require_grep "No executable file IO boundary tests are added yet" tests/README.m
 require_grep "No executable CLI file lint path tests are added yet" tests/README.md
 require_grep "No executable parity runner tests are added yet" tests/README.md
 require_grep "Source directories should contain Ari source files only" docs/dev/ari-implementation-plan.md
-require_grep "CLI file lint path is limited" docs/dev/ari-implementation-plan.md
+require_grep "current standalone path implements explicit-file native rule execution" docs/dev/ari-implementation-plan.md
 require_grep "source-only parity runner skeleton" docs/dev/ari-implementation-plan.md
 require_grep "compiler-backed CI gate" docs/dev/ari-implementation-plan.md
 require_grep "local standalone test entrypoint" docs/dev/ari-implementation-plan.md
@@ -634,37 +637,36 @@ require_grep "CLI argument model added" docs/dev/roadmap.md
 require_grep "minimal CLI token parser added" docs/dev/roadmap.md
 require_grep "stdout-free command dispatcher added" docs/dev/roadmap.md
 require_grep "internal explicit-token entry path added" docs/dev/roadmap.md
-require_grep "No CLI tests are added yet" tests/README.md
+require_grep "Executable shell CLI smoke now covers" tests/README.md
 require_grep "No CLI model tests are added yet" tests/README.md
 require_grep "No executable CLI parser tests are added yet" tests/README.md
 require_grep "No executable dispatcher tests are added yet" tests/README.md
-require_grep "No executable exit-code tests are added yet" tests/README.md
+require_grep "No dedicated Ari exit-code model tests are added yet" tests/README.md
 require_grep "No executable explicit-token entry tests are added yet" tests/README.md
 require_grep "No executable explicit-token list-rules command tests are added yet" tests/README.md
-require_grep "No executable main-entry tests are added yet" tests/README.md
-require_grep "No executable OS argv integration tests are added yet" tests/README.md
+require_grep "Executable shell smoke enters through .main. and OS argv" tests/README.md
 require_grep "No executable stdout/stderr output boundary tests are added yet" tests/README.md
 require_grep "No executable stdout adapter tests are added yet" tests/README.md
 require_grep "No executable stderr adapter tests are added yet" tests/README.md
 require_grep "scripts/build.sh" tests/README.md
 require_grep "scripts/test.sh" tests/README.md
-require_grep "diagnostic output metadata skeleton" docs/dev/ari-implementation-plan.md
+require_grep "Runtime output uses a flat diagnostic store" docs/dev/ari-implementation-plan.md
 require_grep "diagnostic output metadata skeleton" docs/dev/roadmap.md
 require_grep "internal human diagnostic formatter added" docs/dev/roadmap.md
 require_grep "internal human diagnostic array formatter added" docs/dev/roadmap.md
 require_grep "trailing-whitespace first diagnostic capture added" docs/dev/roadmap.md
 require_grep "missing-final-newline first diagnostic capture added" docs/dev/roadmap.md
-require_grep "diagnostic JSON serializers are limited to one internal diagnostic object" docs/dev/ari-implementation-plan.md
+require_grep "adds .FileResult./.RunResult. serializers used by the CLI" docs/dev/ari-implementation-plan.md
 require_grep "internal diagnostic JSON field serialization added" docs/dev/roadmap.md
 require_grep "internal diagnostic JSON array serialization added" docs/dev/roadmap.md
-require_grep "A minimal human-readable formatter" docs/dev/ari-implementation-plan.md
+require_grep "Human source results use" docs/dev/ari-implementation-plan.md
 require_grep "caller-provided diagnostics" docs/dev/ari-implementation-plan.md
 require_grep "first already-built" docs/dev/ari-implementation-plan.md
-require_grep "collected human diagnostics for all explicit source files" docs/dev/ari-implementation-plan.md
+require_grep "reference-shaped human or JSON output to stdout" docs/dev/ari-implementation-plan.md
 require_grep "CLI parse problems write a short summary" docs/dev/ari-implementation-plan.md
 require_grep "concise text to stdout" docs/dev/ari-implementation-plan.md
 require_grep "missing source-file input writes a short" docs/dev/ari-implementation-plan.md
-require_grep "source-file read errors write a short" docs/dev/ari-implementation-plan.md
+require_grep "source/config read failures remain stderr errors" docs/dev/ari-implementation-plan.md
 require_grep "overrides are applied to those collected diagnostics" docs/dev/ari-implementation-plan.md
 require_grep "read-error JSON output" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path" docs/dev/ari-implementation-plan.md
@@ -672,12 +674,11 @@ require_grep "human-readable list-rules formatter" docs/dev/ari-implementation-p
 require_grep "stdout/stderr output boundary model" docs/dev/ari-implementation-plan.md
 require_grep "internal list-rules output path added" docs/dev/roadmap.md
 require_grep "human-readable list-rules formatter added" docs/dev/roadmap.md
-require_grep "No diagnostic output tests are added yet" tests/README.md
-require_grep "No executable human diagnostic formatter tests are added yet" tests/README.md
-require_grep "No executable human diagnostic array formatter tests are added yet" tests/README.md
+require_grep "Executable diagnostic output smoke tests" tests/README.md
+require_grep "Human diagnostics are verified on stdout" tests/README.md
 require_grep "No executable trailing-whitespace first-diagnostic capture tests are added yet" tests/README.md
 require_grep "No executable missing-final-newline first-diagnostic capture tests are added yet" tests/README.md
-require_grep "No executable diagnostic JSON serializer tests are added yet" tests/README.md
+require_grep "Executable CLI smoke tests now validate the runtime JSON envelope" tests/README.md
 require_grep "No executable source input boundary tests are added yet" tests/README.md
 require_grep "No executable list-rules formatter tests are added yet" tests/README.md
 require_grep "config override skeleton" docs/dev/ari-implementation-plan.md
@@ -701,6 +702,7 @@ require_grep "trailing-whitespace helper started" docs/dev/roadmap.md
 require_grep "No executable trailing-whitespace rule execution tests are added yet" tests/README.md
 require_grep "fn main() -> i64" src/main.ari
 require_grep "run_main_entry_shell" src/main.ari
+require_grep "region(1048576)" src/main.ari
 require_grep "mod cli" src/main.ari
 require_grep "mod lint" src/main.ari
 require_grep "cli::run_os_argv_cli" src/main.ari
@@ -861,31 +863,47 @@ require_grep "first internal diagnostic without writing output" src/cli.ari
 require_grep "future work" src/cli.ari
 require_grep "OptionalDiagnostic" src/diagnostic.ari
 require_grep "first_available_diagnostic" src/diagnostic.ari
+require_grep "source: Slice" src/diagnostic.ari
+require_grep "code: Slice" src/diagnostic.ari
+require_grep "compiler_diagnostic_from_span" src/diagnostic.ari
+require_grep "diagnostic_with_severity" src/diagnostic.ari
 require_grep "DiagnosticOutputMetadata" src/output.ari
 require_grep "Human" src/output.ari
 require_grep "Json" src/output.ari
-require_grep "file path" src/output.ari
 require_grep "line" src/output.ari
 require_grep "column" src/output.ari
 require_grep "endLine" src/output.ari
 require_grep "endColumn" src/output.ari
 require_grep "severity" src/output.ari
-require_grep "rule code" src/output.ari
 require_grep "message" src/output.ari
 require_grep "serialize_diagnostic_json" src/output.ari
 require_grep "serialize_diagnostics_json" src/output.ari
+require_grep "FileResult" src/output.ari
+require_grep "RunResult" src/output.ari
+require_grep "diagnostic_start" src/output.ari
+require_grep "diagnostic_count <= diagnostic_total - diagnostic_start" src/output.ari
+require_grep "expected_start == diagnostics.len()" src/output.ari
+require_grep "diagnostics.len() - diagnostic_start" src/cli.ari
+require_grep "serialize_run_result_json" src/output.ari
+require_grep "format_run_result_human" src/output.ari
 require_grep "format_json_string" src/output.ari
-require_grep "format_json_optional_position" src/output.ari
+require_grep "resolved_end_position" src/output.ari
+require_grep "\\u00" src/output.ari
+require_grep "\\ufffd" src/output.ari
 require_grep "diagnostic_severity_name" src/output.ari
 require_grep "format_diagnostic_human" src/output.ari
 require_grep "format_diagnostics_human" src/output.ari
-require_grep "append_i64_in" src/output.ari
-require_grep "filePath" src/output.ari
-require_grep "ruleCode" src/output.ari
+require_grep "append_i64_fixed" src/output.ari
+require_grep "reference_diagnostic_json_capacity" src/output.ari
+require_grep "file_result_json_capacity" src/output.ari
+require_grep '"{\\"files\\":\[' src/output.ari
+require_grep "compiler_exit_code" src/output.ari
+require_grep "diagnostic.source" src/output.ari
+require_grep "diagnostic.code" src/output.ari
 require_grep "endLine" src/output.ari
 require_grep "endColumn" src/output.ari
-require_grep "does not write stdout/stderr" src/output.ari
-require_grep "JSON schema stability remain follow-up" src/output.ari
+require_grep "stream writes happen only" src/output.ari
+require_grep "Source-lint runtime output follows the bundled reference contract" src/output.ari
 require_grep "ListRuleRow" src/output.ari
 require_grep "ListRulesOutput" src/output.ari
 require_grep "list_rule_row_from_metadata" src/output.ari
@@ -894,14 +912,13 @@ require_grep "format_list_rule_row_human" src/output.ari
 require_grep "format_list_rules_human" src/output.ari
 require_grep "format_list_rule_row_json" src/output.ari
 require_grep "format_list_rules_json" src/output.ari
-require_grep "Source diagnostic JSON schema stability" src/output.ari
-require_grep "list-rules stdout wiring" src/output.ari
+require_grep "List-rules JSON remains a documented standalone" src/output.ari
 require_grep "OutputSinkName" src/output.ari
 require_grep "OutputSinkBoundary" src/output.ari
 require_grep "OutputBoundaryResult" src/output.ari
 require_grep "stdout_stderr_output_boundary" src/output.ari
 require_grep "writes_real_streams" src/output.ari
-require_grep "does not call real output APIs" src/output.ari
+require_grep "writes_real_stream: false" src/output.ari
 require_grep "StdoutAdapterResult" src/output.ari
 require_grep "write_stdout_text" src/output.ari
 require_grep "std::io::print_string" src/output.ari
