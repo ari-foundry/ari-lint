@@ -708,6 +708,12 @@ require_grep "CliParseResult" src/cli.ari
 require_grep "CliRuleOverrideArg" src/cli.ari
 require_grep "CliCompilerCheckPlan" src/cli.ari
 require_grep "CliCompilerCheckExecutionBoundary" src/cli.ari
+require_grep "CliCompilerPathValidationKind" src/cli.ari
+require_grep "CliCompilerPathValidationResult" src/cli.ari
+require_grep "CliCompilerPathNotProvided" src/cli.ari
+require_grep "CliCompilerPathRecordedNotChecked" src/cli.ari
+require_grep "CliCompilerPathMissing" src/cli.ari
+require_grep "CliCompilerPathNotExecutable" src/cli.ari
 require_grep "CliCompilerCheckResultKind" src/cli.ari
 require_grep "CliCompilerCheckResult" src/cli.ari
 require_grep "CliCompilerCheckNotRun" src/cli.ari
@@ -746,6 +752,9 @@ require_grep "compiler_check_argv_from_plan" src/cli.ari
 require_grep "plan_explicit_cli_compiler_check_argv" src/cli.ari
 require_grep "compiler_check_execution_boundary_from_plan" src/cli.ari
 require_grep "plan_explicit_cli_compiler_check_execution_boundary" src/cli.ari
+require_grep "compiler_path_validation_from_boundary" src/cli.ari
+require_grep "missing_compiler_path_validation_result" src/cli.ari
+require_grep "non_executable_compiler_path_validation_result" src/cli.ari
 require_grep "compiler_check_result_not_run_from_boundary" src/cli.ari
 require_grep "plan_explicit_cli_compiler_check_result" src/cli.ari
 require_grep "check_argument: \"--check\"" src/cli.ari
@@ -757,6 +766,10 @@ require_grep "planned_argument_count: 1 + (plan.include_path_count" src/cli.ari
 require_grep "exit_code_available: false" src/cli.ari
 require_grep "stdout_available: false" src/cli.ari
 require_grep "stderr_available: false" src/cli.ari
+require_grep "checks_filesystem: checks_filesystem" src/cli.ari
+require_grep "can_execute_compiler: can_execute_compiler" src/cli.ari
+require_grep "compiler-path/missing" src/cli.ari
+require_grep "compiler-path/not-executable" src/cli.ari
 require_grep "Compiler check result is modeled but not executed" src/cli.ari
 require_grep "-I" src/cli.ari
 require_grep "include_path_count" src/cli.ari

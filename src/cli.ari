@@ -3,9 +3,9 @@
 // command wiring, explicit-token entry point, OS argv integration, a
 // main-facing output path, an internal source-file lint path, explicit config
 // path capture, explicit compiler path capture, compiler check planning,
-// compiler check result modeling, parent-directory config discovery, explicit
-// config override application, and an internal caller-provided diagnostic
-// collection path.
+// compiler path validation/result modeling, parent-directory config discovery,
+// explicit config override application, and an internal caller-provided
+// diagnostic collection path.
 // The positional source file input and documented options are represented here.
 // This file reads process arguments only through the verified std::env::args
 // boundary. Main now returns the internal command exit-code mapping through
@@ -101,6 +101,26 @@ pub struct CliCompilerCheckExecutionBoundary {
   captures_stdout: bool,
   captures_stderr: bool,
   calls_tools_lint: bool,
+}
+
+pub enum CliCompilerPathValidationKind {
+  CliCompilerPathNotProvided,
+  CliCompilerPathRecordedNotChecked,
+  CliCompilerPathMissing,
+  CliCompilerPathNotExecutable,
+}
+
+pub struct CliCompilerPathValidationResult {
+  kind: CliCompilerPathValidationKind,
+  compiler_path_present: bool,
+  compiler_path: Slice[u8],
+  checks_filesystem: bool,
+  path_exists_known: bool,
+  executable_known: bool,
+  can_execute_compiler: bool,
+  diagnostic_count: i64,
+  problem_code: Slice[u8],
+  detail: Slice[u8],
 }
 
 pub enum CliCompilerCheckResultKind {
@@ -580,16 +600,115 @@ pub fn plan_explicit_cli_compiler_check_execution_boundary(
   return compiler_check_execution_boundary_from_plan(zone, plan);
 }
 
+fn cli_compiler_path_validation_result(
+  kind: CliCompilerPathValidationKind,
+  compiler_path_present: bool,
+  compiler_path: Slice[u8],
+  checks_filesystem: bool,
+  path_exists_known: bool,
+  executable_known: bool,
+  can_execute_compiler: bool,
+  diagnostic_count: i64,
+  problem_code: Slice[u8],
+  detail: Slice[u8]
+) -> CliCompilerPathValidationResult {
+  return CliCompilerPathValidationResult {
+    kind: kind,
+    compiler_path_present: compiler_path_present,
+    compiler_path: compiler_path,
+    checks_filesystem: checks_filesystem,
+    path_exists_known: path_exists_known,
+    executable_known: executable_known,
+    can_execute_compiler: can_execute_compiler,
+    diagnostic_count: diagnostic_count,
+    problem_code: problem_code,
+    detail: detail,
+  };
+}
+
+pub fn compiler_path_validation_from_boundary(
+  zone: ref mut Zone,
+  boundary: CliCompilerCheckExecutionBoundary
+) -> CliCompilerPathValidationResult {
+  if !boundary.compiler_path_present {
+    return cli_compiler_path_validation_result(
+      CliCompilerPathNotProvided,
+      false,
+      "",
+      false,
+      false,
+      false,
+      false,
+      0,
+      "compiler-path/not-provided",
+      "No explicit compiler path was provided; environment fallback and missing compiler diagnostics remain future work."
+    );
+  }
+
+  return cli_compiler_path_validation_result(
+    CliCompilerPathRecordedNotChecked,
+    true,
+    boundary.compiler_path,
+    false,
+    false,
+    false,
+    false,
+    0,
+    "",
+    "Compiler path is recorded but not filesystem-validated or executed."
+  );
+}
+
+pub fn missing_compiler_path_validation_result(
+  zone: ref mut Zone,
+  compiler_path: Slice[u8]
+) -> CliCompilerPathValidationResult {
+  return cli_compiler_path_validation_result(
+    CliCompilerPathMissing,
+    true,
+    compiler_path,
+    false,
+    true,
+    false,
+    false,
+    1,
+    "compiler-path/missing",
+    "Missing compiler path diagnostic is modeled without invoking the compiler."
+  );
+}
+
+pub fn non_executable_compiler_path_validation_result(
+  zone: ref mut Zone,
+  compiler_path: Slice[u8]
+) -> CliCompilerPathValidationResult {
+  return cli_compiler_path_validation_result(
+    CliCompilerPathNotExecutable,
+    true,
+    compiler_path,
+    false,
+    true,
+    true,
+    false,
+    1,
+    "compiler-path/not-executable",
+    "Non-executable compiler path diagnostic is modeled without invoking the compiler."
+  );
+}
+
 pub fn compiler_check_result_not_run_from_boundary(
   zone: ref mut Zone,
   boundary: CliCompilerCheckExecutionBoundary
 ) -> CliCompilerCheckResult {
+  let compiler_path_present = boundary.compiler_path_present;
+  let compiler_path = boundary.compiler_path;
+  let planned_argument_count = boundary.planned_argument_count;
+  let uses_planned_argv = boundary.uses_planned_argv;
   return CliCompilerCheckResult {
     kind: CliCompilerCheckNotRun,
-    compiler_path_present: boundary.compiler_path_present,
-    compiler_path: boundary.compiler_path,
-    planned_argument_count: boundary.planned_argument_count,
-    uses_planned_argv: boundary.uses_planned_argv,
+    compiler_path_present: compiler_path_present,
+    compiler_path: compiler_path,
+    planned_argument_count: planned_argument_count,
+    uses_planned_argv: uses_planned_argv,
     exit_code_available: false,
     exit_code: 0,
     diagnostic_count: 0,
@@ -1456,7 +1575,11 @@ pub fn run_os_argv_cli_with_main_output(zone: ref mut Zone) -> CliCommandResult 
 // compiler_check_plan_from_cli_args records a future ari --check invocation
 // plan from already-parsed CLI args without invoking the compiler or
 // tools/lint. plan_explicit_cli_compiler_check provides the same data-only plan
-// for caller-provided tokens. compiler_check_execution_boundary_from_plan and
+// for caller-provided tokens. compiler_path_validation_from_boundary,
+// missing_compiler_path_validation_result, and
+// non_executable_compiler_path_validation_result model compiler path validation
+// results without checking the filesystem or invoking the compiler.
+// compiler_check_execution_boundary_from_plan and
 // compiler_check_result_not_run_from_boundary model the planned execution edge
 // and its not-run result without spawning the compiler, capturing streams,
 // emitting diagnostics, calling tools/lint, or interpreting compiler output.
