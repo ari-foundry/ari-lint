@@ -19,6 +19,13 @@ config, short-name config, disabled explicit config, disabled command-line rule
 override, dirty multi-file cases, and `multi-file-mixed`, and prints a concise
 report without failing on behavior differences.
 
+A separate gating native-rule subset now exists at
+`scripts/parity-strict.sh`. It reuses checked-in source fixtures, isolates both
+implementations with a deterministic no-output compiler and explicit empty
+config. JSON stdout must match exact checked-in goldens, stderr must be equal
+and empty, exit status must match the case expectation, and output must retain
+its final LF and parse as JSON.
+
 ## Current Status
 
 - `ari-lint` has an initial Ari source implementation with the current
@@ -42,6 +49,11 @@ report without failing on behavior differences.
   files, and does not claim parity.
 - Known differences from the current report-only smoke are tracked in
   `docs/dev/parity-differences.md`.
+- `scripts/parity-strict.sh` is local-only and gating. Its current scope is
+  native clean, trailing-whitespace, missing-final-newline, ordered multi-file,
+  and duplicate-input output. It does not cover unresolved CLI, config,
+  compiler-boundary, or process-infrastructure differences and is not wired
+  into CI.
 
 ## Reference Implementation
 
@@ -158,7 +170,14 @@ needs follow-up
 
 ## Fixture Categories
 
-Future fixture categories, without adding fixtures in this step:
+The first strict layout is:
+
+- native source inputs under `tests/fixtures/trailing-whitespace/` and
+  `tests/fixtures/missing-final-newline/`
+- parity isolation inputs under `tests/fixtures/parity/`
+- exact native JSON results under `tests/golden/native/`
+
+Remaining fixture categories:
 
 - valid Ari source
 - trailing whitespace, including future parity cases for spaces, tabs,
@@ -182,11 +201,18 @@ Future fixture categories, without adding fixtures in this step:
 
 ## Golden Output Policy
 
-JSON diagnostics should use golden files once schema is stable.
+The strict native subset stores compact, newline-terminated JSON exactly as
+emitted by both implementations. Raw byte comparison fixes field order and
+escaping while a separate JSON parse rejects malformed documents.
 
 Human-readable output should only use golden files for stable text.
 
 Absolute paths should be normalized.
+
+Current strict cases use identical repository-relative operands and need no
+normalization. A future temporary fixture may replace only its known temporary
+root with one fixed token; generic path rewriting is not allowed because it can
+hide real path-field differences.
 
 Compiler diagnostics may need separate golden files from lint diagnostics.
 
@@ -267,6 +293,10 @@ Future comparison flow:
 4. Compare diagnostics, severities, rule codes, and exit status.
 5. Record intentional differences explicitly.
 
+The current strict native flow already performs steps 1 through 4 for its
+checked-in subset. Compiler-boundary and unresolved CLI cases remain outside
+that gate rather than being silently normalized or allowlisted.
+
 Exact command lines should be added only when the standalone build and test
 runner exist.
 
@@ -312,9 +342,9 @@ from the other repo if needed.
 
 - [x] Inventory the current `tools/lint` entrypoint from `tools/lint/main.cpp`
       and the Ari repo `Makefile`
-- [ ] Define fixture directory layout
-- [ ] Define golden JSON format
-- [ ] Define path normalization policy
+- [x] Define the initial native fixture directory layout
+- [x] Define the initial compact JSON golden format
+- [x] Define the no-rewrite relative-path policy for current strict fixtures
 - [ ] Define Ari compiler version pinning policy
 - [ ] Define compiler provisioning policy from
       `docs/dev/compiler-provisioning.md`
@@ -345,9 +375,11 @@ from the other repo if needed.
 - [x] Add short-name explicit config report-only signals to the local
       non-gating parity smoke/report
 - [x] Document known report-only parity differences
-- [ ] Add first source-controlled CLI smoke parity fixture
-- [ ] Add first source-controlled rule parity fixture for trailing whitespace
-- [ ] Add first source-controlled rule parity fixture for missing final newline
+- [x] Add first source-controlled positional CLI parity fixtures
+- [x] Add first source-controlled rule parity fixture for trailing whitespace
+- [x] Add first source-controlled rule parity fixture for missing final newline
+- [x] Add exact clean, rule, ordered multi-file, and duplicate JSON goldens
+- [x] Add a gating local native parity runner
 - [ ] Add compiler-boundary parity fixture
 - [ ] Add CI job only after test runner exists
 

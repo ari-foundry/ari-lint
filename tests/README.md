@@ -1,11 +1,14 @@
 # ari-lint Tests
 
 Compiler-free repository checks, local compiler-backed executable smoke
-validation, and a local report-only parity smoke/report all exist now. The
-smoke suite includes representative exact runtime JSON, human-output, compiler
-invocation, and compiler-diagnostic checks. Focused Ari unit tests, strict
-parity, source-controlled broad compiler-diagnostic goldens, and broader golden
-coverage remain future work.
+validation, a local report-only parity smoke/report, and a strict checked-in
+native-rule parity subset all exist now. The smoke suite includes representative
+exact runtime JSON, human-output, compiler invocation, and compiler-diagnostic
+checks. The strict subset gates clean, trailing-whitespace,
+missing-final-newline, ordered multi-file, and duplicate JSON results against
+the reference tool and source-controlled goldens. Focused Ari unit tests,
+strict CLI/config/compiler-boundary parity, source-controlled broad
+compiler-diagnostic goldens, and broader golden coverage remain future work.
 
 Current compiler-free checks verify repository shape, lightweight
 documentation/source guards, the first trailing-whitespace fixture shape, and
@@ -41,6 +44,9 @@ stdout; the compiler-free checks do not execute that path, while
 A source-only parity runner skeleton records future comparison boundaries, and
 `scripts/parity.sh` provides a local report-only parity smoke/report. The
 lightweight checks do not execute that parity script.
+`scripts/parity-strict.sh` provides a separate gating subset over checked-in
+native rule fixtures. It uses a no-output fixture compiler and explicit empty
+config so compiler diagnostics and ambient config cannot affect those goldens.
 The config precedence fixture plan is documented. Shell-only lightweight checks
 verify the committed fixture files' presence, exact line order, and expected
 text; they do not execute Ari code. Dedicated Ari-backed config precedence tests
@@ -89,6 +95,21 @@ The GitHub Actions workflow is intentionally compiler-free. It runs only
 compiler, invoke `ari --check`, execute `tools/lint`, install package manager
 dependencies, or run parity checks until standalone tests and explicit compiler
 provisioning are ready.
+
+Run the strict native-rule parity subset from any checkout with explicit
+compiler and Ari repository paths:
+
+```sh
+scripts/parity-strict.sh /path/to/ari /path/to/ari-repo
+```
+
+The initial goldens under `tests/golden/native/` were verified against the
+bundled reference at Ari tag `v0.1.0`, commit
+`c615f1c2ce1a93835118b4da8867a7f3dfaf991a`. This is provenance for the
+native-rule expectations, not an Ari release compatibility claim. Relative
+fixture paths remove the need for path rewriting. Future temporary-path cases
+must normalize only their known temporary-root prefix rather than rewriting
+arbitrary paths.
 
 `scripts/build.sh` is separate from `scripts/test.sh` and the lightweight
 checks. It is a compiler-dependent local build scaffold that requires an
@@ -241,7 +262,8 @@ not added yet.
 The rule-specific trailing-whitespace parity plan is documented in
 [docs/rules/trailing-whitespace-parity.md](../docs/rules/trailing-whitespace-parity.md).
 A first local parity smoke/report exists, and the source-only skeleton records
-future Ari-source runner boundaries. No strict parity gate exists yet.
+future Ari-source runner boundaries. The strict native subset now gates the
+checked-in clean and trailing-spaces fixtures; broader cases remain future work.
 
 No executable trailing-whitespace rule execution tests are added yet. Future
 tests should cover no trailing whitespace, trailing spaces, trailing tabs,
@@ -276,7 +298,9 @@ are not added yet.
 The rule-specific missing-final-newline parity plan is documented in
 [docs/rules/missing-final-newline-parity.md](../docs/rules/missing-final-newline-parity.md).
 A first local parity smoke/report exists, and the source-only skeleton records
-future Ari-source runner boundaries. No strict parity gate exists yet.
+future Ari-source runner boundaries. The strict native subset now gates the
+checked-in with-final-newline and missing-final-newline fixtures; broader cases
+remain future work.
 
 Future missing-final-newline fixtures should cover an empty file, a single-line
 file without a final newline, a multi-line file without a final newline, CRLF

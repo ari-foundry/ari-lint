@@ -67,12 +67,19 @@ require_file tests/fixtures/config-precedence/ari-lint.rules
 require_file tests/fixtures/config-precedence/explicit-config.rules
 require_file tests/fixtures/config-precedence/command-line-overrides.txt
 require_file tests/fixtures/config-precedence/invalid.rules
+require_file tests/fixtures/parity/compiler-ok.sh
+require_file tests/fixtures/parity/empty.rules
+require_file tests/golden/native/clean.json
+require_file tests/golden/native/trailing-whitespace.json
+require_file tests/golden/native/missing-final-newline.json
+require_file tests/golden/native/ordered-multi-file-duplicate.json
 require_file examples/README.md
 require_file tests/README.md
 require_file scripts/README.md
 require_file scripts/build.sh
 require_file scripts/smoke.sh
 require_file scripts/parity.sh
+require_file scripts/parity-strict.sh
 require_file scripts/test.sh
 require_file .github/workflows/check.yml
 
@@ -89,7 +96,18 @@ require_no_grep "arix" .github/workflows/check.yml
 [ -x scripts/build.sh ] || fail "scripts/build.sh is not executable"
 [ -x scripts/smoke.sh ] || fail "scripts/smoke.sh is not executable"
 [ -x scripts/parity.sh ] || fail "scripts/parity.sh is not executable"
+[ -x scripts/parity-strict.sh ] || fail "scripts/parity-strict.sh is not executable"
+[ -x tests/fixtures/parity/compiler-ok.sh ] || fail "parity fixture compiler is not executable"
 [ -x scripts/test.sh ] || fail "scripts/test.sh is not executable"
+
+require_grep "strict native parity goldens passed" scripts/parity-strict.sh
+require_grep "ordered-multi-file-duplicate" scripts/parity-strict.sh
+require_grep "--config" scripts/parity-strict.sh
+require_grep "compiler-ok.sh" scripts/parity-strict.sh
+require_grep "cmp -s" scripts/parity-strict.sh
+require_grep "python3" scripts/parity-strict.sh
+require_grep "exit 0" tests/fixtures/parity/compiler-ok.sh
+require_no_grep "tools/lint" tests/fixtures/parity/compiler-ok.sh
 
 require_grep "explicit-config" scripts/parity.sh
 require_grep "config-short-name" scripts/parity.sh
@@ -353,10 +371,26 @@ unexpected_final_newline_fixture=$(find tests/fixtures/missing-final-newline -ty
 unexpected_config_precedence_fixture=$(find tests/fixtures/config-precedence -type f ! -name ari-lint.rules ! -name explicit-config.rules ! -name command-line-overrides.txt ! -name invalid.rules -print -quit)
 [ -z "$unexpected_config_precedence_fixture" ] || fail "unexpected config-precedence fixture: $unexpected_config_precedence_fixture"
 
+unexpected_parity_fixture=$(find tests/fixtures/parity -type f ! -name compiler-ok.sh ! -name empty.rules -print -quit)
+[ -z "$unexpected_parity_fixture" ] || fail "unexpected parity fixture: $unexpected_parity_fixture"
+
+unexpected_native_golden=$(find tests/golden/native -type f ! -name clean.json ! -name trailing-whitespace.json ! -name missing-final-newline.json ! -name ordered-multi-file-duplicate.json -print -quit)
+[ -z "$unexpected_native_golden" ] || fail "unexpected native golden: $unexpected_native_golden"
+
 require_no_grep '[[:blank:]]$' tests/fixtures/trailing-whitespace/clean.ari
 require_grep '[[:blank:]]$' tests/fixtures/trailing-whitespace/trailing-spaces.ari
 require_final_newline tests/fixtures/missing-final-newline/with-final-newline.ari
 require_no_final_newline tests/fixtures/missing-final-newline/missing-final-newline.ari
+[ "$(wc -c < tests/fixtures/parity/empty.rules)" -eq 1 ] || fail "expected one blank line in empty parity config"
+require_final_newline tests/fixtures/parity/empty.rules
+require_final_newline tests/golden/native/clean.json
+require_final_newline tests/golden/native/trailing-whitespace.json
+require_final_newline tests/golden/native/missing-final-newline.json
+require_final_newline tests/golden/native/ordered-multi-file-duplicate.json
+require_grep '"diagnostics":\[\]' tests/golden/native/clean.json
+require_grep '"code":"lint/trailing-whitespace"' tests/golden/native/trailing-whitespace.json
+require_grep '"code":"lint/missing-final-newline"' tests/golden/native/missing-final-newline.json
+require_grep '"path":"tests/fixtures/trailing-whitespace/trailing-spaces.ari"' tests/golden/native/ordered-multi-file-duplicate.json
 require_grep "lint/trailing-whitespace = off" tests/fixtures/config-precedence/ari-lint.rules
 require_grep "lint/missing-final-newline = warning" tests/fixtures/config-precedence/ari-lint.rules
 require_grep "explicit --config" tests/fixtures/config-precedence/explicit-config.rules
@@ -407,6 +441,12 @@ require_grep "docs/rules/missing-final-newline.md" docs/README.md
 require_grep "docs/dev/ari-implementation-plan.md" docs/dev/roadmap.md
 require_grep "docs/dev/parity-test-plan.md" docs/dev/roadmap.md
 require_grep "docs/dev/parity-test-plan.md" tests/README.md
+require_grep "scripts/parity-strict.sh" README.md
+require_grep "parity-strict.sh" scripts/README.md
+require_grep "scripts/parity-strict.sh" tests/README.md
+require_grep "scripts/parity-strict.sh" docs/dev/parity-test-plan.md
+require_grep "strict native parity goldens and runner added" docs/dev/roadmap.md
+require_grep "c615f1c2ce1a93835118b4da8867a7f3dfaf991a" tests/README.md
 require_grep "Do not invent compatibility claims" docs/migration.md
 require_grep "Ari-language implementation" docs/dev/ari-implementation-plan.md
 require_grep "compiler bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md

@@ -79,8 +79,10 @@ here.
   now.
 - This repository has no stable `ari-lint` release yet.
 - No Ari version compatibility claim is established yet.
-- There is no strict parity gate or golden parity suite yet. The local
-  parity smoke/report is report-only and does not claim parity.
+- A strict native-rule parity gate covers checked-in clean,
+  trailing-whitespace, missing-final-newline, ordered multi-file, and duplicate
+  inputs. CLI, config, compiler-boundary, and broad golden parity remain open;
+  the wider local parity smoke/report is still report-only.
 - CI is not compiler-backed yet.
 - Child stderr and stdout are captured separately and parsed in deterministic
   stderr-then-stdout order. This can differ from the reference implementation's
@@ -185,6 +187,21 @@ original lint command, or local build failure.
 Known differences from the current report-only parity smoke are tracked in
 [docs/dev/parity-differences.md](docs/dev/parity-differences.md). That document
 does not establish stable parity or release compatibility.
+
+Run the strict checked-in native-rule parity subset with an explicit build
+compiler and Ari checkout:
+
+```sh
+scripts/parity-strict.sh /path/to/ari /path/to/ari-repo
+```
+
+An optional third argument selects an already-built reference `ari-lint`.
+This gate uses identical relative operands, a deterministic no-output runtime
+compiler, and an explicit empty config. It compares standalone and reference
+JSON stdout byte-for-byte with checked-in goldens, requires equal empty stderr
+and exact expected exit status, and separately checks the final LF and JSON
+syntax. Passing this native subset is not a full parity or Ari release
+compatibility claim.
 
 ## Local Smoke Validation
 
