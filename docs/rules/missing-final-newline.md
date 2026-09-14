@@ -17,8 +17,10 @@ behavior for `lint/missing-final-newline`.
 - In-memory rule execution now scans caller-provided source text, computes final
   line/column metadata from those bytes, and returns an internal `Diagnostic`
   when non-empty content does not end with a newline byte.
-- File reading, filesystem scanning, diagnostic output, config integration, CLI
-  integration, JSON serialization, and tests remain future work.
+- Explicit-file reading, config severity overrides, CLI integration, and
+  reference-shaped human/JSON diagnostics are implemented. Dedicated Ari rule
+  tests, broader fixtures, compiler integration, and strict parity remain
+  future work.
 - Fixture and test planning is tracked in
   [docs/rules/missing-final-newline-fixtures.md](missing-final-newline-fixtures.md);
   initial final-newline and no-final-newline fixtures are started, while full
@@ -49,18 +51,18 @@ A file ending with a lone carriage return is currently treated as missing the
 final newline by the reference implementation. Standalone fixture coverage for
 lone carriage return behavior remains needs follow-up.
 
-The current Ari-language implementation is limited to an already-provided
-`Slice[u8]`. It does not read files or participate in CLI behavior.
+The rule implementation operates on an already-provided `Slice[u8]`; the lint
+and CLI layers provide explicit-file reading and command behavior.
 
 The current Ari-language implementation computes the final line and final
 column from caller-provided bytes, maps the helper result to internal
 span/severity data, and constructs internal diagnostics with rule code
-`lint/missing-final-newline` and message `missing final newline`. It does not
-format human diagnostics, serialize JSON, or apply config.
+`lint/missing-final-newline` and message `missing final newline`. The surrounding
+layers format human/JSON output and apply config severity.
 
 ## Planned Diagnostic Location
 
-The future diagnostic should include:
+The emitted diagnostic includes:
 
 - file path
 - line number for the final line
@@ -74,9 +76,8 @@ The current reference implementation reports the diagnostic at the final
 position in the file, with `endLine` equal to the diagnostic line and
 `endColumn` one column after the reported column.
 
-Exact standalone JSON and human-readable output details remain needs follow-up
-until output schema and text stability are documented. Full diagnostics output is
-not implemented yet.
+Standalone JSON and human-readable output now follow the documented reference
+shape and are covered by representative exact smoke checks.
 
 ## Planned Message
 
@@ -108,15 +109,16 @@ Parity dimensions:
 - rule code
 - severity
 - human-readable output
-- JSON output shape, once schema is stable
+- reference-shaped JSON output
 - exit behavior
 
 ## Fixture Ideas
 
 The detailed future fixture and test plan is documented in
 [docs/rules/missing-final-newline-fixtures.md](missing-final-newline-fixtures.md).
-The first minimal fixture coverage has started, but behavior tests are not
-added yet.
+The first minimal fixture coverage and representative executable behavior smoke
+exist; dedicated Ari rule tests, broad source-controlled goldens, and strict
+parity remain future work.
 
 Remaining future fixture ideas, without adding broad fixtures in this step:
 

@@ -48,21 +48,49 @@ run_stdout_success_smoke() {
 
 run_json_diagnostic_smoke() {
   output_file="$1"
+  json_stderr_file="${output_file}.stderr"
   shift
   printf '%s\n' "smoke.sh: running $*"
   set +e
-  "$@" > "$output_file"
+  "$@" > "$output_file" 2> "$json_stderr_file"
   status=$?
   set -e
-  [ "$status" -eq 2 ] || fail "expected diagnostic exit code 2, got $status"
+  [ "$status" -eq 1 ] || fail "expected diagnostic exit code 1, got $status"
+  [ ! -s "$json_stderr_file" ] || fail "expected empty stderr: $json_stderr_file"
 }
 
 run_json_success_smoke() {
   output_file="$1"
+  json_stderr_file="${output_file}.stderr"
   shift
   printf '%s\n' "smoke.sh: running $*"
   set +e
-  "$@" > "$output_file"
+  "$@" > "$output_file" 2> "$json_stderr_file"
+  status=$?
+  set -e
+  [ "$status" -eq 0 ] || fail "expected success exit code 0, got $status"
+  [ ! -s "$json_stderr_file" ] || fail "expected empty stderr: $json_stderr_file"
+}
+
+run_human_diagnostic_smoke() {
+  stdout_file="$1"
+  stderr_file="$2"
+  shift 2
+  printf '%s\n' "smoke.sh: running $*"
+  set +e
+  "$@" > "$stdout_file" 2> "$stderr_file"
+  status=$?
+  set -e
+  [ "$status" -eq 1 ] || fail "expected diagnostic exit code 1, got $status"
+}
+
+run_human_success_smoke() {
+  stdout_file="$1"
+  stderr_file="$2"
+  shift 2
+  printf '%s\n' "smoke.sh: running $*"
+  set +e
+  "$@" > "$stdout_file" 2> "$stderr_file"
   status=$?
   set -e
   [ "$status" -eq 0 ] || fail "expected success exit code 0, got $status"
@@ -118,6 +146,15 @@ require_json_no_grep() {
   fi
 }
 
+require_files_equal() {
+  expected_file="$1"
+  actual_file="$2"
+  cmp -s "$expected_file" "$actual_file" || {
+    diff -u "$expected_file" "$actual_file" >&2 || true
+    fail "files differ: $expected_file $actual_file"
+  }
+}
+
 help_output="$tmp_dir/help.out"
 run_stdout_success_smoke "$help_output" "$binary" --help
 require_text_grep "Usage: ari-lint" "$help_output"
@@ -167,27 +204,28 @@ config_off_file="$tmp_dir/off.rules"
 config_off_output="$tmp_dir/config-off.json"
 rule_off_output="$tmp_dir/rule-off.json"
 run_json_diagnostic_smoke "$config_output" "$binary" --json --config "$config_file" "$source_file"
-require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$config_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$config_output"
+require_json_grep '"source":"ari-lint"' "$config_output"
 require_json_grep '"severity":"error"' "$config_output"
 
 run_json_diagnostic_smoke "$rule_output" "$binary" --json --config "$config_file" --rule trailing-whitespace=note "$source_file"
-require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$rule_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$rule_output"
 require_json_grep '"severity":"note"' "$rule_output"
 
 inline_rule_output="$tmp_dir/inline-rule-note.json"
 run_json_diagnostic_smoke "$inline_rule_output" "$binary" --json "--config=$config_file" "--rule=trailing-whitespace=note" "$source_file"
-require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$inline_rule_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$inline_rule_output"
 require_json_grep '"severity":"note"' "$inline_rule_output"
 
 inline_ari_output="$tmp_dir/inline-ari.json"
 run_json_diagnostic_smoke "$inline_ari_output" "$binary" --json "--ari=$smoke_ari_compiler" "$source_file"
-require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$inline_ari_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$inline_ari_output"
 
 include_dir="$tmp_dir/modules"
 mkdir -p "$include_dir"
 inline_include_output="$tmp_dir/inline-include.json"
 run_json_diagnostic_smoke "$inline_include_output" "$binary" --json "-I$include_dir" "$source_file"
-require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$inline_include_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$inline_include_output"
 
 missing_compiler_path="$tmp_dir/missing-ari"
 missing_compiler_output="$tmp_dir/missing-ari.stderr"
@@ -215,16 +253,16 @@ sentinel_compiler_output="$tmp_dir/sentinel-ari.json"
 } > "$sentinel_compiler_path"
 chmod 700 "$sentinel_compiler_path"
 run_json_diagnostic_smoke "$sentinel_compiler_output" "$binary" --json --ari "$sentinel_compiler_path" "$source_file"
-require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$sentinel_compiler_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$sentinel_compiler_output"
 require_path_absent "$sentinel_compiler_marker"
 
 printf '%s\n' "trailing-whitespace = off" > "$config_off_file"
 run_json_success_smoke "$config_off_output" "$binary" --json --config "$config_off_file" "$source_file"
-require_json_no_grep '"ruleCode":"lint/trailing-whitespace"' "$config_off_output"
+require_json_no_grep '"code":"lint/trailing-whitespace"' "$config_off_output"
 require_json_no_grep '"severity":"off"' "$config_off_output"
 
 run_json_success_smoke "$rule_off_output" "$binary" --json --config "$config_file" --rule trailing-whitespace=off "$source_file"
-require_json_no_grep '"ruleCode":"lint/trailing-whitespace"' "$rule_off_output"
+require_json_no_grep '"code":"lint/trailing-whitespace"' "$rule_off_output"
 require_json_no_grep '"severity":"off"' "$rule_off_output"
 
 invalid_rule_output="$tmp_dir/invalid-rule.stderr"
@@ -270,7 +308,7 @@ parent_discovery_output="$tmp_dir/parent-discovered-warning.json"
   cd "$discovery_child"
   run_json_diagnostic_smoke "$parent_discovery_output" "$binary" --json "$source_file"
 )
-require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$parent_discovery_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$parent_discovery_output"
 require_json_grep '"severity":"warning"' "$parent_discovery_output"
 
 printf '%s\n' "trailing-whitespace = note" > "$child_config_file"
@@ -279,7 +317,7 @@ nearest_discovery_output="$tmp_dir/nearest-discovered-note.json"
   cd "$discovery_child"
   run_json_diagnostic_smoke "$nearest_discovery_output" "$binary" --json "$source_file"
 )
-require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$nearest_discovery_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$nearest_discovery_output"
 require_json_grep '"severity":"note"' "$nearest_discovery_output"
 
 explicit_over_discovery_output="$tmp_dir/explicit-over-discovery-error.json"
@@ -287,7 +325,7 @@ explicit_over_discovery_output="$tmp_dir/explicit-over-discovery-error.json"
   cd "$discovery_child"
   run_json_diagnostic_smoke "$explicit_over_discovery_output" "$binary" --json --config "$config_file" "$source_file"
 )
-require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$explicit_over_discovery_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$explicit_over_discovery_output"
 require_json_grep '"severity":"error"' "$explicit_over_discovery_output"
 
 field_config_file="$tmp_dir/diagnostic-fields.rules"
@@ -301,24 +339,46 @@ printf '%s  \n' "x" > "$trailing_field_source"
 
 trailing_field_output="$tmp_dir/trailing-field.json"
 run_json_diagnostic_smoke "$trailing_field_output" "$binary" --json --config "$field_config_file" "$trailing_field_source"
-require_json_grep "\"filePath\":\"$trailing_field_source\"" "$trailing_field_output"
+require_json_grep "\"path\":\"$trailing_field_source\"" "$trailing_field_output"
+require_json_grep "\"file\":\"$trailing_field_source\"" "$trailing_field_output"
 require_json_grep '"line":1' "$trailing_field_output"
 require_json_grep '"column":2' "$trailing_field_output"
 require_json_grep '"severity":"warning"' "$trailing_field_output"
-require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$trailing_field_output"
+require_json_grep '"endLine":1' "$trailing_field_output"
+require_json_grep '"endColumn":4' "$trailing_field_output"
+require_json_grep '"source":"ari-lint"' "$trailing_field_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$trailing_field_output"
 require_json_grep '"message":"trailing whitespace"' "$trailing_field_output"
+trailing_field_expected="$tmp_dir/trailing-field.expected.json"
+printf '{"files":[{"path":"%s","exitCode":0,"diagnostics":[{"file":"%s","line":1,"column":2,"endLine":1,"endColumn":4,"severity":"warning","message":"trailing whitespace","source":"ari-lint","code":"lint/trailing-whitespace"}]}]}\n' "$trailing_field_source" "$trailing_field_source" > "$trailing_field_expected"
+require_files_equal "$trailing_field_expected" "$trailing_field_output"
+
+trailing_field_human="$tmp_dir/trailing-field.human"
+trailing_field_human_stderr="$tmp_dir/trailing-field.human.stderr"
+run_human_diagnostic_smoke "$trailing_field_human" "$trailing_field_human_stderr" "$binary" --config "$field_config_file" "$trailing_field_source"
+trailing_field_human_expected="$tmp_dir/trailing-field.human.expected"
+printf '%s:1:2: warning: [lint/trailing-whitespace] trailing whitespace\n' "$trailing_field_source" > "$trailing_field_human_expected"
+require_files_equal "$trailing_field_human_expected" "$trailing_field_human"
+require_empty_file "$trailing_field_human_stderr"
 
 missing_final_newline_field_source="$tmp_dir/missing-final-newline-field.ari"
 printf '%s' "x" > "$missing_final_newline_field_source"
 
 missing_final_newline_field_output="$tmp_dir/missing-final-newline-field.json"
 run_json_diagnostic_smoke "$missing_final_newline_field_output" "$binary" --json --config "$field_config_file" "$missing_final_newline_field_source"
-require_json_grep "\"filePath\":\"$missing_final_newline_field_source\"" "$missing_final_newline_field_output"
+require_json_grep "\"path\":\"$missing_final_newline_field_source\"" "$missing_final_newline_field_output"
+require_json_grep "\"file\":\"$missing_final_newline_field_source\"" "$missing_final_newline_field_output"
 require_json_grep '"line":1' "$missing_final_newline_field_output"
 require_json_grep '"column":2' "$missing_final_newline_field_output"
 require_json_grep '"severity":"warning"' "$missing_final_newline_field_output"
-require_json_grep '"ruleCode":"lint/missing-final-newline"' "$missing_final_newline_field_output"
+require_json_grep '"endLine":1' "$missing_final_newline_field_output"
+require_json_grep '"endColumn":3' "$missing_final_newline_field_output"
+require_json_grep '"source":"ari-lint"' "$missing_final_newline_field_output"
+require_json_grep '"code":"lint/missing-final-newline"' "$missing_final_newline_field_output"
 require_json_grep '"message":"missing final newline"' "$missing_final_newline_field_output"
+missing_final_newline_expected="$tmp_dir/missing-final-newline-field.expected.json"
+printf '{"files":[{"path":"%s","exitCode":0,"diagnostics":[{"file":"%s","line":1,"column":2,"endLine":1,"endColumn":3,"severity":"warning","message":"missing final newline","source":"ari-lint","code":"lint/missing-final-newline"}]}]}\n' "$missing_final_newline_field_source" "$missing_final_newline_field_source" > "$missing_final_newline_expected"
+require_files_equal "$missing_final_newline_expected" "$missing_final_newline_field_output"
 
 multi_dirty_one="$tmp_dir/multi-dirty-one.ari"
 multi_dirty_two="$tmp_dir/multi-dirty-two.ari"
@@ -331,10 +391,13 @@ printf '%s' "fn dirty_two() -> i64 { return 2; }" > "$multi_dirty_two"
 
 multi_output="$tmp_dir/multi-dirty.json"
 run_json_diagnostic_smoke "$multi_output" "$binary" --json "$multi_dirty_one" "$multi_dirty_two"
-require_json_grep "\"filePath\":\"$multi_dirty_one\"" "$multi_output"
-require_json_grep "\"filePath\":\"$multi_dirty_two\"" "$multi_output"
-require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$multi_output"
-require_json_grep '"ruleCode":"lint/missing-final-newline"' "$multi_output"
+require_json_grep "\"path\":\"$multi_dirty_one\"" "$multi_output"
+require_json_grep "\"path\":\"$multi_dirty_two\"" "$multi_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$multi_output"
+require_json_grep '"code":"lint/missing-final-newline"' "$multi_output"
+multi_expected="$tmp_dir/multi-dirty.expected.json"
+printf '{"files":[{"path":"%s","exitCode":0,"diagnostics":[{"file":"%s","line":1,"column":24,"endLine":1,"endColumn":26,"severity":"warning","message":"trailing whitespace","source":"ari-lint","code":"lint/trailing-whitespace"}]},{"path":"%s","exitCode":0,"diagnostics":[{"file":"%s","line":1,"column":36,"endLine":1,"endColumn":37,"severity":"warning","message":"missing final newline","source":"ari-lint","code":"lint/missing-final-newline"}]}]}\n' "$multi_dirty_one" "$multi_dirty_one" "$multi_dirty_two" "$multi_dirty_two" > "$multi_expected"
+require_files_equal "$multi_expected" "$multi_output"
 
 dash_source="$tmp_dir/-dash-source.ari"
 printf '%s  \n' "fn dash_source() -> i64 { return 0; }" > "$dash_source"
@@ -343,8 +406,9 @@ dash_output="$tmp_dir/dash-source.json"
   cd "$tmp_dir"
   run_json_diagnostic_smoke "$dash_output" "$binary" --json -- "-dash-source.ari"
 )
-require_json_grep '"filePath":"-dash-source.ari"' "$dash_output"
-require_json_grep '"ruleCode":"lint/trailing-whitespace"' "$dash_output"
+require_json_grep '"path":"-dash-source.ari"' "$dash_output"
+require_json_grep '"file":"-dash-source.ari"' "$dash_output"
+require_json_grep '"code":"lint/trailing-whitespace"' "$dash_output"
 
 clean_source="$tmp_dir/clean.ari"
 {
@@ -362,12 +426,69 @@ clean_source_two="$tmp_dir/clean-two.ari"
 
 clean_output="$tmp_dir/multi-clean.json"
 run_json_success_smoke "$clean_output" "$binary" --json "$clean_source" "$clean_source_two"
-require_json_grep "[]" "$clean_output"
+clean_expected="$tmp_dir/multi-clean.expected.json"
+printf '{"files":[{"path":"%s","exitCode":0,"diagnostics":[]},{"path":"%s","exitCode":0,"diagnostics":[]}]}\n' "$clean_source" "$clean_source_two" > "$clean_expected"
+require_files_equal "$clean_expected" "$clean_output"
+
+large_clean_source="$tmp_dir/large-clean.ari"
+head -c 66000 /dev/zero | tr '\000' 'a' > "$large_clean_source"
+printf '\n' >> "$large_clean_source"
+large_clean_output="$tmp_dir/large-clean.json"
+run_json_success_smoke "$large_clean_output" "$binary" --json "$large_clean_source"
+large_clean_expected="$tmp_dir/large-clean.expected.json"
+printf '{"files":[{"path":"%s","exitCode":0,"diagnostics":[]}]}' "$large_clean_source" > "$large_clean_expected"
+printf '\n' >> "$large_clean_expected"
+require_files_equal "$large_clean_expected" "$large_clean_output"
+
+tab_character=$(printf '\t')
+escaped_path_source="$tmp_dir/control${tab_character}name.ari"
+cp "$clean_source" "$escaped_path_source"
+escaped_path_output="$tmp_dir/escaped-path.json"
+run_json_success_smoke "$escaped_path_output" "$binary" --json "$escaped_path_source"
+require_json_grep 'control\tname.ari' "$escaped_path_output"
+
+utf8_path_source="$tmp_dir/한글.ari"
+cp "$clean_source" "$utf8_path_source"
+utf8_path_output="$tmp_dir/utf8-path.json"
+run_json_success_smoke "$utf8_path_output" "$binary" --json "$utf8_path_source"
+require_json_grep '한글.ari' "$utf8_path_output"
+
+invalid_path_byte=$(printf '\377')
+invalid_utf8_path_source="$tmp_dir/invalid-${invalid_path_byte}.ari"
+cp "$clean_source" "$invalid_utf8_path_source"
+invalid_utf8_path_output="$tmp_dir/invalid-utf8-path.json"
+run_json_success_smoke "$invalid_utf8_path_output" "$binary" --json "$invalid_utf8_path_source"
+require_json_grep 'invalid-\ufffd.ari' "$invalid_utf8_path_output"
+
+clean_human_output="$tmp_dir/clean.human"
+clean_human_stderr="$tmp_dir/clean.human.stderr"
+run_human_success_smoke "$clean_human_output" "$clean_human_stderr" "$binary" "$clean_source"
+printf '%s: ok\n' "$clean_source" > "$tmp_dir/clean.human.expected"
+require_files_equal "$tmp_dir/clean.human.expected" "$clean_human_output"
+require_empty_file "$clean_human_stderr"
 
 mixed_output="$tmp_dir/mixed-clean-dirty.json"
 run_json_diagnostic_smoke "$mixed_output" "$binary" --json "$clean_source" "$multi_dirty_one"
-require_json_grep "\"filePath\":\"$multi_dirty_one\"" "$mixed_output"
-require_json_no_grep "\"filePath\":\"$clean_source\"" "$mixed_output"
+require_json_grep "\"path\":\"$multi_dirty_one\"" "$mixed_output"
+require_json_grep "\"path\":\"$clean_source\"" "$mixed_output"
+
+duplicate_output="$tmp_dir/duplicate.json"
+run_json_diagnostic_smoke "$duplicate_output" "$binary" --json "$multi_dirty_one" "$multi_dirty_one"
+duplicate_path_count=$(grep -F -o -- "\"path\":\"$multi_dirty_one\"" "$duplicate_output" | wc -l | tr -d ' ')
+[ "$duplicate_path_count" -eq 2 ] || fail "expected duplicate source arguments to produce two file results"
+
+stress_output="$tmp_dir/repeated-dirty.json"
+set -- "$binary" --json
+stress_index=0
+while [ "$stress_index" -lt 24 ]; do
+  set -- "$@" "$multi_dirty_one"
+  stress_index=$((stress_index + 1))
+done
+run_json_diagnostic_smoke "$stress_output" "$@"
+stress_path_count=$(grep -F -o -- "\"path\":\"$multi_dirty_one\"" "$stress_output" | wc -l | tr -d ' ')
+[ "$stress_path_count" -eq 24 ] || fail "expected 24 repeated source arguments in the JSON result"
+stress_suffix=$(tail -c 3 "$stress_output")
+[ "$stress_suffix" = "]}" ] || fail "expected repeated-input JSON to end with a complete files envelope"
 
 missing_source_file="$tmp_dir/missing-source.ari"
 multi_read_error_output="$tmp_dir/multi-read-error.stderr"

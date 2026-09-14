@@ -30,8 +30,69 @@ pub struct DiagnosticOutputMetadata {
   end_line: DiagnosticOutputFieldMetadata,
   end_column: DiagnosticOutputFieldMetadata,
   severity: DiagnosticOutputFieldMetadata,
-  rule_code: DiagnosticOutputFieldMetadata,
   message: DiagnosticOutputFieldMetadata,
+  source: DiagnosticOutputFieldMetadata,
+  code: DiagnosticOutputFieldMetadata,
+}
+
+// FileResult stores a range into one run-wide diagnostic slice. Keeping the
+// diagnostics flat avoids placing owning Vec values inside Vec elements and
+// preserves the reference implementation's per-file ordering.
+pub struct FileResult {
+  path: Slice[u8],
+  compiler_exit_code: i64,
+  diagnostic_start: i64,
+  diagnostic_count: i64,
+}
+
+// RunResult is a non-owning view. Callers must keep the backing file-result and
+// diagnostic vectors, and their zone, alive until formatting is complete.
+pub struct RunResult {
+  files: Slice[FileResult],
+  diagnostics: Slice[super::diagnostic::Diagnostic],
+}
+
+pub fn file_result(
+  path: Slice[u8],
+  compiler_exit_code: i64,
+  diagnostic_start: i64,
+  diagnostic_count: i64,
+  diagnostic_total: i64
+) -> FileResult {
+  std::assert(diagnostic_start >= 0);
+  std::assert(diagnostic_count >= 0);
+  std::assert(diagnostic_start <= diagnostic_total);
+  std::assert(diagnostic_count <= diagnostic_total - diagnostic_start);
+  return FileResult {
+    path: path,
+    compiler_exit_code: compiler_exit_code,
+    diagnostic_start: diagnostic_start,
+    diagnostic_count: diagnostic_count,
+  };
+}
+
+pub fn run_result(
+  files: Slice[FileResult],
+  diagnostics: Slice[super::diagnostic::Diagnostic]
+) -> RunResult {
+  var expected_start = 0;
+  var file_index = 0;
+  while file_index < files.len() {
+    let file = files.get(file_index);
+    std::assert(file.diagnostic_start == expected_start);
+    std::assert(file.diagnostic_count >= 0);
+    std::assert(file.diagnostic_start <= diagnostics.len());
+    std::assert(
+      file.diagnostic_count <= diagnostics.len() - file.diagnostic_start
+    );
+    expected_start = file.diagnostic_start + file.diagnostic_count;
+    file_index = file_index + 1;
+  }
+  std::assert(expected_start == diagnostics.len());
+  return RunResult {
+    files: files,
+    diagnostics: diagnostics,
+  };
 }
 
 pub struct ListRuleRow {
@@ -95,112 +156,385 @@ fn diagnostic_severity_name(severity: super::severity::Severity) -> Slice[u8] {
   }
 }
 
+fn json_hex_digit(value: i64) -> u8 {
+  if value < 10 {
+    return (value + 48) as u8;
+  }
+  return (value - 10 + 97) as u8;
+}
+
+fn json_string_capacity(value: Slice[u8]) -> i64 {
+  var capacity = 2;
+  var index = 0;
+  while index < value.len() {
+    let byte = value.get(index);
+    if byte >= 128u8 {
+      match std::encoding::utf8_at(value, index) {
+        std::Some(character) => {
+          capacity = capacity + character.len();
+          index = character.next_index(index);
+        }
+        std::None => {
+          capacity = capacity + 6;
+          index = index + 1;
+        }
+      }
+    } else if byte == 34u8 || byte == 92u8 || byte == 8u8 || byte == 12u8 ||
+      byte == 10u8 || byte == 13u8 || byte == 9u8 {
+      capacity = capacity + 2;
+      index = index + 1;
+    } else if byte < 32u8 {
+      capacity = capacity + 6;
+      index = index + 1;
+    } else {
+      capacity = capacity + 1;
+      index = index + 1;
+    }
+  }
+  return capacity;
+}
+
+fn append_fixed(
+  text: ref mut std::string::String,
+  value: Slice[u8]
+) -> void {
+  var index = 0;
+  while index < value.len() {
+    text.push(value.get(index));
+    index = index + 1;
+  }
+}
+
+fn append_u64_fixed(
+  text: ref mut std::string::String,
+  value: u64
+) -> void {
+  if value >= 10u64 {
+    append_u64_fixed(text, value / 10u64);
+  }
+  text.push(((value % 10u64) + 48u64) as u8);
+}
+
+fn append_i64_fixed(
+  text: ref mut std::string::String,
+  value: i64
+) -> void {
+  if value < 0 {
+    text.push('-');
+    let magnitude = ((-(value + 1)) as u64) + 1u64;
+    append_u64_fixed(text, magnitude);
+    return;
+  }
+  append_u64_fixed(text, value as u64);
+}
+
+fn append_json_string(
+  text: ref mut std::string::String,
+  value: Slice[u8]
+) -> void {
+  text.push('"');
+  var index = 0;
+  while index < value.len() {
+    let byte = value.get(index);
+    if byte >= 128u8 {
+      match std::encoding::utf8_at(value, index) {
+        std::Some(character) => {
+          let next_index = character.next_index(index);
+          var character_index = index;
+          while character_index < next_index {
+            text.push(value.get(character_index));
+            character_index = character_index + 1;
+          }
+          index = next_index;
+        }
+        std::None => {
+          append_fixed(text, "\\ufffd");
+          index = index + 1;
+        }
+      }
+    } else if byte == 34u8 {
+      append_fixed(text, "\\\"");
+      index = index + 1;
+    } else if byte == 92u8 {
+      append_fixed(text, "\\\\");
+      index = index + 1;
+    } else if byte == 8u8 {
+      append_fixed(text, "\\b");
+      index = index + 1;
+    } else if byte == 12u8 {
+      append_fixed(text, "\\f");
+      index = index + 1;
+    } else if byte == 10u8 {
+      append_fixed(text, "\\n");
+      index = index + 1;
+    } else if byte == 13u8 {
+      append_fixed(text, "\\r");
+      index = index + 1;
+    } else if byte == 9u8 {
+      append_fixed(text, "\\t");
+      index = index + 1;
+    } else if byte < 32u8 {
+      append_fixed(text, "\\u00");
+      let numeric_byte = byte as i64;
+      text.push(json_hex_digit(numeric_byte / 16));
+      text.push(json_hex_digit(numeric_byte % 16));
+      index = index + 1;
+    } else {
+      text.push(byte);
+      index = index + 1;
+    }
+  }
+  text.push('"');
+}
+
 fn format_json_string(
   zone: ref mut Zone,
   value: Slice[u8]
 ) -> std::string::String {
-  var text = std::string::new(zone, value.len() + 2);
-  text.append_string_in(zone, "\"");
-  var chunk_start = 0;
-  var index = 0;
-  while index < value.len() {
-    let byte = value.get(index);
-    if byte == 34u8 || byte == 92u8 || byte == 10u8 || byte == 13u8 || byte == 9u8 {
-      if chunk_start < index {
-        text.append_string_in(
-          zone,
-          std::string::substring(value, chunk_start, index)
-        );
-      }
-      if byte == 34u8 {
-        text.append_string_in(zone, "\\\"");
-      } else if byte == 92u8 {
-        text.append_string_in(zone, "\\\\");
-      } else if byte == 10u8 {
-        text.append_string_in(zone, "\\n");
-      } else if byte == 13u8 {
-        text.append_string_in(zone, "\\r");
-      } else {
-        text.append_string_in(zone, "\\t");
-      }
-      chunk_start = index + 1;
-    }
-    index = index + 1;
-  }
-  if chunk_start < value.len() {
-    text.append_string_in(
-      zone,
-      std::string::substring(value, chunk_start, value.len())
-    );
-  }
-  text.append_string_in(zone, "\"");
+  var text = std::string::new(zone, json_string_capacity(value));
+  append_json_string(ref mut text, value);
   return text;
 }
 
-fn format_json_optional_position(
-  zone: ref mut Zone,
-  position: super::diagnostic::OptionalPosition
-) -> std::string::String {
-  var text = std::string::new(zone, 16);
+fn resolved_end_position(
+  position: super::diagnostic::OptionalPosition,
+  fallback: i64
+) -> i64 {
   match position {
     super::diagnostic::Missing => {
-      text.append_string_in(zone, "null");
-      return text;
+      return fallback;
     }
     super::diagnostic::Value(value) => {
-      text.append_i64_in(zone, value);
-      return text;
+      if value > 0 {
+        return value;
+      }
+      return fallback;
     }
   }
+}
+
+fn append_reference_diagnostic_json(
+  text: ref mut std::string::String,
+  diagnostic: super::diagnostic::Diagnostic
+) -> void {
+  append_fixed(text, "{\"file\":");
+  append_json_string(text, diagnostic.span.file_path);
+  append_fixed(text, ",\"line\":");
+  append_i64_fixed(text, diagnostic.span.line);
+  append_fixed(text, ",\"column\":");
+  append_i64_fixed(text, diagnostic.span.column);
+  append_fixed(text, ",\"endLine\":");
+  append_i64_fixed(text, resolved_end_position(
+    diagnostic.span.end_line,
+    diagnostic.span.line
+  ));
+  append_fixed(text, ",\"endColumn\":");
+  append_i64_fixed(text, resolved_end_position(
+    diagnostic.span.end_column,
+    diagnostic.span.column + 1
+  ));
+  append_fixed(text, ",\"severity\":");
+  append_json_string(text, diagnostic_severity_name(diagnostic.severity));
+  append_fixed(text, ",\"message\":");
+  append_json_string(text, diagnostic.message);
+  append_fixed(text, ",\"source\":");
+  append_json_string(text, diagnostic.source);
+  if diagnostic.code.len() > 0 {
+    append_fixed(text, ",\"code\":");
+    append_json_string(text, diagnostic.code);
+  }
+  text.push('}');
+}
+
+fn reference_diagnostic_json_capacity(
+  diagnostic: super::diagnostic::Diagnostic
+) -> i64 {
+  var capacity = 256;
+  capacity = capacity + json_string_capacity(diagnostic.span.file_path);
+  capacity = capacity + json_string_capacity(diagnostic_severity_name(diagnostic.severity));
+  capacity = capacity + json_string_capacity(diagnostic.message);
+  capacity = capacity + json_string_capacity(diagnostic.source);
+  if diagnostic.code.len() > 0 {
+    capacity = capacity + json_string_capacity(diagnostic.code);
+  }
+  return capacity;
+}
+
+fn serialize_reference_diagnostic_json(
+  zone: ref mut Zone,
+  diagnostic: super::diagnostic::Diagnostic
+) -> std::string::String {
+  var text = std::string::new(zone, reference_diagnostic_json_capacity(diagnostic));
+  append_reference_diagnostic_json(ref mut text, diagnostic);
+  return text;
 }
 
 pub fn serialize_diagnostic_json(
   zone: ref mut Zone,
   diagnostic: super::diagnostic::Diagnostic
 ) -> std::string::String {
-  var text = std::string::new(zone, 256);
-  text.append_string_in(zone, "{\"filePath\":");
-  let file_path = format_json_string(zone, diagnostic.span.file_path);
-  text.append_string_in(zone, file_path);
-  text.append_string_in(zone, ",\"line\":");
-  text.append_i64_in(zone, diagnostic.span.line);
-  text.append_string_in(zone, ",\"column\":");
-  text.append_i64_in(zone, diagnostic.span.column);
-  text.append_string_in(zone, ",\"endLine\":");
-  let end_line = format_json_optional_position(zone, diagnostic.span.end_line);
-  text.append_string_in(zone, end_line);
-  text.append_string_in(zone, ",\"endColumn\":");
-  let end_column = format_json_optional_position(zone, diagnostic.span.end_column);
-  text.append_string_in(zone, end_column);
-  text.append_string_in(zone, ",\"severity\":");
-  let severity = format_json_string(zone, diagnostic_severity_name(diagnostic.severity));
-  text.append_string_in(zone, severity);
-  text.append_string_in(zone, ",\"ruleCode\":");
-  let rule_code = format_json_string(zone, diagnostic.rule_code);
-  text.append_string_in(zone, rule_code);
-  text.append_string_in(zone, ",\"message\":");
-  let message = format_json_string(zone, diagnostic.message);
-  text.append_string_in(zone, message);
-  text.append_string_in(zone, "}");
-  return text;
+  return serialize_reference_diagnostic_json(zone, diagnostic);
 }
 
 pub fn serialize_diagnostics_json(
   zone: ref mut Zone,
   diagnostics: std::vec::Vec[super::diagnostic::Diagnostic]
 ) -> std::string::String {
-  var text = std::string::new(zone, diagnostics.len() * 256 + 2);
-  text.append_string_in(zone, "[");
+  var capacity = 2;
+  var capacity_index = 0;
+  while capacity_index < diagnostics.len() {
+    capacity = capacity + reference_diagnostic_json_capacity(
+      diagnostics.get(capacity_index)
+    ) + 1;
+    capacity_index = capacity_index + 1;
+  }
+  var text = std::string::new(zone, capacity);
+  text.push('[');
   var index = 0;
-  for diagnostic in diagnostics {
+  while index < diagnostics.len() {
     if index > 0 {
-      text.append_string_in(zone, ",");
+      text.push(',');
     }
-    let item = serialize_diagnostic_json(zone, diagnostic);
-    text.append_string_in(zone, item);
+    append_reference_diagnostic_json(ref mut text, diagnostics.get(index));
     index = index + 1;
   }
-  text.append_string_in(zone, "]");
+  text.push(']');
+  return text;
+}
+
+fn append_file_result_json(
+  text: ref mut std::string::String,
+  result: RunResult,
+  file: FileResult
+) -> void {
+  append_fixed(text, "{\"path\":");
+  append_json_string(text, file.path);
+  append_fixed(text, ",\"exitCode\":");
+  append_i64_fixed(text, file.compiler_exit_code);
+  append_fixed(text, ",\"diagnostics\":[");
+  var diagnostic_offset = 0;
+  while diagnostic_offset < file.diagnostic_count {
+    if diagnostic_offset > 0 {
+      text.push(',');
+    }
+    let diagnostic_index = file.diagnostic_start + diagnostic_offset;
+    append_reference_diagnostic_json(
+      text,
+      result.diagnostics.get(diagnostic_index)
+    );
+    diagnostic_offset = diagnostic_offset + 1;
+  }
+  append_fixed(text, "]}");
+}
+
+fn file_result_json_capacity(
+  result: RunResult,
+  file: FileResult
+) -> i64 {
+  var capacity = 96 + json_string_capacity(file.path);
+  var diagnostic_offset = 0;
+  while diagnostic_offset < file.diagnostic_count {
+    let diagnostic_index = file.diagnostic_start + diagnostic_offset;
+    capacity = capacity + reference_diagnostic_json_capacity(
+      result.diagnostics.get(diagnostic_index)
+    ) + 1;
+    diagnostic_offset = diagnostic_offset + 1;
+  }
+  return capacity;
+}
+
+pub fn serialize_file_result_json(
+  zone: ref mut Zone,
+  result: RunResult,
+  file: FileResult
+) -> std::string::String {
+  var text = std::string::new(zone, file_result_json_capacity(result, file));
+  append_file_result_json(ref mut text, result, file);
+  return text;
+}
+
+pub fn serialize_run_result_json(
+  zone: ref mut Zone,
+  result: RunResult
+) -> std::string::String {
+  var capacity = 16;
+  var capacity_file_index = 0;
+  while capacity_file_index < result.files.len() {
+    capacity = capacity + file_result_json_capacity(
+      result,
+      result.files.get(capacity_file_index)
+    ) + 1;
+    capacity_file_index = capacity_file_index + 1;
+  }
+  var text = std::string::new(zone, capacity);
+  append_fixed(ref mut text, "{\"files\":[");
+  var file_index = 0;
+  while file_index < result.files.len() {
+    if file_index > 0 {
+      text.push(',');
+    }
+    append_file_result_json(
+      ref mut text,
+      result,
+      result.files.get(file_index)
+    );
+    file_index = file_index + 1;
+  }
+  append_fixed(ref mut text, "]}\n");
+  return text;
+}
+
+fn append_diagnostic_human_with_fallback(
+  text: ref mut std::string::String,
+  diagnostic: super::diagnostic::Diagnostic,
+  fallback_file: Slice[u8]
+) -> void {
+  var file_path = diagnostic.span.file_path;
+  if file_path.len() == 0 {
+    file_path = fallback_file;
+  }
+  append_fixed(text, file_path);
+  text.push(':');
+  append_i64_fixed(text, diagnostic.span.line);
+  text.push(':');
+  append_i64_fixed(text, diagnostic.span.column);
+  append_fixed(text, ": ");
+  append_fixed(text, diagnostic_severity_name(diagnostic.severity));
+  append_fixed(text, ": ");
+  if diagnostic.code.len() > 0 {
+    text.push('[');
+    append_fixed(text, diagnostic.code);
+    append_fixed(text, "] ");
+  }
+  append_fixed(text, diagnostic.message);
+  text.push('\n');
+}
+
+fn diagnostic_human_capacity(
+  diagnostic: super::diagnostic::Diagnostic,
+  fallback_file: Slice[u8]
+) -> i64 {
+  var file_path = diagnostic.span.file_path;
+  if file_path.len() == 0 {
+    file_path = fallback_file;
+  }
+  return 64 + file_path.len() + diagnostic.code.len() + diagnostic.message.len();
+}
+
+fn format_diagnostic_human_with_fallback(
+  zone: ref mut Zone,
+  diagnostic: super::diagnostic::Diagnostic,
+  fallback_file: Slice[u8]
+) -> std::string::String {
+  var text = std::string::new(
+    zone,
+    diagnostic_human_capacity(diagnostic, fallback_file)
+  );
+  append_diagnostic_human_with_fallback(
+    ref mut text,
+    diagnostic,
+    fallback_file
+  );
   return text;
 }
 
@@ -208,30 +542,121 @@ pub fn format_diagnostic_human(
   zone: ref mut Zone,
   diagnostic: super::diagnostic::Diagnostic
 ) -> std::string::String {
-  var text = std::string::new(zone, 160);
-  text.append_string_in(zone, diagnostic.span.file_path);
-  text.append_string_in(zone, ":");
-  text.append_i64_in(zone, diagnostic.span.line);
-  text.append_string_in(zone, ":");
-  text.append_i64_in(zone, diagnostic.span.column);
-  text.append_string_in(zone, ": ");
-  text.append_string_in(zone, diagnostic_severity_name(diagnostic.severity));
-  text.append_string_in(zone, ": ");
-  text.append_string_in(zone, diagnostic.rule_code);
-  text.append_string_in(zone, ": ");
-  text.append_string_in(zone, diagnostic.message);
-  text.append_string_in(zone, "\n");
-  return text;
+  return format_diagnostic_human_with_fallback(
+    zone,
+    diagnostic,
+    diagnostic.span.file_path
+  );
 }
 
 pub fn format_diagnostics_human(
   zone: ref mut Zone,
   diagnostics: std::vec::Vec[super::diagnostic::Diagnostic]
 ) -> std::string::String {
-  var text = std::string::new(zone, diagnostics.len() * 160);
-  for diagnostic in diagnostics {
-    let line = format_diagnostic_human(zone, diagnostic);
-    text.append_string_in(zone, line);
+  var capacity = 0;
+  var capacity_index = 0;
+  while capacity_index < diagnostics.len() {
+    let diagnostic = diagnostics.get(capacity_index);
+    capacity = capacity + diagnostic_human_capacity(
+      diagnostic,
+      diagnostic.span.file_path
+    );
+    capacity_index = capacity_index + 1;
+  }
+  var text = std::string::new(zone, capacity);
+  var diagnostic_index = 0;
+  while diagnostic_index < diagnostics.len() {
+    let current_diagnostic = diagnostics.get(diagnostic_index);
+    append_diagnostic_human_with_fallback(
+      ref mut text,
+      current_diagnostic,
+      current_diagnostic.span.file_path
+    );
+    diagnostic_index = diagnostic_index + 1;
+  }
+  return text;
+}
+
+fn append_file_result_human(
+  text: ref mut std::string::String,
+  result: RunResult,
+  file: FileResult
+) -> void {
+  if file.diagnostic_count == 0 && file.compiler_exit_code == 0 {
+    append_fixed(text, file.path);
+    append_fixed(text, ": ok\n");
+    return;
+  }
+  if file.diagnostic_count == 0 {
+    append_fixed(text, file.path);
+    append_fixed(text, ":1:1: error: compiler check failed\n");
+    return;
+  }
+
+  var diagnostic_offset = 0;
+  while diagnostic_offset < file.diagnostic_count {
+    let diagnostic_index = file.diagnostic_start + diagnostic_offset;
+    append_diagnostic_human_with_fallback(
+      text,
+      result.diagnostics.get(diagnostic_index),
+      file.path
+    );
+    diagnostic_offset = diagnostic_offset + 1;
+  }
+}
+
+fn file_result_human_capacity(
+  result: RunResult,
+  file: FileResult
+) -> i64 {
+  if file.diagnostic_count == 0 {
+    return file.path.len() + 48;
+  }
+  var capacity = 0;
+  var diagnostic_offset = 0;
+  while diagnostic_offset < file.diagnostic_count {
+    let diagnostic_index = file.diagnostic_start + diagnostic_offset;
+    capacity = capacity + diagnostic_human_capacity(
+      result.diagnostics.get(diagnostic_index),
+      file.path
+    );
+    diagnostic_offset = diagnostic_offset + 1;
+  }
+  return capacity;
+}
+
+pub fn format_file_result_human(
+  zone: ref mut Zone,
+  result: RunResult,
+  file: FileResult
+) -> std::string::String {
+  var text = std::string::new(zone, file_result_human_capacity(result, file));
+  append_file_result_human(ref mut text, result, file);
+  return text;
+}
+
+pub fn format_run_result_human(
+  zone: ref mut Zone,
+  result: RunResult
+) -> std::string::String {
+  var capacity = 0;
+  var capacity_file_index = 0;
+  while capacity_file_index < result.files.len() {
+    capacity = capacity + file_result_human_capacity(
+      result,
+      result.files.get(capacity_file_index)
+    );
+    capacity_file_index = capacity_file_index + 1;
+  }
+  var text = std::string::new(zone, capacity);
+  var file_index = 0;
+  while file_index < result.files.len() {
+    append_file_result_human(
+      ref mut text,
+      result,
+      result.files.get(file_index)
+    );
+    file_index = file_index + 1;
   }
   return text;
 }
@@ -393,57 +818,22 @@ pub fn format_list_rules_json(
   return text;
 }
 
-// Output mode metadata: human output mode name human; JSON output mode name
-// json.
+// Source-lint runtime output follows the bundled reference contract. JSON is a
+// newline-terminated object with one files entry per positional source, a raw
+// compiler exitCode, and ordered diagnostics using file, start/end positions,
+// severity, message, source, and optional code. Human output is written one
+// file result at a time as PATH: ok or a diagnostic line with [CODE].
 //
-// Diagnostic location metadata covers file path, line, column, endLine, and
-// endColumn. Diagnostic fields also include severity, rule code, and message.
-// Future JSON diagnostic field names include filePath, endLine, and endColumn.
+// FileResult ranges point into one run-wide diagnostic slice. The backing
+// vectors must outlive RunResult formatting. String serialization escapes every
+// JSON control byte, preserves valid UTF-8, and emits an escaped replacement
+// character for invalid UTF-8 bytes. Missing end positions use the start line
+// and next column.
 //
-// Human-readable text stability and JSON schema stability remain follow-up
-// items.
+// The legacy single-diagnostic and flat-vector formatting helpers remain useful
+// for focused internal callers, while the main CLI uses serialize_run_result_json
+// and format_run_result_human. List-rules JSON remains a documented standalone
+// extension with its own schema.
 //
-// serialize_diagnostic_json builds one in-memory JSON object from one internal
-// Diagnostic. It escapes common string characters and includes nullable
-// end-position fields. It does not write stdout/stderr, choose output mode,
-// serialize diagnostic arrays, or claim the final JSON schema is stable.
-// serialize_diagnostics_json joins caller-provided diagnostics into one
-// in-memory JSON array by reusing the single-diagnostic serializer. It does not
-// collect diagnostics from rule execution, write stdout/stderr, choose output
-// mode, connect to CLI dispatch, or claim final schema stability.
-//
-// format_diagnostic_human builds one newline-terminated human-readable
-// diagnostic line in memory. It does not write stdout/stderr, choose output
-// mode, serialize diagnostic arrays, or connect to CLI dispatch.
-// format_diagnostics_human joins caller-provided diagnostics into in-memory
-// human-readable text. It does not collect diagnostics from rule execution,
-// write stderr, choose output mode, serialize JSON, or connect to CLI dispatch.
-//
-// ListRuleRow records the internal --list-rules row model for known rule
-// metadata: rule code, short name, default severity, and description.
-// known_list_rules_output returns rows in the current rule metadata order:
-// lint/trailing-whitespace, then lint/missing-final-newline.
-// format_list_rules_human converts those rows into internal human-readable text
-// with one newline-terminated row per rule. It does not write stdout/stderr.
-// format_list_rules_json converts those rows into an in-memory JSON array. It
-// reuses the shared JSON string escaping helper and does not write stdout/stderr
-// or claim final release schema stability.
-//
-// stdout_stderr_output_boundary records stdout and stderr as named future output
-// sinks. It returns status data only and does not call real output APIs.
-//
-// write_stdout_text is the minimal verified stdout adapter. It writes a caller-
-// provided std::string::String through std::io::print_string and returns local status data.
-// It does not read OS argv, inspect command results, write stderr, serialize
-// JSON, call process exit, or run the CLI.
-//
-// write_stderr_text is the minimal verified stderr adapter. It writes a caller-
-// provided std::string::String through std::io::eprint_string and returns local
-// status data. It does not read OS argv, inspect command results, write stdout,
-// serialize JSON, call process exit, or run the CLI.
-//
-// Source diagnostic JSON schema stability remains future work.
-// Main-facing list-rules stdout wiring is handled by the CLI layer through the
-// explicit stdout adapter, and source-file human diagnostics are written by the
-// CLI layer through the stderr adapter. Source scanning, broader output mode
-// wiring, config parsing, and ari --check invocation are also future work.
+// write_stdout_text and write_stderr_text are the stream adapters. Compiler
+// invocation and compiler-diagnostic parsing remain separate follow-up work.

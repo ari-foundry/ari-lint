@@ -27,11 +27,12 @@ as the first argument or through `ARI_COMPILER`, delegates compilation to
 against temporary files and a temporary nested working directory containing
 `ari-lint.rules` to check parent discovered config severity, nearest discovered
 config precedence, explicit `--config` precedence, and CLI `--rule`
-precedence. It also checks current JSON diagnostic `ruleCode`, `severity`,
-`message`, `filePath`, `line`, and `column` fields for
-`lint/trailing-whitespace` and `lint/missing-final-newline`, JSON diagnostics
-for two dirty source files, a clean plus dirty multi-file invocation, and a
-clean plus clean multi-file invocation.
+precedence. It checks the reference-shaped runtime JSON `files` envelope,
+per-file `path`, `exitCode`, and `diagnostics`, and diagnostic `file`, position,
+`severity`, `message`, `source`, and `code` fields. Exact expected output covers
+representative JSON and human results, including final newlines. Multi-file
+coverage includes dirty, clean plus dirty, all-clean, duplicate-argument, and
+escaped-path cases.
 
 `parity.sh` is a local report-only parity smoke wrapper. It accepts an explicit
 Ari compiler path as the first argument or through `ARI_COMPILER`, an
@@ -65,17 +66,19 @@ commands, run parity checks, or participate in CI as a compiler-backed job yet.
 `tools/lint`, run `ari --check`, install dependencies, run package manager
 commands, run parity checks, or participate in CI yet.
 
-`smoke.sh` does not add golden output tests, a parity runner, compiler-backed
-CI, home/global/XDG config search, new lint semantics, or compatibility claims.
+`smoke.sh` does not add a strict parity gate, compiler-backed CI,
+home/global/XDG config search, new lint semantics, or compatibility claims.
 It checks that `--help` names the current supported option set, checks focused
 `--list-rules` and `--json --list-rules` rule-code, short-name, and
 default-severity output signals, checks focused
 usage-error summaries for malformed `--rule` text and missing `--config` or
 `--rule` values, parser-only missing `--ari` values, plus one unknown option,
 checks that explicit config and CLI `--rule` `off` suppress diagnostics, and
-checks only the current JSON rule code, severity, message, file path, line, and
-column fields for temporary diagnostics. Broad golden output coverage remains
-future smoke coverage.
+checks exact reference-shaped runtime JSON and human output for representative
+diagnostics. It also covers clean, mixed, duplicate, 24-file repeated-input,
+66 KB clean-source, final-newline, stderr-isolation, and valid, control-byte,
+and invalid-UTF-8 path behavior. Strict parity, source-controlled broad goldens,
+and compiler diagnostics remain future work.
 
 `parity.sh` does not add CI wiring, a strict parity gate, golden files,
 source-controlled parity fixtures, new lint semantics, release compatibility

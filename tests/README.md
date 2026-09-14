@@ -1,8 +1,10 @@
 # ari-lint Tests
 
-Compiler-free repository checks, local compiler-backed smoke validation, and a
-local report-only parity smoke/report all exist now. Broader executable rule,
-CLI, strict parity, and golden-output tests remain future work.
+Compiler-free repository checks, local compiler-backed executable smoke
+validation, and a local report-only parity smoke/report all exist now. The
+smoke suite includes representative exact runtime JSON and human-output checks.
+Focused Ari unit tests, strict parity, compiler diagnostics, and broader golden
+coverage remain future work.
 
 Current compiler-free checks verify repository shape, lightweight
 documentation/source guards, the first trailing-whitespace fixture shape, and
@@ -23,15 +25,15 @@ diagnostic/read-error counts and the first internal diagnostic in the command
 result. A separate internal CLI collection path can push full source-file
 diagnostics for all explicit source files into a caller-provided vector. Parsed
 explicit config file overrides are applied to collected source-file diagnostics
-before command-line `--rule` severity overrides and before main-facing human
-stderr or JSON stdout output. The explicit `--config` path is captured in the
+before command-line `--rule` severity overrides and before main-facing human or
+JSON stdout output. The explicit `--config` path is captured in the
 CLI argument model and can be read when source-file diagnostics are collected.
 Documented short rule names in config files are normalized to full lint rule
 codes before known-rule validation.
 When `--config` is absent, the CLI source-file path searches upward from the
 current working directory for the nearest `ari-lint.rules`. The main-facing
-source-file lint path writes collected human diagnostics to stderr through the
-verified stderr adapter, but the lightweight checks do not assert CLI output.
+source-file lint path writes reference-shaped human results to stdout; the
+compiler-free checks do not execute that path, while `scripts/smoke.sh` does.
 A source-only parity runner skeleton records future comparison boundaries, and
 `scripts/parity.sh` provides a local report-only parity smoke/report. The
 lightweight checks do not execute that parity script.
@@ -48,21 +50,13 @@ text, but the lightweight checks do not execute Ari rule API tests.
 Registry-backed in-memory rule dispatch has started for one exact known rule
 code and caller-provided source text, but the lightweight checks do not execute
 registry dispatch tests.
-The main entry now returns the existing OS argv CLI command exit-code mapping,
-and the main-facing `--list-rules` path writes human-readable list-rules text
-through the verified stdout adapter. The main-facing source-file `--json` path
-writes collected diagnostics as a JSON array through the verified stdout
-adapter, the main-facing help path writes concise help text through the
-verified stdout adapter, and CLI parse problems write a short summary through
-the verified stderr adapter. Missing source-file input also writes a short
-summary through the verified stderr adapter. Source-file read errors write a
-short summary through the verified stderr adapter without read-error JSON
-output, but the lightweight checks do not execute main-entry tests or
-user-facing CLI output tests.
-Internal single-diagnostic JSON field serialization has started, but the
-internal caller-provided diagnostic JSON array serializer has also started. The
-lightweight checks do not execute JSON serializer tests or assert a stable JSON
-schema.
+The main entry returns the OS argv CLI command exit-code mapping. List-rules,
+help, and source-file results use stdout; CLI parse problems and current
+source/config read failures use stderr. Source `--json` output is one
+newline-terminated reference-shaped object with an ordered entry for every
+positional input, including clean and duplicate paths. Enabled native
+diagnostics return exit `1`. The compiler-free checks do not execute these
+paths, while `scripts/smoke.sh` verifies them through the built binary.
 
 Run the lightweight check script from the repository root:
 
@@ -104,20 +98,21 @@ temporary files and a temporary nested working directory containing
 `ari-lint.rules` to check parent discovered config severity, nearest discovered
 config precedence, explicit `--config` precedence, and CLI `--rule` precedence
 for a trailing-whitespace diagnostic. The temporary config files use documented
-short rule names to cover config-file normalization. It also checks current JSON
-diagnostic `ruleCode`, `severity`, `message`, `filePath`, `line`, and `column`
-fields for
-`lint/trailing-whitespace` and `lint/missing-final-newline`, JSON diagnostics
-for two dirty source files, a clean plus dirty multi-file invocation, and a
-clean plus clean multi-file invocation.
+short rule names to cover config-file normalization. It also checks the runtime
+`files` envelope and per-file `path`, `exitCode`, and `diagnostics`, plus
+diagnostic `file`, positions, `severity`, `message`, `source`, and `code` for
+`lint/trailing-whitespace` and `lint/missing-final-newline`. Representative
+JSON and human outputs are checked exactly, including final newlines. Multi-file
+coverage includes two dirty files, clean plus dirty, all-clean, and duplicate
+source arguments.
 It is not run by `scripts/test.sh` or CI, but it is the current local validation
 path for build, supported CLI commands, source-file JSON diagnostics, explicit
 config, discovered `ari-lint.rules`, nearest discovered config precedence, and
-CLI severity override precedence across explicit source files. It does not
-compare golden output, run a parity runner, search home/global/XDG config
+CLI severity override precedence across explicit source files. It does not run
+a strict parity gate, search home/global/XDG config
 locations, add new lint semantics, or claim compatibility. It now checks
 focused JSON list-rules rule-code, short-name, and default-severity output
-signals; broader golden output coverage remains future smoke coverage.
+signals; compiler-diagnostic goldens remain follow-up work.
 
 `scripts/parity.sh` is the local report-only parity smoke/report. It accepts an
 explicit Ari compiler path or `ARI_COMPILER`, an Ari repo path or `ARI_REPO`,
@@ -134,9 +129,10 @@ claim compatibility or parity.
 Known report-only differences are tracked in
 [docs/dev/parity-differences.md](../docs/dev/parity-differences.md).
 
-Compiler-backed tests remain future work. Current checks do not run the
-compiler. Future compiler-backed tests should use explicit compiler
-provisioning as planned in
+The local executable smoke uses an explicit compiler to build and run
+`ari-lint`, but `ari-lint` does not invoke `ari --check` yet. Dedicated
+compiler-invocation and fake-compiler tests remain future work and should use
+explicit compiler provisioning as planned in
 [docs/dev/compiler-provisioning.md](../docs/dev/compiler-provisioning.md).
 Compiler invocation also remains future work; future compiler-backed tests
 should use explicit compiler invocation as planned in
@@ -146,9 +142,8 @@ Release and compatibility policy is documented in
 No compatibility matrix entry should be added until compiler-backed tests pass
 against a recorded Ari release tag or commit.
 
-Future tests should cover CLI smoke tests, rule tests, configuration tests,
-diagnostic output, JSON diagnostic tests, compiler-boundary behavior, and
-parity with current `tools/lint`.
+Future tests should expand the existing CLI/output smoke with dedicated Ari
+rule, configuration, serializer, compiler-boundary, and strict parity tests.
 
 No model tests are added yet. Future model tests should validate severity
 handling, rule metadata, diagnostic data, config override data, JSON output
@@ -272,9 +267,10 @@ collection, already-parsed severity override data, no config-file reads, no
 filesystem scanning, no output or JSON serialization, no compiler invocation,
 and parity behavior against current `tools/lint`.
 
-No CLI tests are added yet. Future CLI tests should validate positional source
-input, `--json`, `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, invalid
-arguments, and parity behavior against current `tools/lint`.
+Executable shell CLI smoke now covers positional source input, `--json`,
+`--ari`, `-I`, `--list-rules`, `--config`, `--rule`, representative invalid
+arguments, output streams, and exit codes. Dedicated Ari CLI unit tests and
+strict parity remain future work.
 
 No CLI model tests are added yet. Future tests should cover parser output for
 positional files, `--json`, `--list-rules`, `--ari`, `-I`, `--config`,
@@ -290,18 +286,16 @@ runner exists.
 
 No executable dispatcher tests are added yet. Future dispatcher tests should
 cover list-rules dispatch, missing-source commands, source-file lint requests,
-file read errors, main-facing file read error stderr summaries, no read-error
-JSON output before a schema is defined, lint diagnostics,
+file read errors, the current stderr-only read-error path and future reference
+per-file/compiler-shaped read-error JSON, lint diagnostics,
 first diagnostic command-result carrying, caller-provided diagnostic vector
 collection, parsed `--rule` override application, rule override parse-problem
 results, internal exit-code mapping, stdout-free behavior, and parity behavior
 against current `tools/lint` once a parity runner exists.
 
-No executable exit-code tests are added yet. Future tests should cover the
-internal command-result mappings for success, usage-error, and unavailable
-states, ensure no process exit is called by the model, and compare user-facing
-exit behavior with current `tools/lint` once CLI wiring and a parity runner
-exist.
+No dedicated Ari exit-code model tests are added yet. Executable shell smoke
+covers user-facing success, lint-failure, usage-error, and unavailable exits;
+future unit tests should isolate the internal mappings and failure paths.
 
 No executable explicit-token entry tests are added yet. Future entry-path tests
 should cover list-rules token input, parse problems, missing source input,
@@ -313,55 +307,30 @@ tests should cover the named `--list-rules` command path, formatted text
 presence, success exit-code mapping, stdout-free behavior, no OS argv reads, and
 parity behavior against current `tools/lint` once a parity runner exists.
 
-No executable main-entry tests are added yet. Future tests should cover main
-entry behavior, delegation from the main shell to OS argv CLI handling, returned
-exit-code mapping, list-rules stdout output, human diagnostics stderr output
-for source-file lint results, source-file JSON stdout output, help stdout
-output, CLI parse problem stderr output, missing source stderr output, no
-process exit calls, and parity behavior against current `tools/lint` once a
-parity runner exists.
-
-No executable OS argv integration tests are added yet. Future tests should
-cover `std::env::args` collection, argv[0] dropping, delegation into
-explicit-token parsing, environment isolation, list-rules stdout output, human
-diagnostics stderr output for source-file lint results, stdout-free behavior
-for non-output paths, source-file JSON stdout output, help stdout output, CLI
-parse problem stderr output, missing source stderr output, no process exit
-calls, and parity behavior against current `tools/lint` once a parity runner
-exists.
+Executable shell smoke enters through `main` and OS argv, checking returned
+exit codes, list-rules/help output, human and JSON source results, parse errors,
+missing input, and stream isolation. Dedicated Ari main-entry and argv-boundary
+unit tests, environment isolation, and strict parity remain future work.
 
 No executable stdout/stderr output boundary tests are added yet. Future tests
 should cover the internal sink/result model, stdout versus stderr stream
-selection, no-write behavior before output adapters exist, later output adapter
-wiring, diagnostic stream behavior, and parity behavior against current
-`tools/lint` once a parity runner exists.
+selection, adapter failure paths, diagnostic stream behavior, and strict parity.
 
 No executable stdout adapter tests are added yet. Future tests should cover the
 minimal `std::io::print_string` adapter, successful write status, failed write
 status if Ari exposes a practical failure path, no stderr writes, no OS argv
-reads, and later user-facing CLI output wiring.
+reads, existing main-facing stdout wiring, and adapter failure paths.
 
 No executable stderr adapter tests are added yet. Future tests should cover the
 minimal `std::io::eprint_string` adapter, successful write status, failed write
 status if Ari exposes a practical failure path, no stdout writes, no OS argv
-reads, and the current human diagnostic output wiring.
+reads, and current usage/source-read/config-read/compiler-path error wiring.
 
-No diagnostic output tests are added yet. Future diagnostic tests should
-validate human-readable output, JSON output shape, line/column fields,
-endLine/endColumn fields if supported, human diagnostics stderr output,
-internal diagnostic vector collection before output formatting, severity, rule
-code, message, path normalization, and parity behavior against current
-`tools/lint`.
-
-No executable human diagnostic formatter tests are added yet. Future formatter
-tests should validate single-diagnostic text, severity names, rule codes,
-messages, newline termination, no stderr writes, no CLI wiring, and parity
-behavior against current `tools/lint`.
-
-No executable human diagnostic array formatter tests are added yet. Future
-formatter tests should validate caller-provided diagnostic ordering, joined
-newline-terminated text, empty arrays, no rule diagnostic collection, no stderr
-writes, no CLI wiring, and parity behavior against current `tools/lint`.
+Executable diagnostic output smoke tests validate exact reference-shaped JSON
+and human text for representative native diagnostics, numeric start/end
+positions, source/code fields, clean output, ordering, and newline termination.
+Human diagnostics are verified on stdout with stderr empty. Focused formatter
+helper tests and compiler-diagnostic goldens remain follow-up work.
 
 No executable trailing-whitespace first-diagnostic capture tests are added yet.
 Future tests should validate the first captured diagnostic, count preservation,
@@ -373,18 +342,16 @@ Future tests should validate the first captured diagnostic, count preservation,
 line/column metadata, no stderr writes, no JSON serialization, and parity
 behavior against current `tools/lint`.
 
-No executable diagnostic JSON serializer tests are added yet. Future serializer
-tests should validate the current single-diagnostic JSON field construction,
-caller-provided diagnostic JSON array construction, string escaping, optional
-end positions, severity names, rule codes, messages, empty arrays, diagnostic
-ordering, no stdout/stderr writes, no CLI wiring, and final schema stability
-once the schema is set.
+Executable CLI smoke tests now validate the runtime JSON envelope, exact native
+diagnostic objects, clean and mixed file accounting, duplicate inputs, final
+newlines, and path control-byte escaping. Focused internal serializer tests and
+compiler-diagnostic golden cases remain follow-up work.
 
 No executable source input boundary tests are added yet. Future source input
 tests should validate caller-provided source text, path-only source entries,
 path-list inputs from already-parsed CLI paths, the single-path file-read
 boundary, file read error preservation, no recursive filesystem scanning, no
-config discovery, and later file input behavior once CLI wiring is scoped.
+config discovery inside the boundary, and existing explicit-file CLI behavior.
 
 No executable file IO boundary tests are added yet. Future tests should cover
 successful single-file reads, missing-file `PathError` preservation,
@@ -415,8 +382,8 @@ no JSON serialization in the internal path, no compiler invocation, no
 No executable list-rules formatter tests are added yet. Future tests should
 cover list-rules metadata and formatting for rule code, short name, default
 severity, description, ordering, newline behavior, human-readable text
-stability, main-facing stdout wiring, future JSON formatting, and parity
-behavior against current `tools/lint`.
+stability, the existing standalone JSON form, main-facing stdout wiring, and
+parity behavior against current `tools/lint`.
 
 No executable config parser tests are added yet. Future config parser tests
 should validate caller-provided `RULE = SEVERITY` text, blank lines, comments,

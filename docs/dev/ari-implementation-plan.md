@@ -21,13 +21,12 @@ It does not move `tools/lint` or change build behavior.
 - A minimal Ari main entry shell is now present. It delegates to the existing
   OS argv CLI entry path and returns the internal command exit-code mapping.
   The main-facing `--list-rules` path writes stdout through the verified stdout
-  adapter, and the main-facing source-file lint path writes collected human
-  diagnostics for all explicit source files to stderr through the verified
-  stderr adapter. The main-facing source-file `--json` path writes collected
-  diagnostic JSON for all explicit source files to stdout, and CLI help writes
-  concise text to stdout. CLI parse problems write a short summary to stderr,
-  missing source-file input writes a short summary to stderr, and source-file
-  read errors write a short summary to stderr. It does not read
+  adapter. Source runs write reference-shaped human or JSON output to stdout;
+  the JSON envelope retains every positional file, and enabled diagnostics
+  return exit `1`. CLI help writes concise text to stdout.
+  CLI parse problems write a short summary to stderr, missing source-file input writes a short
+  summary to stderr, and source/config read failures remain stderr errors. It
+  does not read
   environment variables beyond the current working directory, produce
   parse-error JSON, produce read-error JSON, search home/global/XDG config
   locations, traverse source directories, invoke the compiler, invoke
@@ -72,32 +71,19 @@ It does not move `tools/lint` or change build behavior.
   reuses the existing explicit-token parser and stdout-free dispatcher. `main`
   now returns the resulting internal exit-code mapping from this path. The
   main-facing `--list-rules` branch writes the existing human-readable
-  list-rules text through the verified stdout adapter, and source-file linting
-  writes collected human diagnostics for all explicit source files through the
-  verified stderr adapter. Source-file `--json` output writes the collected
-  diagnostic array for all explicit source files through stdout, and CLI help
-  writes concise text through stdout. CLI parse problems write a short summary
-  through stderr, missing source-file input writes a short summary through
-  stderr, and source-file read errors write a short summary through stderr. The
-  path does not read environment variables, call process exit, produce
-  parse-error JSON, produce read-error JSON, invoke the compiler, or
-  recursively scan sources.
-- The diagnostic output metadata skeleton has started as data-only declarations
-  for human and JSON output modes, diagnostic location fields, and planned
-  diagnostic fields. The JSON serializer now builds one internal JSON object
-  for one already-built diagnostic, including filePath, line, column, nullable
-  endLine/endColumn, severity, ruleCode, message, and common string escaping,
-  without claiming final schema stability. A minimal human-readable formatter
-  now builds one newline-terminated diagnostic line in memory from an
-  already-built diagnostic, and a related formatter joins caller-provided
-  diagnostics into in-memory human-readable text. Rule and lint aggregation
-  paths can now push full internal diagnostics into caller-provided vectors,
-  and the main-facing source-file lint path writes those collected human
-  diagnostics to stderr. A JSON array serializer now joins caller-provided
-  diagnostics in memory by reusing the single-diagnostic serializer, and the
-  main-facing source-file `--json` path writes that array to stdout. Read
-  errors write a short stderr summary instead of JSON output. Executable
-  serializer/output tests and final JSON schema stability remain future work.
+  list-rules text through the verified stdout adapter. Source runs now write
+  reference-shaped human or JSON output to stdout and return exit `1` when any
+  enabled diagnostic is present. CLI parse problems, missing input, and
+  source/config read failures remain stderr errors. The path does not read
+  compiler-selection environment variables, invoke the compiler, or recursively
+  scan sources.
+- Runtime output uses a flat diagnostic store plus ordered per-file ranges.
+  JSON matches the reference `files` envelope with per-file `path`, `exitCode`,
+  and `diagnostics`; diagnostic objects contain mandatory numeric positions,
+  `severity`, `message`, `source`, and optional `code`. Human source results use
+  `PATH: ok` or bracketed codes on stdout. Representative exact JSON and human
+  smoke checks cover clean, dirty, mixed, duplicate, and escaped-path cases.
+  Compiler-result population remains follow-up work.
 - The source input boundary model has started for caller-provided source text,
   path-only source entries, and explicit file reads. It records internal
   source inputs without recursively scanning the filesystem, discovering config
@@ -138,14 +124,14 @@ It does not move `tools/lint` or change build behavior.
   problems. A separate internal CLI collection path accepts explicit
   caller-provided tokens or parsed source-file input and pushes full internal
   diagnostics for all source files into a caller-provided vector while
-  returning aggregate count and exit-code data. Explicit `--config` file
+  returning aggregate count, ordered per-file diagnostic ranges, and exit-code
+  data. Explicit `--config` file
   overrides are applied to those collected diagnostics before parsed
   command-line `--rule` severity overrides, so the current precedence is
   default severity < discovered config < explicit `--config` < command-line
-  `--rule`. The main-facing OS argv path formats and writes those collected
-  human diagnostics to stderr, or serializes and writes those collected
-  diagnostics as one JSON array to stdout when `--json` is requested, through
-  the verified output adapters. When `--config` is absent, it searches from the
+  `--rule`. The main-facing OS argv path writes reference-shaped human results
+  or a newline-terminated JSON `files` envelope to stdout through the verified
+  output adapter. When `--config` is absent, it searches from the
   current working directory upward for the nearest `ari-lint.rules` and stops
   at the filesystem root. It does not search home/global/XDG config locations,
   traverse source directories, invoke the compiler, call `ari --check`, or call
@@ -165,11 +151,10 @@ It does not move `tools/lint` or change build behavior.
   failing on parity mismatches or claiming parity.
 - An internal list-rules output path now records the known rule count for
   `lint/trailing-whitespace` and `lint/missing-final-newline`, and an internal
-  human-readable list-rules formatter builds text from the same metadata.
-  The main-facing OS argv `--list-rules` path now writes that text to stdout
-  through the verified stdout adapter. JSON output, compiler invocation,
-  config parsing, broader diagnostic output modes, and parity tests remain
-  future work.
+  human-readable list-rules formatter and standalone JSON extension build from
+  the same metadata. The main-facing OS argv `--list-rules` path writes the
+  selected form to stdout through the verified adapter. Compiler invocation,
+  per-file config discovery, and strict parity remain future work.
 - An internal stdout-free command dispatcher now maps parsed CLI arguments to
   internal command results. It routes list-rules requests to the internal
   human-readable list-rules formatter and routes source-file requests through
@@ -178,13 +163,13 @@ It does not move `tools/lint` or change build behavior.
   collection path applies parsed `--rule` severity overrides to collected
   diagnostics. It keeps
   parse-problem, help, and missing-source command paths as internal command
-  results. User-facing stdout/stderr output, JSON output, source
-  scanning, compiler invocation, config-file parsing, diagnostics output, and
-  parity tests remain future work.
+  results. The dispatcher remains output-free; the main-facing layer formats
+  those results. Compiler invocation, recursive source scanning, and strict
+  parity remain future work.
 - Internal command results now carry data-only exit-code mappings for success,
-  usage-error, and unavailable command states. The model does not call process
-  exit, run the CLI, read OS argv, write stdout/stderr, or claim stable
-  user-facing exit behavior.
+  usage-error, lint-failure, and unavailable command states. The model does not
+  call process exit, run the CLI, read OS argv, write stdout/stderr, or claim
+  stable user-facing exit behavior.
 - An internal stdout/stderr output boundary model now records named stdout and
   stderr sinks plus result status for future output handling. It is data-only:
   it does not call real output APIs, write stdout/stderr, connect to OS argv or
@@ -192,12 +177,11 @@ It does not move `tools/lint` or change build behavior.
 - A minimal stdout adapter and a minimal stderr adapter now write
   caller-provided `String` text through the verified Ari
   `std::io::print_string` and `std::io::eprint_string` APIs and return local
-  status data. The stdout adapter is wired for the main-facing OS argv
-  `--list-rules`, help, and source-file JSON diagnostic paths, and the stderr
-  adapter is wired for source-file human diagnostics and parse problem
-  summaries, missing-source summaries, and source-file read-error summaries.
-  These adapters are not wired to process exit, compiler invocation, source
-  scanning, or config discovery.
+  status data. The stdout adapter is wired for main-facing list-rules, help,
+  and source-file human/JSON results. The stderr adapter is wired for parse
+  problems, missing input, and current source/config/compiler-path failures.
+  These adapters are not wired to compiler invocation or recursive source
+  scanning.
 - An internal OS argv entry path now reads arguments through the verified Ari
   `std::env::args` API, drops the program-name argument, and dispatches the
   remaining user tokens through the existing explicit-token parser and
@@ -207,8 +191,9 @@ It does not move `tools/lint` or change build behavior.
   diagnostic, source-file JSON diagnostic, and parse problem output paths are
   also wired through verified output adapters. Missing source-file input writes
   a short stderr summary. Source-file read errors also write a short stderr
-  summary. Config discovery, compiler invocation, detailed help parity, and
-  tests remain future work.
+  summary. Config discovery and representative executable smoke coverage are
+  now wired; compiler invocation, detailed help parity, dedicated Ari tests,
+  and strict parity remain future work.
 - An internal explicit-token entry path now composes the existing
   caller-provided token-list parser with the stdout-free command dispatcher and
   returns a `CliCommandResult`. It does not read OS argv, environment variables,
@@ -300,13 +285,12 @@ It does not move `tools/lint` or change build behavior.
   explicit `--config` JSON smoke checks for trailing-whitespace severity, CLI
   `--rule` precedence, parent-directory config discovery for `ari-lint.rules`,
   nearest discovered config precedence, and explicit `--config` precedence over
-  discovery. Focused JSON diagnostic field smoke checks assert current
-  `ruleCode`, `severity`, `message`, `filePath`, `line`, and `column` fields
-  for `lint/trailing-whitespace` and `lint/missing-final-newline`, and the
-  smoke path also checks multi-file JSON diagnostics. It does not add golden
-  output tests, parity checks, compiler-backed CI, home/global/XDG config
-  search, new lint semantics, or compatibility claims. Broader golden output
-  coverage remains future smoke coverage.
+  discovery. Focused runtime output checks assert the reference file envelope
+  and diagnostic fields for `lint/trailing-whitespace` and
+  `lint/missing-final-newline`. Exact JSON and human expected files cover
+  ordering and final newlines; multi-file, clean, mixed, duplicate, and escaped
+  path cases are also exercised. Strict parity, compiler-backed CI, per-file
+  config discovery, and compiler diagnostics remain follow-up work.
 - A local parity smoke/report script now exists at `scripts/parity.sh`. It
   accepts an explicit Ari compiler path or `ARI_COMPILER`, an Ari repository
   path or `ARI_REPO`, and optionally an existing original lint command path or
@@ -406,7 +390,7 @@ Reference locations:
 - map lint diagnostics to documented output expectations
 - keep JSON schema follow-up explicit
 
-Current preparatory model skeleton files are source-only placeholders:
+Current Ari-language implementation module inventory:
 
 - `src/main.ari` defines a minimal main entry shell and delegates `main` through
   a local `run_main_entry_shell` function. The shell calls the existing OS argv
@@ -462,21 +446,20 @@ Current preparatory model skeleton files are source-only placeholders:
   files or search upward from the current working directory for the nearest
   `ari-lint.rules` when `--config` is absent. It does not read environment
   variables, search home/global/XDG config locations, or call process exit.
-  `main` returns the internal exit-code mapping from that path, and the scoped
-  main-facing paths
-  write list-rules/help/JSON text to stdout plus diagnostics, parse problems,
-  missing-source summaries, and file-read-error summaries to stderr through the
-  verified adapters.
+  `main` returns the internal exit-code mapping from that path. Main-facing
+  list-rules, help, and source human/JSON results use stdout; parse problems,
+  missing-source summaries, and current read/compiler-path failures use stderr
+  through the verified adapters.
 - `src/severity.ari` sketches planned severity values: off, hint, note,
   warning, and error.
-- `src/diagnostic.ari` sketches diagnostic concepts such as file path, line,
-  column, optional end position, severity, rule code, and message. It now also
+- `src/diagnostic.ari` defines diagnostic concepts such as file path, line,
+  column, optional end position, severity, message, source, and code. It also
   has a small source-span constructor used by the trailing-whitespace and
   missing-final-newline mapping skeletons; it does not format output or
   serialize JSON.
-- `src/output.ari` sketches diagnostic output metadata for human-readable and
+- `src/output.ari` defines diagnostic output metadata for human-readable and
   JSON output modes, diagnostic location, file path, line, column, endLine,
-  endColumn, severity, rule code, and message. It also defines an internal
+  endColumn, severity, message, source, and code. It also defines an internal
   single-diagnostic JSON serializer, list-rules output row model, a known-rule
   output count builder from existing rule metadata, an internal human-readable
   list-rules formatter, and a data-only stdout/stderr output boundary model for
@@ -488,10 +471,9 @@ Current preparatory model skeleton files are source-only placeholders:
   `std::io::eprint_string` APIs for caller-provided `String` text and return
   local status data. It does not collect diagnostics from rule execution,
   read OS argv, or run the CLI. The CLI layer now calls the stdout adapter for
-  main-facing `--list-rules` output, help text, and source-file JSON
-  diagnostics, and the stderr adapter is wired for source-file human
-  diagnostics, parse problem summaries, missing-source summaries, and
-  source-file read-error summaries.
+  main-facing `--list-rules`, help, and source-file human/JSON output. The
+  stderr adapter is wired for parse-problem, missing-source, and current
+  source/config-read summaries.
 - `src/rule.ari` sketches rule metadata concepts such as rule code, short name,
   default severity, and description, and exposes a small constructor for
   internal rule descriptors. It also defines shared rule execution input/result
@@ -531,84 +513,34 @@ Current preparatory model skeleton files are source-only placeholders:
   It does not decide discovery, inspect CLI arguments, run lint rules, or apply
   config to lint execution.
 
-These files do not implement user-facing rule execution,
-argument validation, diagnostics output, JSON serialization, or `ari --check`
-invocation. The trailing-whitespace and missing-final-newline rule
-execution paths are limited to caller-provided in-memory source text, the main
-entry shell is limited to returning the internal exit-code mapping from the OS
-argv CLI entry path, the OS argv entry path is limited to reading
-`std::env::args`, dropping argv[0], dispatching internal tokens, and writing
-stdout only for the `--list-rules` command through the verified adapter,
-the CLI parser is limited to explicit caller-provided token lists, raw option
-values, and explicit `--config` path capture with scoped source-file
-diagnostic collection reading when provided,
-the config parser is limited to caller-provided text, rule/severity
-pairs, blank lines, comments, short-name normalization, known-rule validation,
-and one caller-selected config file path, the rule override
-parser is limited to caller-provided `--rule` text, internal override
-construction, and known-rule validation, the severity override resolver is
-limited to effective severity data for a caller-provided rule code and
-already-parsed overrides, the diagnostic severity application helper is limited
-to rebuilding one already-built internal Diagnostic with resolved severity, the
-diagnostic JSON serializers are limited to one internal diagnostic object and
-one caller-provided diagnostic array,
-the source input boundary is limited to caller-provided source text and
-path-only entries, the default lint run aggregation path is limited to combining
-diagnostic counts and preserving the first already-built diagnostic for one
-caller-provided in-memory source text, the in-memory override aggregation path
-is limited to preserving that count and first-diagnostic result shape when
-already-parsed severity overrides are supplied,
-the file-backed override aggregation path is limited to reading explicitly
-provided source paths through the file-read boundary and preserving diagnostic
-counts plus the first diagnostic,
-the file-read boundary is limited to reading one explicitly provided path with
-the verified Ari `std::fs::read_detailed` API and preserving file read errors,
-the CLI file lint path is limited to iterating explicit source-file arguments,
-the single-file read boundary, in-memory lint aggregation, explicit config
-override application, optional parsed `--rule` override validation, aggregate
-internal diagnostic counts, the first internal diagnostic, and aggregate
-internal read-error counts,
-the known-rule registry lookup is limited to returning internal data for exact
-full rule codes, registry-backed rule dispatch is limited to selecting one
-known in-memory rule wrapper for caller-provided source text,
-the list-rules formatter is limited to internal text construction, the command
-dispatcher is limited to stdout-free internal command results, the exit-code
-model is limited to internal data carried by those results, the explicit-token
-`--list-rules` command path is limited to caller-provided token construction,
-the main-facing `--list-rules` stdout path is limited to writing that formatted
-text through the stdout adapter, the main-facing help path is limited to
-concise stdout text, the stdout and stderr adapters are limited to
-caller-provided `String` text, the main-facing source-file read-error path is
-limited to a short stderr summary without read-error JSON output, the
-main-facing config-file read-error path is limited to a short stderr summary
-without read-error JSON output, and the
-stdout/stderr output boundary is limited to status data for named future sinks.
-Compiler invocation, home/global/XDG config search, diagnostics output,
-stderr writing, stdout
-adapter wiring beyond the scoped main-facing output paths, process exit, JSON
-schema stability, environment handling, source
-filesystem scanning, directory traversal, main-entry tests, argv-boundary tests, OS-argv
-integration tests, config parser tests, rule override parser tests, severity
-resolution tests, diagnostic severity application tests, diagnostic JSON
-serializer tests, source input tests,
-trailing-whitespace execution tests, missing-final-newline execution tests,
-output-boundary tests,
-stdout-adapter tests, exit-code tests, list-rules command tests, parser tests,
-dispatcher tests, and
-explicit-token entry tests remain future work. Registry-backed dispatch is not
-yet wired into lint aggregation or CLI behavior. Severity parsing, CLI/config
-override behavior, rule registration behavior, directory traversal policy,
-file-backed lint command behavior, and the JSON schema are not stable yet.
+The current standalone path implements explicit-file native rule execution,
+CLI/config severity validation, ordered per-file results, reference-shaped
+runtime JSON and human output, and main-entry exit behavior. The output layer
+retains focused single-diagnostic and caller-provided diagnostic-array helpers,
+and adds `FileResult`/`RunResult` serializers used by the CLI. Registry-backed
+dispatch, file-backed aggregation, and the two native rules are wired into the
+current executable path.
 
-The local build scaffold is not compiler-backed CI or full build validation.
-Compiler-backed CI, standalone test execution, compiler provisioning in CI,
+The remaining implementation limits are explicit: `ari --check` is not invoked;
+compiler selection does not read `ARI_COMPILER`; implicit config discovery is
+still process-CWD-wide rather than per source file; read failures do not yet use
+the reference per-file JSON diagnostic path; and recursive source discovery is
+out of scope. Focused shell smoke exists, but dedicated Ari unit tests, strict
+source-controlled parity goldens, compiler-backed CI, and a release-backed
+compatibility matrix remain future work.
+
+The local build scaffold and `scripts/smoke.sh` provide compiler-backed build
+and executable CLI/output smoke validation, but they are not compiler-backed
+CI or full build validation. Dedicated Ari tests, compiler-invocation tests,
+broad source-controlled goldens, compiler provisioning in CI, strict parity,
 and compatibility validation remain future work.
 
 The local standalone test entrypoint is not a full executable test suite.
 `scripts/test.sh` resolves the repository root and delegates to
-`scripts/check.sh` only. Compiler-backed tests, CLI tests, rule execution
-tests, parity checks, golden output comparison, package manager commands, and
-CI compiler execution remain future work.
+`scripts/check.sh` only. Compiler-backed executable smoke lives separately in
+`scripts/smoke.sh`; dedicated Ari unit tests, compiler-invocation tests, broad
+source-controlled golden comparison, strict parity, package manager commands,
+and CI compiler execution remain future work.
 
 Standalone build wiring is local-only. `scripts/build.sh` resolves the
 repository root, requires an explicit compiler path or `ARI_COMPILER`, writes
@@ -683,12 +615,11 @@ Current rule module state:
   apply config, write output, serialize JSON, invoke the compiler, execute
   `ari --check`, or call `tools/lint`.
 
-The rule implementations only handle caller-provided bytes in memory. These
-rule module files do not implement file reading, filesystem scanning, config
-parsing, CLI parsing, diagnostics output, JSON serialization, compiler
-invocation, tests, or CI. File-backed aggregation beyond explicit source paths,
-home/global/XDG config search, user-facing output, JSON diagnostic arrays,
-tests, and parity checks remain future work.
+The individual rule modules remain in-memory and do not own file reading,
+config, CLI, or output concerns. The surrounding lint and CLI layers now compose
+them for explicit files and emit runtime results. Compiler invocation,
+home/global/XDG config search, dedicated Ari unit tests, strict parity, and CI
+compiler provisioning remain future work.
 
 The source input file-read boundary reads one explicitly provided path into a
 source input using `std::fs::read_detailed`. It does not scan directories,
@@ -699,12 +630,11 @@ The CLI file lint path reads each explicit source-file argument, runs the
 in-memory lint aggregation for successfully read files, validates parsed
 `--rule` overrides when provided, preserves read errors, and carries aggregate
 counts plus the first internal diagnostic in `CliCommandResult`. The
-main-facing OS argv path now also collects source-file diagnostics into a
-caller-provided vector, applies discovered or explicit config file overrides
-first, then parsed command-line `--rule` severity overrides, formats collected
-diagnostics as human diagnostics, and writes them to stderr through the
-verified stderr adapter. It can also serialize those collected source-file
-diagnostics as one JSON array to stdout when `--json` is requested. CLI and
+main-facing OS argv path collects source-file diagnostics into a flat vector,
+records an ordered range for every positional file, applies discovered or
+explicit config file overrides first, then parsed command-line `--rule`
+severity overrides, and writes reference-shaped human or JSON results to
+stdout. CLI and
 config parse problems write a short summary to stderr. Source-file and
 config-file read errors write short stderr summaries and do not produce
 read-error JSON output. It does not produce parse-error JSON, search
@@ -730,8 +660,9 @@ compiler, call `ari --check`, call `tools/lint`, or call process exit.
 - run tests with explicit `--ari` compiler path
 - add compiler-backed CI only after compiler provisioning, standalone tests,
   and compiler identity recording are ready
-- keep local smoke validation scoped to build plus safe CLI invocation checks
-  until executable CLI assertions and stable output expectations exist
+- keep local smoke validation scoped to compiler-backed build plus
+  representative exact CLI/output assertions until broad source-controlled
+  goldens and strict parity exist
 
 The source-only parity runner skeleton in `src/parity.ari` records the future
 comparison boundary. It does not execute `tools/lint`, execute `ari-lint`, read
@@ -739,8 +670,8 @@ fixtures, compare outputs, invoke the compiler, or run in CI.
 
 The local `scripts/parity.sh` smoke/report executes outside Ari source as a
 developer helper only. It compares current output signals with the original
-bundled lint binary on three temporary fixtures and keeps differences
-non-gating.
+bundled lint binary across temporary native-rule, config, usage/error,
+compiler-boundary, and multi-file cases and keeps differences non-gating.
 
 ## Parity Strategy
 
@@ -849,7 +780,8 @@ usable.
 - [ ] Define diagnostic data model
 - [ ] Define concrete diagnostic output metadata value construction after Ari
       syntax choices are verified
-- [ ] Define stable JSON schema and human-readable diagnostic text policy
+- [x] Define the reference-compatible runtime JSON schema and human-readable
+      diagnostic text policy
 - [x] Add minimal internal diagnostic JSON serialization placeholder for one diagnostic
 - [x] Add internal diagnostic JSON field serialization for one diagnostic
 - [x] Add internal diagnostic JSON array serialization for caller-provided diagnostics

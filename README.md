@@ -57,7 +57,11 @@ here.
 - Source-file lint for all explicitly provided positional source files, using
   the currently implemented rules:
   `lint/trailing-whitespace` and `lint/missing-final-newline`.
-- `--json` diagnostics for source-file lint results.
+- Reference-shaped `--json` source results with one ordered `files` entry per
+  positional input, including clean and duplicate inputs. JSON preserves valid
+  UTF-8 and renders invalid input bytes as escaped replacement characters.
+- Human source results on stdout as `PATH: ok` or
+  `PATH:LINE:COLUMN: SEVERITY: [CODE] MESSAGE`; enabled diagnostics exit `1`.
 - Explicit config file loading with `--config`.
 - Discovered `ari-lint.rules` config when `--config` is absent, searching from
   the current working directory upward and using the nearest file.
@@ -194,11 +198,10 @@ succeeds, it runs these current safe CLI invocations:
 ./build/ari-lint --json /tmp/.../one.ari /tmp/.../two.ari
 ```
 
-These checks verify only that the local binary builds, that the supported smoke
+These checks verify that the local binary builds, that the supported smoke
 commands execute, that `--help` names the current supported option set, and that
 `--list-rules` and `--json --list-rules` include the current rule-code,
-short-name, and default-severity signals. They do not add golden output tests,
-parity checks,
+short-name, and default-severity signals. They do not add a strict parity gate,
 compiler-backed CI, home/global/XDG config search, new lint semantics, or
 compatibility claims. The config smoke uses explicit temporary files and a
 temporary nested working directory containing `ari-lint.rules`; it checks only
@@ -207,9 +210,9 @@ short rule names in config files, and checks that `off` suppresses diagnostics
 from explicit config and CLI `--rule`. A focused usage-error smoke checks malformed
 `--rule` text, missing `--config`, `--rule`, or parser-only `--ari` values, and
 one unknown option only for the current short stderr summary. Focused diagnostic
-smoke checks assert current `ruleCode`, `severity`, `message`, `filePath`,
-`line`, and `column` fields for `lint/trailing-whitespace` and
-`lint/missing-final-newline`, plus
-multi-file JSON diagnostics, a clean plus
-dirty invocation, and a clean plus clean invocation. Broader golden output
-coverage remains future smoke coverage.
+smoke checks assert the runtime `files`, `path`, `exitCode`, `diagnostics`,
+`file`, position, `severity`, `message`, `source`, and `code` fields for
+`lint/trailing-whitespace` and `lint/missing-final-newline`. Exact checks cover
+representative JSON and human output, including final newlines. The smoke also
+covers dirty multi-file, clean/dirty, all-clean, duplicate-argument, and escaped
+path cases. Compiler-diagnostic goldens remain future work.

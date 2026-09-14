@@ -5,25 +5,25 @@
 This document plans future fixtures and tests for
 `lint/trailing-whitespace`.
 
-The first minimal fixture coverage has started. Full CLI tests, parity tests,
-golden files, test runner behavior, source implementation, and CI test jobs
+The first minimal fixture coverage and executable CLI smoke exist. Broader
+source-controlled goldens, dedicated rule tests, strict parity, and CI jobs
 remain future work.
 
 ## Current Status
 
 - The current reference behavior remains `tools/lint` in `ari-foundry/ari`.
-- `ari-lint` has a minimal internal single-line helper for trailing whitespace.
-- Full rule execution is not complete.
-- Source-file scanning, diagnostic production, CLI behavior, config behavior,
-  JSON output, broad fixtures, golden files, and parity tests remain future
-  work.
+- `ari-lint` has in-memory and explicit-file execution for trailing whitespace.
+- Diagnostic production, CLI/config behavior, and reference-shaped human/JSON
+  output are wired for explicit files.
+- Recursive source scanning, broad fixtures, source-controlled goldens, and
+  strict parity remain future work.
 - The first minimal fixture files now exist:
   `tests/fixtures/trailing-whitespace/clean.ari` and
   `tests/fixtures/trailing-whitespace/trailing-spaces.ari`.
 - The lightweight workflow check verifies fixture presence and whether the
   clean fixture avoids trailing blanks while the trailing-spaces fixture keeps
   an intentional trailing space.
-- No standalone test runner is wired for trailing-whitespace behavior yet.
+- `scripts/smoke.sh` exercises representative trailing-whitespace behavior.
 - Additional fixture cases remain future work.
 
 ## Started Fixture Coverage
@@ -95,8 +95,9 @@ severity `warning`, and message text `trailing whitespace`.
 The current reference reports the column as the first trailing space or tab and
 `endColumn` as one past the logical line end after CRLF normalization.
 
-Standalone fixture encoding, path normalization, exact JSON output, and any
-golden-file schema details remain needs follow-up.
+Representative exact runtime JSON is covered by executable smoke. Broader
+source-controlled fixture encoding, path normalization, and golden-file
+coverage remain needs follow-up.
 
 ## Parity Strategy
 

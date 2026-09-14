@@ -5,21 +5,21 @@
 This document plans future fixtures and tests for
 `lint/missing-final-newline`.
 
-The first minimal fixture coverage has started. Full CLI tests, parity tests,
-golden files, test runner behavior, source implementation, and CI test jobs
+The first minimal fixture coverage and executable CLI smoke exist. Broader
+source-controlled goldens, dedicated rule tests, strict parity, and CI jobs
 remain future work.
 
 ## Current Status
 
-- A minimal internal helper exists for missing-final-newline detection.
-- Full rule execution is not complete.
+- In-memory and explicit-file missing-final-newline execution exist.
 - The first minimal fixture files now exist:
   `tests/fixtures/missing-final-newline/with-final-newline.ari` and
   `tests/fixtures/missing-final-newline/missing-final-newline.ari`.
 - The lightweight workflow check verifies fixture presence and final newline
   presence or absence. It does not compile fixtures, run the Ari compiler,
   invoke `ari-lint`, compare diagnostics, or execute the helper directly.
-- No test runner is wired yet.
+- `scripts/smoke.sh` exercises representative missing-final-newline behavior and
+  exact runtime output.
 - The current reference behavior remains `tools/lint` in `ari-foundry/ari`.
 - Rule-specific parity planning is documented in
   [docs/rules/missing-final-newline-parity.md](missing-final-newline-parity.md).
@@ -105,8 +105,9 @@ carriage return behavior, exact line and column behavior, and end line/end
 column behavior remains needs follow-up until dedicated fixtures and tests
 exist.
 
-Exact standalone JSON output, human-readable output, fixture encoding, path
-normalization, and any golden-file schema details remain needs follow-up.
+Representative exact runtime JSON and human-readable output are covered by
+executable smoke. Broader source-controlled fixture encoding, path
+normalization, and golden-file coverage remain needs follow-up.
 
 ## Parity Strategy
 
