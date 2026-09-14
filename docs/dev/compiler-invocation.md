@@ -205,9 +205,10 @@ missing and non-executable programs, nonzero exits, signals, diagnostic order,
 embedded carriage returns, bounded output truncation, fallback suppression, and
 no execution for help or rule listing.
 
-Real-compiler compatibility evidence must use an explicitly provisioned,
-pinned Ari release or commit and record that identity. The current local smoke
-does not by itself establish a release compatibility claim.
+Real-compiler evidence uses an explicitly provisioned, pinned Ari release or
+commit and records that identity. The compiler-smoke workflow supplies one such
+`v0.1.0` prerelease baseline; neither it nor local smoke establishes a release
+compatibility claim.
 
 ## Security And Reproducibility
 
@@ -234,11 +235,12 @@ tests, and documentation belong in `ari-lint`.
 - [x] Replace temporary explicit-path early failures with per-file results.
 - [x] Add focused fake-compiler smoke coverage.
 - [x] Bound retained compiler output while draining both pipes to completion.
-- [ ] Record pinned real-compiler compatibility evidence.
-- [ ] Add compiler-backed CI only after its provisioning policy is complete.
+- [x] Record pinned real-compiler CI evidence without calling it compatibility.
+- [x] Add compiler-backed CI after completing its provisioning policy.
 
-## Non-Goals Of The Current Slice
+## Boundary Non-Goals
 
-- No network download or compiler build is added.
-- No compiler-backed CI or strict parity claim is added.
-- No Ari compatibility or release claim is made.
+- The lightweight workflow does not download or invoke the compiler.
+- Compiler-smoke CI does not build Ari or execute reference parity.
+- No strict compiler-boundary parity, Ari compatibility, or release claim is
+  made by the pinned smoke baseline.

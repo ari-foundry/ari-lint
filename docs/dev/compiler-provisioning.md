@@ -2,12 +2,11 @@
 
 ## Purpose
 
-This document defines how local `ari-lint` build, source-command, smoke, and
-future CI checks receive an Ari compiler binary.
+This document defines how local `ari-lint` build, source-command, smoke, and CI
+checks receive an Ari compiler binary.
 
-This document does not add compiler downloads, compiler builds, or CI
-provisioning. Local callers provide the compiler explicitly or through the
-documented runtime selection boundary.
+The pinned CI baseline described here is validation evidence only. It does not
+establish an Ari compatibility entry or a stable `ari-lint` release.
 
 ## Current Status
 
@@ -19,9 +18,11 @@ documented runtime selection boundary.
   compiler for local build and executable validation.
 - Standalone source commands invoke the selected compiler once per source with
   `--check`.
-- The GitHub Actions workflow is intentionally compiler-free and runs only the
-  zero-argument test mode until explicit compiler provisioning and compiler
-  identity recording are ready.
+- `.github/workflows/check.yml` remains deterministically compiler-free and
+  runs zero-argument `scripts/test.sh`.
+- `.github/workflows/compiler-smoke.yml` provisions the pinned Ari `v0.1.0`
+  Linux x86-64 artifact, verifies its archive and BUILDINFO identities, and runs
+  explicit-compiler `scripts/test.sh`.
 - Current `tools/lint` in `ari-foundry/ari` remains the reference
   implementation.
 
@@ -60,22 +61,44 @@ compatibility with an Ari release.
 
 ## CI Compiler Strategy
 
-Do not download or build the compiler in the current lightweight check.
+The lightweight `check.yml` workflow does not download or invoke the compiler.
+The separate `compiler-smoke.yml` workflow runs on `ubuntu-24.04` with
+read-only repository permissions, no credential persistence, no cache, and the
+LLVM driver fixed to `/usr/bin/clang-18`.
 
-The current GitHub Actions workflow must not run `scripts/build.sh`, invoke the
-Ari compiler, invoke `ari --check`, execute `tools/lint`, install package
-manager dependencies, or claim compatibility. It preserves a compiler-free CI
-gate through zero-argument `scripts/test.sh` while pinned compiler provisioning
-and identity recording remain future work.
+The compiler baseline is:
 
-Future compiler-backed CI may use a pinned Ari release artifact or a pinned
-source commit.
+- release/tag: `v0.1.0` (prerelease)
+- release URL:
+  `https://github.com/ari-foundry/ari/releases/tag/v0.1.0`
+- source commit: `c615f1c2ce1a93835118b4da8867a7f3dfaf991a`
+- target: `linux-x86_64`
+- asset: `ari-v0.1.0-linux-x86_64.tar.gz`
+- asset SHA-256:
+  `0af99459eb2ad4ad688ae8ba8e4e3bcce88358bba969f88bff65f5df3ced6da2`
+- extracted `BUILDINFO` SHA-256:
+  `6a9eaefbbc6aef083496e7d78749ec5e13ef87175301923ee000e45a9824baa6`
+- checkout action: `actions/checkout@v4.4.0`, pinned to
+  `11d5960a326750d5838078e36cf38b85af677262`
 
-Any future source build should be explicit and isolated.
+The release is currently marked `immutable: false` by GitHub. The workflow
+therefore trusts neither the tag name nor download URL alone: it verifies the
+archive before extraction, verifies the exact extracted BUILDINFO bytes, and
+then checks the recorded version, tag, commit, and target fields. Any asset
+replacement, identity drift, missing standard library, or missing executable
+fails before `ari-lint` runs.
 
-CI must record the compiler version, release tag, or commit.
+The Ari artifact is byte-pinned, but the GitHub-hosted Ubuntu image is not. CI
+fixes the LLVM driver to the installed `clang-18` path and records its version
+in the job log; image or driver patch updates may still change this smoke
+environment. That is another reason this job is validation evidence rather
+than a hermetic compatibility result.
 
-CI should fail clearly when the compiler is missing or incompatible.
+After provisioning, CI records the selected path through `GITHUB_ENV` and calls
+`scripts/test.sh "$ARI_COMPILER"`. The positional argument is the explicit
+opt-in; ambient environment state cannot activate the compiler-backed mode.
+The workflow downloads no package-manager dependencies, builds no compiler,
+and does not execute the bundled `tools/lint` or local parity runners.
 
 ## Release And Compatibility Policy
 
@@ -85,7 +108,9 @@ Do not claim compatibility with Ari releases until tested.
 
 Compatibility entries must reference real Ari release tags or commits.
 
-Compatibility should be updated only after compiler-backed tests pass.
+The pinned job passing is a prerequisite for any later compatibility entry, but
+is not sufficient by itself. Compatibility still requires a deliberate matrix
+entry with the tested `ari-lint` revision, coverage, and known limitations.
 
 ## Test Runner Integration
 
@@ -137,23 +162,22 @@ Cross-boundary issues should link both repos if needed.
 - [x] Confirm documented `--ari` behavior
 - [x] Support `ARI_COMPILER` for runtime compiler selection
 - [x] Define and implement precedence between `--ari` and `ARI_COMPILER`
-- [ ] Decide compiler version/commit recording format
-- [ ] Decide future CI compiler source
-- [x] Keep current GitHub Actions workflow compiler-free pending explicit
-      compiler provisioning and compiler identity recording
+- [x] Decide compiler version/commit recording format
+- [x] Select and pin the first CI compiler artifact
+- [x] Keep the lightweight GitHub Actions workflow compiler-free
 - [x] Add local compiler-backed executable smoke coverage
 - [x] Add an explicit compiler-backed mode to the standalone test entrypoint
-- [ ] Update compatibility docs only after tests pass
+- [x] Add a separate compiler-backed smoke workflow with identity verification
+- [ ] Add a compatibility matrix entry only after its remaining requirements
+      are deliberately approved
 
 ## Non-Goals
 
-- Do not download the compiler in this step.
-- Do not build the compiler in this step.
-- Do not add compiler execution to CI in this step.
-- Do not add `ari --check` invocation to the lightweight check or CI in this
-  step.
-- Do not add `tools/lint` execution to CI in this step.
-- Do not add a strict parity gate in this step.
-- Do not add compatibility claims in this step.
-- Do not modify ari-foundry/ari in this step.
-- Do not modify ari-foundry.github.io in this step.
+- Do not add compiler execution to the lightweight workflow.
+- Do not download or build a compiler in `scripts/test.sh` itself.
+- Do not build Ari from source in CI.
+- Do not execute `tools/lint` or strict/reference parity in compiler-smoke CI.
+- Do not treat one passing prerelease baseline as a compatibility matrix.
+- Do not add release automation or support claims in this step.
+- Do not modify `ari-foundry/ari` or `ari-foundry.github.io` from this
+  repository.

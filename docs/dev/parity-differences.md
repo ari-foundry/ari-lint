@@ -608,9 +608,9 @@ open.
 
 - Do not move, delete, or modify `ari-foundry/ari` `tools/lint`.
 - Do not copy `tools/lint` source into this repository.
-- Do not add a strict parity gate in this step.
-- Do not add golden files or broad parity suites in this step.
-- Do not add compiler-backed CI in this step.
+- Keep the broad local parity report non-gating; strict subsets are separately
+  approved and documented.
+- Do not treat compiler-smoke CI as reference parity coverage.
 - Do not claim stable parity, release compatibility, or full replacement.
 
 ## Issue Routing

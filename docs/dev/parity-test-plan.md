@@ -354,8 +354,9 @@ from the other repo if needed.
 - [x] Define the initial native fixture directory layout
 - [x] Define the initial compact JSON golden format
 - [x] Define the no-rewrite relative-path policy for current strict fixtures
-- [ ] Define Ari compiler version pinning policy
-- [ ] Define compiler provisioning policy from
+- [x] Define the Ari compiler version pinning policy for the compiler-smoke
+      baseline
+- [x] Define compiler provisioning policy in
       `docs/dev/compiler-provisioning.md`
 - [x] Define and implement compiler invocation policy from
       `docs/dev/compiler-invocation.md`
@@ -391,7 +392,7 @@ from the other repo if needed.
 - [x] Add exact clean, rule, ordered multi-file, and duplicate JSON goldens
 - [x] Add a gating local native parity runner
 - [ ] Add compiler-boundary parity fixture
-- [ ] Add CI job only after test runner exists
+- [ ] Add a parity CI job only after its broader gating contract exists
 
 ## Explicit Non-Goals
 

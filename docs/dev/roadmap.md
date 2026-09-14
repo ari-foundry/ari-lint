@@ -6,7 +6,8 @@ list-rules output, multi-file source-file linting for the current rule set,
 JSON diagnostics, explicit and discovered config, CLI severity overrides,
 per-source Ari compiler execution and diagnostic parsing, a local report-only
 parity smoke/report against the original bundled lint tool, a strict checked-in
-native-rule parity subset, and exact standalone/reference list-rules contracts.
+native-rule parity subset, exact standalone/reference list-rules contracts, and
+checksum-pinned Ari `v0.1.0` compiler-smoke CI.
 Historical milestones include: skeleton initialized / Ari source skeleton
 started / internal model skeleton started / registry-severity-config skeleton
 started /
@@ -82,6 +83,7 @@ local smoke validation added /
 minimal config override smoke coverage added /
 standalone test entrypoint added /
 explicit compiler-backed test mode added /
+pinned compiler-smoke CI added /
 release and compatibility policy documented /
 main OS argv exit-code wiring added /
 main-facing list-rules stdout output added /
@@ -125,8 +127,7 @@ and test work.
       the current implementation now includes rule execution, CLI parsing,
       diagnostics, compiler invocation, local build and smoke validation, and
       focused documentation, while broader strict parity tests, broad golden
-      output tests, compiler-backed CI, and release compatibility claims remain
-      future work.
+      output tests, and release compatibility claims remain future work.
 - [x] Add a minimal main entry shell that delegates through a local internal
       shell function and returns success. Main wiring to the OS argv integration
       entry path, stdout/stderr output, JSON output, config parsing, compiler
@@ -525,16 +526,17 @@ and test work.
 - [x] Record the compiler-backed CI gate by documenting that the GitHub Actions
       workflow remains compiler-free and runs only zero-argument
       `scripts/test.sh` until explicit compiler provisioning and compiler
-      identity recording are ready. Actual compiler-backed CI, Ari compiler
-      execution, `ari --check`, package manager commands, parity checks,
-      release automation, and compatibility claims remain future work.
+      identity recording are ready. A separate pinned compiler-smoke workflow
+      has since been added; package manager commands, CI parity, release
+      automation, and compatibility claims remain future work.
 - [x] Wire local standalone build root handling in `scripts/build.sh` so the
       script resolves the repository root, uses the compiler root when
       `lib/std.arih` is available there, and compiles `src/main.ari` to
       `build/ari-lint` with an explicit compiler path, while preserving relative
-      compiler paths from the caller's directory. CI build execution,
-      compiler-backed checks, package manager files, release artifacts,
-      standalone tests, and compatibility claims remain future work.
+      compiler paths from the caller's directory. At that milestone, CI build
+      execution, compiler-backed checks, package manager files, release
+      artifacts, standalone tests, and compatibility claims remained future
+      work; compiler-smoke CI has since been added.
 - [x] Start internal data model skeleton as preparatory Ari source work only;
       rule implementation, CLI parsing, diagnostics output, config parsing,
       compiler invocation, implementation tests, and implementation CI remain
@@ -608,10 +610,10 @@ and test work.
       entry-path tests, and parity behavior remain future work.
 - [x] Add local build scaffold and `.gitignore` hygiene for local/generated
       artifacts. `scripts/build.sh` requires an explicit Ari compiler path and
-      builds `src/main.ari` to `build/ari-lint` for local use only; CI compiler
+      builds `src/main.ari` to `build/ari-lint`. At that milestone, CI compiler
       execution, release builds, compiler-backed tests, package manager
-      integration, parity runner behavior, and compatibility claims remain
-      future work.
+      integration, parity runner behavior, and compatibility claims remained
+      future work; compiler-smoke CI has since been added.
 - [x] Start diagnostic output metadata skeleton for human-readable output, JSON
       output, diagnostic location, file path, line, column, endLine, endColumn,
       severity, rule code, and message as metadata-only Ari source
@@ -714,16 +716,15 @@ and test work.
       JSON golden tests, package manager files, release workflow, and
       compatibility claims remain future work.
 - [x] Add Ari compiler provisioning plan in
-      `docs/dev/compiler-provisioning.md` for future compiler-backed tests and
-      boundary behavior; compiler execution, compiler-backed tests, CI compiler
-      setup, compiler download/build automation, parity runner behavior, and a
+      `docs/dev/compiler-provisioning.md`; the first checksum-pinned compiler CI
+      baseline now implements that plan without building Ari. CI parity and a
       compatibility matrix remain future work.
 - [x] Add Ari compiler invocation plan in
       `docs/dev/compiler-invocation.md`; explicit `--ari`, `ARI_COMPILER`, the
       default compiler path, both `-I` forms, exact per-file argv, direct
       execution, diagnostic parsing, and failure normalization now exist.
-      Compiler-backed CI, strict compiler-boundary parity, and a compatibility
-      matrix remain future work.
+      Compiler-backed smoke CI now exists; strict compiler-boundary parity and a
+      compatibility matrix remain future work.
 - [x] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the fixture and golden output
       strategy. A first local report-only `scripts/parity.sh` smoke now
@@ -746,11 +747,12 @@ and test work.
       `docs/dev/parity-differences.md`, including cross-stream compiler output
       ordering and remaining CLI/output differences, without making a stable
       parity or compatibility claim.
-- [x] Record compiler-backed CI gate; `.github/workflows/check.yml` remains
-      lightweight and compiler-free through zero-argument `scripts/test.sh`
-      until explicit Ari compiler provisioning exists.
+- [x] Keep `.github/workflows/check.yml` lightweight and compiler-free through
+      zero-argument `scripts/test.sh`, and add a separate identity-checked
+      compiler-smoke workflow for explicit-compiler validation.
 - [x] Wire local standalone build script root handling; build execution remains
-      explicit/local and is not part of CI.
+      explicit, and compiler-smoke CI reaches it only through the explicit
+      compiler test mode.
 - [x] Add local smoke validation in `scripts/smoke.sh` that accepts an explicit
       Ari compiler path or `ARI_COMPILER`, delegates the build to
       `scripts/build.sh`, and runs the current safe `--help`, `--list-rules`,
@@ -785,8 +787,8 @@ and test work.
 - [x] Define initial release and compatibility policy in
       `docs/dev/release-compatibility-policy.md` after inspecting Ari releases
       and Ari tags; actual `ari-lint` compatibility entries still require
-      Ari-language source, compiler-backed standalone tests, and recorded Ari
-      compiler identity.
+      a deliberate tested matrix, an identified `ari-lint` revision, coverage
+      review, and recorded limitations.
 - [ ] Move implementation toward Ari-language code when feasible, after the
       documented plan has enough verified compiler/toolchain support.
 - [ ] Update Ari Foundry portal after repo is usable.
