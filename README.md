@@ -12,8 +12,8 @@ once for every explicit source file. Compiler behavior remains owned by the Ari
 compiler project. The current `tools/lint` implementation in
 `ari-foundry/ari` remains the reference implementation for now.
 
-The long-term implementation direction is to develop `ari-lint` in Ari when
-the language and toolchain are ready.
+The implementation is written in Ari and remains constrained by current Ari
+language and toolchain support.
 
 ## References
 
@@ -21,6 +21,9 @@ the language and toolchain are ready.
 - Ari releases: https://github.com/ari-foundry/ari/releases
 - Ari tags: https://github.com/ari-foundry/ari/tags
 - Ari Foundry portal: https://ari-foundry.github.io
+- Feature overview: [docs/features.md](docs/features.md)
+- Configuration: [docs/config.md](docs/config.md)
+- Rule reference: [docs/rules.md](docs/rules.md)
 - Source diagnostic output contract: [docs/diagnostics.md](docs/diagnostics.md)
 
 ## Current Scope

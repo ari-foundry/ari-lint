@@ -7,21 +7,18 @@ behavior for `lint/missing-final-newline`.
 
 ## Current Status
 
+- The rule is implemented in the Ari-language standalone path.
 - The current reference behavior is the bundled `tools/lint` implementation in
   `ari-foundry/ari`.
-- This repository currently has metadata/module layout, a minimal internal
-  content helper, and internal diagnostic mapping in
-  `src/rules/missing_final_newline.ari`.
-- The helper only checks already-provided bytes and returns whether non-empty
-  content is missing a final newline byte.
-- In-memory rule execution now scans caller-provided source text, computes final
-  line/column metadata from those bytes, and returns an internal `Diagnostic`
-  when non-empty content does not end with a newline byte.
-- Explicit-file reading, config severity overrides, CLI integration, and
-  reference-shaped human/JSON diagnostics are implemented. An initial strict
-  native parity case exists; dedicated Ari rule tests, broader fixtures, and
-  broader strict parity remain future work. The
-  main-facing CLI now combines this rule with compiler diagnostics.
+- `src/rules/missing_final_newline.ari` checks caller-provided source bytes,
+  computes the final position, and collects an internal `Diagnostic` for a
+  non-empty input without a final line feed.
+- The standalone source path reads explicit files, applies config and CLI
+  severity overrides, combines compiler and native diagnostics, and emits the
+  documented human or JSON result.
+- Exact compiler-backed smoke and an initial strict native parity case cover
+  representative behavior. Dedicated Ari rule tests, broader fixtures, and
+  broader strict parity remain future work.
 - Fixture and test planning is tracked in
   [docs/rules/missing-final-newline-fixtures.md](missing-final-newline-fixtures.md);
   initial final-newline and no-final-newline fixtures are started, while full
@@ -39,7 +36,7 @@ behavior for `lint/missing-final-newline`.
 - Default severity: `warning`, confirmed from the current Ari lint docs and
   reference rule registry.
 
-## Planned Detection
+## Detection
 
 The rule detects non-empty caller-provided source text that does not end with a
 newline byte.
@@ -51,7 +48,7 @@ reference checks whether the final byte is `\n`.
 
 A file ending with a lone carriage return is currently treated as missing the
 final newline by the reference implementation. Standalone fixture coverage for
-lone carriage return behavior remains needs follow-up.
+lone carriage return behavior remains future work.
 
 The rule implementation operates on an already-provided `Slice[u8]`; the lint
 and CLI layers provide explicit-file reading and command behavior.
@@ -62,7 +59,7 @@ span/severity data, and constructs internal diagnostics with rule code
 `lint/missing-final-newline` and message `missing final newline`. The surrounding
 layers format human/JSON output and apply config severity.
 
-## Planned Diagnostic Location
+## Diagnostic Location
 
 The emitted diagnostic includes:
 
@@ -81,7 +78,7 @@ position in the file, with `endLine` equal to the diagnostic line and
 Standalone JSON and human-readable output now follow the documented reference
 shape and are covered by representative exact smoke checks.
 
-## Planned Message
+## Message
 
 The current reference implementation reports:
 

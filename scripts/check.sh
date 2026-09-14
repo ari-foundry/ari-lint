@@ -79,6 +79,9 @@ require_file AGENTS.md
 require_file .gitignore
 require_file .gitattributes
 require_file docs/README.md
+require_file docs/features.md
+require_file docs/config.md
+require_file docs/rules.md
 require_file docs/diagnostics.md
 require_file docs/list-rules.md
 require_file docs/migration.md
@@ -633,7 +636,7 @@ require_grep "https://github.com/ari-foundry/ari" README.md
 require_grep "https://github.com/ari-foundry/ari/releases" README.md
 require_grep "https://github.com/ari-foundry/ari/tags" README.md
 require_grep "https://ari-foundry.github.io" README.md
-require_grep "long-term implementation direction" README.md
+require_grep "implementation is written in Ari" README.md
 require_grep "Ari" README.md
 require_grep "scripts/check.sh" README.md
 require_grep "scripts/test.sh" README.md
@@ -648,6 +651,9 @@ require_grep "docs/diagnostics.md" README.md
 require_grep "local standalone test entrypoint" README.md
 require_grep "relative compiler paths" README.md
 require_grep "docs/migration.md" docs/README.md
+require_fixed_grep '[Features](features.md)' docs/README.md
+require_fixed_grep '[Configuration](config.md)' docs/README.md
+require_fixed_grep '[Rules](rules.md)' docs/README.md
 require_grep "docs/diagnostics.md" docs/README.md
 require_grep "docs/list-rules.md" docs/README.md
 require_grep "docs/dev/ari-implementation-plan.md" docs/README.md
@@ -672,7 +678,58 @@ require_grep "docs/list-rules.md" docs/dev/parity-differences.md
 require_grep "standalone list-rules contract and strict goldens added" docs/dev/roadmap.md
 require_grep "source diagnostic output contract published" docs/dev/roadmap.md
 require_grep "Do not invent compatibility claims" docs/migration.md
-require_grep "Split diagnostics documentation into .docs/diagnostics.md." docs/migration.md
+require_fixed_grep '- [x] Adapt `docs/lint/features.md` into `ari-lint` `docs/features.md`' docs/migration.md
+require_fixed_grep '- [x] Adapt `docs/lint/README.md` into `ari-lint` README/docs entry points' docs/migration.md
+require_fixed_grep '- [x] Split config documentation into `docs/config.md`' docs/migration.md
+require_fixed_grep '- [x] Split diagnostics documentation into `docs/diagnostics.md`' docs/migration.md
+require_fixed_grep '- [x] Split rule reference into `docs/rules.md`' docs/migration.md
+require_fixed_grep '- [ ] Update the upstream handoff wording after local user docs are primary' docs/migration.md
+require_fixed_grep '- [ ] Update Ari Foundry portal after docs are usable (separate portal PR)' docs/migration.md
+require_grep "ari-lint Features" docs/features.md
+require_grep "Explicit Source Checks" docs/features.md
+require_fixed_grep '-I DIR ... SOURCE --check' docs/features.md
+require_grep "ARI_COMPILER" docs/features.md
+require_fixed_grep '`--` treats every following token as a source operand.' docs/features.md
+require_fixed_grep '[Configuration](config.md)' docs/features.md
+require_fixed_grep '[the rule reference](rules.md)' docs/features.md
+require_fixed_grep '[Diagnostic Output](diagnostics.md)' docs/features.md
+require_grep "ari-lint Configuration" docs/config.md
+require_grep "File Format" docs/config.md
+require_grep "Discovery And Selection" docs/config.md
+require_grep "nearest readable" docs/config.md
+require_fixed_grep 'A selected directory named `ari-lint.rules` is treated as an empty config and' docs/config.md
+require_fixed_grep 'masks higher candidates. Likewise, an explicit directory path is treated as an' docs/config.md
+require_grep "Home, global, XDG" docs/config.md
+require_grep "Precedence" docs/config.md
+require_grep "Invalid Configuration" docs/config.md
+require_grep "lint/config" docs/config.md
+require_fixed_grep 'An explicit `--config PATH` or `--config=PATH` applies the same file to every' docs/config.md
+require_fixed_grep '- Severity names are the exact lowercase values `off`, `hint`, `note`,' docs/config.md
+require_fixed_grep '1. the registry default' docs/config.md
+require_fixed_grep '2. settings from the selected discovered or explicit config file' docs/config.md
+require_fixed_grep '3. command-line `--rule` settings, in command-line order' docs/config.md
+require_grep "ari-lint Rules" docs/rules.md
+require_fixed_grep '| `lint/trailing-whitespace` | `trailing-whitespace` | `warning` | Reports spaces or tabs at the end of a source line. |' docs/rules.md
+require_fixed_grep '| `lint/missing-final-newline` | `missing-final-newline` | `warning` | Reports non-empty source files that do not end with a newline. |' docs/rules.md
+require_grep "Severity Control" docs/rules.md
+require_grep "Diagnostic Order And Status" docs/rules.md
+require_grep "ari/compiler-check-failed" docs/rules.md
+require_fixed_grep '[the list-rules contract](list-rules.md)' docs/rules.md
+require_grep "docs/features.md" README.md
+require_grep "docs/config.md" README.md
+require_grep "docs/rules.md" README.md
+require_grep "Ari-language implementation source is active" AGENTS.md
+require_grep "Standalone build, checks, smoke, parity" AGENTS.md
+require_grep "release-compatibility-policy.md" AGENTS.md
+require_no_grep "implementation source has not been added yet" AGENTS.md
+require_no_grep "docs migration from ari-foundry/ari has not happened yet" AGENTS.md
+require_no_grep "standalone build/test wiring has not happened yet" AGENTS.md
+require_grep "standalone CLI is wired" examples/README.md
+require_grep "./build/ari-lint --ari" examples/README.md
+require_grep "./build/ari-lint --json --ari" examples/README.md
+require_grep "placeholder, not an Ari-language example" examples/README.md
+require_no_grep "Examples will be added after source extraction" examples/README.md
+require_no_grep "standalone .ari-lint. CLI is not wired" examples/README.md
 require_grep "Diagnostic Output Contract" docs/diagnostics.md
 require_grep "JSON Source Result" docs/diagnostics.md
 require_grep "Diagnostic Ordering" docs/diagnostics.md

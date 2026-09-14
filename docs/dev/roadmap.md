@@ -116,6 +116,8 @@ standalone list-rules contract and strict goldens added /
 initial strict explicit-config JSON and human goldens added /
 initial strict compiler-boundary JSON and human goldens added /
 source diagnostic output contract published.
+Focused user-facing feature, configuration, and rule-index pages have also
+been handed off to this repository.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -125,11 +127,12 @@ and test work.
 ## Split Roadmap
 
 - [x] Initialize repo skeleton.
-- [ ] Migrate `docs/lint` from `ari-foundry/ari`; `docs/migration.md` tracks
-      the documentation migration plan.
-- [ ] Plan Ari-language reimplementation with behavior parity against current
-      `tools/lint`; `docs/dev/ari-implementation-plan.md` tracks the staged
-      implementation plan.
+- [x] Adapt the focused `docs/lint` user documentation from
+      `ari-foundry/ari`; `docs/migration.md` records the completed local handoff
+      and separately owned upstream/portal follow-up.
+- [x] Plan and begin the Ari-language implementation with behavior parity
+      against current `tools/lint`; `docs/dev/ari-implementation-plan.md`
+      tracks completed and remaining stages.
 - [x] Start Ari source as the first step toward Ari-language implementation;
       the current implementation now includes rule execution, CLI parsing,
       diagnostics, compiler invocation, local build and smoke validation, and
@@ -807,9 +810,10 @@ and test work.
       and Ari tags; actual `ari-lint` compatibility entries still require
       a deliberate tested matrix, an identified `ari-lint` revision, coverage
       review, and recorded limitations.
-- [ ] Move implementation toward Ari-language code when feasible, after the
-      documented plan has enough verified compiler/toolchain support.
+- [x] Implement the standalone tool in Ari as toolchain support became
+      available; broader parity and release compatibility remain open.
 - [ ] Update Ari Foundry portal after repo is usable.
 
-These steps are planned split work. Except for the initial skeleton, they are
-not complete yet.
+Checked entries record completed incremental split work; unchecked entries
+remain open. Scope clauses in older checked entries describe each milestone
+when it landed; the current status summary above is authoritative.

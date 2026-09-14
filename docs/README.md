@@ -1,7 +1,8 @@
 # ari-lint Docs
 
-These docs will eventually contain `ari-lint` CLI, rule, diagnostic,
-configuration, test, release, and compatibility documentation.
+These docs are the primary home for the current standalone `ari-lint` CLI,
+rule, diagnostic, configuration, test, release-policy, and compatibility-policy
+documentation.
 
 Detailed Ari language and compiler docs remain in the Ari compiler project:
 https://github.com/ari-foundry/ari
@@ -19,6 +20,16 @@ Future compatibility docs should reference real Ari releases and tags:
 
 Documentation migration is staged and tracked in
 [docs/migration.md](migration.md).
+
+User-facing documentation starts here:
+
+- [Features](features.md) describes explicit source checks, the external
+  compiler boundary, native rules, output modes, and current limitations.
+- [Configuration](config.md) defines `ari-lint.rules`, discovery, precedence,
+  severities, command-line overrides, and error behavior.
+- [Rules](rules.md) is the current registry and rule-reference index.
+- [Diagnostic Output](diagnostics.md) defines human and JSON source results.
+- [List-Rules](list-rules.md) defines exact registry-listing output.
 
 Ari-language implementation is active, including per-source external compiler
 checks. The implementation plan is tracked in
@@ -58,14 +69,14 @@ The initial release and compatibility policy is documented in
 [docs/dev/release-compatibility-policy.md](dev/release-compatibility-policy.md).
 It does not claim compatibility with any Ari release or tag.
 
-Rule documentation contains focused behavior and design notes for the current
-rule implementation. Current rule notes include
+Detailed rule notes contain focused behavior and design status for the current
+implementation. Current rule notes include
 [docs/rules/trailing-whitespace.md](rules/trailing-whitespace.md) and
 [docs/rules/missing-final-newline.md](rules/missing-final-newline.md).
 
 Compiler and standard library (stdlib) bugs should be filed in
 `ari-foundry/ari`, not `ari-lint`.
 
-This documentation remains provisional until the standalone implementation and
-docs migration are complete. Do not copy `docs/lint` content from
+This documentation describes pre-release behavior; it does not establish a
+stable release or Ari compatibility claim. Do not copy `docs/lint` content from
 `ari-foundry/ari` wholesale, and do not include unverified Ari syntax examples.

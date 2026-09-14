@@ -31,9 +31,9 @@ Target `ari-lint` documentation areas in this repository are:
 - `docs/dev/roadmap.md` for development roadmap
 - `README.md` for high-level project overview
 
-These are migration targets. The entry point, diagnostic contract, and
-developer roadmap now exist; the remaining user-facing targets are tracked
-below.
+All current target areas now exist. The focused user-facing pages are primary
+for standalone behavior in this repository; upstream status wording and portal
+navigation remain separate handoff work.
 
 ## Migration Strategy
 
@@ -41,10 +41,11 @@ below.
 2. The initial `ari-foundry/ari` `docs/lint` handoff links were added by
    [Ari PR #16](https://github.com/ari-foundry/ari/pull/16).
 3. Adapt lint-specific `docs/lint` content into `ari-lint` in small scoped PRs.
-4. Keep links back to `ari-foundry/ari` while the standalone documentation
-   handoff is incomplete.
-5. After the user-facing handoff is complete, make `ari-lint` docs primary.
-6. Update Ari Foundry portal only after `ari-lint` docs are usable.
+4. Keep links back to `ari-foundry/ari` for compiler and language ownership.
+5. Treat the completed user-facing pages here as primary for standalone lint
+   behavior.
+6. Handle any further Ari-repository wording and Ari Foundry portal navigation
+   as separate work in their owning repositories.
 
 ## Content Ownership
 
@@ -76,9 +77,9 @@ Do not claim `ari-lint` has a stable release yet.
 
 ## Handoff State For ari-foundry/ari
 
-The initial handoff links now exist in `ari-foundry/ari` `docs/lint`. Further
-handoff edits remain separate upstream work as the user-facing docs here become
-complete.
+The initial handoff links exist in `ari-foundry/ari` `docs/lint`, and the
+focused user-facing documentation here is now complete. Any further status or
+navigation edits remain separate upstream work.
 
 Further handoff work should:
 
@@ -86,8 +87,8 @@ Further handoff work should:
 - keep historical context in `ari` during migration
 - avoid deleting `docs/lint` abruptly
 - avoid broken links from `docs/README.md`
-- avoid claiming `ari-lint` is stable before the standalone implementation and
-  tests are ready
+- avoid claiming a stable release or Ari compatibility before the documented
+  release-policy evidence requirements are satisfied
 
 ## Non-Goals
 
@@ -104,11 +105,13 @@ Further handoff work should:
 ## Follow-up Checklist
 
 - [x] Add handoff note in `ari-foundry/ari` `docs/lint`
-- [ ] Adapt `docs/lint/features.md` into `ari-lint` `docs/features.md`
-- [ ] Adapt `docs/lint/README.md` into `ari-lint` README/docs entry points
-- [ ] Split config documentation into `docs/config.md`
+- [x] Adapt `docs/lint/features.md` into `ari-lint` `docs/features.md`
+- [x] Adapt `docs/lint/README.md` into `ari-lint` README/docs entry points
+- [x] Split config documentation into `docs/config.md`
 - [x] Split diagnostics documentation into `docs/diagnostics.md`
-- [ ] Split rule reference into `docs/rules.md`
+- [x] Split rule reference into `docs/rules.md`
 - [x] Keep links to Ari compiler docs in `ari-foundry/ari`
-- [ ] Update Ari Foundry portal after docs are usable
+- [ ] Update the upstream handoff wording after local user docs are primary
+      (separate `ari` PR)
+- [ ] Update Ari Foundry portal after docs are usable (separate portal PR)
 - [x] Avoid stable release claims under the documented release policy
