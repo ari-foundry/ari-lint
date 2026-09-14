@@ -24,13 +24,14 @@ It does not move `tools/lint` or change build behavior.
   adapter. Source runs write reference-shaped human or JSON output to stdout;
   the JSON envelope retains every positional file, and enabled diagnostics
   return exit `1`. CLI help writes concise text to stdout.
-  CLI parse problems write a short summary to stderr, missing source-file input writes a short
-  summary to stderr, and source/config read failures remain stderr errors. It
-  does not read
-  environment variables beyond the current working directory, produce
-  parse-error JSON, produce read-error JSON, search home/global/XDG config
-  locations, traverse source directories, invoke the compiler, invoke
-  `ari --check`, call `tools/lint`, or call process exit.
+  CLI parse problems and missing source-file input write short summaries to
+  stderr. Source read failures and explicit config read or parse failures also
+  use stderr. Bad lines in a discovered config instead become ordered per-file
+  `lint/config` diagnostics on stdout and return exit `1`. The path does not read
+  compiler-selection environment variables, produce parse-error JSON, produce
+  source-read-error JSON, search home/global/XDG config locations, recursively
+  discover source files, invoke the compiler, invoke `ari --check`, call
+  `tools/lint`, or call process exit.
 - The rule registry, severity, and config model skeleton has started as
   preparatory source-only declarations. The registry now constructs known
   entries for `lint/trailing-whitespace` and `lint/missing-final-newline` from
@@ -58,14 +59,14 @@ It does not move `tools/lint` or change build behavior.
   problems. The parser now retains all positional source file paths while
   keeping `first_source_file` as compatibility metadata. It captures the
   explicit `--config` path value when one is provided. Source-file diagnostic
-  collection can read that explicit config file path, or when `--config` is
-  absent search upward from the current working directory for the nearest
-  `ari-lint.rules`, and apply those overrides before command-line `--rule`
-  overrides across all source files in the invocation. A semantic parser now
-  converts caller-provided `--rule` values into command-line-sourced internal
-  severity overrides and parse problems. Actual OS process argument collection
-  now has a minimal internal entry path; environment handling remains future
-  work.
+  collection can read that one config for every source and disable discovery,
+  or when `--config` is absent search lexically upward from each source file's
+  directory for its nearest readable `ari-lint.rules`. Command-line `--rule`
+  overrides are applied after the selected config for every source. A semantic
+  parser now converts caller-provided `--rule` values into command-line-sourced
+  internal severity overrides and parse problems. Actual OS process argument collection now
+  has a minimal internal entry path; compiler-selection environment handling
+  remains future work.
 - An explicit OS argv boundary now exists in `src/cli.ari`. It reads process
   arguments through the verified Ari `std::env::args` API, drops argv[0], and
   reuses the existing explicit-token parser and stdout-free dispatcher. `main`
@@ -73,10 +74,11 @@ It does not move `tools/lint` or change build behavior.
   main-facing `--list-rules` branch writes the existing human-readable
   list-rules text through the verified stdout adapter. Source runs now write
   reference-shaped human or JSON output to stdout and return exit `1` when any
-  enabled diagnostic is present. CLI parse problems, missing input, and
-  source/config read failures remain stderr errors. The path does not read
-  compiler-selection environment variables, invoke the compiler, or recursively
-  scan sources.
+  enabled diagnostic is present. CLI parse problems, missing input, source read
+  failures, and explicit config read or parse failures remain stderr errors.
+  Discovered config parse problems are ordinary per-file `lint/config`
+  diagnostics on stdout. The path does not read compiler-selection environment
+  variables, invoke the compiler, or recursively scan sources.
 - Runtime output uses a flat diagnostic store plus ordered per-file ranges.
   JSON matches the reference `files` envelope with per-file `path`, `exitCode`,
   and `diagnostics`; diagnostic objects contain mandatory numeric positions,
@@ -125,18 +127,19 @@ It does not move `tools/lint` or change build behavior.
   caller-provided tokens or parsed source-file input and pushes full internal
   diagnostics for all source files into a caller-provided vector while
   returning aggregate count, ordered per-file diagnostic ranges, and exit-code
-  data. Explicit `--config` file
-  overrides are applied to those collected diagnostics before parsed
-  command-line `--rule` severity overrides, so the current precedence is
-  default severity < discovered config < explicit `--config` < command-line
-  `--rule`. The main-facing OS argv path writes reference-shaped human results
-  or a newline-terminated JSON `files` envelope to stdout through the verified
-  output adapter. When `--config` is absent, it searches from the
-  current working directory upward for the nearest `ari-lint.rules` and stops
-  at the filesystem root. It does not search home/global/XDG config locations,
-  traverse source directories, invoke the compiler, call `ari --check`, or call
-  `tools/lint`. Source-file and config-file read errors write short stderr
-  summaries and do not produce read-error JSON output yet.
+  data. The current precedence is default severity < selected config <
+  command-line `--rule`. The selected config is either one explicit `--config`
+  file shared by every source, which disables discovery, or the nearest readable
+  `ari-lint.rules` found lexically upward from each source file's directory.
+  The main-facing OS argv path writes reference-shaped human results or a
+  newline-terminated JSON `files` envelope to stdout through the verified output
+  adapter. Bad discovered config lines are inserted as ordered per-file
+  `lint/config` diagnostics before native rule diagnostics. Explicit config read
+  or parse failures write all reference-shaped errors to stderr and exit `2`
+  before linting. It does not search home/global/XDG config locations,
+  recursively discover source files, invoke the compiler, call `ari --check`, or
+  call `tools/lint`. Source-file read errors still write short stderr summaries
+  and do not produce read-error JSON output yet.
 - A source-only parity runner skeleton now records intended comparison
   boundaries against current `tools/lint`, with all execution, file IO, and
   output-comparison flags false. It does not run `tools/lint`, invoke an
@@ -153,8 +156,8 @@ It does not move `tools/lint` or change build behavior.
   `lint/trailing-whitespace` and `lint/missing-final-newline`, and an internal
   human-readable list-rules formatter and standalone JSON extension build from
   the same metadata. The main-facing OS argv `--list-rules` path writes the
-  selected form to stdout through the verified adapter. Compiler invocation,
-  per-file config discovery, and strict parity remain future work.
+  selected form to stdout through the verified adapter. Compiler invocation and
+  strict parity remain future work.
 - An internal stdout-free command dispatcher now maps parsed CLI arguments to
   internal command results. It routes list-rules requests to the internal
   human-readable list-rules formatter and routes source-file requests through
@@ -179,9 +182,10 @@ It does not move `tools/lint` or change build behavior.
   `std::io::print_string` and `std::io::eprint_string` APIs and return local
   status data. The stdout adapter is wired for main-facing list-rules, help,
   and source-file human/JSON results. The stderr adapter is wired for parse
-  problems, missing input, and current source/config/compiler-path failures.
-  These adapters are not wired to compiler invocation or recursive source
-  scanning.
+  problems, missing input, source failures, explicit-config failures, and
+  current compiler-path failures. Discovered config problems travel through the
+  diagnostic stdout path instead. These adapters are not wired to compiler
+  invocation or recursive source scanning.
 - An internal OS argv entry path now reads arguments through the verified Ari
   `std::env::args` API, drops the program-name argument, and dispatches the
   remaining user tokens through the existing explicit-token parser and
@@ -229,19 +233,21 @@ It does not move `tools/lint` or change build behavior.
   boundary. An explicit config file parse boundary can now read one
   caller-provided config file path and parse its text into the existing
   internal override model without deciding discovery. The CLI source-file
-  diagnostic collection path now reads an explicit config path when provided,
-  otherwise searches upward from the current working directory for the nearest
-  `ari-lint.rules`, applies config overrides to collected diagnostics, and then
-  appends command-line `--rule` overrides so `--rule` wins.
+  diagnostic collection path now reads one explicit config path for all sources
+  when provided, otherwise searches lexically upward from each source file's
+  directory for its nearest readable `ari-lint.rules`. It applies the selected
+  config overrides and then appends command-line `--rule` overrides so `--rule`
+  wins for every source.
 - The config precedence fixture plan is documented in
-  `docs/dev/config-precedence-fixtures.md`. It records future default,
-  config-file, explicit `--config`, and command-line `--rule` precedence
-  fixture areas. Initial fixture files now exist under
+  `docs/dev/config-precedence-fixtures.md`. It records default, config-file,
+  explicit `--config`, and command-line `--rule` precedence fixture areas.
+  Initial fixture files now exist under
   `tests/fixtures/config-precedence/`, with shell-only executable checks for
   presence, exact line order, and key override values. They do not execute Ari
-  parser code, read config files through CLI behavior, discover
-  `ari-lint.rules`, run CLI tests, invoke the compiler, execute `ari --check`,
-  or claim stable config behavior.
+  parser code themselves. Separately, `scripts/smoke.sh` executes the built CLI
+  against generated temporary configs. Dedicated Ari tests, source-controlled
+  runtime goldens, strict parity, compiler invocation, and compatibility claims
+  remain future work.
 - The rule module layout has started with source-only child modules for the
   trailing whitespace and missing final newline rules.
   A minimal internal single-line helper has started for trailing whitespace,
@@ -282,15 +288,18 @@ It does not move `tools/lint` or change build behavior.
   `./build/ari-lint --json --list-rules`. It also uses temporary files to run
   focused list-rules output assertions for rule-code, short-name, and
   default-severity signals, plus
-  explicit `--config` JSON smoke checks for trailing-whitespace severity, CLI
-  `--rule` precedence, parent-directory config discovery for `ari-lint.rules`,
-  nearest discovered config precedence, and explicit `--config` precedence over
-  discovery. Focused runtime output checks assert the reference file envelope
-  and diagnostic fields for `lint/trailing-whitespace` and
-  `lint/missing-final-newline`. Exact JSON and human expected files cover
-  ordering and final newlines; multi-file, clean, mixed, duplicate, and escaped
-  path cases are also exercised. Strict parity, compiler-backed CI, per-file
-  config discovery, and compiler diagnostics remain follow-up work.
+  explicit `--config` JSON smoke checks for trailing-whitespace severity,
+  per-source nearest readable discovery for `ari-lint.rules`, different configs
+  in one multi-file run, unreadable-nearer fallback, explicit-config discovery
+  suppression, and CLI-last `--rule` precedence. It also checks ordered
+  `lint/config` diagnostics for bad discovered lines and exact stderr/exit `2`
+  behavior for explicit config read or parse errors. Focused runtime output
+  checks assert the reference file envelope and diagnostic fields for
+  `lint/trailing-whitespace` and `lint/missing-final-newline`. Exact JSON and
+  human expected files cover ordering and final newlines; multi-file, clean,
+  mixed, duplicate, and escaped path cases are also exercised. Dedicated Ari
+  tests, source-controlled broad goldens, strict parity, compiler-backed CI, and
+  compiler diagnostics remain follow-up work.
 - A local parity smoke/report script now exists at `scripts/parity.sh`. It
   accepts an explicit Ari compiler path or `ARI_COMPILER`, an Ari repository
   path or `ARI_REPO`, and optionally an existing original lint command path or
@@ -442,10 +451,11 @@ Current Ari-language implementation module inventory:
   text and exit-code data through that existing pipeline. It also defines an OS
   argv integration path that reads process arguments through verified
   `std::env::args`, drops argv[0], and dispatches through the existing
-  explicit-token path. The source-file collection path can read explicit config
-  files or search upward from the current working directory for the nearest
-  `ari-lint.rules` when `--config` is absent. It does not read environment
-  variables, search home/global/XDG config locations, or call process exit.
+  explicit-token path. The source-file collection path can read one explicit
+  config for all source files or search lexically upward from each source file's
+  directory for its nearest readable `ari-lint.rules` when `--config` is absent.
+  It does not read compiler-selection environment variables, search
+  home/global/XDG config locations, or call process exit.
   `main` returns the internal exit-code mapping from that path. Main-facing
   list-rules, help, and source human/JSON results use stdout; parse problems,
   missing-source summaries, and current read/compiler-path failures use stderr
@@ -514,20 +524,23 @@ Current Ari-language implementation module inventory:
   config to lint execution.
 
 The current standalone path implements explicit-file native rule execution,
-CLI/config severity validation, ordered per-file results, reference-shaped
-runtime JSON and human output, and main-entry exit behavior. The output layer
-retains focused single-diagnostic and caller-provided diagnostic-array helpers,
-and adds `FileResult`/`RunResult` serializers used by the CLI. Registry-backed
-dispatch, file-backed aggregation, and the two native rules are wired into the
-current executable path.
+CLI/config severity validation, per-source nearest readable config discovery,
+explicit-config discovery suppression, CLI-last precedence, ordered per-file
+results, reference-shaped runtime JSON and human output, and main-entry exit
+behavior. Bad discovered config lines are per-file `lint/config` diagnostics;
+explicit config read and parse failures use reference-shaped stderr and exit
+`2`. The output layer retains focused single-diagnostic and caller-provided
+diagnostic-array helpers, and adds `FileResult`/`RunResult` serializers used by
+the CLI. Registry-backed dispatch, file-backed aggregation, and the two native
+rules are wired into the current executable path.
 
 The remaining implementation limits are explicit: `ari --check` is not invoked;
-compiler selection does not read `ARI_COMPILER`; implicit config discovery is
-still process-CWD-wide rather than per source file; read failures do not yet use
-the reference per-file JSON diagnostic path; and recursive source discovery is
-out of scope. Focused shell smoke exists, but dedicated Ari unit tests, strict
-source-controlled parity goldens, compiler-backed CI, and a release-backed
-compatibility matrix remain future work.
+compiler selection does not read `ARI_COMPILER`; source read failures do not yet
+use the reference per-file JSON diagnostic path; and recursive source discovery
+is out of scope. Focused executable shell smoke exists, but dedicated Ari unit
+tests, compiler-invocation tests, broad source-controlled goldens, strict parity,
+compiler-backed CI, and a release-backed compatibility matrix remain future
+work.
 
 The local build scaffold and `scripts/smoke.sh` provide compiler-backed build
 and executable CLI/output smoke validation, but they are not compiler-backed
@@ -554,13 +567,14 @@ manager commands, execute `tools/lint`, run parity checks, or claim
 compatibility.
 
 Config precedence is recorded from the current Ari lint reference docs. The
-minimal parser only handles caller-provided text and documented short rule-name
-normalization. Initial config precedence fixture files and shell-only
-executable checks now exist, but standalone config discovery checks beyond
-local parent traversal and Ari-backed config precedence checks remain needs
-follow-up before this repository claims stable config behavior. The fixture
-plan is documented in
-`docs/dev/config-precedence-fixtures.md`.
+parser handles caller-provided text and documented short rule-name
+normalization, and the main-facing CLI now applies per-source nearest readable
+discovery, explicit-config discovery suppression, and CLI-last precedence.
+Initial config precedence fixture files, lightweight fixture checks, and focused
+executable shell smoke now exist. Dedicated Ari config tests,
+source-controlled runtime goldens, and strict parity remain follow-up work
+before this repository claims stable config behavior. The fixture plan is
+documented in `docs/dev/config-precedence-fixtures.md`.
 
 The exact JSON schema and human-readable diagnostic text remain unstable and
 need follow-up before this repository claims standalone output compatibility.
@@ -631,15 +645,16 @@ in-memory lint aggregation for successfully read files, validates parsed
 `--rule` overrides when provided, preserves read errors, and carries aggregate
 counts plus the first internal diagnostic in `CliCommandResult`. The
 main-facing OS argv path collects source-file diagnostics into a flat vector,
-records an ordered range for every positional file, applies discovered or
-explicit config file overrides first, then parsed command-line `--rule`
-severity overrides, and writes reference-shaped human or JSON results to
-stdout. CLI and
-config parse problems write a short summary to stderr. Source-file and
-config-file read errors write short stderr summaries and do not produce
-read-error JSON output. It does not produce parse-error JSON, search
-home/global/XDG config locations, traverse source directories, invoke the
-compiler, call `ari --check`, call `tools/lint`, or call process exit.
+  records an ordered range for every positional file, applies each source's
+  discovered config or the invocation-wide explicit config first, then parsed
+  command-line `--rule` severity overrides, and writes reference-shaped human or
+  JSON results to stdout. Bad discovered config lines become ordered per-file
+  `lint/config` diagnostics on stdout. CLI parse problems and explicit config
+  read or parse failures write reference-shaped errors to stderr; source-file
+  read errors write short stderr summaries and do not produce read-error JSON
+  output. It does not produce parse-error JSON, search home/global/XDG config
+  locations, recursively discover source files, invoke the compiler, call
+  `ari --check`, call `tools/lint`, or call process exit.
 
 ### Phase 5: compiler boundary
 
@@ -746,12 +761,13 @@ usable.
 - CLI parity may be hard to preserve exactly.
 - Tests may depend on a compatible Ari compiler binary.
 - Source layout may change after implementation starts.
-- Registry, severity, and config shapes may change when real rule execution,
-  config discovery, rule override validation, and override application begin.
+- Registry, severity, and config shapes may change as compiler-backed rule
+  execution, dedicated Ari tests, and strict parity coverage expand.
 - Rule module boundaries may change once real rule behavior and shared rule
   execution APIs are designed.
-- Standalone config discovery and override precedence may need fixtures before
-  they become stable behavior.
+- Standalone config discovery and override precedence still need dedicated Ari
+  tests and source-controlled parity fixtures before they become stable
+  behavior.
 - Metadata value construction may change once Ari constant or value syntax is
   selected for the standalone implementation.
 - CLI metadata value construction may change once Ari constant or collection

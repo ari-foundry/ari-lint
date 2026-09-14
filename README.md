@@ -64,9 +64,9 @@ here.
   `PATH:LINE:COLUMN: SEVERITY: [CODE] MESSAGE`; enabled diagnostics exit `1`.
 - Explicit config file loading with `--config`.
 - Discovered `ari-lint.rules` config when `--config` is absent, searching from
-  the current working directory upward and using the nearest file.
-- `--rule` severity overrides. Current precedence is default severity <
-  discovered config < explicit `--config` < CLI `--rule`.
+  each source file's directory upward and using the nearest readable file.
+- `--rule` severity overrides. Explicit `--config` disables discovery, and CLI
+  `--rule` settings are applied after the selected config settings.
 
 ## Current Limitations
 
@@ -203,16 +203,21 @@ commands execute, that `--help` names the current supported option set, and that
 `--list-rules` and `--json --list-rules` include the current rule-code,
 short-name, and default-severity signals. They do not add a strict parity gate,
 compiler-backed CI, home/global/XDG config search, new lint semantics, or
-compatibility claims. The config smoke uses explicit temporary files and a
-temporary nested working directory containing `ari-lint.rules`; it checks only
-the current JSON rule code and severity fields for config precedence, including
-short rule names in config files, and checks that `off` suppresses diagnostics
-from explicit config and CLI `--rule`. A focused usage-error smoke checks malformed
-`--rule` text, missing `--config`, `--rule`, or parser-only `--ari` values, and
-one unknown option only for the current short stderr summary. Focused diagnostic
-smoke checks assert the runtime `files`, `path`, `exitCode`, `diagnostics`,
-`file`, position, `severity`, `message`, `source`, and `code` fields for
-`lint/trailing-whitespace` and `lint/missing-final-newline`. Exact checks cover
-representative JSON and human output, including final newlines. The smoke also
-covers dirty multi-file, clean/dirty, all-clean, duplicate-argument, and escaped
-path cases. Compiler-diagnostic goldens remain future work.
+compatibility claims. The config smoke uses explicit temporary files and
+temporary source trees containing `ari-lint.rules`. It checks per-source nearest
+readable discovery, different configs in one multi-file run, unreadable-nearer
+fallback, explicit `--config` discovery suppression, and CLI-last precedence.
+It also checks ordered per-file `lint/config` diagnostics on stdout with exit
+`1` for bad discovered lines, and exact stderr with exit `2` for explicit config
+read or parse errors. Short rule names are covered, and `off` suppression is
+checked for explicit config and CLI `--rule`. A focused usage-error smoke checks
+malformed `--rule` text, missing `--config`, `--rule`, or parser-only `--ari`
+values, and one unknown option only for the current short stderr summary.
+Focused diagnostic smoke checks assert the runtime `files`, `path`, `exitCode`,
+`diagnostics`, `file`, position, `severity`, `message`, `source`, and `code`
+fields for `lint/trailing-whitespace` and `lint/missing-final-newline`. Exact
+checks cover representative JSON and human output, including final newlines.
+The smoke also covers dirty multi-file, clean/dirty, all-clean,
+duplicate-argument, and escaped path cases. Dedicated Ari tests,
+source-controlled broad goldens, strict parity, compiler-backed CI, and
+compiler-diagnostic goldens remain future work.

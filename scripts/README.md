@@ -24,15 +24,17 @@ as the first argument or through `ARI_COMPILER`, delegates compilation to
 `scripts/build.sh`, and runs the current safe CLI smoke invocations:
 `./build/ari-lint --help`, `./build/ari-lint --list-rules`, and
 `./build/ari-lint --json --list-rules`. It also runs JSON smoke commands
-against temporary files and a temporary nested working directory containing
-`ari-lint.rules` to check parent discovered config severity, nearest discovered
-config precedence, explicit `--config` precedence, and CLI `--rule`
-precedence. It checks the reference-shaped runtime JSON `files` envelope,
-per-file `path`, `exitCode`, and `diagnostics`, and diagnostic `file`, position,
-`severity`, `message`, `source`, and `code` fields. Exact expected output covers
-representative JSON and human results, including final newlines. Multi-file
-coverage includes dirty, clean plus dirty, all-clean, duplicate-argument, and
-escaped-path cases.
+against temporary source trees containing `ari-lint.rules` to check per-source
+nearest readable discovery, different configs in one multi-file run,
+unreadable-nearer fallback, discovery suppression by explicit `--config`, and
+CLI-last `--rule` precedence. Discovered bad config lines are checked as ordered
+per-file `lint/config` diagnostics on stdout with exit `1`; explicit config read
+and parse errors are checked as exact stderr with exit `2`. The script checks
+the reference-shaped runtime JSON `files` envelope, per-file `path`, `exitCode`,
+and `diagnostics`, and diagnostic `file`, position, `severity`, `message`,
+`source`, and `code` fields. Exact expected output covers representative JSON
+and human results, including final newlines. Multi-file coverage includes dirty,
+clean plus dirty, all-clean, duplicate-argument, and escaped-path cases.
 
 `parity.sh` is a local report-only parity smoke wrapper. It accepts an explicit
 Ari compiler path as the first argument or through `ARI_COMPILER`, an
@@ -75,10 +77,13 @@ usage-error summaries for malformed `--rule` text and missing `--config` or
 `--rule` values, parser-only missing `--ari` values, plus one unknown option,
 checks that explicit config and CLI `--rule` `off` suppress diagnostics, and
 checks exact reference-shaped runtime JSON and human output for representative
-diagnostics. It also covers clean, mixed, duplicate, 24-file repeated-input,
-66 KB clean-source, final-newline, stderr-isolation, and valid, control-byte,
-and invalid-UTF-8 path behavior. Strict parity, source-controlled broad goldens,
-and compiler diagnostics remain future work.
+diagnostics. It also covers per-source nearest config discovery, unreadable
+nearer-config fallback, discovery suppression by explicit config, CLI-last
+precedence, discovered config diagnostics, exact explicit config errors, clean,
+mixed, duplicate, 24-file repeated-input, 66 KB clean-source, final-newline,
+stderr-isolation, and valid, control-byte, and invalid-UTF-8 path behavior.
+Strict parity, source-controlled broad goldens, and compiler diagnostics remain
+future work.
 
 `parity.sh` does not add CI wiring, a strict parity gate, golden files,
 source-controlled parity fixtures, new lint semantics, release compatibility
