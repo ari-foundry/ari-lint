@@ -760,6 +760,7 @@ require_grep "ari_compiler_path = std::string::substring" src/cli.ari
 require_grep "compiler_check_plan_from_cli_args" src/cli.ari
 require_grep "plan_explicit_cli_compiler_check" src/cli.ari
 require_grep "compiler_check_argv_from_plan" src/cli.ari
+require_grep "compiler_check_argv_for_source_from_plan" src/cli.ari
 require_grep "plan_explicit_cli_compiler_check_argv" src/cli.ari
 require_grep "compiler_check_execution_boundary_from_plan" src/cli.ari
 require_grep "plan_explicit_cli_compiler_check_execution_boundary" src/cli.ari
@@ -771,9 +772,12 @@ require_grep "plan_explicit_cli_compiler_check_result" src/cli.ari
 require_grep "check_argument: \"--check\"" src/cli.ari
 require_grep "calls_tools_lint: false" src/cli.ari
 require_grep "source_files: args.source_files" src/cli.ari
+require_grep "argv.push(std::string::from_slice_in(zone, source_file))" src/cli.ari
 require_grep "argv.push(std::string::from_slice_in(zone, plan.check_argument))" src/cli.ari
 require_grep "uses_planned_argv: true" src/cli.ari
-require_grep "planned_argument_count: 1 + (plan.include_path_count" src/cli.ari
+require_grep "planned_invocation_count: plan.source_count" src/cli.ari
+require_grep "planned_argument_count_per_invocation: 2 + (plan.include_path_count" src/cli.ari
+require_grep "uses_per_file_argv: true" src/cli.ari
 require_grep "exit_code_available: false" src/cli.ari
 require_grep "stdout_available: false" src/cli.ari
 require_grep "stderr_available: false" src/cli.ari
@@ -792,6 +796,9 @@ require_grep "first_include_path" src/cli.ari
 require_grep "include_paths: std::vec::Vec" src/cli.ari
 require_grep "include_paths.push" src/cli.ari
 require_grep "include_paths: args.include_paths" src/cli.ari
+require_grep "token.starts_with(\"-I\")" src/cli.ari
+require_grep "--ari PATH" src/cli.ari
+require_grep "-I DIR" src/cli.ari
 require_grep "--list-rules" src/cli.ari
 require_grep "list_rules_requested" src/cli.ari
 require_grep "--config" src/cli.ari

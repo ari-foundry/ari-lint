@@ -95,7 +95,9 @@ pub struct CliCompilerCheckPlan {
 pub struct CliCompilerCheckExecutionBoundary {
   compiler_path_present: bool,
   compiler_path: Slice[u8],
-  planned_argument_count: i64,
+  planned_invocation_count: i64,
+  planned_argument_count_per_invocation: i64,
+  uses_per_file_argv: bool,
   uses_planned_argv: bool,
   invokes_compiler: bool,
   captures_stdout: bool,
@@ -134,7 +136,9 @@ pub struct CliCompilerCheckResult {
   kind: CliCompilerCheckResultKind,
   compiler_path_present: bool,
   compiler_path: Slice[u8],
-  planned_argument_count: i64,
+  planned_invocation_count: i64,
+  planned_argument_count_per_invocation: i64,
+  uses_per_file_argv: bool,
   uses_planned_argv: bool,
   exit_code_available: bool,
   exit_code: i64,
@@ -428,6 +432,21 @@ pub fn parse_cli_tokens(
         problem_count = problem_count + 1;
         index = index + 1;
       }
+    } else if token.starts_with("-I") && token_text.len() > 2 {
+      let inline_include_path_text = std::string::substring(
+        token_text,
+        2,
+        token_text.len()
+      );
+      if include_path_count == 0 {
+        first_include_path = inline_include_path_text;
+      }
+      include_paths.push(std::string::copy_with_allocator(
+        ref token_allocator,
+        inline_include_path_text
+      ));
+      include_path_count = include_path_count + 1;
+      index = index + 1;
     } else if token.equals("--config") {
       if index + 1 < tokens.len() {
         config_path_present = true;
@@ -548,26 +567,37 @@ pub fn plan_explicit_cli_compiler_check(
   return compiler_check_plan_from_cli_args(zone, parse_result.args);
 }
 
-pub fn compiler_check_argv_from_plan(
+pub fn compiler_check_argv_for_source_from_plan(
   zone: ref mut Zone,
-  plan: CliCompilerCheckPlan
+  plan: CliCompilerCheckPlan,
+  source_file: Slice[u8]
 ) -> std::vec::Vec[std::string::String] {
   var argv = std::vec::new<std::string::String>(
     zone,
-    1 + (plan.include_path_count * 2) + plan.source_count
+    2 + (plan.include_path_count * 2)
   );
-  argv.push(std::string::from_slice_in(zone, plan.check_argument));
 
   for include_path in plan.include_paths {
     argv.push(std::string::from(zone, "-I"));
     argv.push(std::string::from_slice_in(zone, include_path.as_slice()));
   }
 
-  for source_file in plan.source_files {
-    argv.push(std::string::from_slice_in(zone, source_file.as_slice()));
-  }
+  argv.push(std::string::from_slice_in(zone, source_file));
+  argv.push(std::string::from_slice_in(zone, plan.check_argument));
 
   return argv;
+}
+
+pub fn compiler_check_argv_from_plan(
+  zone: ref mut Zone,
+  plan: CliCompilerCheckPlan
+) -> std::vec::Vec[std::string::String] {
+  let first_source_file = plan.first_source_file;
+  return compiler_check_argv_for_source_from_plan(
+    zone,
+    plan,
+    first_source_file
+  );
 }
 
 pub fn plan_explicit_cli_compiler_check_argv(
@@ -585,7 +615,9 @@ pub fn compiler_check_execution_boundary_from_plan(
   return CliCompilerCheckExecutionBoundary {
     compiler_path_present: plan.compiler_path_present,
     compiler_path: plan.compiler_path,
-    planned_argument_count: 1 + (plan.include_path_count * 2) + plan.source_count,
+    planned_invocation_count: plan.source_count,
+    planned_argument_count_per_invocation: 2 + (plan.include_path_count * 2),
+    uses_per_file_argv: true,
     uses_planned_argv: true,
     invokes_compiler: false,
     captures_stdout: false,
@@ -717,13 +749,18 @@ pub fn compiler_check_result_not_run_from_boundary(
 ) -> CliCompilerCheckResult {
   let compiler_path_present = boundary.compiler_path_present;
   let compiler_path = boundary.compiler_path;
-  let planned_argument_count = boundary.planned_argument_count;
+  let planned_invocation_count = boundary.planned_invocation_count;
+  let planned_argument_count_per_invocation =
+    boundary.planned_argument_count_per_invocation;
+  let uses_per_file_argv = boundary.uses_per_file_argv;
   let uses_planned_argv = boundary.uses_planned_argv;
   return CliCompilerCheckResult {
     kind: CliCompilerCheckNotRun,
     compiler_path_present: compiler_path_present,
     compiler_path: compiler_path,
-    planned_argument_count: planned_argument_count,
+    planned_invocation_count: planned_invocation_count,
+    planned_argument_count_per_invocation: planned_argument_count_per_invocation,
+    uses_per_file_argv: uses_per_file_argv,
     uses_planned_argv: uses_planned_argv,
     exit_code_available: false,
     exit_code: 0,
@@ -905,6 +942,8 @@ fn write_cli_help_stdout(zone: ref mut Zone) -> bool {
   text.append_string_in(zone, "  -h, --help                 Show this help text.\n");
   text.append_string_in(zone, "  --list-rules               List known lint rules.\n");
   text.append_string_in(zone, "  --json                     Write source-file diagnostics as JSON.\n");
+  text.append_string_in(zone, "  --ari PATH                 Use PATH as the Ari compiler.\n");
+  text.append_string_in(zone, "  -I DIR                     Add an Ari module search path.\n");
   text.append_string_in(zone, "  --config PATH              Load rule severities from a config file.\n");
   text.append_string_in(zone, "  --rule RULE=SEVERITY       Override a known rule severity.\n");
   text.append_string_in(zone, "  --                          Treat following arguments as source files.\n");

@@ -50,6 +50,10 @@ here.
   compiler path or `ARI_COMPILER`, plus an Ari repository path or `ARI_REPO`.
 - CLI `--help` output.
 - CLI `--list-rules` output.
+- Explicit `--ari PATH` / `--ari=PATH` parsing and source-command path
+  validation. The path is not spawned yet.
+- `-I DIR` / `-IDIR` parsing with per-file compiler argv planned as
+  `-I DIR ... FILE --check`.
 - Source-file lint for all explicitly provided positional source files, using
   the currently implemented rules:
   `lint/trailing-whitespace` and `lint/missing-final-newline`.
@@ -69,6 +73,8 @@ here.
 - There is no strict parity gate or golden parity suite yet. The local
   parity smoke/report is report-only and does not claim parity.
 - CI is not compiler-backed yet.
+- The main command does not invoke `ari --check` yet; compiler selection from
+  `ARI_COMPILER` and the reference `build/ari` default is also pending.
 - The implemented rule set is limited.
 - Directory traversal and recursive source-tree scanning are not implemented;
   pass source files explicitly.

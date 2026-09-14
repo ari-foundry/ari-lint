@@ -709,10 +709,10 @@ and test work.
       setup, compiler download/build automation, parity runner behavior, and a
       compatibility matrix remain future work.
 - [x] Add Ari compiler invocation plan in
-      `docs/dev/compiler-invocation.md` for future `--ari PATH` and
-      `ARI_COMPILER` selection behavior; `--ari` implementation,
-      `ARI_COMPILER` handling, compiler execution, compiler-backed tests,
-      parity runner behavior, and a compatibility matrix remain future work.
+      `docs/dev/compiler-invocation.md`; explicit `--ari` parsing/path
+      validation, both `-I` forms, and exact per-file argv planning now exist.
+      `ARI_COMPILER` handling, compiler execution, compiler-backed tests, a
+      strict parity gate, and a compatibility matrix remain future work.
 - [ ] Plan parity testing against current `tools/lint`;
       `docs/dev/parity-test-plan.md` tracks the fixture and golden output
       strategy. A first local report-only `scripts/parity.sh` smoke now

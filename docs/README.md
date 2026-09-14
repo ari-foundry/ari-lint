@@ -20,13 +20,12 @@ Future compatibility docs should reference real Ari releases and tags:
 Documentation migration is staged and tracked in
 [docs/migration.md](migration.md).
 
-Ari-language implementation is in skeleton stage. The implementation plan is
+Ari-language implementation is active but not yet compiler-integrated. The implementation plan is
 tracked in [docs/dev/ari-implementation-plan.md](dev/ari-implementation-plan.md).
 
-Future parity testing against the current bundled/reference `tools/lint`
-behavior is planned in
-[docs/dev/parity-test-plan.md](dev/parity-test-plan.md). Parity tests do not
-exist in this repository yet.
+Parity testing against the current bundled/reference `tools/lint` behavior is
+planned in [docs/dev/parity-test-plan.md](dev/parity-test-plan.md). A local
+report-only parity runner exists; a strict gate does not.
 Known parity differences from the current report-only local smoke are tracked
 in [docs/dev/parity-differences.md](dev/parity-differences.md).
 
@@ -35,10 +34,10 @@ behavior is planned in
 [docs/dev/compiler-provisioning.md](dev/compiler-provisioning.md). Compiler
 provisioning is not implemented yet.
 
-Future Ari compiler invocation through `--ari PATH` or `ARI_COMPILER` is
-planned in
-[docs/dev/compiler-invocation.md](dev/compiler-invocation.md). Compiler
-invocation is not implemented yet.
+The compiler selection and per-file argv boundary is documented in
+[docs/dev/compiler-invocation.md](dev/compiler-invocation.md). Explicit
+`--ari` path validation and `-I` planning exist, but compiler invocation and
+`ARI_COMPILER` fallback are not implemented yet.
 
 The initial release and compatibility policy is documented in
 [docs/dev/release-compatibility-policy.md](dev/release-compatibility-policy.md).
