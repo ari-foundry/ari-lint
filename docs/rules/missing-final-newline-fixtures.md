@@ -5,9 +5,9 @@
 This document plans future fixtures and tests for
 `lint/missing-final-newline`.
 
-The first minimal fixture coverage and executable CLI smoke exist. Broader
-source-controlled goldens, dedicated rule tests, strict parity, and CI jobs
-remain future work.
+The first fixtures, exact native JSON goldens, executable CLI smoke, and strict
+local native parity case exist. Broader fixture/golden coverage, dedicated rule
+tests, and parity CI remain future work.
 
 ## Current Status
 
@@ -23,9 +23,9 @@ remain future work.
 - The current reference behavior remains `tools/lint` in `ari-foundry/ari`.
 - Rule-specific parity planning is documented in
   [docs/rules/missing-final-newline-parity.md](missing-final-newline-parity.md).
-  Fixture comparison has first local smoke/report coverage through
-  `scripts/parity.sh`, but strict source-controlled fixture parity and golden
-  comparisons remain future work.
+  Fixture comparison has broad report-only coverage through `scripts/parity.sh`
+  and an initial source-controlled strict native case through
+  `scripts/parity-strict.sh`. Broader strict fixture parity remains future work.
 
 ## Started Fixture Coverage
 
@@ -115,9 +115,9 @@ Future tests should compare the Ari implementation against current `tools/lint`.
 
 The detailed missing-final-newline parity plan is documented in
 [docs/rules/missing-final-newline-parity.md](missing-final-newline-parity.md).
-Fixture comparison has first local smoke/report coverage through
-`scripts/parity.sh`, but strict source-controlled fixture parity and golden
-comparisons remain future work.
+Fixture comparison has broad report-only coverage through `scripts/parity.sh`
+and an initial source-controlled strict native case through
+`scripts/parity-strict.sh`. Broader strict fixture parity remains future work.
 
 Parity dimensions:
 
@@ -129,26 +129,28 @@ Parity dimensions:
 - severity
 - message
 - human-readable output
-- JSON output once schema is stable
+- JSON output under the documented source-result contract
 - exit behavior
 
 ## Golden Output Policy
 
-- Do not add golden JSON until JSON schema is stable.
+- Keep exact native JSON goldens aligned with `docs/diagnostics.md` and the
+  current no-rewrite relative-path policy.
 - Human-readable golden output should wait until message text is stable.
-- Path normalization is required before comparing outputs.
+- Current strict cases preserve caller-provided relative paths without rewrite;
+  only genuinely environment-dependent values should be normalized or excluded.
 - Ari compiler version or commit should be recorded when compiler-backed
   diagnostics are involved.
 
 ## Test Runner Notes
 
-- No test runner is added in this step.
-- Future test runner should not depend on undocumented local monorepo paths.
+- `scripts/parity-strict.sh` gates the checked-in native subset locally.
+- Test runners must not depend on undocumented local monorepo paths.
 - Tests should use explicit Ari compiler path only when compiler-backed
   behavior is involved.
 - Pure helper tests should not require `ari --check`.
 
-## Non-Goals
+## Original Planning-Step Non-Goals
 
 - Do not add broad fixture coverage in this step.
 - Do not add CLI, parity, golden, or diagnostic tests in this step.

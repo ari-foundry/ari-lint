@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document plans how lint documentation will move from `ari-foundry/ari`
+This document tracks how lint documentation is moving from `ari-foundry/ari`
 into `ari-foundry/ari-lint`.
 
 This step does not move source code, does not copy docs wholesale, and does not
@@ -21,7 +21,7 @@ Do not guess files that do not exist.
 
 ## Target Documentation Areas
 
-Future `ari-lint` documentation areas in this repository are:
+Target `ari-lint` documentation areas in this repository are:
 
 - `docs/README.md` as the docs entry point
 - `docs/features.md` for lint feature documentation
@@ -31,15 +31,19 @@ Future `ari-lint` documentation areas in this repository are:
 - `docs/dev/roadmap.md` for development roadmap
 - `README.md` for high-level project overview
 
-These files are planned targets. They are not all created in this step.
+These are migration targets. The entry point, diagnostic contract, and
+developer roadmap now exist; the remaining user-facing targets are tracked
+below.
 
 ## Migration Strategy
 
-1. Add migration plan in `ari-lint`.
-2. Add handoff note in `ari-foundry/ari` `docs/lint` later.
-3. Copy or adapt `docs/lint` content into `ari-lint` in small scoped PRs.
-4. Keep links back to `ari-foundry/ari` while source extraction is incomplete.
-5. After source extraction, make `ari-lint` docs the primary docs.
+1. Keep the migration plan in `ari-lint` current as each area moves.
+2. The initial `ari-foundry/ari` `docs/lint` handoff links were added by
+   [Ari PR #16](https://github.com/ari-foundry/ari/pull/16).
+3. Adapt lint-specific `docs/lint` content into `ari-lint` in small scoped PRs.
+4. Keep links back to `ari-foundry/ari` while the standalone documentation
+   handoff is incomplete.
+5. After the user-facing handoff is complete, make `ari-lint` docs primary.
 6. Update Ari Foundry portal only after `ari-lint` docs are usable.
 
 ## Content Ownership
@@ -70,18 +74,20 @@ Do not invent compatibility claims or version numbers.
 
 Do not claim `ari-lint` has a stable release yet.
 
-## Handoff Plan For ari-foundry/ari
+## Handoff State For ari-foundry/ari
 
-A later step should update `ari-foundry/ari` `docs/lint` with a handoff note
-once this repository has enough docs to be useful.
+The initial handoff links now exist in `ari-foundry/ari` `docs/lint`. Further
+handoff edits remain separate upstream work as the user-facing docs here become
+complete.
 
-The handoff should:
+Further handoff work should:
 
 - point to `ari-foundry/ari-lint`
 - keep historical context in `ari` during migration
 - avoid deleting `docs/lint` abruptly
 - avoid broken links from `docs/README.md`
-- avoid claiming `ari-lint` is stable before source extraction and tests exist
+- avoid claiming `ari-lint` is stable before the standalone implementation and
+  tests are ready
 
 ## Non-Goals
 
@@ -90,7 +96,6 @@ The handoff should:
 - Do not copy `docs/lint` content wholesale in this step.
 - Do not add `ari-lint` source code in this step.
 - Do not add Ari source files in this step.
-- Do not add standalone tests in this step.
 - Do not add release workflows in this step.
 - Do not claim compatibility matrix support in this step.
 - Do not modify `ari-foundry/ari` in this step.
@@ -98,12 +103,12 @@ The handoff should:
 
 ## Follow-up Checklist
 
-- [ ] Add handoff note in `ari-foundry/ari` `docs/lint`
+- [x] Add handoff note in `ari-foundry/ari` `docs/lint`
 - [ ] Adapt `docs/lint/features.md` into `ari-lint` `docs/features.md`
 - [ ] Adapt `docs/lint/README.md` into `ari-lint` README/docs entry points
 - [ ] Split config documentation into `docs/config.md`
-- [ ] Split diagnostics documentation into `docs/diagnostics.md`
+- [x] Split diagnostics documentation into `docs/diagnostics.md`
 - [ ] Split rule reference into `docs/rules.md`
-- [ ] Keep links to Ari compiler docs in `ari-foundry/ari`
+- [x] Keep links to Ari compiler docs in `ari-foundry/ari`
 - [ ] Update Ari Foundry portal after docs are usable
-- [ ] Avoid stable release claims until release policy exists
+- [x] Avoid stable release claims under the documented release policy

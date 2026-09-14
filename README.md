@@ -21,6 +21,7 @@ the language and toolchain are ready.
 - Ari releases: https://github.com/ari-foundry/ari/releases
 - Ari tags: https://github.com/ari-foundry/ari/tags
 - Ari Foundry portal: https://ari-foundry.github.io
+- Source diagnostic output contract: [docs/diagnostics.md](docs/diagnostics.md)
 
 ## Current Scope
 
@@ -72,6 +73,9 @@ here.
   UTF-8 and renders invalid input bytes as escaped replacement characters.
 - Human source results on stdout as `PATH: ok` or
   `PATH:LINE:COLUMN: SEVERITY: [CODE] MESSAGE`; enabled diagnostics exit `1`.
+  The exact JSON fields, stream selection, status mapping, ordering, encoding,
+  and bounded-output behavior are defined in
+  [docs/diagnostics.md](docs/diagnostics.md).
 - Explicit config file loading with `--config`.
 - Discovered `ari-lint.rules` config when `--config` is absent, searching from
   each source file's directory upward and using the nearest readable file.

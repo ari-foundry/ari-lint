@@ -79,6 +79,7 @@ require_file AGENTS.md
 require_file .gitignore
 require_file .gitattributes
 require_file docs/README.md
+require_file docs/diagnostics.md
 require_file docs/list-rules.md
 require_file docs/migration.md
 require_file docs/dev/compiler-invocation.md
@@ -414,6 +415,17 @@ require_grep "unknown argument: --definitely-unknown" scripts/smoke.sh
 require_grep "--config PATH" src/cli.ari
 require_grep "run_json_diagnostic_smoke" scripts/smoke.sh
 require_grep "run_json_success_smoke" scripts/smoke.sh
+require_grep "require_json_document" scripts/smoke.sh
+require_grep "require_final_newline" scripts/smoke.sh
+require_grep "python3 -c" scripts/smoke.sh
+require_fixed_grep 'json.JSONDecoder(parse_constant=reject_constant).raw_decode(text)' scripts/smoke.sh
+require_grep "expected strict JSON validation to reject NaN" scripts/smoke.sh
+require_fixed_grep 'require_json_document "$json_list_rules_output"' scripts/smoke.sh
+require_grep "ari/compiler-check-failed.*compiler check failed" scripts/smoke.sh
+require_grep "ari/compiler-check-failed.*plain noise" scripts/smoke.sh
+require_grep "expected empty stdout" scripts/smoke.sh
+require_grep "missing_source_output" scripts/smoke.sh
+require_grep "json_missing_source_output" scripts/smoke.sh
 require_grep '"severity":"error"' scripts/smoke.sh
 require_grep '"severity":"note"' scripts/smoke.sh
 require_grep '"severity":"warning"' scripts/smoke.sh
@@ -574,9 +586,11 @@ require_grep "Local build via" README.md
 require_grep "Local smoke validation via" README.md
 require_grep "all explicitly provided positional source files" README.md
 require_grep "Focused diagnostic" README.md
+require_grep "docs/diagnostics.md" README.md
 require_grep "local standalone test entrypoint" README.md
 require_grep "relative compiler paths" README.md
 require_grep "docs/migration.md" docs/README.md
+require_grep "docs/diagnostics.md" docs/README.md
 require_grep "docs/list-rules.md" docs/README.md
 require_grep "docs/dev/ari-implementation-plan.md" docs/README.md
 require_grep "docs/dev/compiler-invocation.md" docs/README.md
@@ -598,7 +612,28 @@ require_grep "tests/golden/list-rules/" docs/list-rules.md
 require_grep "intentional CLI contracts" docs/list-rules.md
 require_grep "docs/list-rules.md" docs/dev/parity-differences.md
 require_grep "standalone list-rules contract and strict goldens added" docs/dev/roadmap.md
+require_grep "source diagnostic output contract published" docs/dev/roadmap.md
 require_grep "Do not invent compatibility claims" docs/migration.md
+require_grep "Split diagnostics documentation into .docs/diagnostics.md." docs/migration.md
+require_grep "Diagnostic Output Contract" docs/diagnostics.md
+require_grep "JSON Source Result" docs/diagnostics.md
+require_grep "Diagnostic Ordering" docs/diagnostics.md
+require_grep "Encoding And Termination" docs/diagnostics.md
+require_grep "Streams And Top-Level Status" docs/diagnostics.md
+require_grep "exitCode" docs/diagnostics.md
+require_grep "not the top-level .ari-lint. status" docs/diagnostics.md
+require_grep "exactly one final LF" docs/diagnostics.md
+require_grep "invalid UTF-8 byte as" docs/diagnostics.md
+require_grep "retained stderr bytes followed" docs/diagnostics.md
+require_grep "retained complete-line" docs/diagnostics.md
+require_grep "exceptional fallback can" docs/diagnostics.md
+require_grep "not an .ari-lint. release" docs/diagnostics.md
+require_grep "docs/diagnostics.md" docs/dev/ari-implementation-plan.md
+require_no_grep "JSON diagnostic schema may still be unstable." docs/dev/ari-implementation-plan.md
+require_no_grep "JSON diagnostic schema may still be unstable." docs/dev/parity-test-plan.md
+require_no_grep "once.*schema.*stable" docs/rules/trailing-whitespace-fixtures.md
+require_no_grep "once.*schema.*stable" docs/rules/missing-final-newline-fixtures.md
+require_no_grep "JSON golden tests should wait" docs/dev/compiler-provisioning.md
 require_grep "Ari-language implementation" docs/dev/ari-implementation-plan.md
 require_grep "compiler bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
 require_grep "standard library bugs belong in ari-foundry/ari" docs/dev/ari-implementation-plan.md
@@ -657,7 +692,8 @@ require_grep "docs/rules/trailing-whitespace-parity.md" docs/rules/trailing-whit
 require_grep "docs/rules/trailing-whitespace-parity.md" docs/dev/parity-test-plan.md
 require_grep "docs/rules/trailing-whitespace-parity.md" tests/README.md
 require_grep "Do not add a strict parity gate in this step" docs/rules/trailing-whitespace-parity.md
-require_grep "first minimal fixture coverage and executable CLI smoke exist" docs/rules/trailing-whitespace-fixtures.md
+require_grep "local native parity case exist" docs/rules/trailing-whitespace-fixtures.md
+require_grep "local native parity case exist" docs/rules/missing-final-newline-fixtures.md
 require_grep "initial clean and trailing-spaces fixtures are started" docs/rules/trailing-whitespace.md
 require_grep "trailing-whitespace design note" docs/dev/roadmap.md
 require_grep "trailing-whitespace fixture and test plan" docs/dev/roadmap.md
@@ -892,7 +928,7 @@ require_grep "stdout/stderr output boundary model" docs/dev/ari-implementation-p
 require_grep "internal list-rules output path added" docs/dev/roadmap.md
 require_grep "human-readable list-rules formatter added" docs/dev/roadmap.md
 require_grep "Executable diagnostic output smoke tests" tests/README.md
-require_grep "Human diagnostics are verified on stdout" tests/README.md
+require_grep "All JSON cases are syntax-checked" tests/README.md
 require_grep "No executable trailing-whitespace first-diagnostic capture tests are added yet" tests/README.md
 require_grep "No executable missing-final-newline first-diagnostic capture tests are added yet" tests/README.md
 require_grep "Executable CLI smoke tests now validate the runtime JSON envelope" tests/README.md

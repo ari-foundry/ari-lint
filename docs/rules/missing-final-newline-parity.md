@@ -2,13 +2,13 @@
 
 ## Purpose
 
-This document defines how future `lint/missing-final-newline` behavior should
-be compared against the current bundled/reference `tools/lint` behavior in
+This document defines how `lint/missing-final-newline` behavior is compared
+against the current bundled/reference `tools/lint` behavior in
 `ari-foundry/ari`.
 
-This step adds only the local report-only `scripts/parity.sh` smoke. It does
-not add source-controlled fixtures, golden output, CI parity jobs, or a strict
-parity gate.
+The original planning step added only the report-only `scripts/parity.sh`
+smoke. An initial source-controlled strict native case and golden now exist;
+broader strict coverage and parity CI remain follow-up work.
 
 ## Current Status
 
@@ -16,19 +16,20 @@ parity gate.
 - An internal diagnostic mapping skeleton exists.
 - Initial final-newline/no-final-newline fixtures exist.
 - Native explicit-file rule execution and representative output smoke are
-  complete; dedicated rule tests and strict parity remain open.
-- A first local non-gating parity smoke/report exists in `scripts/parity.sh`.
+  complete; the initial native case is gated by `scripts/parity-strict.sh`,
+  while dedicated rule tests and broader strict parity remain open.
+- A broader local non-gating parity smoke/report exists in `scripts/parity.sh`.
 - `tools/lint` in `ari-foundry/ari` remains the reference implementation.
 
 ## Reference Command Strategy
 
-Future parity should use the current `tools/lint` command or Ari bundled lint
-command as the reference once the command is confirmed.
+Parity uses the current `tools/lint` command or Ari bundled lint command as the
+reference.
 
 The first local report verifies the Ari repo `Makefile` lint target and
 `tools/lint/main.cpp`, then uses an existing executable `build/ari-lint` or an
-explicit `ORIGINAL_LINT` path. Exact source-controlled parity command policy
-still needs follow-up.
+explicit `ORIGINAL_LINT` path. Exact source-controlled parity command policy is
+implemented for the current strict subset; broader cases still need follow-up.
 
 Future parity should avoid undocumented local monorepo paths. It should record
 the Ari compiler/tooling version or commit used for each comparison.
@@ -45,7 +46,7 @@ Planned comparison inputs:
 - future CRLF fixture if behavior is confirmed
 - future lone-CR fixture if behavior is confirmed
 
-No new fixture files are added in this step.
+The first two fixtures are checked in; the remaining entries are future paths.
 
 ## Comparison Outputs
 
@@ -66,19 +67,21 @@ The current reference implementation confirms the native rule code
 `lint/missing-final-newline`, default severity `warning`, message text
 `missing final newline`, source value `ari-lint`, and end column one column
 after the reported final column. Standalone native output shape and diagnostic
-exit policy now match the reference; source-controlled strict comparison
-remains future work.
+exit policy now match the reference; source-controlled strict comparison is
+gated for the initial native case, while broader comparison remains future work.
 
 ## Normalization Policy
 
-Paths should be normalized before comparison.
+Current strict fixtures preserve the caller-provided relative path without
+rewrite.
 
-Environment-specific fields should be ignored or normalized.
+Environment-specific fields in future cases should be ignored or normalized.
 
 Compiler/tooling version should be recorded.
 
-JSON and human-readable output should be compared exactly after normalizing
-environment-specific path prefixes.
+Current strict JSON and human-readable output is compared exactly without
+normalization. Any future normalization should be scoped to environment-specific
+path prefixes.
 
 ## Intentional Differences
 
@@ -88,9 +91,9 @@ Intentional differences require a design note update.
 
 Breaking parity should not be silent.
 
-## Future Runner Shape
+## Runner Shape
 
-Future runner shape:
+The comparison shape is:
 
 1. prepare fixture path
 2. run reference `tools/lint` behavior
@@ -99,9 +102,9 @@ Future runner shape:
 5. compare diagnostic fields
 6. report mismatch
 
-The local `scripts/parity.sh` report implements only a first smoke-sized
-version of this shape. Strict comparison, golden output, and CI gating are not
-added in this step.
+The local `scripts/parity.sh` report implements a broad non-gating version.
+`scripts/parity-strict.sh` implements the checked-in native subset with exact
+goldens; broader strict comparison and parity CI are not added yet.
 
 ## Issue Routing
 
@@ -116,7 +119,7 @@ Ari toolchain limitations belong in `ari-foundry/ari`.
 
 Cross-boundary bugs should link the owning issue.
 
-## Non-Goals
+## Original Planning-Step Non-Goals
 
 - Do not add a strict parity gate in this step.
 - Do not add source-controlled fixtures in this step.

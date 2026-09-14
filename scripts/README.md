@@ -106,11 +106,16 @@ explicit-compiler `scripts/test.sh` and `scripts/smoke.sh`.
 `smoke.sh` does not add a strict parity gate, home/global/XDG config search, new
 lint semantics, or compatibility claims. The separate checksum-pinned
 compiler-smoke workflow runs it through `scripts/test.sh`.
-It checks that `--help` names the current supported option set, checks focused
+It requires Python 3 only to parse emitted JSON; it installs no dependency.
+Every JSON source/listing case must be one valid document with a final LF and
+empty stderr. Successful stdout-only commands require empty stderr, and usage
+errors require empty stdout. It checks that `--help` names the current supported
+option set, checks focused
 `--list-rules` and `--json --list-rules` rule-code, short-name, and
 default-severity output signals, checks focused
 usage-error summaries for malformed `--rule` text and missing `--config` or
-`--rule` values, parser-only missing `--ari` values, plus one unknown option,
+`--rule` values, parser-only missing `--ari` values, one unknown option, and
+missing source input with and without `--json`,
 checks that explicit config and CLI `--rule` `off` suppress diagnostics, and
 checks exact reference-shaped runtime JSON and human output for representative
 diagnostics. It also covers per-source nearest config discovery, unreadable
