@@ -2,9 +2,10 @@
 
 Compiler-free repository checks, local compiler-backed executable smoke
 validation, a local report-only parity smoke/report, and a strict checked-in
-native-rule parity subset all exist now. The smoke suite includes representative
-exact runtime JSON, human-output, compiler invocation, and compiler-diagnostic
-checks. The strict subset gates clean, trailing-whitespace,
+native-rule parity subset all exist now. Exact standalone and reference
+list-rules contracts are also gated with separate goldens. The smoke suite
+includes representative exact runtime JSON, human-output, compiler invocation,
+and compiler-diagnostic checks. The strict subset gates clean, trailing-whitespace,
 missing-final-newline, ordered multi-file, and duplicate JSON results against
 the reference tool and source-controlled goldens. Focused Ari unit tests,
 strict CLI/config/compiler-boundary parity, source-controlled broad
@@ -45,8 +46,10 @@ A source-only parity runner skeleton records future comparison boundaries, and
 `scripts/parity.sh` provides a local report-only parity smoke/report. The
 lightweight checks do not execute that parity script.
 `scripts/parity-strict.sh` provides a separate gating subset over checked-in
-native rule fixtures. It uses a no-output fixture compiler and explicit empty
-config so compiler diagnostics and ambient config cannot affect those goldens.
+list-rules snapshots and native rule fixtures. List-rules intentionally uses
+different standalone/reference goldens. Native cases use a no-output fixture
+compiler and explicit empty config so compiler diagnostics and ambient config
+cannot affect those goldens.
 The config precedence fixture plan is documented. Shell-only lightweight checks
 verify the committed fixture files' presence, exact line order, and expected
 text; they do not execute Ari code. Dedicated Ari-backed config precedence tests
@@ -96,8 +99,8 @@ compiler, invoke `ari --check`, execute `tools/lint`, install package manager
 dependencies, or run parity checks until standalone tests and explicit compiler
 provisioning are ready.
 
-Run the strict native-rule parity subset from any checkout with explicit
-compiler and Ari repository paths:
+Run the strict list-rules and native-rule subsets from any checkout with
+explicit compiler and Ari repository paths:
 
 ```sh
 scripts/parity-strict.sh /path/to/ari /path/to/ari-repo
@@ -110,6 +113,15 @@ native-rule expectations, not an Ari release compatibility claim. Relative
 fixture paths remove the need for path rewriting. Future temporary-path cases
 must normalize only their known temporary-root prefix rather than rewriting
 arbitrary paths.
+
+The exact registry outputs under `tests/golden/list-rules/` implement the
+standalone contract in [docs/list-rules.md](../docs/list-rules.md) and
+separately preserve current bundled-reference behavior at Ari tag `v0.1.0`,
+commit `c615f1c2ce1a93835118b4da8867a7f3dfaf991a`. The strict runner checks both
+option orders for each implementation, final LF, empty stderr, exit `0`, JSON
+validity for the standalone JSON form, and sentinel-backed absence of compiler
+invocation for the explicitly selected compiler. This provenance is not an Ari
+release compatibility claim.
 
 `scripts/build.sh` is separate from `scripts/test.sh` and the lightweight
 checks. It is a compiler-dependent local build scaffold that requires an
@@ -329,7 +341,7 @@ and parity behavior against current `tools/lint`.
 Executable shell CLI smoke now covers positional source input, `--json`,
 `--ari`, `-I`, `--list-rules`, `--config`, `--rule`, representative invalid
 arguments, output streams, and exit codes. Dedicated Ari CLI unit tests and
-strict parity remain future work.
+broader strict CLI parity remain future work.
 
 No CLI model tests are added yet. Future tests should cover parser output for
 positional files, `--json`, `--list-rules`, `--ari`, `-I`, `--config`,
@@ -340,8 +352,8 @@ the minimal explicit token-list parser for positional files, `--json`,
 `--list-rules`, `--help`/`-h`, `--ari`, `-I`, explicit `--config` path
 capture, raw `--rule` values, missing option values, unknown options, repeated
 `-I` and `--rule`, multiple positional files, the internal OS argv integration
-entry path, plus parity behavior against current `tools/lint` once a parity
-runner exists.
+entry path, plus parity behavior against current `tools/lint` in a dedicated Ari
+test harness.
 
 No executable dispatcher tests are added yet. Future dispatcher tests should
 cover list-rules dispatch, missing-source commands, source-file lint requests,
@@ -350,7 +362,7 @@ diagnostics,
 first diagnostic command-result carrying, caller-provided diagnostic vector
 collection, parsed `--rule` override application, rule override parse-problem
 results, internal exit-code mapping, stdout-free behavior, and parity behavior
-against current `tools/lint` once a parity runner exists.
+against current `tools/lint` in a dedicated Ari test harness.
 
 No dedicated Ari exit-code model tests are added yet. Executable shell smoke
 covers user-facing success, lint-failure, usage-error, and unavailable exits;
@@ -359,17 +371,19 @@ future unit tests should isolate the internal mappings and failure paths.
 No executable explicit-token entry tests are added yet. Future entry-path tests
 should cover list-rules token input, parse problems, missing source input,
 source-file lint requests, stdout-free behavior, and parity behavior against
-current `tools/lint` once a parity runner exists.
+current `tools/lint` in a dedicated Ari test harness.
 
-No executable explicit-token list-rules command tests are added yet. Future
-tests should cover the named `--list-rules` command path, formatted text
-presence, success exit-code mapping, stdout-free behavior, no OS argv reads, and
-parity behavior against current `tools/lint` once a parity runner exists.
+No dedicated Ari explicit-token list-rules command tests are added yet. The
+strict executable runner covers the main-facing OS argv path, both output
+forms, option ordering, stream selection, exit status, and exact goldens.
+Future Ari unit tests should isolate the internal command path, stdout-free
+behavior, and absence of OS argv reads.
 
 Executable shell smoke enters through `main` and OS argv, checking returned
 exit codes, list-rules/help output, human and JSON source results, parse errors,
 missing input, and stream isolation. Dedicated Ari main-entry and argv-boundary
-unit tests, environment isolation, and strict parity remain future work.
+unit tests, environment isolation, and broader strict CLI/config/compiler
+parity remain future work.
 
 No executable stdout/stderr output boundary tests are added yet. Future tests
 should cover the internal sink/result model, stdout versus stderr stream
@@ -446,11 +460,11 @@ serialization in the internal path, isolation of the compiler-free in-memory
 helpers, main-facing compiler invocation, and parity behavior against current
 `tools/lint`.
 
-No executable list-rules formatter tests are added yet. Future tests should
-cover list-rules metadata and formatting for rule code, short name, default
-severity, description, ordering, newline behavior, human-readable text
-stability, the existing standalone JSON form, main-facing stdout wiring, and
-parity behavior against current `tools/lint`.
+No dedicated Ari list-rules formatter unit tests are added yet. The strict
+executable goldens cover rule code, short name, default severity, description,
+ordering, newline behavior, human text, standalone JSON, main-facing stdout,
+and the explicit reference difference. Future Ari tests should isolate the
+internal formatter without OS argv or stream IO.
 
 No executable config parser tests are added yet as dedicated Ari tests. The
 shell smoke exercises parsing through the built CLI. Future dedicated tests
@@ -509,18 +523,19 @@ The lightweight checks verify fixture presence, exact line order, and key text
 only. They do not parse these committed fixtures with Ari code. Separately, the
 smoke script runs CLI-process tests against generated temporary configs and
 compares focused exact output. Dedicated Ari-backed config precedence tests,
-source-controlled broad goldens, and strict parity checks remain future work.
+source-controlled broad goldens, and broader strict config parity remain
+future work.
 
-Parity testing is planned in
-[docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Real parity
-fixtures and executable parity runners are not added yet. A source-only parity
-runner skeleton records intended boundaries only.
+Parity testing is specified in
+[docs/dev/parity-test-plan.md](../docs/dev/parity-test-plan.md). Checked-in
+native-rule fixtures and list-rules/native golden subsets now run through
+`scripts/parity-strict.sh`; `scripts/parity.sh` remains the broader report-only
+runner. A source-only Ari parity skeleton records intended internal boundaries.
 
-No executable parity runner tests are added yet. Future parity runner tests
-should cover reference command selection, standalone `ari-lint` command
-selection, fixture inputs, path normalization, output comparison, exit-code
-comparison, and strict avoidance of accidental compiler or network execution in
-lightweight checks.
+No dedicated tests of the parity-runner infrastructure are added yet. Future
+runner tests should isolate reference and standalone command selection, fixture
+inputs, path normalization, output comparison, exit-code comparison, and strict
+avoidance of accidental compiler or network execution in lightweight checks.
 
 No compiler-backed CI tests are added yet. Future compiler-backed CI should
 record the Ari compiler release tag or commit, use explicit compiler
@@ -547,9 +562,8 @@ model changes.
 Future Ari-language implementation tests must follow current `ari-foundry/ari`
 language usage.
 
-Only the initial source-controlled trailing-whitespace
-clean/trailing-spaces fixtures and missing-final-newline
-final-newline/no-final-newline fixtures are added so far. Executable CLI and
-compiler-backed smoke coverage uses generated temporary cases, but no broad
-source-controlled fixture set, broad golden suite, strict parity runner, or
-compiler-backed CI job exists yet.
+The current source-controlled fixture set covers initial trailing-whitespace and
+missing-final-newline cases. Exact list-rules and focused native JSON goldens,
+plus their strict runner, now exist. Executable CLI and compiler-backed smoke
+coverage also uses generated temporary cases, but no broad compiler/config/CLI
+fixture-and-golden suite or compiler-backed CI job exists yet.

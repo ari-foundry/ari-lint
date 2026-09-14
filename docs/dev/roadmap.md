@@ -5,8 +5,8 @@ build and smoke validation, compiler-free checks, supported CLI help and
 list-rules output, multi-file source-file linting for the current rule set,
 JSON diagnostics, explicit and discovered config, CLI severity overrides,
 per-source Ari compiler execution and diagnostic parsing, a local report-only
-parity smoke/report against the original bundled lint tool, and a strict
-checked-in native-rule parity subset.
+parity smoke/report against the original bundled lint tool, a strict checked-in
+native-rule parity subset, and exact standalone/reference list-rules contracts.
 Historical milestones include: skeleton initialized / Ari source skeleton
 started / internal model skeleton started / registry-severity-config skeleton
 started /
@@ -104,7 +104,8 @@ representative exact output smoke checks added /
 per-source compiler execution added /
 compiler diagnostic parsing and failure normalization added /
 fake-compiler runtime smoke matrix added /
-strict native parity goldens and runner added.
+strict native parity goldens and runner added /
+standalone list-rules contract and strict goldens added.
 
 Current `tools/lint` in `ari-foundry/ari` remains the reference implementation
 during this split. Compiler, standard library, and Ari toolchain bugs should be
@@ -122,8 +123,9 @@ and test work.
 - [x] Start Ari source as the first step toward Ari-language implementation;
       the current implementation now includes rule execution, CLI parsing,
       diagnostics, compiler invocation, local build and smoke validation, and
-      focused documentation, while strict parity tests, golden output tests,
-      compiler-backed CI, and release compatibility claims remain future work.
+      focused documentation, while broader strict parity tests, broad golden
+      output tests, compiler-backed CI, and release compatibility claims remain
+      future work.
 - [x] Add a minimal main entry shell that delegates through a local internal
       shell function and returns success. Main wiring to the OS argv integration
       entry path, stdout/stderr output, JSON output, config parsing, compiler
@@ -181,7 +183,8 @@ and test work.
       discovering config files, traversing directories, invoking the compiler,
       executing `ari --check`, calling `tools/lint`, or calling process exit.
       Reference-shaped human and JSON source results have since been wired
-      through stdout; broader output tests and strict parity remain future work.
+      through stdout; broader output tests and broader strict parity remain
+      future work.
 - [x] Add a minimal config text parser for caller-provided text using the
       documented `RULE = SEVERITY` shape, blank lines, and `#` comments,
       normalizing documented short rule names to full lint rule codes, and

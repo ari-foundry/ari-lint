@@ -1,0 +1,2 @@
+lint/trailing-whitespace	default=warning	Reports spaces or tabs at the end of a source line.
+lint/missing-final-newline	default=warning	Reports non-empty source files that do not end with a newline.

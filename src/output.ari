@@ -815,6 +815,7 @@ pub fn format_list_rules_json(
   let missing_final_text = format_list_rule_row_json(zone, missing_final);
   text.append_string_in(zone, missing_final_text);
   text.append_string_in(zone, "]");
+  text.push('\n');
   return text;
 }
 

@@ -19,12 +19,14 @@ config, short-name config, disabled explicit config, disabled command-line rule
 override, dirty multi-file cases, and `multi-file-mixed`, and prints a concise
 report without failing on behavior differences.
 
-A separate gating native-rule subset now exists at
-`scripts/parity-strict.sh`. It reuses checked-in source fixtures, isolates both
-implementations with a deterministic no-output compiler and explicit empty
-config. JSON stdout must match exact checked-in goldens, stderr must be equal
-and empty, exit status must match the case expectation, and output must retain
-its final LF and parse as JSON.
+A separate gating list-rules and native-rule subset now exists at
+`scripts/parity-strict.sh`. List-rules uses separately approved standalone and
+reference snapshots. Native cases reuse checked-in source fixtures and isolate
+both implementations with a deterministic no-output compiler and explicit
+empty config. Stdout must match the case golden, stderr must be empty, exit
+status must match the case expectation, and JSON output must retain its final
+LF and parse successfully. Every list-rules case also selects a sentinel
+compiler and fails if it is invoked.
 
 ## Current Status
 
@@ -50,8 +52,9 @@ its final LF and parse as JSON.
 - Known differences from the current report-only smoke are tracked in
   `docs/dev/parity-differences.md`.
 - `scripts/parity-strict.sh` is local-only and gating. Its current scope is
-  native clean, trailing-whitespace, missing-final-newline, ordered multi-file,
-  and duplicate-input output. It does not cover unresolved CLI, config,
+  the separately approved standalone/reference list-rules contracts plus native
+  clean, trailing-whitespace, missing-final-newline, ordered multi-file, and
+  duplicate-input output. It does not cover remaining help/usage CLI, config,
   compiler-boundary, or process-infrastructure differences and is not wired
   into CI.
 
@@ -176,6 +179,8 @@ The first strict layout is:
   `tests/fixtures/missing-final-newline/`
 - parity isolation inputs under `tests/fixtures/parity/`
 - exact native JSON results under `tests/golden/native/`
+- exact standalone and reference registry results under
+  `tests/golden/list-rules/`
 
 Remaining fixture categories:
 
@@ -213,6 +218,10 @@ Current strict cases use identical repository-relative operands and need no
 normalization. A future temporary fixture may replace only its known temporary
 root with one fixed token; generic path rewriting is not allowed because it can
 hide real path-field differences.
+
+List-rules uses separate exact goldens because the standalone short-name and
+JSON registry fields are intentional CLI extensions. The strict runner does not
+hide that difference behind a parity allowlist.
 
 Compiler diagnostics may need separate golden files from lint diagnostics.
 
@@ -364,6 +373,7 @@ from the other repo if needed.
       smoke/report
 - [x] Add JSON list-rules report-only CLI signals to the local non-gating
       parity smoke/report
+- [x] Define and gate separate exact standalone/reference list-rules contracts
 - [x] Add missing-compiler report-only compiler-boundary signals to the local
       non-gating parity smoke/report
 - [x] Add compiler-error report-only compiler-boundary signals to the local

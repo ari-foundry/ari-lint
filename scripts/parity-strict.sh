@@ -39,6 +39,7 @@ standalone_lint="$repo_root/build/ari-lint"
 fixture_compiler="$repo_root/tests/fixtures/parity/compiler-ok.sh"
 empty_config="$repo_root/tests/fixtures/parity/empty.rules"
 golden_dir="$repo_root/tests/golden/native"
+list_rules_golden_dir="$repo_root/tests/golden/list-rules"
 
 [ -x "$standalone_lint" ] || fail "standalone lint is not executable: $standalone_lint"
 [ -x "$fixture_compiler" ] || fail "fixture compiler is not executable: $fixture_compiler"
@@ -47,6 +48,14 @@ command -v python3 >/dev/null 2>&1 || fail "python3 is required to validate JSON
 
 tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/ari-lint-parity-strict.XXXXXX")
 trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
+
+metadata_sentinel_compiler="$tmp_dir/metadata-sentinel-ari"
+{
+  printf '%s\n' '#!/bin/sh'
+  printf '%s\n' 'touch "${ARI_LINT_METADATA_SENTINEL_MARKER:?}"'
+  printf '%s\n' 'exit 99'
+} > "$metadata_sentinel_compiler"
+chmod 700 "$metadata_sentinel_compiler"
 
 require_final_newline() {
   last_byte=$(tail -c 1 "$1" | od -An -t x1 | tr -d ' \n')
@@ -72,6 +81,72 @@ run_tool() {
   status=$?
   set -e
   printf '%s\n' "$status" > "$status_path"
+}
+
+run_metadata_tool() {
+  tool_name="$1"
+  tool_path="$2"
+  case_name="$3"
+  shift 3
+
+  stdout_path="$tmp_dir/$case_name.$tool_name.stdout"
+  stderr_path="$tmp_dir/$case_name.$tool_name.stderr"
+  status_path="$tmp_dir/$case_name.$tool_name.status"
+  metadata_sentinel_marker="$tmp_dir/$case_name.$tool_name.compiler-spawned"
+
+  set +e
+  (
+    ARI_COMPILER="$metadata_sentinel_compiler"
+    ARI_LINT_METADATA_SENTINEL_MARKER="$metadata_sentinel_marker"
+    export ARI_COMPILER ARI_LINT_METADATA_SENTINEL_MARKER
+    CDPATH= cd "$repo_root" &&
+      "$tool_path" --ari "$metadata_sentinel_compiler" "$@"
+  ) > "$stdout_path" 2> "$stderr_path"
+  status=$?
+  set -e
+  printf '%s\n' "$status" > "$status_path"
+}
+
+run_metadata_case() {
+  case_name="$1"
+  tool_name="$2"
+  tool_path="$3"
+  expected_file="$4"
+  expects_json="$5"
+  shift 5
+
+  [ -f "$expected_file" ] || fail "missing golden: $expected_file"
+  require_final_newline "$expected_file"
+  run_metadata_tool "$tool_name" "$tool_path" "$case_name" "$@"
+
+  stdout_path="$tmp_dir/$case_name.$tool_name.stdout"
+  stderr_path="$tmp_dir/$case_name.$tool_name.stderr"
+  status_path="$tmp_dir/$case_name.$tool_name.status"
+  metadata_sentinel_marker="$tmp_dir/$case_name.$tool_name.compiler-spawned"
+
+  [ "$(cat "$status_path")" = "0" ] ||
+    fail "$case_name $tool_name exit status differs from 0"
+  [ ! -e "$metadata_sentinel_marker" ] ||
+    fail "$case_name $tool_name unexpectedly invoked the Ari compiler"
+  [ ! -s "$stderr_path" ] || fail "$case_name $tool_name stderr is not empty"
+  cmp -s "$expected_file" "$stdout_path" || {
+    diff -u "$expected_file" "$stdout_path" >&2 || true
+    fail "$case_name $tool_name stdout differs from golden"
+  }
+  require_final_newline "$stdout_path"
+
+  if [ "$expects_json" = "yes" ]; then
+    python3 -c 'import json, sys; json.load(open(sys.argv[1], encoding="utf-8"))' \
+      "$stdout_path" || fail "$case_name $tool_name output is not valid JSON"
+  fi
+
+  printf '%s\n' "parity-strict.sh: passed $case_name ($tool_name)"
+}
+
+require_no_metadata_compiler_invocation() {
+  unexpected_marker=$(find "$tmp_dir" -type f -name '*.compiler-spawned' -print -quit)
+  [ -z "$unexpected_marker" ] ||
+    fail "list-rules unexpectedly invoked the selected Ari compiler: $unexpected_marker"
 }
 
 run_case() {
@@ -124,6 +199,28 @@ run_case() {
   printf '%s\n' "parity-strict.sh: passed $case_name"
 }
 
+run_metadata_case list-rules standalone "$standalone_lint" \
+  "$list_rules_golden_dir/standalone-human.txt" no \
+  --list-rules
+run_metadata_case json-list-rules standalone "$standalone_lint" \
+  "$list_rules_golden_dir/standalone.json" yes \
+  --json --list-rules
+run_metadata_case list-rules-json standalone "$standalone_lint" \
+  "$list_rules_golden_dir/standalone.json" yes \
+  --list-rules --json
+run_metadata_case list-rules reference "$reference_lint" \
+  "$list_rules_golden_dir/reference-human.txt" no \
+  --list-rules
+run_metadata_case json-list-rules reference "$reference_lint" \
+  "$list_rules_golden_dir/reference-human.txt" no \
+  --json --list-rules
+run_metadata_case list-rules-json reference "$reference_lint" \
+  "$list_rules_golden_dir/reference-human.txt" no \
+  --list-rules --json
+
+require_no_metadata_compiler_invocation
+printf '%s\n' "strict list-rules contract goldens passed"
+
 run_case clean 0 \
   tests/fixtures/trailing-whitespace/clean.ari
 run_case trailing-whitespace 1 \
@@ -137,4 +234,5 @@ run_case ordered-multi-file-duplicate 1 \
   tests/fixtures/missing-final-newline/missing-final-newline.ari \
   tests/fixtures/trailing-whitespace/trailing-spaces.ari
 
+require_no_metadata_compiler_invocation
 printf '%s\n' "strict native parity goldens passed"
